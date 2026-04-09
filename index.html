@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Low-Angle Cat Gallery</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__content">
+        <p class="eyebrow">Cat Lens</p>
+        <h1>Build a gallery for dramatic cat photos</h1>
+        <p class="subtitle">
+          Upload your favorite fluffy, low-angle cat pictures and curate them in a
+          playful, responsive grid.
+        </p>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="uploader card" aria-labelledby="upload-title">
+        <h2 id="upload-title">Add cat pictures</h2>
+        <p class="muted">
+          Supports JPG, PNG, and WebP. Your photos are kept in this browser only.
+        </p>
+
+        <label class="dropzone" for="cat-upload-input">
+          <input
+            type="file"
+            id="cat-upload-input"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+          />
+          <span class="dropzone__title">Drop files here</span>
+          <span class="dropzone__hint">or click to browse</span>
+        </label>
+
+        <div class="controls">
+          <button id="clear-gallery" class="button button--ghost" type="button">
+            Clear uploaded photos
+          </button>
+        </div>
+      </section>
+
+      <section class="gallery card" aria-labelledby="gallery-title">
+        <div class="gallery__head">
+          <h2 id="gallery-title">Cat wall</h2>
+          <p class="muted" id="photo-count">0 photos</p>
+        </div>
+
+        <div id="gallery-grid" class="gallery-grid" role="list"></div>
+      </section>
+    </main>
+
+    <template id="gallery-item-template">
+      <article class="photo" role="listitem">
+        <button class="photo__remove" type="button" aria-label="Remove photo">×</button>
+        <img alt="Uploaded cat photo" loading="lazy" />
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
