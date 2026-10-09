@@ -7,7 +7,9 @@
 //                        [--size 1280x720] [--keep-going] [--tag myname]
 //   --tag NAME isolates concurrent runs: builds dist/dev-NAME.html and writes screenshots to .smoke/NAME/
 //
-// A scenario module default-exports: async ({ page, game, keys, wait, shot, log }) => any
+// A scenario module default-exports: async ({ page, game, keys, wait, shot, log, gameWait, hold }) => any
+//   gameWait(sec)            -> wait for `sec` SIMULATED seconds (use this instead of wall-clock waits)
+//   hold(action, sec)        -> hold a virtual input action (e.g. 'attack','aim','forward','jump') for sec simulated seconds
 //   game(fnOrString, arg)    -> page.evaluate with `window.game` available as the first param: game(g => g.player.position.x)
 //   keys(code, ms)           -> hold a key (KeyboardEvent.code, e.g. 'KeyW') for ms milliseconds
 //   wait(ms)                 -> sleep
@@ -69,12 +71,26 @@ const keys = async (code, ms) => { await page.keyboard.down(code); await wait(ms
 const shot = (name) => page.screenshot({ path: path.join(outDir, name.endsWith('.png') ? name : name + '.png'), timeout: 120000 })
   .catch((e) => report.log.push('screenshot ' + name + ' failed: ' + String(e.message || e).split('\n')[0]));
 const log = (...a) => report.log.push(a.map((x) => (typeof x === 'string' ? x : JSON.stringify(x))).join(' '));
+// Wait for SIMULATED seconds (headless SwiftShader can run far below real time; dt is clamped to 0.05).
+const gameWait = async (sec, maxRealMs = 120000) => {
+  const t0 = await page.evaluate(() => window.game.time);
+  const end = Date.now() + maxRealMs;
+  while (Date.now() < end) { await wait(100); if ((await page.evaluate(() => window.game.time)) - t0 >= sec) return true; }
+  return false;
+};
+// Hold a virtual action (e.g. 'attack', 'aim', 'forward') for `sec` simulated seconds. Prefer this over page.mouse:
+// under headless pointer lock real mouse clicks inject large look spikes.
+const hold = async (action, sec) => {
+  await page.evaluate((a) => window.game.input.setVirtual(a, true), action);
+  await gameWait(sec);
+  await page.evaluate((a) => window.game.input.setVirtual(a, false), action);
+};
 
 try {
   const scen = opt('scenario', null);
   if (scen) {
     const mod = await import(pathToFileURL(path.resolve(scen)).href + '?t=' + Date.now());
-    report.scenario = await mod.default({ page, game, keys, wait, shot, log });
+    report.scenario = await mod.default({ page, game, keys, wait, shot, log, gameWait, hold });
   }
   const ev = opt('eval', null);
   if (ev) report.scenario = await page.evaluate(ev);

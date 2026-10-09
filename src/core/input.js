@@ -21,6 +21,7 @@ export const KEYMAP = {
   jump: ['Space'],                    // on foot: jump/swim up. car: handbrake. heli: ascend
   sprint: ['ShiftLeft', 'ShiftRight'], // on foot: sprint. heli: descend
   crouch: ['ControlLeft', 'KeyX'],     // on foot: sneak (slow, no fall off edges)
+  handsUp: ['KeyB'],                   // on foot: hold to surrender (hands up) - lets a 1-star cop arrest you quickly
   enterVehicle: ['KeyF'],              // enter / exit / carjack
   camera: ['KeyC', 'KeyV'],            // cycle camera mode (1st / 3rd person / far)
   inventory: ['KeyE'],                 // open/close inventory

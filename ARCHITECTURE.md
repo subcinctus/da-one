@@ -118,6 +118,7 @@ Actions and default keys:
 | jump | Space | car: handbrake; heli: ascend |
 | sprint | Shift | heli: descend |
 | crouch | Ctrl, X | |
+| handsUp | B | hold to surrender (player.handsUp) |
 | enterVehicle | F | |
 | camera | C, V | |
 | inventory | E | |
@@ -435,6 +436,6 @@ API in §4.5. Particles are pooled (InstancedMesh of small cubes for debris/voxe
 - `npm run build`: produces `dist/index.html` (minified single file, the shippable game).
 - `npm run build:dev`: produces `dist/dev.html` (unminified, with source maps).
 - `npm run smoke -- --tag <your-agent-name> [--seconds 8] [--scenario file.mjs] [--eval "js"] [--shot .smoke/x.png] [--params "touch=1&newgame=1"] [--no-build] [--verbose]`. **Always pass `--tag <your agent name>`** so concurrent agents do not overwrite each other's build or screenshots (your build goes to `dist/dev-<tag>.html` and screenshots to `.smoke/<tag>/`). The command builds dev and boots the game in headless Chromium (SwiftShader WebGL, about 5–30 fps) with `?autostart=1`, runs an optional scenario, screenshots, and prints a JSON report (`pageErrors`, `consoleErrors`, `stats`). It exits 1 on errors.
-  - Scenario module: `export default async ({ page, game, keys, wait, shot, log }) => result`. `game(fn, arg)` evaluates `fn(window.game, arg)` in the page (it must be serialisable: no closures over Node variables). `keys('KeyW', 1500)` holds a key. Use `page.mouse` for clicks. Note: pointer lock does not work headless, so mouse-look tests should set `game.cameraRig.yaw` etc. directly.
+  - Scenario module: `export default async ({ page, game, keys, wait, shot, log, gameWait, hold }) => result`. `gameWait(sec)` waits for SIMULATED seconds (headless runs far slower than real time). `hold('attack', 1.5)` holds a virtual action. `game(fn, arg)` evaluates `fn(window.game, arg)` in the page (it must be serialisable: no closures over Node variables). `keys('KeyW', 1500)` holds a key. Use `page.mouse` for clicks. Note: pointer lock does not work headless, so mouse-look tests should set `game.cameraRig.yaw` etc. directly.
   - Screenshots go to `.smoke/<tag>/` (gitignored). You can view a PNG with your file-reading tool to check visuals.
 - Test pure logic directly with Node (`node -e "import('./src/world/generator.js').then(...)"`). `three` imports fine in Node. Avoid `document`/`window` at module top level so modules stay importable in Node.

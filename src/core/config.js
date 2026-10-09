@@ -28,7 +28,7 @@ export const PHYS = {
 export const DEFAULT_SEED = 1337;
 
 export const DEFAULT_SETTINGS = {
-  renderDistance: 6,      // chunks (radius). 4..12
+  renderDistance: 8,      // chunks (radius). 4..12
   mouseSensitivity: 1.0,  // multiplier (base = 0.0022 rad / pixel)
   invertY: false,
   fov: 75,
