@@ -1,0 +1,12 @@
+{
+  "name": "iphone-use",
+  "version": "0.1.0",
+  "description": "Let Claude operate your real iPhone over USB through WebDriverAgent: guided setup, app automation, a live screen preview and screenshot fallback.",
+  "author": {
+    "name": "subcinctus"
+  },
+  "homepage": "https://github.com/subcinctus/da-one",
+  "repository": "https://github.com/subcinctus/da-one",
+  "license": "MIT",
+  "keywords": ["iphone", "ios", "automation", "webdriveragent", "mobile"]
+}

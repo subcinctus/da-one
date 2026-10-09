@@ -1,0 +1,41 @@
+name: iphone-use checks
+
+on:
+  push:
+    paths:
+      - "plugins/iphone-use/**"
+      - ".claude-plugin/**"
+      - ".github/workflows/iphone-use-check.yml"
+  pull_request:
+    paths:
+      - "plugins/iphone-use/**"
+      - ".claude-plugin/**"
+      - ".github/workflows/iphone-use-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run the iPhone Use test suite
+        run: bash plugins/iphone-use/scripts/check.sh
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the iPhone Use test suite
+        run: bash plugins/iphone-use/scripts/check.sh

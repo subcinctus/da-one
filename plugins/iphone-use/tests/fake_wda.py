@@ -167,6 +167,19 @@ def mjpeg_part(jpeg):
             + jpeg + b"\r\n\r\n")
 
 
+def _parse_mjpeg_mode(mode):
+    """("normal"|"silent"|"chunked"|"split"|"garbage"|"close_after"|"stall_after", count or None)."""
+    mode = str(mode or "normal")
+    kind, _, count = mode.partition(":")
+    if kind in MJPEG_COUNTED_MODES:
+        if not re.fullmatch(r"[0-9]+", count):
+            raise ValueError("mjpeg_mode %r needs a frame count, e.g. %s:2" % (mode, kind))
+        return kind, int(count)
+    if kind not in MJPEG_MODES or count:
+        raise ValueError("unknown mjpeg_mode %r" % mode)
+    return kind, None
+
+
 def chunk_bytes(data, size=MJPEG_PIECE):
     """HTTP/1.1 chunked framing of `data` in chunks of at most `size` bytes (no terminator)."""
     out = []
@@ -1020,6 +1033,7 @@ class FakeWDA:
         self.requests = []
         self.mjpeg = bool(mjpeg)
         self.mjpeg_fps = mjpeg_fps
+        _parse_mjpeg_mode(mjpeg_mode)  # fail fast on a typo
         self.mjpeg_mode = mjpeg_mode
         self.mjpeg_frames = None
         self.mjpeg_requests = []
@@ -1974,15 +1988,6 @@ class FakeWDA:
 
     # --- MJPEG -----------------------------------------------------------------
 
-    def _mjpeg_settings(self):
-        mode = str(self.mjpeg_mode or "normal")
-        kind, _, count = mode.partition(":")
-        if kind in MJPEG_COUNTED_MODES:
-            return kind, max(0, int(count or 0))
-        if kind not in MJPEG_MODES:
-            raise ValueError("unknown mjpeg_mode %r" % mode)
-        return kind, None
-
     def _mjpeg_wait(self, client, seconds):
         """Wait up to `seconds`; True when the client closed or the fake is stopping."""
         deadline = _monotonic() + seconds
@@ -2011,7 +2016,6 @@ class FakeWDA:
         with self._conn_lock:
             self._mjpeg_clients[connection] = client
         try:
-            kind, count = self._mjpeg_settings()
             while True:  # WDA sends nothing until the client sends something
                 readable, _, _ = select.select([connection], [], [], 0.05)
                 if self._stopping.is_set():
@@ -2023,6 +2027,7 @@ class FakeWDA:
                 return
             with self.lock:
                 self.mjpeg_requests.append(first)
+            kind, count = _parse_mjpeg_mode(self.mjpeg_mode)
             if kind == "silent":
                 while not self._mjpeg_wait(client, 1.0):
                     pass
