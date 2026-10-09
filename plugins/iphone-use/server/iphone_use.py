@@ -407,11 +407,15 @@ def _build_runtime(state_dir, url, serve_preview):
 
 
 def _one_shot(tool, state_dir, url) -> int:
+    runtime = None
     try:
         runtime = _build_runtime(state_dir, url, serve_preview=False)
     except ToolError as exc:
         envelope = {"ok": False, "error": exc.as_dict()}
-        runtime = None
+    except Exception as exc:  # noqa: BLE001 - always print one envelope
+        _stderr_failure(exc)
+        envelope = {"ok": False, "error": {"code": "internal_error", "message": START_FAILURE_MESSAGE,
+                                           "uncertain": False, "action_executed": False}}
     if runtime is not None:
         try:
             envelope = runtime.execute(tool, {})

@@ -14,6 +14,8 @@ It also implements `iphone_ready` (the readiness probe and its bounded recovery)
 import base64
 import binascii
 import collections
+import http.client
+import json
 import math
 import os
 import sys
@@ -53,6 +55,8 @@ TOOLBAR_TIMEOUT = 8.0
 RECORD_LIMIT = 500
 MODEL_LIMIT = 60
 THREAD_JOIN_SECONDS = 0.5
+REMOTE_STATE_TIMEOUT = 0.5
+REMOTE_STATE_BYTES = 64 * 1024
 
 # Environment knobs (DESIGN.md section 3): name -> (default, low, high, integer)
 KNOBS = {
@@ -409,8 +413,8 @@ class Runtime:
             _safe(self.screen.set_paused, True, "device_locked")
         elif exc.code == "not_editable" and exc.details.get("secure_field"):
             _safe(self.screen.set_paused, True, "authentication")
-        if op in READ_OPS:
-            exc.details.setdefault("action_executed", False)
+        if op in READ_OPS or op == "ready":
+            exc.details.setdefault("action_executed", False)  # READY never acts on the phone
         if op != "ready" and self.channel_fault(exc):
             exc.details.update(category="channel_runtime", recovery=self._channel_recovery())
 
@@ -604,16 +608,35 @@ class Runtime:
             result["url"] = self._current_url()
             return result
         info = self.preview.current()
-        state = self.screen.state()
         result = {"url": info.url if info else None, "running": info is not None}
         result.update(self.screen.pause_status())
         result["viewers"] = info.viewers if info else 0
-        result["frame_available"] = bool(state.get("frame_available")) if (info is None or info.owner) else None
+        if info is not None and not info.owner:
+            result["frame_available"] = self._remote_frame_available(info)
+        else:
+            result["frame_available"] = bool(self.screen.state().get("frame_available"))
         return result
 
     def _current_url(self):
         info = _safe(self.preview.current)
         return info.url if info is not None else None
+
+    @staticmethod
+    def _remote_frame_available(info) -> Optional[bool]:
+        """frame_available of the preview another process serves (its /api/state), or None if unknown."""
+        connection = http.client.HTTPConnection("127.0.0.1", info.port, timeout=REMOTE_STATE_TIMEOUT)
+        try:
+            connection.request("GET", "/%s/api/state" % info.token, headers={"Accept": "application/json"})
+            response = connection.getresponse()
+            body = response.read(REMOTE_STATE_BYTES + 1)
+            if response.status != 200 or len(body) > REMOTE_STATE_BYTES:
+                return None
+            state = json.loads(body.decode("utf-8"))
+        except (OSError, http.client.HTTPException, ValueError):
+            return None
+        finally:
+            connection.close()
+        return bool(state.get("frame_available")) if isinstance(state, dict) else None
 
     # --- preview toolbar (the user's own clicks) ------------------------------------------------------
 
