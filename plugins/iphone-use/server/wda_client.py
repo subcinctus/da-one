@@ -442,10 +442,13 @@ class WDAClient:
             response.close()  # Python 3.9: read1 leaves the response open; close it to reuse the connection
             if response.will_close:
                 self.close()
-        except (OSError, http.client.HTTPException):
+        except (OSError, http.client.HTTPException) as exc:
             self.close()
             if read:
-                raise ToolError("service_unreachable", _UNREACHABLE_READ, details={"phase": "read"}) from None
+                # "timeout" = the iPhone was too slow to answer; "connection" = the link itself failed.
+                reason = "timeout" if isinstance(exc, socket.timeout) else "connection"
+                raise ToolError("service_unreachable", _UNREACHABLE_READ,
+                                details={"phase": "read", "reason": reason}) from None
             raise ToolError("action_uncertain", _UNCERTAIN, uncertain=True, details={"phase": "response"}) from None
         record["bytes"] = len(raw)
         return self._interpret(response.status, raw, read, cap)

@@ -49,6 +49,9 @@ TYPING_FREQUENCY = 30
 TYPING_PIECE = 200
 KEEP_ARTIFACTS = 40
 LAUNCH_VERIFY_SECONDS = 5.0
+# While confirming which app is in front, one read may take this long: a busy iPhone (or simulator) can need
+# several seconds right after an app opens. A read that still times out means "not confirmed yet", not a lost link.
+VERIFY_READ_TIMEOUT = 10.0
 HOME_VERIFY_SECONDS = 2.0
 SPRINGBOARD = "com.apple.springboard"
 DRAG_HOLD_SECONDS = 0.1
@@ -242,6 +245,16 @@ def _now_text():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def _slow_read(error):
+    """True when a read failed only because the iPhone answered too slowly (the link itself is fine)."""
+    return (error.code == "service_unreachable" and error.details.get("phase") == "read"
+            and error.details.get("reason") == "timeout")
+
+
+READ_AFTER_ACTION = ("The action reached the iPhone, but reading the result afterwards failed or timed out. Look "
+                     "at the current screen (iphone_observe) before doing anything else; do not repeat the action.")
+
+
 def action_result(function):
     """Attach execution evidence (and, for visual failures, a screenshot) to every ToolError.
 
@@ -262,6 +275,12 @@ def action_result(function):
             if accepted > 0:
                 error.details.update(action_executed=True, action_complete=False)
                 error.details.setdefault("verification_required", PARTIAL_VERIFICATION)
+                if error.code == "service_unreachable" and error.details.get("phase") == "read":
+                    error.message = READ_AFTER_ACTION
+                    error.args = (READ_AFTER_ACTION,)
+                    error.details.setdefault("recovery", {"next_tool": "iphone_observe",
+                                                          "next_arguments": {"mode": "both"},
+                                                          "replay_action": False})
                 if swipe:
                     error.details.setdefault("attempts", accepted)
             else:
@@ -857,11 +876,21 @@ class PhoneController:
         deadline = time.monotonic() + LAUNCH_VERIFY_SECONDS
         app = None
         channel_fault = None
+        slow = None
         while True:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 if channel_fault is not None:
                     raise channel_fault
+                if slow is not None:
+                    raise ToolError(
+                        "postcondition_failed",
+                        "The app was activated, but the iPhone answered too slowly to confirm which app is in front. "
+                        "Look at the screen before doing anything else; do not activate it again automatically.",
+                        details={"requested_app": bundle_id, "foreground_app": None, "foreground_verified": False,
+                                 "reason": "verification_timed_out",
+                                 "recovery": {"next_tool": "iphone_observe", "next_arguments": {"mode": "both"},
+                                              "replay_action": False}})
                 raise ToolError(
                     "postcondition_failed",
                     "The app was activated but did not come to the front within five seconds. Do not activate it "
@@ -870,12 +899,15 @@ class PhoneController:
                              "recovery": {"next_tool": "iphone_observe", "next_arguments": {"mode": "both"},
                                           "replay_action": False}})
             try:
-                app = self.active_app(timeout=max(MIN_POLL_TIMEOUT, remaining))
-                channel_fault = None
+                app = self.active_app(timeout=max(VERIFY_READ_TIMEOUT, remaining))
+                channel_fault = slow = None
             except ToolError as error:
-                if error.code != "foreground_unavailable":
+                if error.code == "foreground_unavailable":
+                    channel_fault = error  # XCTest may briefly not know the app mid-launch: not yet
+                elif _slow_read(error):
+                    slow = error  # a busy iPhone: not confirmed yet
+                else:
                     raise
-                channel_fault = error  # XCTest may briefly not know the app mid-launch: not yet
                 app = None
             if app == bundle_id:
                 break
@@ -907,10 +939,21 @@ class PhoneController:
         app = None
         try:
             while True:
-                app = self.active_app(timeout=max(MIN_POLL_TIMEOUT, deadline - time.monotonic()))
+                slow = False
+                try:
+                    app = self.active_app(timeout=max(VERIFY_READ_TIMEOUT, deadline - time.monotonic()))
+                except ToolError as error:
+                    if not _slow_read(error):
+                        raise
+                    slow, app = True, None  # a busy iPhone: not confirmed yet
                 if app == SPRINGBOARD:
                     break
                 if time.monotonic() >= deadline:
+                    if slow:
+                        raise ToolError("postcondition_failed",
+                                        "Home was pressed, but the iPhone answered too slowly to confirm the Home "
+                                        "Screen. Look at the screen; do not press Home again automatically.",
+                                        details={"foreground_app": None, "reason": "verification_timed_out"})
                     raise ToolError("postcondition_failed",
                                     "Home was pressed, but the Home Screen did not come to the front. Look at the "
                                     "screen; do not press Home again automatically.",

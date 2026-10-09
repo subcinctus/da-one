@@ -512,6 +512,29 @@ class LaunchTests(HarnessCase):
         self.assertEqual(self.h.count("GET /wda/activeAppInfo"), 0)
         self.assertEqual(self.h.actions(), ["POST /wda/apps/activate"])
 
+    def test_a_slow_foreground_read_is_waited_for(self):
+        # A busy iPhone may need seconds to answer right after an app opens; one slow read still confirms it.
+        self.fake.inject("GET", "/wda/activeAppInfo", delay=0.15)
+        with mock.patch.object(wda_controller, "VERIFY_READ_TIMEOUT", 1.0):
+            result = self.phone.launch_app(FORM, verify=True)
+        self.assertTrue(result["foreground_verified"])
+        self.assertEqual(self.h.actions(), ["POST /wda/apps/activate"])
+
+    def test_foreground_reads_that_keep_timing_out_are_not_a_lost_connection(self):
+        self.fake.inject("GET", "/wda/activeAppInfo", delay=0.4, times=None)
+        with mock.patch.object(wda_controller, "VERIFY_READ_TIMEOUT", 0.1), \
+                mock.patch.object(wda_controller, "LAUNCH_VERIFY_SECONDS", 0.25):
+            error = self.assert_code("postcondition_failed", lambda: self.phone.launch_app(FORM, verify=True))
+        self.assertEqual(error.details["reason"], "verification_timed_out")
+        self.assertIn("answered too slowly", error.message)
+        self.assertTrue(error.details["action_executed"])
+        self.assertFalse(error.details["action_complete"])
+        self.assertFalse(error.details["foreground_verified"])
+        # Like any unconfirmed result it carries a screenshot to decide from, and never asks for a replay.
+        self.assertIn("image", error.details["observation"])
+        self.assertIs(error.details["recovery"]["replay_action"], False)
+        self.assertEqual(self.h.actions(), ["POST /wda/apps/activate"])  # never activated twice
+
     def test_a_channel_failure_after_activation_is_not_replayed(self):
         self.fake.inject("GET", "/wda/activeAppInfo", error="unknown error",
                          message="XCTDaemonErrorDomain Code=41 Not authorized for performing UI testing actions")
@@ -592,7 +615,21 @@ class HomeAndVolumeTests(HarnessCase):
         self.assertTrue(error.details["action_executed"])
         self.assertFalse(error.details["home_foreground_verified"])
         self.assertIn("Home was pressed", error.details["verification_required"])
+        # The message must not claim that nothing ran: Home was pressed, only the follow-up read failed.
+        self.assertEqual(error.message, wda_controller.READ_AFTER_ACTION)
+        self.assertNotIn("no phone action was executed", error.message)
+        self.assertEqual(error.details["recovery"]["next_tool"], "iphone_observe")
         self.assertEqual(self.h.actions(), ["POST /wda/homescreen"])
+
+    def test_home_reads_that_keep_timing_out_are_not_a_lost_connection(self):
+        self.fake.inject("GET", "/wda/activeAppInfo", delay=0.4, times=None)
+        with mock.patch.object(wda_controller, "VERIFY_READ_TIMEOUT", 0.1), \
+                mock.patch.object(wda_controller, "HOME_VERIFY_SECONDS", 0.25):
+            error = self.assert_code("postcondition_failed", lambda: self.phone.press_button("home", verify=True))
+        self.assertEqual(error.details["reason"], "verification_timed_out")
+        self.assertIn("answered too slowly", error.message)
+        self.assertTrue(error.details["action_executed"])
+        self.assertEqual(self.h.actions(), ["POST /wda/homescreen"])  # never pressed twice
 
     def test_volume_buttons_are_sent_once_and_stay_unverified(self):
         for name in ("volumeup", "volumedown"):

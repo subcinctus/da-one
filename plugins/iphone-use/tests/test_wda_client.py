@@ -942,7 +942,7 @@ class ResponseHandlingTests(ClientTestCase):
         server = self.serve(lambda *a: (200, {"value": None}, 0.2, False))
         client = self.client(server, timeout=0.05)
         error = self.assert_tool_error(lambda: client.request("GET", "/source"), "service_unreachable")
-        self.assertEqual(error.details, {"phase": "read"})
+        self.assertEqual(error.details, {"phase": "read", "reason": "timeout"})
         self.assertEqual(error.message, "The iPhone service connection failed or timed out; no phone action was "
                                         "executed.")
 

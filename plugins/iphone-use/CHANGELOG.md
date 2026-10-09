@@ -18,4 +18,7 @@
   position instead of guessing.
 - Safety rules: uncertain actions are never repeated automatically, line breaks and sending need explicit intent,
   password fields are always refused, and money-moving or irreversible steps need your explicit go-ahead.
+- Patient with slow phones: after opening an app or pressing Home, a slow answer is waited for and, if it still
+  cannot be confirmed, reported as "not confirmed yet, look at the screen" rather than as a lost connection
+  (found by the iOS Simulator test against the real WebDriverAgent).
 - English skills for everyday use and for setup and recovery.
