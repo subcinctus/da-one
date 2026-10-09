@@ -29,47 +29,47 @@ Programme details in the answers (course names, thesis formats, internships) wer
 14\. Columbia University School of the Arts, MFA in Film, Creative Producing concentration
 15\. Boston University (BU), College of Communication, MS in Media Ventures
 # **1. University of California, Los Angeles (UCLA), MFA Producers Program**
-**Deadline: 1 November 2026, 11:59 pm PST (final).** Eligibility risk: UCLA TFT says three-year degrees are not eligible and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception, so email TFT admissions this week before finishing this application.
+**Deadline: 1 November 2026, 11:59 pm PST (final).** Eligibility risk: UCLA TFT says three-year degrees are not eligible and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception; Karan asked TFT admissions on 9 October 2026 and is waiting for their answer.
 ## **1. Statement of Purpose**
 *Limit: 500 words total (about 1 page single-spaced). You do not need to answer every guiding question.*
 *Question: What is your purpose in applying for graduate study in your specified degree program? Describe your area(s) of interest. What experiences have prepared you for advanced study in this program? What relevant skills have you gained? Have your experiences led to specific or tangible outcomes (performances, publications, presentations, awards or recognitions)? What additional information about your past experience may aid the committee (research, employment, teaching, service, artistic or international experiences developing leadership, communication, project management, teamwork)? Why is the UCLA graduate program the best place for you to pursue your academic goals? What are your plans for your career after earning this degree? (UCLA TFT also asks: give the faculty a sense of who you are; what you hope to achieve in the program; your professional goals and how you plan to achieve them.)*
-On most sets I worked on as a cinematographer, the problems that reached the camera had started somewhere else, often with a cost no one was in charge of. \[One real example in one sentence: the set, what went wrong, and where it began.\] From behind the camera I could only work around them. I am applying to the UCLA Producers Program to learn how those earlier decisions are made well, from the first draft of a script to the week a film reaches its audience.
+On most sets I worked on as a cinematographer, the problems that reached the camera had started somewhere else, often with a cost no one was in charge of. From behind the camera I could only work around them. I am applying to the UCLA Producers Program to learn how those earlier decisions are made well, from the first draft of a script to the week a film reaches its audience.
 I came to film from a commerce classroom. At Suncity School in Gurugram I studied economics, business studies and accountancy, and I learned studio photography under Nitin Rai at the Raghu Rai Center for Photography. With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it, and because nobody else was going to, I also organised it: I found places to shoot, scheduled shoots around exams and kept classmates involved. I did not have a word for that part of the work yet.
-At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction, and worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. Over the same years I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. On a Finolex commercial for Early Man Productions I was on the direction team and prepared the production sheets, cast references and PPM deck. For Growth Jockey I planned a shoot for Sleepyhead Mattresses: the equipment, the script, and the offer and audience the film was aimed at. Since October 2025 I have worked as a camera assistant on a project under producer Boney Kapoor \[title\].
+At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction, and worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. Over the same years I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. On a Finolex commercial for Early Man Productions I was on the direction team and prepared the production sheets, cast references and PPM deck. For Growth Jockey I planned a shoot for Sleepyhead Mattresses: the equipment, the script, and the offer and audience the film was aimed at. Since October 2025 I have worked as a camera assistant on a project under producer Boney Kapoor.
 What I have not yet done is work in a production office or take a project from an idea to a fully financed production. My particular interest is development: working with a writer while the story, the budget and the audience are still open questions, on projects that can travel between India and the United States.
-In the Producers Program, development is taught alongside physical production, which I have so far seen from the camera department and a direction team. The thesis is a full plan to package, finance, budget, market and distribute one project, and writing that plan is the skill I most want to leave UCLA with. \[Optional: one faculty member whose work you know, and why.\]
+In the Producers Program, development is taught alongside physical production, which I have so far seen from the camera department and a direction team. The thesis is a full plan to package, finance, budget, market and distribute one project, and writing that plan is the skill I most want to leave UCLA with.
 After the degree I plan to spend a few years in development and production, then build a creative studio in India of 8 to 30 people that develops its own slate of films and series. I want it small enough that every project gets real attention, with clear budgets and fair contracts.
-*444 words (excluding \[bracket\] notes)*
+*443 words*
 ## **2. Personal Statement**
 *Limit: 500 words total (about 1 page single-spaced). Respond to one or more prompts.*
 *Question: (a) Are there educational, personal, cultural, economic, or social experiences, not described in your Statement of Purpose, that have shaped your academic journey? If so, how? Have any of these experiences provided unique perspectives you would contribute to your program, field or profession? (b) Describe challenges or barriers you have faced in your pursuit of higher education. What motivated you to persist, and how did you overcome them? (c) What leadership experiences, community outreach, service initiatives, or research projects have you participated in or plan to pursue that aim to positively impact others or the broader community? (d) Describe ways in which your perspectives, experiences, or aspirations have aligned with UCLA's Principles of Community.*
-In Indian film many people get their start through family. Nobody in mine works in film or photography. \[One line about what your family does and how they saw your choice.\] When I chose film, what I had was a commerce education, a camera, and friends who were willing to give up their weekends to make things with me.
+In Indian film many people get their start through family. Nobody in mine works in film or photography. When I chose film, what I had was a commerce education, a camera, and friends who were willing to give up their weekends to make things with me.
 With no one to tell me how a set worked, I learned on the job, taking every role I could get: press photographer for Suncity MUN, cinematographer and editor on our school web series, assistant cinematographer on short films, camera assistant on Khauf, member of a direction team. On each one I was new and had to show I could handle more. It made me notice who gets let in on a set, and who does not.
-While I was still in school, during COVID, I joined Mitti to Matka, a Gurugram initiative supporting local potters whose sales had collapsed. We bought and auctioned their pots at fair prices, worked with them on designs, and supplied food and sanitary supplies to their families. As media manager I made the graphics, stills and videos, ran the website and handled the administration. Buyers saw the pots through my photographs, so a picture could decide what a family earned that week. \[One concrete moment: a family, a sale, or a day at the workshop that stayed with you.\]
-That work made me careful with money. Every rupee we spent badly was a rupee a family did not receive, so I kept a record of where each one went. I felt responsible for families who were depending on us. And I saw where our help stopped: we could sell pots and deliver supplies, but we could not undo what the lockdown had done to a whole community. I stayed on as media manager until 2021.
+While I was still in school, during COVID, I joined Mitti to Matka, a Gurugram initiative supporting local potters whose sales had collapsed. We bought and auctioned their pots at fair prices, worked with them on designs, and supplied food and sanitary supplies to their families. As media manager I made the graphics, stills and videos, ran the website and handled the administration. Buyers saw the pots through my photographs, so a picture could decide what a family earned that week.
+That work made me careful with money. Every rupee we spent badly was a rupee a family did not receive. I felt responsible for families who were depending on us. And I saw where our help stopped: we could sell pots and deliver supplies, but we could not undo what the lockdown had done to a whole community. I stayed on as media manager until 2021.
 I plan to build a studio in India where talented people without connections are trained, paid fairly and trusted with responsibility, because I know how much one early chance can matter. At UCLA I would bring the view of someone who worked his way into the industry through the camera department and a direction team, and the habits Mitti to Matka gave me: treating shared money as a trust, and saying plainly what a project can and cannot do for the people it touches. I see the same values in UCLA's Principles of Community, and I want to practise them as a producer.
-*383 words (excluding \[bracket\] notes)*
+*373 words*
 ## **3. Why the UCLA Producers Program**
 *Limit: half a page maximum*
 *Question: Why specifically do you want to attend the UCLA Producers Program?*
 I want the Producers Program because it starts with development, for features and for television. By the spring of the first year I would be pitching a slate of projects to an industry panel. As a camera assistant on Khauf and on my current project under Boney Kapoor, I have seen projects once they reach the set, not how they are developed, financed and sold. The slate pitch, and later the thesis plan, would make me do that work myself.
-The first year also covers entertainment law and international finance and distribution. I need both, because the projects I want to develop should work in India and in the United States, and I will have to understand the contracts and the money in each. I also want to produce a directing student's thesis film, because I learn best by building something with a director from the first conversation. \[Optional: one faculty member or the Producers Marketplace, and why.\]
+The first year also covers entertainment law and international finance and distribution. I need both, because the projects I want to develop should work in India and in the United States, and I will have to understand the contracts and the money in each. I also want to produce a directing student's thesis film, because I learn best by building something with a director from the first conversation.
 Los Angeles matters to me as well. I want to see how independent producers keep a slate going between projects, and to meet people there who could later become partners for the studio I plan to build in India.
-*187 words (excluding \[bracket\] notes)*
+*187 words*
 ## **4. Qualities in role models**
 *Limit: half a page maximum*
 *Question: What two to three qualities do you most admire in people you consider role models?*
 I admire people who are careful with what belongs to someone else. I first saw why it matters at Mitti to Matka, where the money we raised during COVID was meant for potters' families. On a set the same applies to a client's budget and a crew's time.
-I also admire honesty about limits. The people I respect most say clearly what they can deliver and what they cannot, even when a bigger promise would be easier to make. On the sets I have worked on, many problems started with a promise someone could not keep. \[Optional: one person you have watched do this well, and what they said or did.\]
+I also admire honesty about limits. The people I respect most say clearly what they can deliver and what they cannot, even when a bigger promise would be easier to make. On the sets I have worked on, many problems started with a promise someone could not keep.
 I look up to people who explain how the work is done and then trust newcomers with some of it. I started out as an assistant cinematographer on short films and a camera assistant on Khauf under Pankaj Kumar, so I know what that is worth to someone new. I plan to run my own crews the same way.
-*155 words (excluding \[bracket\] notes)*
+*155 words*
 ## **5. A difficult or stressful situation with collaborators**
 *Limit: half a page maximum*
 *Question: Briefly describe a specific difficult or stressful situation where you helped solve a problem with collaborators.*
-Between 2020 and 2022, while we were still at school, a group of friends and I made The Classroom, a five-part web series released on YouTube. As well as co-directing, shooting and editing, I organised it, and the shoots had to be scheduled around our exams.
+When I was at school, a group of friends and I made The Classroom, a five-part web series released on YouTube. As well as co-directing, shooting and editing, I organised it, and the shoots had to be scheduled around our exams.
 On one shoot day, one of the actors dropped out at the last second. Rather than lose the day, we invented a new character on the spot, a funny sports teacher, to replace the missing role. I had to play him myself.
 Our scriptwriter was at home, not on set. The lines had been written for the role we had lost, so we worked together remotely to rewrite them to suit a sports teacher. The new role also needed a costume, and I managed to get a standard tracksuit at no cost. The story of the episode still held together.
-*146 words (excluding \[bracket\] notes)*
+*141 words*
 ## **6. Original Treatment 1 (feature film)**
 *Limit: 3 pages maximum, double-spaced, 12pt (about 800 words)*
 *Question: Original treatment (no adaptations). Feature film treatment: title, logline, genre, story synopsis.*
@@ -87,7 +87,7 @@ At dawn on Diwali, Turtuk cuts two brides, one for Frano and one for Frano's gro
 That night Ali carries the groom up a north-facing slope and says nothing for six hours, a personal record. A maulvi recites as bride and groom go under the boulders with charcoal, sawdust and clay pots of Shyok water. At the same hour Frano buries Turtuk's bride with its own grey ice. Two glaciers marry, one on each side.
 Ali flies to Bengaluru on the date on his ticket, charcoal still under his nails. The binocular money buys a return for next Diwali, when the boxes will carry apricots. Someone has to talk the Major round.
 Ten summers later the first meltwater comes down the stone channel. Zainab, ninety, puts her feet in it and tells Ali it is colder than it used to be. By noon it has crossed the Line, as the river does every second, without papers.
-*784 words (excluding \[bracket\] notes)*
+*784 words*
 ## **7. Original Treatment 2 (television series)**
 *Limit: 3 pages maximum, double-spaced, 12pt (about 800 words)*
 *Question: Original treatment (no adaptations). Television treatment: title, logline, genre, premise, short character descriptions of major characters, brief synopsis of the pilot episode.*
@@ -111,58 +111,57 @@ Kendupali's first television picture is a test card, and three hundred people ap
 At the back stands a man with a notebook, his bush shirt too clean for the road. Jharana takes him for a survey man counting viewers. During the family-planning programme he watches the men, not the screen. Afterwards he introduces himself to Nilamani as Dr Ashok Rath and asks, kindly, how many of these men have three children or more.
 Jharana logs the fault: "Dish turned east. Cause: devotion." Gopal leaves the guest a banana. On Varghese's board Kendupali gets its tick; the two villages she did not reach get crosses.
 As she leaves, her headlight finds the dish, tilted west towards a borrowed satellite, marigolds on its pole. Beneath it Rath writes "Kendupali: 131 men. All present at dusk."
-*799 words (excluding \[bracket\] notes)*
+*799 words*
 ## **8. Role in optional additional materials**
 *Limit: not stated (visual materials max 10 minutes total). Optional.*
 *Question: Indicate the role you played in the production.*
-The Classroom (2020 to 2022), five-part school web series released on YouTube. Role: co-director, cinematographer, editor and organiser (found places to shoot, scheduled shoots around exams, kept classmates involved); also played one role on screen. \[Episode or excerpt submitted, running time and link. Keep all materials under 10 minutes in total.\]
-\[If you add a second sample: title, year, your exact role (for example lead cinematographer), running time and link.\]
-*35 words (excluding \[bracket\] notes)*
+The Classroom, a five-part school web series released on YouTube. Role: co-director, cinematographer, editor and organiser (found places to shoot, scheduled shoots around exams, kept classmates involved); also played the sports teacher on screen.
+*34 words*
 ## **9. Awards and distinctions**
 *Limit: not stated. Optional.*
 *Question: List academic awards, prizes, honors, fellowships, or other distinctions you have received.*
 • 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram
-*15 words (excluding \[bracket\] notes)*
+*15 words*
 ## **10. Publications and organizations**
 *Limit: not stated. Optional, if pertinent.*
 *Question: List your publications and any scholarly or professional organizations in which you hold membership.*
-None at present. \[Leave blank unless you hold a real membership or publication.\]
-*3 words (excluding \[bracket\] notes)*
+None at present.
+*3 words*
 ## **11. Pertinent work experience**
 *Limit: not stated; one entry per employer*
 *Question: Describe your employment, occupation or activities pertinent to your graduate goals during or since your collegiate studies.*
-1\. \[Company\], project under producer Boney Kapoor, October 2025 to present. Camera assistant on \[project title\]: \[two or three real duties in the camera department\].
-2\. Growth Jockey, Gurugram, April 2024. Sleepyhead Mattresses campaign. \[Exact job title.\] Planned the shoot: equipment, script, and the offer and audience the film was aimed at.
+1\. Bayview Projects, October 2025 to present. Camera assistant on a project under producer Boney Kapoor.
+2\. Growth Jockey, Gurugram, April 2024. Planned the shoot for the Sleepyhead Mattresses campaign: equipment, script, and the offer and audience the film was aimed at.
 3\. Early Man Productions, 2024. Direction team, Finolex commercial. Prepared production sheets, cast references and the PPM deck, and ran costume trials.
-4\. Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar: \[two or three real duties in the camera department\].
-5\. Freelance cinematographer, 2021 to 2024. Assistant cinematographer on five short films; lead or assistant cinematographer on independent films. RED, Sony Venice, Sony FX and Alpha; DIT and colour. \[Add two or three titles.\]
-*104 words (excluding \[bracket\] notes)*
+4\. Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar.
+5\. Freelance cinematographer, 2021 to 2024. Assistant cinematographer on five short films; lead or assistant cinematographer on independent films. Cameras: RED, Sony Venice, Sony FX and Alpha; also DIT and colour.
+*107 words*
 ## **12. Resume / CV**
 *Limit: not stated. Required upload.*
 *Question: Upload a resume/CV. Include any relevant information specific to our program.*
 KARAN CHAUDHARY
-Gurugram, India | \[email\] | \[phone\] | \[portfolio link\]
+Gurugram, India | thekaranchaudhary3208@gmail.com | +91 8750800000
 EDUCATION
-B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS), July 2022 to June 2025
-Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram. \[Year\]
-Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, \[2018 or 2019\] to 2020
+B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS), completed 2025
+Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram, 2021
+Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, 2019 to 2020
 EXPERIENCE
-Camera assistant, \[project title\], under producer Boney Kapoor, \[company\], Oct 2025 to present
-\[Job title\], Sleepyhead Mattresses campaign, Growth Jockey, Gurugram, Apr 2024: shoot planning (equipment, script, offer and audience)
+Camera assistant, Bayview Projects (producer Boney Kapoor), Oct 2025 to present
+Shoot planning, Sleepyhead Mattresses campaign, Growth Jockey, Gurugram, Apr 2024: equipment, script, and the film's offer and audience
 Direction team, Finolex commercial, Early Man Productions, 2024: production sheets, cast references, PPM deck, costume trials
-Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar): \[main duties, once confirmed\]
-CAMERA AND POST
-Assistant cinematographer, five short films, \[titles\], 2021 to 2024
-Lead or assistant cinematographer, independent films, \[titles\], 2021 to 2024
-Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), 2020 to 2022: found places to shoot, scheduled shoots around exams, kept classmates involved
+Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
+FILM CREDITS
+Assistant cinematographer, five short films, 2021 to 2024
+Lead or assistant cinematographer, independent films, 2021 to 2024
+Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), made with friends while at Suncity School: found places to shoot, scheduled shoots around exams, kept classmates involved
 COMMUNITY AND LEADERSHIP
 Media manager, Mitti to Matka (support for Gurugram potters during COVID), 2020 to 2021: graphics, stills, video, website, administration
-International Press Photographer, Suncity MUN, 2020 to 2022
+International press photographer, Suncity MUN
 SKILLS
-Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: \[list\].
+Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: English, Hindi.
 AWARDS
 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
-*233 words (excluding \[bracket\] notes)*
+*234 words*
 # **2. University of North Carolina School of the Arts (UNCSA), MFA in Filmmaking, Creative Producing concentration**
 **Early deadline: 2 November 2026 (non-binding). Final deadline: 20 January 2027.** Your credential evaluation must arrive by whichever deadline you aim for, which is tight for 2 November.
 ## **1. Letter of Intent**

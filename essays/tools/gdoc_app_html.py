@@ -7,7 +7,7 @@ import re, sys, html
 
 SEC, NOTES, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
 DATE = sys.argv[4] if len(sys.argv) > 4 else 'Draft for review, October 2026'
-CSS = ("p{margin:0 0 8pt 0;line-height:1.15}h1{margin:28pt 0 4pt 0}h2{margin:18pt 0 4pt 0}"
+CSS = ("p{margin:0 0 8pt 0;line-height:1.15}ul{margin:0 0 8pt 0}h1{margin:28pt 0 4pt 0}h2{margin:18pt 0 4pt 0}"
        ".q{color:#555555}.m{font-size:9pt;color:#888888;margin:0 0 4pt 0}"
        ".t{font-size:26pt;font-weight:bold;margin:0}.st{font-size:14pt;color:#444444;margin:0}"
        ".da{color:#888888;margin:0 0 4pt 0}.dl{color:#444444;margin:0 0 16pt 0}"
@@ -60,7 +60,10 @@ out = [f'<html><head><meta charset="utf-8"><style>{CSS}</style></head><body>',
        f'<p class="da">{il(DATE)}</p>']
 if deadline:
     out.append(f'<p class="dl">{il(deadline)}</p>')
-out.append("<p>These are the draft answers for this application. Each question is followed by the answer and its length against the limit. Words in square brackets are details still to be added or confirmed. Notes on eligibility are at the end.</p>")
+has_brackets = any('\\[' in l for l in L if not re.match(r'^\*[\d,]+ (words|characters)', l))
+out.append("<p>These are the draft answers for this application. Each question is followed by the answer and its length against the limit. "
+           + ("Words in square brackets are details still to be added or confirmed. " if has_brackets else "")
+           + "Notes on eligibility are at the end.</p>")
 
 qs = [k for k in range(1, len(L)) if L[k].startswith('## ')]
 for n, k in enumerate(qs):
