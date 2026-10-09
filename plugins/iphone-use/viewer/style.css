@@ -1,0 +1,581 @@
+/* iPhone Screen preview page. No remote resources, no inline styles (CSP: style-src 'self'). */
+
+:root {
+  color-scheme: light dark;
+  --canvas: #f6f6f7;
+  --canvas-dot: rgba(0, 0, 0, 0.09);
+  --text: #0d0d0d;
+  --muted: #6e6e80;
+  --surface: #ffffff;
+  --surface-hover: rgba(0, 0, 0, 0.08);
+  --line: #e6e6e8;
+  --control-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  --accent: #10a37f;
+  --warn: #b7791f;
+  --danger: #b42318;
+  --toast: rgba(32, 33, 35, 0.95);
+  --toast-text: #ffffff;
+  --hint-text: #5b5b66;
+  --glow-hues: #6cc4ff, #3f9dff 17%, #8fdcff 33%, #58a9ff 49%, #7d8dff 62%, #b59bff 72%, #f2a8dc 82%, #9bd6ff 92%, #6cc4ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #141416;
+    --canvas-dot: rgba(255, 255, 255, 0.07);
+    --text: #ececf1;
+    --muted: #a1a1aa;
+    --surface: #202024;
+    --surface-hover: rgba(255, 255, 255, 0.12);
+    --line: rgba(255, 255, 255, 0.12);
+    --control-shadow: none;
+    --accent: #19c37d;
+    --warn: #e0a84a;
+    --danger: #f97066;
+    --toast: rgba(236, 236, 241, 0.96);
+    --toast-text: #0d0d0d;
+    --hint-text: #b4b4bd;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--canvas);
+}
+
+body {
+  color: var(--text);
+  font: 500 12px/1.2 ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 24px 16px 16px;
+  overflow: hidden;
+  background-color: var(--canvas);
+  background-image: radial-gradient(circle, var(--canvas-dot) 0.8px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* --- status pill ------------------------------------------------------------------------- */
+
+#status {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 12px;
+  border: 0.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--control-shadow);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+#model {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+#live {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+#app[data-live="live"] #live {
+  color: var(--accent);
+}
+
+#app[data-live="live"] .dot {
+  opacity: 1;
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+
+#app[data-live="paused"] #live {
+  color: var(--warn);
+}
+
+#app[data-live="offline"] #live {
+  color: var(--danger);
+}
+
+/* --- stage and iPhone chassis ------------------------------------------------------------ */
+
+#stage {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+#device {
+  --bezel: 10px;
+  --screen-radius: 50px;
+  position: relative;
+  flex: none;
+  width: min(100%, 350px);
+  aspect-ratio: 460 / 976;
+  isolation: isolate;
+  border-radius: calc(var(--screen-radius) + var(--bezel));
+  background: linear-gradient(115deg, #c4c0b9 0%, #686662 12%, #b1ada6 24%, #555452 51%, #96938e 72%, #c9c6c0 91%, #686762 100%);
+  box-shadow: 0 0 0 0.7px rgba(37, 37, 37, 0.68), 0 12px 28px -14px rgba(0, 0, 0, 0.33), 0 4px 8px -4px rgba(0, 0, 0, 0.2);
+  user-select: none;
+  pointer-events: none;
+}
+
+#device::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--bezel) * 0.24);
+  z-index: 1;
+  border-radius: calc(var(--screen-radius) + var(--bezel) * 0.76);
+  background: #090a0c;
+  box-shadow: 0 0 0 0.7px rgba(0, 0, 0, 0.6), inset 0 0 0 0.7px rgba(255, 255, 255, 0.09);
+}
+
+#screen {
+  position: absolute;
+  inset: var(--bezel);
+  z-index: 2;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--screen-radius);
+  background: #050609;
+  line-height: 0;
+}
+
+.side-button {
+  position: absolute;
+  z-index: 0;
+  left: calc(var(--bezel) * -0.22);
+  width: calc(var(--bezel) * 0.27);
+  border-radius: calc(var(--bezel) * 0.15);
+  background: linear-gradient(90deg, #5a5956, #b1aea7 55%, #5e5c59);
+  box-shadow: 0 0 0 0.4px rgba(53, 53, 50, 0.5);
+}
+
+.action-button { top: 15%; height: 3.7%; }
+.volume-up { top: 23%; height: 6.4%; }
+.volume-down { top: 32%; height: 6.4%; }
+
+.power-button {
+  left: auto;
+  right: calc(var(--bezel) * -0.22);
+  top: 26%;
+  height: 10.4%;
+  background: linear-gradient(90deg, #5e5c59, #aaa7a1 45%, #5a5956);
+}
+
+.receiver {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--bezel) * 0.36);
+  z-index: 3;
+  width: 15%;
+  height: calc(var(--bezel) * 0.19);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #030405;
+}
+
+#app[data-orientation="landscape"] .side-button {
+  left: auto;
+  top: calc(var(--bezel) * -0.22);
+  width: auto;
+  height: calc(var(--bezel) * 0.27);
+  background: linear-gradient(180deg, #5a5956, #b1aea7 55%, #5e5c59);
+}
+
+#app[data-orientation="landscape"] .action-button { left: 15%; width: 3.7%; }
+#app[data-orientation="landscape"] .volume-up { left: 23%; width: 6.4%; }
+#app[data-orientation="landscape"] .volume-down { left: 32%; width: 6.4%; }
+
+#app[data-orientation="landscape"] .power-button {
+  left: 26%;
+  right: auto;
+  top: auto;
+  bottom: calc(var(--bezel) * -0.22);
+  width: 10.4%;
+}
+
+#app[data-orientation="landscape"] .receiver {
+  left: calc(var(--bezel) * 0.36);
+  top: 50%;
+  width: calc(var(--bezel) * 0.19);
+  height: 15%;
+  transform: translateY(-50%);
+}
+
+#image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* --- empty states -------------------------------------------------------------------------- */
+
+#empty {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 18%;
+  background: radial-gradient(ellipse at 12% 0%, rgba(255, 255, 255, 0.03), transparent 56%),
+              linear-gradient(145deg, #16171a, #090a0c 48%, #050609);
+  color: #b8babf;
+  line-height: 1.35;
+  text-align: center;
+  user-select: none;
+}
+
+.empty-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.empty-icon g {
+  display: none;
+}
+
+#empty[data-state="connecting"] [data-icon="connecting"],
+#empty[data-state="offline"] [data-icon="offline"],
+#empty[data-state="locked"] [data-icon="locked"],
+#empty[data-state="authentication"] [data-icon="authentication"],
+#empty[data-state="paused"] [data-icon="paused"],
+#empty[data-state="unavailable"] [data-icon="unavailable"] {
+  display: block;
+}
+
+.empty-icon .symbol-dot {
+  fill: currentColor;
+  stroke: none;
+}
+
+#empty-text {
+  max-width: 100%;
+  color: #9a9ca2;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* --- operating glow: a gradient ring plus inset light; only opacity is animated ----------- */
+
+.glow {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.36s ease;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1.5px rgba(160, 210, 255, 0.85),
+              inset 0 0 22px 6px rgba(88, 169, 255, 0.42),
+              inset 0 0 52px 16px rgba(181, 155, 255, 0.2);
+}
+
+.glow::before,
+.glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 3px;
+  border-radius: inherit;
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  mask-composite: exclude;
+}
+
+.glow::before {
+  background: conic-gradient(from 20deg, var(--glow-hues));
+}
+
+.glow::after {
+  background: conic-gradient(from 200deg, var(--glow-hues));
+  opacity: 0;
+}
+
+#app[data-operating="true"] .glow {
+  opacity: 1;
+  animation: glow-breathe 8s ease-in-out infinite;
+}
+
+#app[data-operating="true"] .glow::after {
+  animation: glow-swap 8s ease-in-out infinite;
+}
+
+#app[data-visible="false"] .glow,
+#app[data-visible="false"] .glow::after,
+#app[data-visible="false"] .dot {
+  animation-play-state: paused;
+}
+
+.island {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: calc(var(--bezel) * 1.17);
+  width: calc(var(--bezel) * 11.25);
+  height: calc(var(--bezel) * 3.46);
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #030405;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.6), inset 0 0.5px 0 rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.island::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--bezel) * 0.66);
+  top: 50%;
+  width: calc(var(--bezel) * 1.65);
+  height: calc(var(--bezel) * 1.65);
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 43% 38%, #274271 0%, #111d31 27%, #090c12 54%, #010203 73%);
+  opacity: 0.7;
+}
+
+#app[data-orientation="landscape"] .island {
+  left: calc(var(--bezel) * 2.9);
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+/* --- gesture markers (one node per tap or drag) -------------------------------------------- */
+
+#cursors {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.cursor {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.4);
+  box-shadow: 0 0 0 1px rgba(76, 76, 76, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.cursor.still {
+  opacity: 1;
+}
+
+/* --- toast, toolbar, hint ------------------------------------------------------------------ */
+
+#toast {
+  position: absolute;
+  left: 50%;
+  bottom: 74px;
+  z-index: 5;
+  max-width: calc(100% - 32px);
+  padding: 7px 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--toast);
+  color: var(--toast-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  box-shadow: 0 6px 20px -8px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: toast-in 0.18s ease-out;
+}
+
+#toast[data-tone="error"] {
+  background: #b42318;
+  color: #ffffff;
+}
+
+#toolbar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 0.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--control-shadow);
+}
+
+#toolbar button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+#toolbar button:hover {
+  background: var(--surface-hover);
+}
+
+#toolbar button:active {
+  transform: scale(0.94);
+}
+
+#toolbar button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+#toolbar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+  transform: none;
+}
+
+#toolbar button[data-busy="true"] {
+  opacity: 1;
+  animation: tool-busy 1s ease-in-out infinite;
+}
+
+#toolbar svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#hint {
+  flex: none;
+  max-width: 420px;
+  margin: 0;
+  padding: 0 8px;
+  color: var(--hint-text);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* --- small windows ------------------------------------------------------------------------- */
+
+@media (max-width: 360px), (max-height: 480px) {
+  #app {
+    gap: 8px;
+    padding: 12px 10px 10px;
+  }
+
+  #toast {
+    bottom: 58px;
+  }
+}
+
+/* --- animations ---------------------------------------------------------------------------- */
+
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+@keyframes glow-swap {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes tool-busy {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow,
+  #toolbar button {
+    transition: none;
+  }
+
+  #app[data-operating="true"] .glow,
+  #app[data-operating="true"] .glow::after,
+  #app[data-live="live"] .dot,
+  #toolbar button[data-busy="true"],
+  #toast {
+    animation: none;
+  }
+}
