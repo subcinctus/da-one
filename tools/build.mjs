@@ -46,3 +46,18 @@ const out = outArg ? path.resolve(root, outArg) : path.join(root, 'dist', dev ? 
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, html);
 console.log(`built ${path.relative(root, out)} (${(html.length / 1024).toFixed(0)} KB) in ${Date.now() - t0} ms`);
+
+// Release builds also emit dist/artifact.html: the same page without the document wrapper
+// (doctype/html/head/body/charset/viewport), for hosts that supply their own skeleton. <title> stays first.
+if (!dev && !outArg) {
+  const art = html
+    .replace(/<!doctype html>\s*/i, '')
+    .replace(/<html[^>]*>\s*/i, '').replace(/<\/html>\s*/i, '')
+    .replace(/<head>\s*/i, '').replace(/<\/head>\s*/i, '')
+    .replace(/<body>\s*/i, '').replace(/<\/body>\s*/i, '')
+    .replace(/<meta charset[^>]*>\s*/i, '')
+    .replace(/<meta name="viewport"[^>]*>\s*/i, '');
+  const artOut = path.join(root, 'dist', 'artifact.html');
+  fs.writeFileSync(artOut, art);
+  console.log(`built ${path.relative(root, artOut)} (${(art.length / 1024).toFixed(0)} KB)`);
+}
