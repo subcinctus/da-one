@@ -2,10 +2,10 @@
 Karan Chaudhary. Refined 8 October 2026 from the Draft Answers (8 Oct) doc. Same 15 programmes, questions and limits. Roles corrected on 9 October: camera assistant on Khauf and on the project under Boney Kapoor, planning on the Sleepyhead shoot, direction team on Finolex, organiser of The Classroom, and no production jobs. The answers now read plainer and more personal: real scope stated without overselling, gaps stated as facts, no aphorisms or dramatic lines, and no shared sentences between applications the same university may read together (USC, Chapman, LMU, NYU). Sections are in deadline order, so the first section is the first application due.
 **How to use it:** the limit sits under each question, and the word or character count follows each answer. The count leaves out \[yellow brackets\], which mark details only you can fill in, so leave room for them. Treatments, scenes and stories are fiction, written for you to rework in your own voice. Video items give talking points, not scripts. When an answer says "Use ... item N", the prompt is the same, so submit that answer. These are drafts: rewrite them in your own words before you submit, since several of these schools treat AI-written text as dishonesty and some may ask you to declare AI use.
 **Do these first**
-• **Check your degree certificate.** Whistling Woods' own policy says its degrees are awarded by RGNIYD (NAAC grade B+), not TISS (A+); its TISS agreement only began in 2024. Your certificate decides several schools, and so does your class (first class or not). Every CV in this doc has a bracket for the awarding body.
-• **UCLA (due 1 Nov), likely ineligible:** UCLA TFT says three-year "ordinary pass" degrees are not eligible, and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception. Email TFT admissions before paying the fee. The UCLA answers are complete in case they say yes.
+• **Degree certificate: TISS.** You confirmed on 9 October that your degree is awarded by the Tata Institute of Social Sciences (TISS). Your class (first class or not) still matters for some schools. The UCLA CV names TISS; the other CVs will be filled in as each application is prepared.
+• **UCLA (due 1 Nov), likely ineligible:** UCLA TFT says three-year "ordinary pass" degrees are not eligible, and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception. TFT replied on 22 September that a four-year-equivalent degree is required; on 9 October you asked whether the department could request an exception. Wait for their answer before paying the fee. The UCLA answers are complete in case they say yes.
 • **NYU Tisch, likely ineligible unless your degree is rated four-year equivalent:** Tisch wants a four-year degree, or three years plus a one-year PG diploma, confirmed by a credential evaluation at application. Stern itself accepts three-year Indian degrees.
-• **At risk:** AFI (needs first class and NAAC "A", but has a Professional Distinction Pathway), LMU, Columbia and UNCSA. **Fine:** BU, NYFA, Stern, and USC if RGNIYD counts as UGC-recognised (USC does its own evaluation). **Unclear:** Chapman and CMU. Order a WES or ECE evaluation now for Tisch, LMU, CMU and UNCSA; USC and Chapman do not accept them.
+• **At risk:** AFI (needs first class and NAAC "A", but has a Professional Distinction Pathway), LMU, Columbia and UNCSA. **Fine:** BU, NYFA, Stern, and USC (TISS is UGC-recognised; USC does its own evaluation). **Unclear:** Chapman and CMU. Order a WES or ECE evaluation now for Tisch, LMU, CMU and UNCSA; USC and Chapman do not accept them.
 • **UNCSA (early deadline 2 Nov, final 20 Jan):** fill in your address, phone and citizenship to unlock the portal. The credential evaluation must arrive by the deadline you aim for, so 20 January is more realistic.
 • **Chapman (priority deadline 15 Nov):** email Graduate Admission so they can create the programme application. The MBA/MFA also needs the GMAT or GRE.
 • **LMU:** you can apply to only one LMU graduate programme a year, so choose the MFA (Creative Producing) or MELM.
@@ -144,7 +144,7 @@ None at present. \[Leave blank unless you hold a real membership or publication.
 KARAN CHAUDHARY
 Gurugram, India | \[email\] | \[phone\] | \[portfolio link\]
 EDUCATION
-B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by \[RGNIYD or TISS: copy exactly from your degree certificate\]), July 2022 to June 2025
+B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS), July 2022 to June 2025
 Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram. \[Year\]
 Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, \[2018 or 2019\] to 2020
 EXPERIENCE
@@ -163,7 +163,7 @@ SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: \[list\].
 ACHIEVEMENTS
 Football: 1st place, Gurugram city (2019); 4th place, Haryana state (2020)
-*226 words (excluding \[bracket\] notes)*
+*232 words (excluding \[bracket\] notes)*
 # **2. University of North Carolina School of the Arts (UNCSA), MFA in Filmmaking, Creative Producing concentration**
 **Early deadline: 2 November 2026 (non-binding). Final deadline: 20 January 2027.** Your credential evaluation must arrive by whichever deadline you aim for, which is tight for 2 November.
 ## **1. Letter of Intent**

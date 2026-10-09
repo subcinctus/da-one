@@ -113,7 +113,7 @@ None at present.
 KARAN CHAUDHARY
 Gurugram, India | \[email\] | \[phone\] | \[portfolio link\]
 EDUCATION
-B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by \[RGNIYD or TISS\]), July 2022 to June 2025
+B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS), July 2022 to June 2025
 Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram. \[Year\]
 Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, \[2018 or 2019\] to 2020
 EXPERIENCE
@@ -132,7 +132,7 @@ SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: \[list\].
 ACHIEVEMENTS
 Football: 1st place, Gurugram city (2019); 4th place, Haryana state (2020)
-*226 words (excluding \[bracket\] notes)*
+*232 words (excluding \[bracket\] notes)*
 # **2. University of North Carolina School of the Arts (UNCSA), MFA in Filmmaking, Creative Producing concentration**
 **Early deadline: 2 November 2026 (non-binding). Final deadline: 20 January 2027.** The credential evaluation must arrive by the chosen deadline, which makes 2 November tight.
 ## **1. Letter of Intent**
@@ -1402,12 +1402,12 @@ Dear \[Name\], thank you for agreeing to recommend me for BU's MS in Media Ventu
 # Deadlines and open points
 Programme details in the answers (course names, thesis formats, internships) were checked against each school's official pages on 7 October 2026.
 ## The degree question
-Several schools will turn on the degree certificate. Whistling Woods' own policy says its degrees are awarded by RGNIYD (NAAC grade B+), not TISS (A+); its agreement with TISS began only in 2024. The class of degree (first class or not) also matters. Each CV leaves a space for the awarding body until the certificate is checked.
+Several schools will turn on the degree certificate. The degree is awarded by the Tata Institute of Social Sciences (TISS), confirmed on 9 October. The class of degree (first class or not) also matters. The UCLA CV names TISS; the other CVs will be filled in as each application is prepared.
 A WES or ECE credential evaluation is needed for NYU Tisch, LMU, CMU and UNCSA. USC and Chapman do their own evaluation and do not accept WES or ECE.
 ## School by school
-**UCLA, MFA Producers Program.** 1 November 2026, 11:59 pm PST. Likely ineligible as things stand: UCLA TFT says three-year "ordinary pass" degrees are not eligible, and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception, so the plan is to email TFT admissions before paying the fee. The answers are complete in case they say yes.
+**UCLA, MFA Producers Program.** 1 November 2026, 11:59 pm PST. Likely ineligible as things stand: UCLA TFT says three-year "ordinary pass" degrees are not eligible, and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception. TFT replied on 22 September that a four-year-equivalent degree is required; on 9 October Karan asked whether the department could request an exception, and the fee waits for their answer. The answers are complete in case they say yes.
 **UNCSA, MFA in Filmmaking (Creative Producing).** Early deadline 2 November 2026 (non-binding); final deadline 20 January 2027. Eligibility is at risk. The portal unlocks once address, phone and citizenship are entered. The credential evaluation must arrive by the deadline chosen, so 20 January is the realistic one.
-**USC: Peter Stark Producing Program, MFA Film and Television Production, MFA Writing for Screen and Television.** 15 November 2026 for all three. Eligibility is fine if RGNIYD counts as UGC-recognised. The Stark prompts come from the official site and need confirming in SlideRoom.
+**USC: Peter Stark Producing Program, MFA Film and Television Production, MFA Writing for Screen and Television.** 15 November 2026 for all three. Eligibility is fine: TISS is UGC-recognised, and USC does its own evaluation. The Stark prompts come from the official site and need confirming in SlideRoom.
 **Chapman: MFA Producing, and the joint MBA/MFA.** Priority deadline 15 November 2026 (fellowship preference). Eligibility is unclear. The portal will not create the application yet, so Chapman Graduate Admission needs an email first. The MBA/MFA also needs the GMAT or GRE.
 **LMU: MFA (Creative Producing), or MELM.** LMU allows one graduate application a year, so this is one or the other. MFA: 15 November 2026. MELM: early admission 15 November 2026, round 1 on 10 January 2027. Eligibility is at risk.
 **NYFA Los Angeles, MFA in Producing.** Early action 21 November 2026 (non-binding); international deadline 12 February 2027. Eligibility is fine.
