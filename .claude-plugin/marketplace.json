@@ -1,0 +1,18 @@
+{
+  "name": "da-one",
+  "owner": {
+    "name": "subcinctus"
+  },
+  "metadata": {
+    "description": "Claude Code plugins from the da-one repository."
+  },
+  "plugins": [
+    {
+      "name": "iphone-use",
+      "source": "./plugins/iphone-use",
+      "description": "Let Claude operate your real iPhone over USB: open apps, read the screen, tap, type and check results, with a live preview.",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}
