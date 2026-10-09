@@ -121,9 +121,8 @@ The Classroom (2020 to 2022), five-part school web series released on YouTube. R
 ## **9. Awards and distinctions**
 *Limit: not stated. Optional.*
 *Question: List academic awards, prizes, honors, fellowships, or other distinctions you have received.*
-• 1st place, Gurugram city football \[tournament name\], 2019
-• 4th place, Haryana state football \[tournament name\], 2020
-*16 words (excluding \[bracket\] notes)*
+• 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram
+*15 words (excluding \[bracket\] notes)*
 ## **10. Publications and organizations**
 *Limit: not stated. Optional, if pertinent.*
 *Question: List your publications and any scholarly or professional organizations in which you hold membership.*
@@ -161,9 +160,9 @@ Media manager, Mitti to Matka (support for Gurugram potters during COVID), 2020 
 International Press Photographer, Suncity MUN, 2020 to 2022
 SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: \[list\].
-ACHIEVEMENTS
-Football: 1st place, Gurugram city (2019); 4th place, Haryana state (2020)
-*232 words (excluding \[bracket\] notes)*
+AWARDS
+3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
+*233 words (excluding \[bracket\] notes)*
 # **2. University of North Carolina School of the Arts (UNCSA), MFA in Filmmaking, Creative Producing concentration**
 **Early deadline: 2 November 2026 (non-binding). Final deadline: 20 January 2027.** Your credential evaluation must arrive by whichever deadline you aim for, which is tight for 2 November.
 ## **1. Letter of Intent**
