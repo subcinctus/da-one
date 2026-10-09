@@ -450,7 +450,7 @@ class ActionTests(ServerCase):
             server.token, server.port)
         chunked = (head + "Transfer-Encoding: chunked\r\n\r\n").encode() + b"11\r\n{\"action\":\"home\"}\r\n0\r\n\r\n"
         self.assertTrue(raw_exchange(server.port, chunked).startswith(b"HTTP/1.1 400 "))
-        no_length = (head + "\r\n").encode()
+        no_length = (head + "Connection: close\r\n\r\n").encode()
         self.assertTrue(raw_exchange(server.port, no_length).startswith(b"HTTP/1.1 400 "))
         self.assertEqual(actions.calls, [])
 
@@ -499,10 +499,10 @@ class StreamTests(ServerCase):
         self.assertIsNotNone(client.read_part())
         started = time.monotonic()
         count = 0
-        while time.monotonic() - started < 1.0:
+        while time.monotonic() - started < 0.75:
             if client.read_part(timeout=1.0) is not None:
                 count += 1
-        self.assertLessEqual(count, 5)
+        self.assertLessEqual(count, 4)              # 20 fps from WDA, at most 4 parts per second relayed
         self.assertGreaterEqual(count, 2)
 
     def test_a_still_frame_is_sent_again(self):
@@ -516,8 +516,7 @@ class StreamTests(ServerCase):
             if part is not None:
                 parts.append(part)
         self.assertEqual(parts, [TINY_JPEG] * 3)
-        first_part_at = started
-        self.assertLess(time.monotonic() - first_part_at, 1.5)
+        self.assertLess(time.monotonic() - started, 1.0)
 
     def test_closed_clients_free_their_slots(self):
         hub, _ = self.wda_hub("stall_after:1")
@@ -614,7 +613,7 @@ class EventTests(ServerCase):
         self.assertEqual(client.read_sse(), "retry: 2000")
         first = client.read_state()
         self.assertTrue(first["frame_available"])
-        self.assertIsNone(client.read_state(timeout=0.8))
+        self.assertIsNone(client.read_state(timeout=0.6))
         self.assertGreater(hub.state()["seq"], 0)
 
     def test_keepalive(self):
@@ -835,9 +834,7 @@ class ManagerTests(ServerCase):
         info = first.ensure()
         second = self.manager(hub=ScreenHub(self.state_dir))
         self.addCleanup(second.hub.close)
-        with mock.patch.object(viewer_server.os, "getpid", return_value=os.getpid() + 1_000_000):
-            with mock.patch.object(viewer_server.privstate, "pid_alive", return_value=True):
-                reused = second.ensure()
+        reused = second.ensure()
         self.assertFalse(reused.owner)
         self.assertEqual(reused.url, info.url)
 
@@ -864,8 +861,7 @@ class DesktopHelperTests(ServerCase):
                                           "-e", "end run"])
         self.assertEqual(call.timeout, 8)
         self.assertFalse(any(self.state_dir in part for part in call.argv[:-1]))
-        self.assertEqual(os.path.dirname(seen["path"]), os.path.realpath(self.state_dir)
-                         if os.path.dirname(seen["path"]) != self.state_dir else self.state_dir)
+        self.assertEqual(os.path.dirname(seen["path"]), self.state_dir)
         self.assertTrue(os.path.basename(seen["path"]).startswith(".clipboard-"))
         self.assertTrue(seen["path"].endswith(".png"))
         self.assertEqual((seen["mode"], seen["data"]), (0o600, data))

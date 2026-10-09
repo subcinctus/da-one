@@ -321,6 +321,13 @@ class ReadMjpegScriptedTests(unittest.TestCase):
         self.assertLess(time.monotonic() - stop_at, 1.0)
         self.assertEqual(peer.request, MJPEG_REQUEST)
 
+    def test_nothing_is_sent_when_already_stopped(self):
+        peer = self.peer([MJPEG_HEADER + mjpeg_part(TINY_JPEG)])
+        frames = []
+        read_mjpeg(peer.ours, lambda *args: frames.append(args), lambda: False)
+        time.sleep(0.05)
+        self.assertEqual((peer.request, frames), (b"", []))
+
     def test_frames_sent_with_the_header_are_not_lost(self):
         peer = self.peer([MJPEG_HEADER + mjpeg_part(TINY_JPEG) + mjpeg_part(TINY_JPEG)], close=True)
         self.assertEqual(collect(peer.ours, 5), [(TINY_JPEG, 39, 84)] * 2)

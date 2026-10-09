@@ -12,6 +12,7 @@ import re  # noqa: E402
 import shutil  # noqa: E402
 import socket  # noqa: E402
 import struct  # noqa: E402
+import subprocess  # noqa: E402
 import threading  # noqa: E402
 import time  # noqa: E402
 import unittest  # noqa: E402
@@ -509,6 +510,22 @@ class ActivityTests(HubCase):
         hub.set_viewport({"width": 393.5, "height": 852, "units": "iPhone points"})
         self.assertEqual(hub.state()["viewport"], {"width": 393.5, "height": 852})
 
+    def test_concurrent_transactions_never_lose_an_event(self):
+        hubs = [self.hub(), self.hub()]
+
+        def tap(hub):
+            for index in range(25):
+                hub.gesture("tap", point={"x": index, "y": 1})
+
+        threads = [threading.Thread(target=tap, args=(hubs[index % 2],)) for index in range(4)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(10)
+        raw = self.raw_file()
+        self.assertEqual(raw["last_event_id"], 100)
+        self.assertEqual([event["id"] for event in raw["events"]], list(range(69, 101)))
+
     def test_external_seq_is_shared(self):
         hub, other = self.hub(), self.hub()
         self.assertEqual(hub.external_seq(), 0)
@@ -695,6 +712,22 @@ class CaptureTests(HubCase):
         hub.attach_viewer()
         eventually(lambda: stream.calls > calls)
         self.assertEqual(hub.wait_frame(0, 2.0).jpeg, FRAME_A)
+
+    def test_pause_from_a_separate_process(self):
+        hub, stream = self.capture_hub(frames=[FRAME_A])
+        hub.attach_viewer()
+        hub.wait_frame(0, 2.0)
+        peer = stream.peer
+        code = ("import sys; sys.path.insert(0, sys.argv[1]); import screen_hub; "
+                "hub = screen_hub.ScreenHub(sys.argv[2]); hub.set_paused(True, 'authentication'); "
+                "hub.note_external_action(); hub.close()")
+        result = subprocess.run([sys.executable, "-I", "-c", code, SERVER, self.state_dir], stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (0, b"", b""))
+        eventually(lambda: peer.eof.is_set(), timeout=1.0, message="capture did not stop")
+        self.assertIsNone(hub.latest_frame())
+        self.assertEqual(hub.pause_status(), {"paused": True, "pause_reason": "authentication"})
+        self.assertEqual(hub.external_seq(), 1)
 
     def test_frames_never_touch_the_disk(self):
         hub, stream = self.capture_hub(frames=[FRAME_A, FRAME_B])

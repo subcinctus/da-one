@@ -293,6 +293,8 @@ def read_mjpeg(sock, on_frame, keep_going, startup_timeout=STARTUP_TIMEOUT, idle
     false; raises MJPEGError on a startup timeout, a non-200 answer or `idle_timeout`
     seconds without any byte. Socket errors propagate as OSError.
     """
+    if not keep_going():
+        return
     sock.sendall(MJPEG_REQUEST)
     sock.settimeout(RECV_TICK)
     head, leftover = _read_response_head(sock, keep_going, startup_timeout)
@@ -738,8 +740,11 @@ class ScreenHub:
             self._run = run
             run.thread.start()
 
-    def _halt(self, erase):
-        """Stop the current capture run (it exits on its own) and optionally erase the frame."""
+    def _halt(self, erase, new_stream=False):
+        """Stop the current capture run (it exits on its own) and optionally erase the frame.
+
+        With new_stream the stream id changes and seq restarts, in the same step.
+        """
         with self._lock:
             run = self._run
             self._run = None
@@ -747,6 +752,9 @@ class ScreenHub:
                 run.stop.set()
             if erase:
                 self._frame = None
+            if new_stream:
+                self.stream_id = uuid.uuid4().hex
+                self._seq = 0
             self._wake += 1
             self._frame_changed.notify_all()
         if run is not None:
@@ -815,10 +823,7 @@ class ScreenHub:
 
     def restart(self) -> dict:
         """Drop the frame and announce a new stream (new stream_id, seq 0); viewers reconnect."""
-        self._halt(erase=True)
-        with self._lock:
-            self.stream_id = uuid.uuid4().hex
-            self._seq = 0
+        self._halt(erase=True, new_stream=True)
         return self.state()
 
     def close(self) -> None:

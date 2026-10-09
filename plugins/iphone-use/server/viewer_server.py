@@ -15,6 +15,7 @@ both through the injectable command runner.
 """
 
 import collections
+import copy
 import errno
 import hmac
 import http.client
@@ -48,6 +49,8 @@ FRAME_INTERVAL = 0.25
 SSE_INTERVAL = 0.25
 SSE_KEEPALIVE = 15.0
 MAX_ACTION_BODY = 1024
+RELAY_TICK = 0.05               # how often a waiting stream checks for a closed tab, pause or restart
+POLL_INTERVAL = 0.05            # serve_forever poll: how quickly stop() takes effect
 
 ACTIONS = ("refresh", "home", "screenshot")
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; "
@@ -190,6 +193,10 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         code = int(code)
         if code == 501:
             code = 405
+        if self.request_version == "HTTP/0.9":
+            # http.server would answer a request it could not parse with a bare body;
+            # always send a status line and the security headers instead.
+            self.request_version = "HTTP/1.1"
         try:
             self._reject(code, close=True)
         except OSError:
@@ -285,6 +292,9 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         self._body_consumed = False
         preview = self.server.preview
         method = self.command
+        if self.request_version not in ("HTTP/1.0", "HTTP/1.1"):
+            self.request_version = "HTTP/1.1"
+            return self._reject(400, close=True)
         if not self._host_ok():
             return self._reject(403)
         if method not in ("GET", "HEAD", "POST"):
@@ -396,7 +406,10 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             self.send_header(name, value)
         self.send_header("Connection", "close")
         self.end_headers()
-        last_seq = 0
+        # One part every FRAME_INTERVAL (at most 4 per second), always the newest frame. A still
+        # screen gets the same frame again: browsers paint a multipart part only when the
+        # next part begins. Short ticks notice a closed tab, a pause or a restart quickly.
+        next_part_at = time.monotonic()
 
         def ended():
             return preview.stopping or hub.stream_id != stream_id or hub.paused()
@@ -404,23 +417,19 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         while not ended():
             if self._client_gone():
                 return
-            frame = hub.wait_frame(last_seq, FRAME_INTERVAL)
+            now = time.monotonic()
+            if now < next_part_at:
+                preview.wait(min(RELAY_TICK, next_part_at - now))
+                continue
+            frame = hub.latest_frame() or hub.wait_frame(0, RELAY_TICK)
             if frame is None:
-                # Browsers paint a multipart part only when the next one starts, so a still
-                # screen gets its latest frame again (at most every FRAME_INTERVAL).
-                frame = hub.latest_frame()
-            if frame is None:
-                preview.wait(0.05)
+                preview.wait(0.01)              # never spin, even if the hub was closed meanwhile
                 continue
             if ended():                         # never write a picture once a pause is set
                 return
-            started = time.monotonic()
             self.wfile.write(b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: %d\r\n\r\n"
                              % len(frame.jpeg) + frame.jpeg + b"\r\n")
-            last_seq = frame.seq
-            remaining = FRAME_INTERVAL - (time.monotonic() - started)
-            if remaining > 0:
-                preview.wait(remaining)          # at most 4 frames per second
+            next_part_at = time.monotonic() + FRAME_INTERVAL
 
     def _events(self):
         preview = self.server.preview
@@ -530,7 +539,7 @@ class PreviewServer:
             self.port = server.server_address[1]
             self._stop.clear()
             self._server = server
-            self._thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.1},
+            self._thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": POLL_INTERVAL},
                                             name=HTTP_THREAD_NAME, daemon=True)
             self._thread.start()
             return self.url
@@ -578,13 +587,13 @@ class PreviewServer:
         except ToolError as exc:
             result = {"ok": False, "error": exc.as_dict()}
         except Exception:  # noqa: BLE001 - the page gets an envelope, never a traceback
-            return INTERNAL_ERROR
+            return copy.deepcopy(INTERNAL_ERROR)
         if not isinstance(result, dict):
-            return INTERNAL_ERROR
+            return copy.deepcopy(INTERNAL_ERROR)
         try:
             _json_bytes(result)
-        except (TypeError, ValueError):
-            return INTERNAL_ERROR
+        except (TypeError, ValueError, RecursionError):
+            return copy.deepcopy(INTERNAL_ERROR)
         return result
 
 
