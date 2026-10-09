@@ -112,12 +112,17 @@ def fake_clock(start=1000.0):
 
 
 def iter_strings(value):
-    """Every string (keys and values) inside a JSON-like structure."""
+    """Every string (keys and values) inside a JSON-like structure, except file paths.
+
+    Paths are skipped because random temp-dir names could contain any lower-case token.
+    """
     if isinstance(value, str):
         yield value
     elif isinstance(value, dict):
         for key, item in value.items():
             yield str(key)
+            if key == "path" and isinstance(item, str):
+                continue
             for text in iter_strings(item):
                 yield text
     elif isinstance(value, (list, tuple)):
