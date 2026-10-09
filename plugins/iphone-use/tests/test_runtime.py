@@ -34,10 +34,17 @@ TOOL_NAMES = ("iphone_doctor", "iphone_setup", "iphone_ready", "iphone_observe",
 
 
 def refused_port():
-    """A loopback port with nothing listening (bound but not listening, so nobody else can take it)."""
+    """A loopback port with nothing listening: listened on briefly, then closed.
+
+    (A bound-but-never-listening socket is refused on Linux but silently times out on macOS.)
+    The closed socket is returned too, so callers may still close it.
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(("127.0.0.1", 0))
-    return sock, sock.getsockname()[1]
+    sock.listen(1)
+    port = sock.getsockname()[1]
+    sock.close()
+    return sock, port
 
 
 def test_env(home, mux, extra=None):

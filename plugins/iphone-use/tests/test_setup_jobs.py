@@ -157,6 +157,7 @@ import http.server
 import json
 import os
 import signal
+import socketserver
 import subprocess
 import sys
 import time
@@ -207,7 +208,13 @@ if action == "test-without-building":
         def log_message(self, *ignored):
             pass
 
-    server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+    class Server(http.server.HTTPServer):
+        def server_bind(self):
+            # HTTPServer.server_bind calls socket.getfqdn(), which can stall for many seconds on macOS.
+            socketserver.TCPServer.server_bind(self)
+            self.server_name, self.server_port = self.server_address[:2]
+
+    server = Server(("127.0.0.1", 0), Handler)
     port = server.server_address[1]
     signal.signal(signal.SIGTERM, lambda *ignored: os._exit(0))
     with open(os.path.join(HERE, "port.tmp"), "w") as handle:

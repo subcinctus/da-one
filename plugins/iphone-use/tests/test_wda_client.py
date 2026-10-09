@@ -170,11 +170,16 @@ def wda_error(error, message="Failed", status=500, traceback="SECRET TRACEBACK")
 
 
 def refused_port(test):
-    """A loopback port that refuses connections: bound (reserved) but never listening."""
+    """A loopback port with nothing listening: briefly listened on, then closed, so connects are refused.
+
+    (A bound-but-never-listening socket is refused on Linux but silently times out on macOS.)
+    """
     holder = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     holder.bind(("127.0.0.1", 0))
-    test.addCleanup(holder.close)
-    return holder.getsockname()[1]
+    holder.listen(1)
+    port = holder.getsockname()[1]
+    holder.close()
+    return port
 
 
 class ClientTestCase(unittest.TestCase):
@@ -316,7 +321,8 @@ class TransportTests(unittest.TestCase):
         sock = transport.open_socket(timeout=1.0)
         self.addCleanup(sock.close)
         self.assertEqual(sock.getpeername()[1], server.port)
-        self.assertEqual(sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY), 1)
+        # Any non-zero value means enabled (Linux reports 1, macOS reports 4).
+        self.assertNotEqual(sock.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY), 0)
         other = transport.open_socket(server.port, timeout=1.0)
         other.close()
         with self.assertRaises(ConnectionRefusedError):

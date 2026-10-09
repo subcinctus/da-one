@@ -126,10 +126,13 @@ class SetupCase(unittest.TestCase):
         privstate.write_json_private(os.path.join(self.state, "config.json"), dict(fields))
 
     def refused_port(self):
+        """Nothing listening: listen briefly, then close (bound-only sockets time out on macOS)."""
         sock = socket.socket()
         sock.bind(("127.0.0.1", 0))
-        self.addCleanup(sock.close)
-        return sock.getsockname()[1]
+        sock.listen(1)
+        port = sock.getsockname()[1]
+        sock.close()
+        return port
 
     def fake_wda(self, **kwargs):
         fake = FakeWDA(**kwargs).start()

@@ -150,11 +150,16 @@ def raw_frame(payload_bytes, tag=1, version=1, message_type=8, length=None):
 
 
 def refused_port(test):
-    """A loopback port that refuses connections: bound (reserved) but never listening."""
+    """A loopback port with nothing listening: briefly listened on, then closed, so connects are refused.
+
+    (A bound-but-never-listening socket is refused on Linux but silently times out on macOS.)
+    """
     holder = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     holder.bind(("127.0.0.1", 0))
-    test.addCleanup(holder.close)
-    return holder.getsockname()[1]
+    holder.listen(1)
+    port = holder.getsockname()[1]
+    holder.close()
+    return port
 
 
 def plist_bytes(obj):

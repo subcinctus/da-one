@@ -6,6 +6,7 @@ for _p in (SERVER, HERE):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+import base64  # noqa: E402
 import io  # noqa: E402
 import json  # noqa: E402
 import queue  # noqa: E402
@@ -268,7 +269,11 @@ class ProcessTests(unittest.TestCase):
         self.assertEqual(status["running"], False)
         shot = replies[3]
         self.assertEqual([block["type"] for block in shot["content"]], ["text", "image"])
-        self.assertEqual(shot["content"][1]["mimeType"], "image/png")
+        image = shot["content"][1]
+        # PNG as captured, or JPEG when macOS sips is present to downscale it; the bytes must match the type.
+        self.assertIn(image["mimeType"], ("image/png", "image/jpeg"))
+        magic = b"\x89PNG" if image["mimeType"] == "image/png" else b"\xff\xd8"
+        self.assertTrue(base64.b64decode(image["data"]).startswith(magic))
         self.assertNotIn(shot["content"][1]["data"][:200], shot["content"][0]["text"])
         self.finish(server)
         self.assertIn("GET /source", self.fake.routes())
