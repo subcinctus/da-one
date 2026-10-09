@@ -754,6 +754,9 @@ export class PoliceCar {
       this.revT = rand(0.8, 1.2);
       this.revSteer = this.avoidSide || (Math.random() < 0.5 ? 1 : -1);
       this.avoidT = 2.2;
+      this.stuckCount++;
+      this.stuckWindowT = 20;
+      if (this.stuckCount >= 4 || (this.stuckCount >= 2 && this.distToPlayer > 140)) this.police.onUnitHopeless(this);
       return;
     }
     // stuck detection
@@ -768,7 +771,7 @@ export class PoliceCar {
       this.revSteer = err > 0 ? 1 : -1;
       this.stuckCount++;
       this.stuckWindowT = 20;
-      if (this.stuckCount >= 5) this.police.onUnitHopeless(this);
+      if (this.stuckCount >= 5 || (this.stuckCount >= 2 && this.distToPlayer > 140)) this.police.onUnitHopeless(this);
     }
   }
 
