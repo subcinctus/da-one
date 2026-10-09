@@ -83,7 +83,7 @@ for n, k in enumerate(qs):
     for s in body:
         if not s.strip():
             continue
-        if s.startswith('• ') or s.startswith('- '):
+        if s.startswith('• ') or s.startswith('- ') or s.startswith('* '):
             if not inl:
                 out.append('<ul>'); inl = True
             out.append(f'<li>{il(s[2:])}</li>'); exp = False
