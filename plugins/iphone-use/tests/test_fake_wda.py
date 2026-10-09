@@ -249,7 +249,11 @@ class TransportTests(FakeCase):
         self.fake.inject("GET", "/source", delay=0.3)
         worker = threading.Thread(target=lambda: self.ok("GET", self.s("/source"), conn=self.connection()))
         worker.start()
-        time.sleep(0.05)
+        # Wait until the delayed /source really holds the queue lock (a fixed sleep raced on slow macOS runners).
+        deadline = time.monotonic() + 5
+        while not self.fake._queue_lock.locked() and time.monotonic() < deadline:
+            time.sleep(0.005)
+        self.assertTrue(self.fake._queue_lock.locked())
         started = time.monotonic()
         self.ok("GET", "/status", conn=self.connection())
         status_seconds = time.monotonic() - started
