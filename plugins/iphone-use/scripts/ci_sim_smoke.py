@@ -53,6 +53,8 @@ TYPED_TEXT = "Wi"
 EVIL_ORIGIN = "https://evil.example"
 IMAGE_MAGIC = {"image/png": b"\x89PNG\r\n\x1a\n", "image/jpeg": b"\xff\xd8\xff"}
 IMAGE_EXTENSIONS = {"image/png": ".png", "image/jpeg": ".jpg"}
+READY_ATTEMPTS = 3
+READY_PAUSE = 15
 REQUIRED_TOOLS = ("iphone_ready", "iphone_observe", "iphone_press_button", "iphone_apps", "iphone_launch_app",
                   "iphone_find", "iphone_tap", "iphone_swipe", "iphone_batch", "iphone_type_text", "iphone_metrics")
 
@@ -443,7 +445,19 @@ class Smoke:
               flush=True)
 
     def ready(self):
-        envelope, image = self.ok("iphone_ready", {"recover": False, "screenshot": True})
+        # Like Claude after "the iPhone service is not ready yet": wait, then run iphone_ready again. A freshly
+        # booted simulator can take a minute before WebDriverAgent creates its first session.
+        for attempt in range(1, READY_ATTEMPTS + 1):
+            envelope, image = self.call("iphone_ready", {"recover": False, "screenshot": True})
+            error = envelope.get("error") or {}
+            if envelope.get("ok") is True or error.get("code") != "service_unreachable" or attempt == READY_ATTEMPTS:
+                break
+            print("   not ready yet (%s); retrying in %ds, as the skill does" % (error.get("message"), READY_PAUSE),
+                  flush=True)
+            time.sleep(READY_PAUSE)
+        if envelope.get("ok") is not True:
+            raise CheckFailed("iphone_ready failed: %s: %s" % (error.get("code"), error.get("message")),
+                              self.last_result)
         self.expect(envelope.get("ready") is True and envelope.get("state") == "ready",
                     "iphone_ready did not report ready=true.")
         self.expect(image is not None, "iphone_ready(screenshot=true) returned no image.")

@@ -147,6 +147,25 @@ jobs:
           fi
           grep -E "$bound|ServerURLHere->" "$log" || true
 
+      - name: Wait until WebDriverAgent can open a session
+        # /status answers before XCTest is fully up on a freshly booted simulator; the first session can take a
+        # minute. This only measures and waits; the smoke test then creates its own session.
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          start=$SECONDS
+          for attempt in 1 2 3 4; do
+            if curl --silent --fail --max-time 75 -X POST -H "Content-Type: application/json" \
+                -d '{"capabilities":{"alwaysMatch":{"shouldWaitForQuiescence":false,"waitForIdleTimeout":0}}}' \
+                "http://127.0.0.1:$WDA_PORT/session" > "$ARTIFACTS/warmup-session.json"; then
+              echo "WebDriverAgent opened a session after $((SECONDS - start)) s (attempt $attempt)"
+              exit 0
+            fi
+            echo "no session yet after $((SECONDS - start)) s (attempt $attempt)"
+            sleep 5
+          done
+          echo "::warning::WebDriverAgent did not open a session within $((SECONDS - start)) s; the smoke test will retry"
+
       - name: Smoke-test the MCP server against the simulator
         timeout-minutes: 10
         run: |

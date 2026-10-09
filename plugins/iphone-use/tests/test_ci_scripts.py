@@ -215,6 +215,17 @@ class SimSmokeTests(unittest.TestCase):
         with open(os.path.join(self.artifacts, "smoke-results.json"), encoding="utf-8") as handle:
             return json.load(handle)
 
+    def test_a_not_yet_ready_service_is_retried_like_the_skill_does(self):
+        # The first session request is dropped (service_unreachable); the smoke waits and runs iphone_ready again.
+        self.fake.inject("POST", "/session", drop=True)
+        with mock.patch.object(self.smoke, "READY_PAUSE", 0):
+            code, output = self.run_main("--skip-guard-checks")
+        self.assertEqual(code, 0, output)
+        self.assertIn("retrying", output)
+        tools = [call["tool"] for call in self.results()["calls"]]
+        self.assertEqual(tools[:2], ["iphone_ready", "iphone_ready"])
+        self.assertEqual(self.results()["calls"][0]["outcome"], "error service_unreachable")
+
     def test_the_whole_run_passes_against_the_fake(self):
         code, output = self.run_main("--skip-guard-checks")
         self.assertEqual(code, 0, output)
