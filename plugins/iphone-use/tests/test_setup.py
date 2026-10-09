@@ -46,7 +46,20 @@ FB_FIXTURE = (
     + "  self.mjpegServer.socket = self.screenshotsBroadcaster;\n"
     "}\n"
 )
-PATCH_ENTRY = " M " + wda_setup.MJPEG_PATCH_PATH + "\n"
+HTTP_FIXTURE = (
+    "- (nullable NSDictionary<NSString *, NSString *> *)parsedHeaderFieldsFromLines:(NSArray<NSString *> *)lines\n"
+    "                                                                    forClient:(nw_connection_t)client\n"
+    "{\n"
+    "  NSMutableDictionary<NSString *, NSString *> *requestHeaders = [NSMutableDictionary dictionary];\n"
+    + wda_setup.GUARD_PATCH_ANCHOR
+    + "}\n"
+)
+PRISTINE = {wda_setup.MJPEG_PATCH_PATH: FB_FIXTURE, wda_setup.GUARD_PATCH_PATH: HTTP_FIXTURE}
+FB_ENTRY = " M " + wda_setup.MJPEG_PATCH_PATH + "\n"
+HTTP_ENTRY = " M " + wda_setup.GUARD_PATCH_PATH + "\n"
+PATCH_ENTRY = HTTP_ENTRY + FB_ENTRY  # git status lists both patched files, sorted by path
+# A checkout of the pinned WebDriverAgent to check the patches against (the simulator CI job sets this).
+REAL_WDA = os.environ.get("IPHONE_USE_TEST_WDA_SOURCE", "")
 
 
 def iphone(udid, name="iPhone", model="iPhone 15", paired="paired", devmode="enabled", device_type="iPhone"):
@@ -87,14 +100,20 @@ COMPANY_TEAM = {"teamID": TEAM2, "teamName": "Example Corp", "isFreeProvisioning
                 "teamType": "Company"}
 
 
-def make_source(path, fb_text=FB_FIXTURE):
+def patched_files():
+    """The patched files of a fully patched checkout."""
+    return {patch.path: patch.apply(PRISTINE[patch.path]) for patch in wda_setup.PATCHES}
+
+
+def make_source(path, fb_text=FB_FIXTURE, http_text=HTTP_FIXTURE):
     os.makedirs(os.path.join(path, "WebDriverAgent.xcodeproj"), exist_ok=True)
     with open(os.path.join(path, "WebDriverAgent.xcodeproj", "project.pbxproj"), "w") as handle:
         handle.write(PBXPROJ)
-    target = os.path.join(path, wda_setup.MJPEG_PATCH_PATH)
-    os.makedirs(os.path.dirname(target), exist_ok=True)
-    with open(target, "w") as handle:
-        handle.write(fb_text)
+    for name, text in ((wda_setup.MJPEG_PATCH_PATH, fb_text), (wda_setup.GUARD_PATCH_PATH, http_text)):
+        target = os.path.join(path, name)
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        with open(target, "w") as handle:
+            handle.write(text)
     return path
 
 
@@ -152,15 +171,17 @@ class SetupCase(unittest.TestCase):
         self.env.update(daemon.env())
         return daemon
 
-    def git_rules(self, src, head=wda_setup.WDA_COMMIT, status="", show=FB_FIXTURE, status_code=0):
+    def git_rules(self, src, head=wda_setup.WDA_COMMIT, status="", status_code=0):
         self.runner.on("git", "-C", src, "rev-parse", "HEAD", stdout=head + "\n")
         self.runner.on("git", "-C", src, "status", "--porcelain", "--untracked-files=no", stdout=status,
                        returncode=status_code)
-        self.runner.on("git", "-C", src, "show", "HEAD:" + wda_setup.MJPEG_PATCH_PATH, stdout=show)
+        for name, text in PRISTINE.items():
+            self.runner.on("git", "-C", src, "show", "HEAD:" + name, stdout=text)
 
     def owned_source(self, manager, patched=False):
         src = str(manager.owned_source)
-        make_source(src, wda_setup.apply_mjpeg_patch(FB_FIXTURE) if patched else FB_FIXTURE)
+        files = patched_files() if patched else PRISTINE
+        make_source(src, files[wda_setup.MJPEG_PATCH_PATH], files[wda_setup.GUARD_PATCH_PATH])
         self.git_rules(src, status=PATCH_ENTRY if patched else "")
         return src
 
@@ -324,17 +345,17 @@ class ConfigureTests(SetupCase):
     def test_user_source_dir_must_be_pinned_and_is_never_modified(self):
         manager = self.manager()
         external = make_source(os.path.join(self.tmp, "external", "WebDriverAgent"))
-        before = read_bytes(os.path.join(external, wda_setup.MJPEG_PATCH_PATH))
+        before = {name: read_bytes(os.path.join(external, name)) for name in wda_setup.PATCH_PATHS}
         self.git_rules(external, head="0123456789abcdef")
         error = self.assertToolError("prerequisite_missing", manager.configure, udid=UDID, team_id=TEAM,
                                      bundle_id=BUNDLE, source_dir=external)
         self.assertIn("16.14.0", error.message)
-        self.assertEqual(read_bytes(os.path.join(external, wda_setup.MJPEG_PATCH_PATH)), before)
+        self.assertEqual({name: read_bytes(os.path.join(external, name)) for name in before}, before)
         self.assertFalse(os.path.exists(os.path.join(self.state, "config.json")))
         self.git_rules(external)
         result = manager.configure(udid=UDID, team_id=TEAM, bundle_id=BUNDLE, source_dir=external + "/")
         self.assertEqual(result["config"]["source_dir"], external)
-        self.assertEqual(read_bytes(os.path.join(external, wda_setup.MJPEG_PATCH_PATH)), before)
+        self.assertEqual({name: read_bytes(os.path.join(external, name)) for name in before}, before)
 
     def test_refused_while_an_owned_job_is_active(self):
         manager = self.manager()
@@ -571,6 +592,91 @@ class SourceTests(SetupCase):
             self.assertEqual(caught.exception.code, "prerequisite_missing")
             self.assertIn("does not match the pinned version", caught.exception.message)
 
+    def test_apply_guard_patch(self):
+        patched = wda_setup.apply_guard_patch(HTTP_FIXTURE)
+        self.assertEqual(patched, HTTP_FIXTURE.replace(wda_setup.GUARD_PATCH_ANCHOR,
+                                                       wda_setup.GUARD_PATCH_BLOCK + wda_setup.GUARD_PATCH_ANCHOR))
+        self.assertEqual(patched.count(wda_setup.GUARD_PATCH_BLOCK), 1)
+        self.assertEqual(patched.count("iphone-use: browser-guard-v1"), 1)
+        self.assertEqual(wda_setup.apply_guard_patch(patched), patched)
+        # Web pages (Origin) and foreign Host names (DNS rebinding) get the parser's own 400 answer.
+        for fragment in ('nil != requestHeaders[@"origin"]', 'nil != requestHeaders[@"sec-fetch-site"]',
+                         'requestHeaders[@"host"].lowercaseString',
+                         '@"127.0.0.1:"', '@"localhost:"', '@"[::1]:"',
+                         "    [self respondBadRequestToClient:client];\n    return nil;\n  }\n"):
+            self.assertIn(fragment, wda_setup.GUARD_PATCH_BLOCK)
+        for text in ("no anchor here\n", HTTP_FIXTURE + wda_setup.GUARD_PATCH_ANCHOR,
+                     HTTP_FIXTURE.replace(wda_setup.GUARD_PATCH_ANCHOR, "  return headers;\n")):
+            with self.assertRaises(ToolError) as caught:
+                wda_setup.apply_guard_patch(text)
+            self.assertEqual(caught.exception.code, "prerequisite_missing")
+            self.assertIn("does not match the pinned version", caught.exception.message)
+
+    def test_patch_table(self):
+        self.assertEqual(wda_setup.PATCH_PATHS, (wda_setup.MJPEG_PATCH_PATH, wda_setup.GUARD_PATCH_PATH))
+        self.assertEqual(wda_setup.PATCH_MARKERS, ("iphone-use: mjpeg-bind-v2", "iphone-use: browser-guard-v1"))
+        for patch in wda_setup.PATCHES:
+            with self.subTest(path=patch.path):
+                committed = PRISTINE[patch.path]
+                patched = patch.apply(committed)
+                self.assertIn(patch.marker, patched)
+                self.assertNotIn(patch.marker, committed)
+                self.assertEqual(patch.apply(patched), patched)
+                self.assertNotIn(patched, patch.legacy(committed))
+        self.assertEqual(len(wda_setup.legacy_mjpeg_patches(FB_FIXTURE)), 1)
+        self.assertEqual(wda_setup.legacy_guard_patches(HTTP_FIXTURE), [])
+
+    @unittest.skipUnless(REAL_WDA and os.path.isdir(REAL_WDA), "set IPHONE_USE_TEST_WDA_SOURCE to a pinned checkout")
+    def test_patches_on_the_real_pinned_files(self):
+        def read(name):
+            with open(os.path.join(REAL_WDA, name), encoding="utf-8", newline="") as handle:
+                return handle.read()
+
+        web_server, http_server = read(wda_setup.MJPEG_PATCH_PATH), read(wda_setup.GUARD_PATCH_PATH)
+        patched = wda_setup.apply_mjpeg_patch(web_server)
+        self.assertIn('  [self.server setDefaultHeader:@"Server" value:@"WebDriverAgent/1.0"];\n'
+                      "\n"
+                      "  [NSNotificationCenter.defaultCenter addObserver:self\n", patched)
+        self.assertIn("  self.screenshotsBroadcaster = [[FBTCPSocket alloc]\n"
+                      "                                 initWithPort:(uint16_t)FBConfiguration.sharedInstance"
+                      ".mjpegServerPort];\n"
+                      "  self.screenshotsBroadcaster.interface = FBConfiguration.sharedInstance.bindingIPAddress;"
+                      " // iphone-use: mjpeg-bind-v2\n"
+                      "  self.mjpegServer.socket = self.screenshotsBroadcaster;\n", patched)
+        self.assertNotIn("Access-Control-Allow", patched)
+        self.assertEqual(len(web_server.splitlines()) - len(patched.splitlines()), 1)  # 2 lines out, 1 in
+
+        guarded = wda_setup.apply_guard_patch(http_server)
+        self.assertIn(
+            "    requestHeaders[normalizedName] = value;\n"
+            "  }\n"
+            "  // iphone-use: browser-guard-v1. Refuse requests made by web pages (they carry Origin or "
+            "Sec-Fetch-Site)\n"
+            "  // or addressed to a non-loopback Host (DNS rebinding). The plugin talks over USB and sends none of "
+            "these.\n"
+            '  NSString *iphoneUseHost = requestHeaders[@"host"].lowercaseString;\n'
+            "  BOOL iphoneUseLoopbackHost = nil == iphoneUseHost\n"
+            '    || [iphoneUseHost isEqualToString:@"127.0.0.1"] || [iphoneUseHost hasPrefix:@"127.0.0.1:"]\n'
+            '    || [iphoneUseHost isEqualToString:@"localhost"] || [iphoneUseHost hasPrefix:@"localhost:"]\n'
+            '    || [iphoneUseHost isEqualToString:@"[::1]"] || [iphoneUseHost hasPrefix:@"[::1]:"];\n'
+            '  if (nil != requestHeaders[@"origin"] || nil != requestHeaders[@"sec-fetch-site"] '
+            '|| !iphoneUseLoopbackHost) {\n'
+            "    [self respondBadRequestToClient:client];\n"
+            "    return nil;\n"
+            "  }\n"
+            "  return requestHeaders;\n"
+            "}\n"
+            "\n"
+            "// Rejects framing this server cannot honour", guarded)
+        self.assertEqual(guarded.replace(wda_setup.GUARD_PATCH_BLOCK, "", 1), http_server)
+        # The block sits inside -parsedHeaderFieldsFromLines:forClient:, whose answer nil means "already answered".
+        method = guarded.index("- (nullable NSDictionary<NSString *, NSString *> *)parsedHeaderFieldsFromLines:")
+        block = guarded.index(wda_setup.GUARD_PATCH_BLOCK)
+        self.assertNotIn("\n}\n", guarded[method:block])
+        self.assertIn("[self parsedHeaderFieldsFromLines:lines forClient:client];\n"
+                      "  if (nil == requestHeaders) {\n"
+                      "    return nil;\n", guarded)
+
     def test_missing_source_runs_nothing(self):
         manager = self.manager()
         error = self.assertToolError("prerequisite_missing", manager._verify_source, os.path.join(self.tmp, "none"))
@@ -592,39 +698,59 @@ class SourceTests(SetupCase):
         manager = self.manager()
         owned = str(manager.owned_source)
         user = make_source(os.path.join(self.tmp, "user-wda"))
-        patched_text = wda_setup.apply_mjpeg_patch(FB_FIXTURE)
-        wrong_patch = FB_FIXTURE.replace(wda_setup.MJPEG_PATCH_ANCHOR, wda_setup.MJPEG_PATCH_ANCHOR
-                                         + "  self.screenshotsBroadcaster.interface = @\"0.0.0.0\";\n")
+        fb, http = FB_FIXTURE, HTTP_FIXTURE
+        fb_patched, http_patched = wda_setup.apply_mjpeg_patch(fb), wda_setup.apply_guard_patch(http)
+        fb_first = wda_setup.legacy_mjpeg_patches(fb)[0]
+        wrong_patch = fb.replace(wda_setup.MJPEG_PATCH_ANCHOR, wda_setup.MJPEG_PATCH_ANCHOR
+                                 + "  self.screenshotsBroadcaster.interface = @\"0.0.0.0\";\n")
         dirty = " M WebDriverAgent.xcodeproj/project.pbxproj\n"
+        staged = "M  " + wda_setup.GUARD_PATCH_PATH + "\nMM " + wda_setup.MJPEG_PATCH_PATH + "\n"
         cases = [
-            # (path, fb text, status, owned, expected patched or error message)
-            (owned, FB_FIXTURE, "", None, False),
-            (user, FB_FIXTURE, "", None, False),
-            (owned, patched_text, PATCH_ENTRY, None, True),
-            (owned, patched_text, "M  " + wda_setup.MJPEG_PATCH_PATH + "\n", None, True),
-            (owned, wrong_patch, PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
+            # (path, FBWebServer.m, FBHTTPServer.m, status, owned, expected patched or error message)
+            (owned, fb, http, "", None, False),
+            (user, fb, http, "", None, False),
+            (owned, fb_patched, http_patched, PATCH_ENTRY, None, True),
+            (owned, fb_patched, http_patched, staged, None, True),
+            # Only some of our patches, or an earlier version of one: fetch updates the copy.
+            (owned, fb_patched, http, FB_ENTRY, None, wda_setup.OUTDATED_COPY),
+            (owned, fb, http_patched, HTTP_ENTRY, None, wda_setup.OUTDATED_COPY),
+            (owned, fb_first, http, FB_ENTRY, None, wda_setup.OUTDATED_COPY),
+            (owned, fb_first, http_patched, PATCH_ENTRY, None, wda_setup.OUTDATED_COPY),
+            # Anything else is not ours.
+            (owned, wrong_patch, http_patched, PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
             # Our patch line plus another edit (here: the stream opened to Wi-Fi again) is not our patch.
-            (owned, patched_text.replace(wda_setup.MJPEG_PATCH_LINE, wda_setup.MJPEG_PATCH_LINE
-                                         + "  self.screenshotsBroadcaster.interface = @\"0.0.0.0\";\n"),
-             PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
+            (owned, fb_patched.replace(wda_setup.MJPEG_PATCH_LINE, wda_setup.MJPEG_PATCH_LINE
+                                       + "  self.screenshotsBroadcaster.interface = @\"0.0.0.0\";\n"),
+             http_patched, PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
             # Our patch line with the CORS headers left in (the first patch version) is not the current patch.
-            (owned, wda_setup.legacy_mjpeg_patches(FB_FIXTURE)[0].replace("mjpeg-bind-v1", "mjpeg-bind-v2"),
+            (owned, fb_first.replace("mjpeg-bind-v1", "mjpeg-bind-v2"), http_patched, PATCH_ENTRY, None,
+             wda_setup.MODIFIED_COPY),
+            # A weakened guard ("localhost.example.com" would pass) or a guard inserted twice is not our patch.
+            (owned, fb_patched, http_patched.replace('hasPrefix:@"localhost:"', 'hasPrefix:@"localhost"'),
              PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
-            (owned, patched_text, PATCH_ENTRY + dirty, None, wda_setup.MODIFIED_COPY),
-            (owned, FB_FIXTURE, dirty, None, wda_setup.MODIFIED_COPY),
-            (user, patched_text, PATCH_ENTRY, None, wda_setup.SOURCE_MODIFIED),
-            (user, patched_text, PATCH_ENTRY, True, True),
-            (user, FB_FIXTURE, dirty, None, wda_setup.SOURCE_MODIFIED),
+            (owned, fb_patched, http_patched.replace(wda_setup.GUARD_PATCH_BLOCK, wda_setup.GUARD_PATCH_BLOCK * 2),
+             PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
+            # Listed as modified but unchanged (for example a mode change), or deleted.
+            (owned, fb_patched, http, PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
+            (owned, fb_patched, http_patched, " D " + wda_setup.GUARD_PATCH_PATH + "\n" + FB_ENTRY, None,
+             wda_setup.MODIFIED_COPY),
+            (owned, fb_patched, http_patched, PATCH_ENTRY + dirty, None, wda_setup.MODIFIED_COPY),
+            (owned, fb, http, dirty, None, wda_setup.MODIFIED_COPY),
+            (user, fb_patched, http_patched, PATCH_ENTRY, None, wda_setup.SOURCE_MODIFIED),
+            (user, fb_patched, http, FB_ENTRY, None, wda_setup.SOURCE_MODIFIED),
+            (user, fb_patched, http_patched, PATCH_ENTRY, True, True),
+            (user, fb, http, dirty, None, wda_setup.SOURCE_MODIFIED),
         ]
-        for path, text, status, owned_flag, expected in cases:
-            with self.subTest(path=os.path.basename(path), status=status, expected=expected):
-                make_source(path, text)
+        for index, (path, fb_text, http_text, status, owned_flag, expected) in enumerate(cases):
+            with self.subTest(case=index, path=os.path.basename(path), status=status, expected=expected):
+                make_source(path, fb_text, http_text)
                 self.git_rules(path, status=status)
                 if isinstance(expected, bool):
                     self.assertEqual(manager._verify_source(path, owned=owned_flag), {"patched": expected})
                 else:
                     error = self.assertToolError("prerequisite_missing", manager._verify_source, path, owned_flag)
                     self.assertEqual(error.message, expected)
+                    self.assertEqual(error.details["next_steps"], [wda_setup.FETCH_STEP])
         self.git_rules(user, status="", status_code=128)
         self.assertToolError("prerequisite_missing", manager._verify_source, user)
 

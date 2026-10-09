@@ -8,6 +8,7 @@ for _p in (SERVER, HERE):
 
 import http.client  # noqa: E402
 import json  # noqa: E402
+import re  # noqa: E402
 import shutil  # noqa: E402
 import socket  # noqa: E402
 import threading  # noqa: E402
@@ -25,6 +26,8 @@ from wda_client import (  # noqa: E402
     resolve_transport, validate_loopback_url)
 
 UDID = "00008110-001A2B3C4D5E6F7A"
+# The Host values the plugin's patched WebDriverAgent accepts (wda_setup browser guard); it refuses any Origin.
+GUARD_HOST = re.compile(r"(?:127\.0\.0\.1|localhost|\[::1\])(?::[0-9]+)?")
 
 
 class ScriptedServer:
@@ -296,6 +299,20 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(TcpTransport("http://[::1]:8100/").describe(), {"kind": "tcp", "url": "http://[::1]:8100"})
         self.assertEqual(UsbmuxTransport(UDID, 8100, env={}).describe(),
                          {"kind": "usbmux", "udid": UDID, "device_port": 8100})
+
+    def test_every_loopback_url_sends_a_host_the_browser_guard_accepts(self):
+        urls = ("http://127.0.0.1:8100", "http://localhost:8101/", "http://[::1]:8102", "http://127.0.0.1",
+                "http://localhost", "http://[::1]/")
+        for transport in [UsbmuxTransport(UDID, 8100)] + [TcpTransport(url) for url in urls]:
+            with self.subTest(transport=transport.identity):
+                sent = []
+                connection = transport.new_connection(1.0)
+                connection.send = sent.append  # capture the request instead of connecting
+                connection.request("POST", "/wda/homescreen", body=b"{}", headers={"Accept": "application/json"})
+                lines = b"".join(sent).split(b"\r\n\r\n")[0].decode("latin-1").split("\r\n")[1:]
+                headers = {name.lower(): value.strip() for name, _, value in (line.partition(":") for line in lines)}
+                self.assertTrue(GUARD_HOST.fullmatch(headers["host"]), headers["host"])
+                self.assertNotIn("origin", headers)
 
     def test_usbmux_transport_validates_arguments(self):
         for udid, port in (("short", 8100), (None, 8100), (UDID, 0), (UDID, 70000), (UDID, True), (UDID, "8100")):
@@ -836,6 +853,9 @@ class KeepAliveTests(ClientTestCase):
         self.assertEqual(get_headers["accept"], "application/json")
         self.assertNotIn("content-type", get_headers)
         self.assertNotIn("transfer-encoding", get_headers)
+        for headers in server.headers:  # what the patched WebDriverAgent's browser guard accepts
+            self.assertEqual(headers["host"], "127.0.0.1:%d" % server.port)
+            self.assertNotIn("origin", headers)
 
     def test_close_keeps_the_session_id(self):
         server = self.serve(lambda *a: ok())
@@ -1147,6 +1167,9 @@ class UsbmuxEndToEndTests(ClientTestCase):
         self.assertEqual(fake.connects, [(UDID, 8100, 0)])
         self.assertEqual(len(set(server.peer_ports)), 1)
         self.assertEqual([r["MessageType"] for r in fake.received()], ["ListDevices", "Connect"])
+        # Through the tunnel the Host header names the iPhone's loopback port, as the browser guard requires.
+        self.assertEqual({headers["host"] for headers in server.headers}, {"127.0.0.1:8100"})
+        self.assertFalse([headers for headers in server.headers if "origin" in headers])
 
         # Unplugging closes the tunnel; the next read opens a new one.
         fake.close_tunnels()

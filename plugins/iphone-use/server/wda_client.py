@@ -94,7 +94,8 @@ class UsbmuxHTTPConnection(http.client.HTTPConnection):
     auto_open = 0  # never connect implicitly inside send(); connects are explicit
 
     def __init__(self, udid, device_port, timeout, env=None):
-        super().__init__("127.0.0.1", device_port, timeout=timeout)  # Host header is irrelevant to WDA
+        # Sends "Host: 127.0.0.1:<port>"; the plugin's patched WDA refuses a non-loopback Host (browser guard).
+        super().__init__("127.0.0.1", device_port, timeout=timeout)
         self.udid = udid
         self.device_port = device_port
         self.env = env

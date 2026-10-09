@@ -6,6 +6,7 @@ for _p in (SERVER, HERE):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+import hashlib  # noqa: E402
 import json  # noqa: E402
 import shutil  # noqa: E402
 import signal  # noqa: E402
@@ -42,10 +43,36 @@ FB_NEW = (
     "}\n"
 )
 FB_OLD = "// WebDriverAgent 16.13.6\n" + FB_NEW
+GUARD_PATH = wda_setup.GUARD_PATCH_PATH
+HTTP_NEW = (
+    "- (nullable NSDictionary<NSString *, NSString *> *)parsedHeaderFieldsFromLines:(NSArray<NSString *> *)lines\n"
+    "{\n"
+    "  NSMutableDictionary<NSString *, NSString *> *requestHeaders = [NSMutableDictionary dictionary];\n"
+    + wda_setup.GUARD_PATCH_ANCHOR
+    + "}\n"
+)
+HTTP_OLD = "// WebDriverAgent 16.13.6\n" + HTTP_NEW
 PRISTINE = {
-    wda_setup.WDA_COMMIT: {PBX_PATH: "// project 16.14.0\n", PATCH_PATH: FB_NEW},
-    OLD_COMMIT: {PBX_PATH: "// project 16.13.6\n", PATCH_PATH: FB_OLD},
+    wda_setup.WDA_COMMIT: {PBX_PATH: "// project 16.14.0\n", PATCH_PATH: FB_NEW, GUARD_PATH: HTTP_NEW},
+    OLD_COMMIT: {PBX_PATH: "// project 16.13.6\n", PATCH_PATH: FB_OLD, GUARD_PATH: HTTP_OLD},
 }
+
+
+def patched_files(files):
+    """files (a PRISTINE entry) with every patch applied."""
+    result = dict(files)
+    for patch in wda_setup.PATCHES:
+        result[patch.path] = patch.apply(files[patch.path])
+    return result
+
+
+def fingerprint_before_the_guard(config, patched):
+    """build.json's fingerprint as the plugin wrote it before the browser guard (patched: mjpeg-bind-v2 only)."""
+    data = {key: config.get(key) for key in ("udid", "team_id", "bundle_id", "source_dir", "network_mode",
+                                             "device_port", "mjpeg_port")}
+    data.update(commit=wda_setup.WDA_COMMIT, patched="iphone-use: mjpeg-bind-v2" if patched else False)
+    return hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
+
 
 # A tiny stand-in for git: repository state lives in <repo>/.git/fakegit.json; tracked files are compared with
 # the pristine contents of HEAD. Every call is logged next to the script, with its environment.
@@ -145,7 +172,8 @@ elif command == ["checkout", "--detach", "FETCH_HEAD"]:
         write(path, text)
     save()
 elif command[:2] == ["checkout", "--"]:
-    write(command[2], files()[command[2]])
+    for path in command[2:]:
+        write(path, files()[path])
 elif command[:1] == ["show"]:
     path = command[1].split(":", 1)[1]
     if path not in files():
@@ -303,9 +331,7 @@ class JobCase(unittest.TestCase):
         os.makedirs(os.path.join(path, ".git"), exist_ok=True)
         with open(os.path.join(path, ".git", "fakegit.json"), "w") as handle:
             json.dump({"head": head, "origin": origin, "fetched": None}, handle)
-        files = dict(PRISTINE[head])
-        if patched:
-            files[PATCH_PATH] = wda_setup.apply_mjpeg_patch(files[PATCH_PATH])
+        files = patched_files(PRISTINE[head]) if patched else dict(PRISTINE[head])
         files.update(overrides or {})
         for name, text in files.items():
             full = os.path.join(path, name)
@@ -325,6 +351,12 @@ class JobCase(unittest.TestCase):
         privstate.write_json_private(manager.state_dir / "build.json", {
             "config_fingerprint": wda_setup.build_fingerprint(config, patched), "commit": wda_setup.WDA_COMMIT,
             "built_at": privstate.iso_now()})
+
+    def assert_fully_patched(self, manager, source):
+        """Every PATCHES file holds exactly its patch on top of the pinned commit, and nothing else changed."""
+        for name, text in patched_files(PRISTINE[wda_setup.WDA_COMMIT]).items():
+            self.assertEqual(read_text(os.path.join(source, name)), text, name)
+        self.assertEqual(manager._verify_source(source), {"patched": True})
 
     def git_calls(self):
         path = os.path.join(self.bin, "git-calls.jsonl")
@@ -394,21 +426,21 @@ class FetchJobTests(JobCase):
         source = str(manager.owned_source)
         self.assertEqual(job["source_dir"], source)
         self.assertEqual(stat.S_IMODE(os.stat(source).st_mode), 0o700)
-        text = read_text(os.path.join(source, PATCH_PATH))
-        self.assertEqual(text, wda_setup.apply_mjpeg_patch(FB_NEW))
+        self.assert_fully_patched(manager, source)
         commands = [call[2:] if call[:1] == ["-C"] else call for call in self.git_calls()]
         self.assertIn(["init", source], commands)
         self.assertIn(["remote", "add", "origin", wda_setup.WDA_REPOSITORY], commands)
         self.assertIn(["fetch", "--depth", "1", "origin", wda_setup.WDA_COMMIT], commands)
         self.assertIn(["checkout", "--detach", "FETCH_HEAD"], commands)
-        self.assertEqual(manager._verify_source(source), {"patched": True})
         job_path = manager.jobs_dir / (result["job_id"] + ".json")
         log_path = manager.logs_dir / (result["job_id"] + ".log")
         for path in (job_path, log_path):
             self.assertEqual(stat.S_IMODE(os.stat(str(path)).st_mode), 0o600)
         self.assertEqual(stat.S_IMODE(os.stat(str(manager.jobs_dir)).st_mode), 0o700)
         self.assertEqual(stat.S_IMODE(os.stat(str(manager.logs_dir)).st_mode), 0o700)
-        self.assertIn("Running: git init", self.log_text(manager, result["job_id"]))
+        log = self.log_text(manager, result["job_id"])
+        self.assertIn("Running: git init", log)
+        self.assertIn("no requests from web pages) to %s and %s." % (PATCH_PATH, GUARD_PATH), log)
         stored = privstate.read_json(job_path)
         self.assertEqual(stored["worker_entrypoint"], os.path.join(SERVER, "wda_setup.py"))
         self.assertIsNotNone(stored["completed_at"])
@@ -422,8 +454,8 @@ class FetchJobTests(JobCase):
         job = self.wait_done(manager, manager.fetch()["job_id"])
         self.assertEqual(job["state"], "succeeded", job)
         self.assertFalse([call for call in self.git_calls() if "fetch" in call])
-        self.assertEqual(read_text(os.path.join(str(manager.owned_source), PATCH_PATH)),
-                         wda_setup.apply_mjpeg_patch(FB_NEW))
+        self.assertFalse([call for call in self.git_calls() if "checkout" in call])
+        self.assert_fully_patched(manager, str(manager.owned_source))
 
     def test_clean_pinned_checkout_from_an_earlier_run_gets_patched(self):
         manager = self.manager()
@@ -431,7 +463,7 @@ class FetchJobTests(JobCase):
         job = self.wait_done(manager, manager.fetch()["job_id"])
         self.assertEqual(job["state"], "succeeded", job)
         self.assertFalse([call for call in self.git_calls() if "fetch" in call])
-        self.assertEqual(manager._verify_source(str(manager.owned_source)), {"patched": True})
+        self.assert_fully_patched(manager, str(manager.owned_source))
 
     def test_our_patch_on_an_older_commit_is_restored_then_updated(self):
         manager = self.manager()
@@ -440,12 +472,12 @@ class FetchJobTests(JobCase):
         job = self.wait_done(manager, manager.fetch()["job_id"])
         self.assertEqual(job["state"], "succeeded", job)
         calls = self.git_calls()
-        restore = calls.index(["-C", source, "checkout", "--", PATCH_PATH])
+        restore = calls.index(["-C", source, "checkout", "--", PATCH_PATH, GUARD_PATH])
         fetch = calls.index(["-C", source, "fetch", "--depth", "1", "origin", wda_setup.WDA_COMMIT])
         detach = calls.index(["-C", source, "checkout", "--detach", "FETCH_HEAD"])
         self.assertLess(restore, fetch)
         self.assertLess(fetch, detach)
-        self.assertEqual(read_text(os.path.join(source, PATCH_PATH)), wda_setup.apply_mjpeg_patch(FB_NEW))
+        self.assert_fully_patched(manager, source)
 
     def test_the_first_version_of_our_patch_is_replaced(self):
         # mjpeg-bind-v1 left WebDriverAgent's CORS headers in place; fetch restores the file and patches it again.
@@ -456,14 +488,46 @@ class FetchJobTests(JobCase):
         self.checkout(source, overrides={PATCH_PATH: legacy})
         with self.assertRaises(ToolError) as caught:
             manager._verify_source(source)
-        self.assertEqual(caught.exception.message, wda_setup.MODIFIED_COPY)
+        self.assertEqual(caught.exception.message, wda_setup.OUTDATED_COPY)
         job = self.wait_done(manager, manager.fetch()["job_id"])
         self.assertEqual(job["state"], "succeeded", job)
         self.assertIn(["-C", source, "checkout", "--", PATCH_PATH], self.git_calls())
-        text = read_text(os.path.join(source, PATCH_PATH))
-        self.assertEqual(text, wda_setup.apply_mjpeg_patch(FB_NEW))
-        self.assertNotIn("Access-Control-Allow-Origin", text)
-        self.assertEqual(manager._verify_source(source), {"patched": True})
+        self.assertNotIn("Access-Control-Allow-Origin", read_text(os.path.join(source, PATCH_PATH)))
+        self.assert_fully_patched(manager, source)
+
+    def test_a_copy_without_the_browser_guard_is_upgraded_and_needs_a_new_build(self):
+        # The previous plugin version patched FBWebServer.m only (mjpeg-bind-v2) and built from that.
+        manager = self.manager()
+        source = str(manager.owned_source)
+        self.checkout(source, overrides={PATCH_PATH: wda_setup.apply_mjpeg_patch(FB_NEW)})
+        manager.configure(udid=UDID, team_id=TEAM, bundle_id=BUNDLE)
+        config = manager._normalized(manager.config)
+        # Same formula as today; only the recorded patch versions differ.
+        self.assertEqual(fingerprint_before_the_guard(config, False), wda_setup.build_fingerprint(config, False))
+        old_build = fingerprint_before_the_guard(config, True)
+        privstate.write_json_private(manager.state_dir / "build.json", {
+            "config_fingerprint": old_build, "commit": wda_setup.WDA_COMMIT, "built_at": privstate.iso_now()})
+        with self.assertRaises(ToolError) as caught:
+            manager.start()
+        self.assertEqual(caught.exception.message, wda_setup.OUTDATED_COPY)
+        self.assertEqual(caught.exception.details["next_steps"], [wda_setup.FETCH_STEP])
+        self.assertFalse(manager.status()["built"])
+
+        job = self.wait_done(manager, manager.fetch()["job_id"])
+        self.assertEqual(job["state"], "succeeded", job)
+        calls = self.git_calls()
+        restore = calls.index(["-C", source, "checkout", "--", PATCH_PATH])
+        self.assertLess(restore, calls.index(["-C", source, "checkout", "--detach", "FETCH_HEAD"]))
+        self.assert_fully_patched(manager, source)
+        # The old build lacks the guard: its fingerprint no longer matches, so start asks for a build first.
+        self.assertNotEqual(wda_setup.build_fingerprint(config, True), old_build)
+        self.assertFalse(manager.status()["built"])
+        with self.assertRaises(ToolError) as caught:
+            manager.start()
+        self.assertEqual(caught.exception.message, wda_setup.NEEDS_BUILD)
+        build = self.wait_done(manager, manager.build()["job_id"])
+        self.assertEqual(build["state"], "succeeded", build)
+        self.assertTrue(manager.status()["built"])
 
     def test_modified_owned_copy_is_left_untouched(self):
         manager = self.manager()
@@ -474,6 +538,7 @@ class FetchJobTests(JobCase):
         self.assertEqual(job["error"], wda_setup.MODIFIED_COPY)
         self.assertEqual(read_text(os.path.join(source, PBX_PATH)), "// edited by someone\n")
         self.assertEqual(read_text(os.path.join(source, PATCH_PATH)), FB_OLD)
+        self.assertEqual(read_text(os.path.join(source, GUARD_PATH)), HTTP_OLD)
         self.assertFalse([call for call in self.git_calls() if "fetch" in call])
 
     def test_a_user_source_dir_is_never_patched(self):
@@ -484,6 +549,7 @@ class FetchJobTests(JobCase):
         self.assertEqual(job["state"], "succeeded", job)
         self.assertEqual(job["source_dir"], str(manager.owned_source))
         self.assertEqual(read_text(os.path.join(external, PATCH_PATH)), FB_NEW)
+        self.assertEqual(read_text(os.path.join(external, GUARD_PATH)), HTTP_NEW)
         self.assertFalse([call for call in self.git_calls() if call[:2] == ["-C", external] and "checkout" in call])
         self.assertEqual(manager.config["source_dir"], external)
 

@@ -21,6 +21,7 @@ the same results as the tools, printed as one JSON envelope.
 from __future__ import annotations
 
 import argparse
+import collections
 import hashlib
 import json
 import math
@@ -74,8 +75,11 @@ TEAM_RE = r"[A-Z0-9]{10}"
 BUNDLE_RE = r"[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z0-9-]+){2,}"
 MIRRORING_PATTERN = "/iPhone Mirroring.app/Contents/MacOS/iPhone Mirroring"
 
+# The plugin's own WebDriverAgent checkout (never a source_dir the user supplied) gets two small source patches,
+# one file each; PATCHES (below the patch functions) lists them.
+#
 # USB-only screen stream (AM-1): WebDriverAgent's MJPEG server binds every interface unless this one
-# line, applied only to the plugin's own checkout, makes it honour USE_IP like the command server.
+# line makes it honour USE_IP like the command server.
 MJPEG_PATCH_PATH = "WebDriverAgentLib/Routing/FBWebServer.m"
 MJPEG_PATCH_ANCHOR = (" " * 33) + "initWithPort:(uint16_t)FBConfiguration.sharedInstance.mjpegServerPort];\n"
 MJPEG_PATCH_MARKER = "iphone-use: mjpeg-bind-v2"
@@ -90,6 +94,26 @@ CORS_HEADER_LINES = (
 # The first version of the patch (screen stream only); fetch recognises it as ours and replaces it.
 LEGACY_PATCH_LINES = ("  self.screenshotsBroadcaster.interface = FBConfiguration.sharedInstance.bindingIPAddress;"
                       " // iphone-use: mjpeg-bind-v1\n",)
+# Browser guard: web pages open on the iPhone reach the command server's loopback address too, by plain
+# cross-site requests (which carry an Origin header) or by DNS rebinding (a Host header naming the page's own
+# site). The block below, inserted at the end of the header parser, answers such requests with 400 and closes
+# the connection. The plugin always sends a loopback Host and never an Origin header.
+GUARD_PATCH_PATH = "WebDriverAgentLib/Routing/FBHTTPServer.m"
+GUARD_PATCH_ANCHOR = "  return requestHeaders;\n"  # the last line of -parsedHeaderFieldsFromLines:forClient:
+GUARD_PATCH_MARKER = "iphone-use: browser-guard-v1"
+GUARD_PATCH_BLOCK = (
+    "  // " + GUARD_PATCH_MARKER + ". Refuse requests made by web pages (they carry Origin or Sec-Fetch-Site)\n"
+    "  // or addressed to a non-loopback Host (DNS rebinding). The plugin talks over USB and sends none of these.\n"
+    "  NSString *iphoneUseHost = requestHeaders[@\"host\"].lowercaseString;\n"
+    "  BOOL iphoneUseLoopbackHost = nil == iphoneUseHost\n"
+    "    || [iphoneUseHost isEqualToString:@\"127.0.0.1\"] || [iphoneUseHost hasPrefix:@\"127.0.0.1:\"]\n"
+    "    || [iphoneUseHost isEqualToString:@\"localhost\"] || [iphoneUseHost hasPrefix:@\"localhost:\"]\n"
+    "    || [iphoneUseHost isEqualToString:@\"[::1]\"] || [iphoneUseHost hasPrefix:@\"[::1]:\"];\n"
+    "  if (nil != requestHeaders[@\"origin\"] || nil != requestHeaders[@\"sec-fetch-site\"] || !iphoneUseLoopbackHost) {\n"
+    "    [self respondBadRequestToClient:client];\n"
+    "    return nil;\n"
+    "  }\n"
+)
 
 NETWORK_MODES = ("usb_only", "allow_network")
 DEFAULT_COUNTRY = "in"
@@ -150,8 +174,10 @@ INTERRUPTED_MESSAGE = ("The recorded worker no longer exists or cannot be verifi
                        "unrelated was signalled.")
 STOP_NOTE = "Only this plugin's own background jobs were stopped. No apps were uninstalled."
 MODIFIED_COPY = "The plugin's own WebDriverAgent copy was modified; it was left untouched."
-UNPATCHED_COPY = ("The plugin's own WebDriverAgent copy is missing its USB-only setting, so it was not used. Download "
-                  "it again with iphone_setup(action=\"fetch\"), which adds the setting.")
+UNPATCHED_COPY = ("The plugin's own WebDriverAgent copy is missing its safety settings, so it was not used. Download "
+                  "it again with iphone_setup(action=\"fetch\"), which adds them.")
+OUTDATED_COPY = ("The plugin's own WebDriverAgent copy has an older or incomplete version of its safety settings, so "
+                 "it was not used. Download it again with iphone_setup(action=\"fetch\"), which updates them.")
 NOT_CONFIGURED = ("iPhone Use is not set up yet: choose the iPhone and signing team with "
                   "iphone_setup(action=\"configure\").")
 CONFIGURE_STEP = "Run iphone_doctor to see what is missing, then iphone_setup(action=\"configure\")."
@@ -304,6 +330,12 @@ def diagnose(text) -> list:
     return hints
 
 
+def _not_pinned_source() -> ToolError:
+    return ToolError("prerequisite_missing",
+                     "The WebDriverAgent source does not match the pinned version; fetch it again.",
+                     details={"next_steps": [FETCH_STEP], "action_executed": False})
+
+
 def apply_mjpeg_patch(text: str) -> str:
     """Remove the CORS header lines and insert MJPEG_PATCH_LINE right after the anchor line.
 
@@ -312,9 +344,7 @@ def apply_mjpeg_patch(text: str) -> str:
     if MJPEG_PATCH_LINE in text:
         return text
     if text.count(MJPEG_PATCH_ANCHOR) != 1 or any(text.count(line) != 1 for line in CORS_HEADER_LINES):
-        raise ToolError("prerequisite_missing",
-                        "The WebDriverAgent source does not match the pinned version; fetch it again.",
-                        details={"next_steps": [FETCH_STEP], "action_executed": False})
+        raise _not_pinned_source()
     for line in CORS_HEADER_LINES:
         text = text.replace(line, "", 1)
     index = text.index(MJPEG_PATCH_ANCHOR) + len(MJPEG_PATCH_ANCHOR)
@@ -327,6 +357,31 @@ def legacy_mjpeg_patches(text: str) -> list:
         return []
     index = text.index(MJPEG_PATCH_ANCHOR) + len(MJPEG_PATCH_ANCHOR)
     return [text[:index] + line + text[index:] for line in LEGACY_PATCH_LINES]
+
+
+def apply_guard_patch(text: str) -> str:
+    """Insert GUARD_PATCH_BLOCK right before the anchor line. Already patched text is returned unchanged."""
+    if GUARD_PATCH_BLOCK in text:
+        return text
+    if text.count(GUARD_PATCH_ANCHOR) != 1:
+        raise _not_pinned_source()
+    index = text.index(GUARD_PATCH_ANCHOR)
+    return text[:index] + GUARD_PATCH_BLOCK + text[index:]
+
+
+def legacy_guard_patches(text: str) -> list:
+    """Earlier versions of the browser guard: none (browser-guard-v1 is the first)."""
+    return []
+
+
+# (file, function that patches its committed text, marker recorded in the build fingerprint, earlier versions).
+SourcePatch = collections.namedtuple("SourcePatch", "path apply marker legacy")
+PATCHES = (
+    SourcePatch(MJPEG_PATCH_PATH, apply_mjpeg_patch, MJPEG_PATCH_MARKER, legacy_mjpeg_patches),
+    SourcePatch(GUARD_PATCH_PATH, apply_guard_patch, GUARD_PATCH_MARKER, legacy_guard_patches),
+)
+PATCH_PATHS = tuple(patch.path for patch in PATCHES)
+PATCH_MARKERS = tuple(patch.marker for patch in PATCHES)
 
 
 def xcodebuild_argv(config, state_dir, action) -> list:
@@ -354,14 +409,14 @@ def xcodebuild_argv(config, state_dir, action) -> list:
 
 
 def build_fingerprint(config, patched) -> str:
-    """Identity of a build: a change of any of these fields (or of the patch) needs a new build."""
+    """Identity of a build: a change of any of these fields (or of a patch version) needs a new build."""
     data = {
         "udid": config.get("udid"),
         "team_id": config.get("team_id"),
         "bundle_id": config.get("bundle_id"),
         "source_dir": config.get("source_dir"),
         "commit": WDA_COMMIT,
-        "patched": MJPEG_PATCH_MARKER if patched else False,
+        "patched": list(PATCH_MARKERS) if patched else False,
         "network_mode": config.get("network_mode"),
         "device_port": config.get("device_port"),
         "mjpeg_port": config.get("mjpeg_port"),
@@ -539,10 +594,14 @@ def _porcelain_entries(text) -> list:
     return [line for line in str(text or "").splitlines() if line.strip()]
 
 
-def _is_patch_entry(entries) -> bool:
-    """True when `git status --porcelain` lists exactly the patched file as modified."""
-    return (len(entries) == 1 and entries[0][:2] in (" M", "M ", "MM")
-            and entries[0][3:] == MJPEG_PATCH_PATH)
+def _patched_file_entries(entries) -> Optional[list]:
+    """The files of `git status --porcelain` entries when each one is a modified file we patch, else None."""
+    paths = []
+    for entry in entries:
+        if entry[:2] not in (" M", "M ", "MM") or entry[3:] not in PATCH_PATHS:
+            return None
+        paths.append(entry[3:])
+    return paths
 
 
 def _ps_path() -> str:
@@ -613,6 +672,38 @@ def _write_preserving_mode(path, data: bytes) -> None:
         except OSError:
             pass
         raise
+
+
+def _git_show(source, path) -> Optional[str]:
+    """A committed file, read directly (never through a job log relay), strict UTF-8."""
+    try:
+        shown = subprocess.run(["git", "-C", str(source), "show", "HEAD:" + path],
+                               stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                               timeout=60, check=False)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if shown.returncode != 0:
+        return None
+    try:
+        return shown.stdout.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+
+def apply_patches(source) -> None:
+    """Apply PATCHES to the committed files of a clean checkout; every file is patched in memory before any is
+    written. Used by the fetch job and by scripts/ci_prepare_wda.py, so CI builds exactly what users build.
+
+    Raises RuntimeError when a committed file cannot be read, ToolError when it is not the pinned text.
+    """
+    patched = []
+    for patch in PATCHES:
+        shown = _git_show(source, patch.path)
+        if shown is None:
+            raise RuntimeError("Could not read the pinned WebDriverAgent source; fetch it again.")
+        patched.append((patch.path, patch.apply(shown)))
+    for path, text in patched:
+        _write_preserving_mode(pathlib.Path(source) / path, text.encode("utf-8"))
 
 
 def _error(code, message, next_steps=None, **details) -> ToolError:
@@ -798,8 +889,9 @@ class SetupManager:
     def _verify_source(self, source_dir, owned=None) -> dict:
         """Check the WebDriverAgent checkout: pinned commit and a clean (or correctly patched) tree.
 
-        Returns {"patched": bool}. The patched state is accepted only for the plugin's own checkout.
-        Raises prerequisite_missing; never modifies anything.
+        Returns {"patched": bool}: False for a clean tree, True when exactly the PATCHES files are modified and
+        each one is byte-identical to its patch applied to the committed file. The patched state is accepted
+        only for the plugin's own checkout. Raises prerequisite_missing; never modifies anything.
         """
         path = _absolute_path(str(source_dir))
         if path is None:
@@ -818,26 +910,46 @@ class SetupManager:
         entries = _porcelain_entries(status.stdout)
         if not entries:
             return {"patched": False}
-        if owned and _is_patch_entry(entries) and self._working_file_patched(path):
+        ours = self._our_changes(path, entries) if owned else None
+        if ours == dict.fromkeys(PATCH_PATHS, "current"):
             return {"patched": True}
+        if ours is not None:  # an earlier version of our patches, or a fetch stopped while patching
+            raise _error("prerequisite_missing", OUTDATED_COPY, [FETCH_STEP])
         raise _error("prerequisite_missing", MODIFIED_COPY if owned else SOURCE_MODIFIED, [FETCH_STEP])
 
-    def _working_file_patched(self, path) -> bool:
-        shown = self._run(["git", "-C", str(path), "show", "HEAD:" + MJPEG_PATCH_PATH])
-        if not shown.ok:
-            return False
-        try:
-            expected = apply_mjpeg_patch(shown.stdout)
-            working = (pathlib.Path(path) / MJPEG_PATCH_PATH).read_bytes().decode("utf-8")
-        except (ToolError, OSError, UnicodeDecodeError):
-            return False
-        return working == expected and MJPEG_PATCH_LINE in working
+    def _our_changes(self, path, entries) -> Optional[dict]:
+        """{file: "current" | "older"} when every tracked change is one of our patches on top of HEAD, else None.
+
+        "current" means byte-identical to the patch applied to the committed file, "older" to an earlier
+        version of that patch.
+        """
+        changed = _patched_file_entries(entries)
+        if not changed:
+            return None
+        versions = {}
+        for patch in PATCHES:
+            if patch.path not in changed:
+                continue
+            shown = self._run(["git", "-C", str(path), "show", "HEAD:" + patch.path])
+            if not shown.ok:
+                return None
+            try:
+                working = (pathlib.Path(path) / patch.path).read_bytes()
+                if working == patch.apply(shown.stdout).encode("utf-8"):
+                    versions[patch.path] = "current"
+                elif working in [text.encode("utf-8") for text in patch.legacy(shown.stdout)]:
+                    versions[patch.path] = "older"
+                else:
+                    return None
+            except (ToolError, OSError):
+                return None
+        return versions
 
     def _usable_source(self, config) -> dict:
-        """_verify_source, plus AM-1: in usb_only mode the plugin's own checkout must carry the USB-only patch.
+        """_verify_source, plus AM-1: in usb_only mode the plugin's own checkout must carry PATCHES.
 
         (A fetch interrupted between checkout and patch leaves a clean, pinned, unpatched copy whose screen
-        stream would listen on Wi-Fi.) Fetching again applies the patch.
+        stream would listen on Wi-Fi.) Fetching again applies the patches.
         """
         source = self._verify_source(config["source_dir"])
         if (not source["patched"] and config.get("network_mode", "usb_only") == "usb_only"
@@ -2106,7 +2218,7 @@ class _JobWorker:
         raise RuntimeError("The iPhone service stopped; see the log and start again.")
 
     def fetch(self) -> None:
-        """Get the pinned WebDriverAgent into <state>/runtime/WebDriverAgent and apply the USB-only patch."""
+        """Get the pinned WebDriverAgent into <state>/runtime/WebDriverAgent and apply PATCHES."""
         source = self.manager.owned_source
         src = str(source)
         if not source.exists() and not source.is_symlink():
@@ -2126,8 +2238,11 @@ class _JobWorker:
                 self.log("WebDriverAgent %s is ready in %s." % (WDA_VERSION, src))
                 return
         entries = self._tracked_changes(src)
-        if entries is not None and _is_patch_entry(entries) and self._has_our_patch(source):
-            self.run_command(["git", "-C", src, "checkout", "--", MJPEG_PATCH_PATH])
+        ours = self.manager._our_changes(src, entries) if entries else None
+        if ours:
+            # Only our patches (this or an earlier version, or some of them when a fetch stopped while patching):
+            # restore those files so the checkout below can proceed, then patch the result again.
+            self.run_command(["git", "-C", src, "checkout", "--"] + list(ours))
             entries = self._tracked_changes(src)
         origin = self.capture(["git", "-C", src, "remote", "get-url", "origin"])
         if entries is None or entries or not origin.ok or origin.stdout.strip() != WDA_REPOSITORY:
@@ -2153,46 +2268,13 @@ class _JobWorker:
 
     def _require_patched(self, src) -> None:
         if not self.manager._verify_source(src, owned=True)["patched"]:
-            raise RuntimeError("The USB-only patch could not be applied to WebDriverAgent; fetch it again.")
-
-    @staticmethod
-    def _git_show(source) -> Optional[str]:
-        """The committed FBWebServer.m, read directly (never through the log relay), strict UTF-8."""
-        try:
-            shown = subprocess.run(["git", "-C", str(source), "show", "HEAD:" + MJPEG_PATCH_PATH],
-                                   stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                   timeout=60, check=False)
-        except (OSError, subprocess.SubprocessError):
-            return None
-        if shown.returncode != 0:
-            return None
-        try:
-            return shown.stdout.decode("utf-8")
-        except UnicodeDecodeError:
-            return None
-
-    def _has_our_patch(self, source) -> bool:
-        """The only tracked change is exactly our patch (this or an earlier version) on top of the current HEAD."""
-        shown = self._git_show(source)
-        if shown is None:
-            return False
-        try:
-            working = (pathlib.Path(source) / MJPEG_PATCH_PATH).read_bytes()
-            if working in [text.encode("utf-8") for text in legacy_mjpeg_patches(shown)]:
-                return True
-            expected = apply_mjpeg_patch(shown).encode("utf-8")
-        except (ToolError, OSError):
-            return False
-        return working == expected
+            raise RuntimeError("The safety patches could not be applied to WebDriverAgent; fetch it again.")
 
     def patch(self, source) -> None:
-        shown = self._git_show(source)
-        if shown is None:
-            raise RuntimeError("Could not read the pinned WebDriverAgent source; fetch it again.")
-        patched = apply_mjpeg_patch(shown)
-        _write_preserving_mode(pathlib.Path(source) / MJPEG_PATCH_PATH, patched.encode("utf-8"))
-        self.log("Applied the USB-only settings (screen-stream address, no cross-origin access) to "
-                 + MJPEG_PATCH_PATH + ".")
+        """Apply PATCHES to the clean checkout (apply_patches) and say so in the log."""
+        apply_patches(source)
+        self.log("Applied the safety settings (screen stream on USB only, no cross-origin access, no requests from "
+                 "web pages) to " + " and ".join(PATCH_PATHS) + ".")
 
 
 def worker_main(state_dir, job_id, token) -> int:

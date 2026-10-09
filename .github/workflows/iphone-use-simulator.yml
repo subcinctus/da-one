@@ -1,0 +1,209 @@
+name: iphone-use simulator
+
+# What Linux cannot check: the plugin's patched WebDriverAgent compiles (for the simulator and for iPhones),
+# runs under XCTest on an iOS Simulator, refuses browser requests, and works end to end through the plugin's
+# MCP server.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "plugins/iphone-use/server/wda_setup.py"
+      - "plugins/iphone-use/server/wda_client.py"
+      - "plugins/iphone-use/server/wda_controller.py"
+      - "plugins/iphone-use/scripts/ci_*.py"
+      - ".github/workflows/iphone-use-simulator.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      WDA_PORT: "8100"
+      MJPEG_PORT: "9100"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Xcode and the simulator runtimes
+        run: |
+          set -euo pipefail
+          echo "ARTIFACTS=$RUNNER_TEMP/iphone-use-ci" >> "$GITHUB_ENV"
+          echo "WDA_DIR=$RUNNER_TEMP/WebDriverAgent" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/iphone-use-ci"
+          xcode-select --print-path
+          xcodebuild -version
+          xcrun simctl list runtimes
+
+      - name: Choose an iPhone simulator (newest iOS runtime)
+        run: |
+          set -euo pipefail
+          xcrun simctl list devices available -j > "$ARTIFACTS/simctl-devices.json"
+          python3 plugins/iphone-use/scripts/ci_pick_simulator.py "$ARTIFACTS/simctl-devices.json" >> "$GITHUB_ENV"
+
+      - name: Boot the simulator
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          echo "Booting $SIM_NAME (iOS $SIM_OS, $SIM_UDID)"
+          xcrun simctl boot "$SIM_UDID" || echo "simctl boot did not start it; it may be booted already"
+          xcrun simctl bootstatus "$SIM_UDID" -b
+
+      - name: Download WebDriverAgent and apply the plugin's patches
+        id: prepare
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          python3 plugins/iphone-use/scripts/ci_prepare_wda.py "$WDA_DIR"
+          # Check both patches against the real pinned source (this test skips elsewhere). The clone holds the
+          # committed, unpatched files; the step fails unless the test really ran and passed.
+          git clone --quiet "$WDA_DIR" "$RUNNER_TEMP/wda-pristine"
+          (cd plugins/iphone-use/tests && IPHONE_USE_TEST_WDA_SOURCE="$RUNNER_TEMP/wda-pristine" \
+            python3 -m unittest -v test_setup.SourceTests.test_patches_on_the_real_pinned_files) 2>&1 \
+            | tee "$RUNNER_TEMP/real-patch-test.log"
+          grep -q "test_patches_on_the_real_pinned_files .*\.\.\. ok" "$RUNNER_TEMP/real-patch-test.log"
+
+      - name: Build WebDriverAgent for the simulator
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          log="$ARTIFACTS/xcodebuild-build-simulator.log"
+          status=0
+          xcodebuild build-for-testing \
+            -project "$WDA_DIR/WebDriverAgent.xcodeproj" \
+            -scheme WebDriverAgentRunner \
+            -configuration Debug \
+            -destination "id=$SIM_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/derived-data-simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            USE_PORT="$WDA_PORT" USE_IP=127.0.0.1 MJPEG_SERVER_PORT="$MJPEG_PORT" \
+            > "$log" 2>&1 || status=$?
+          echo "Diagnostics in the patched files (none expected):"
+          grep -E "(FBHTTPServer|FBWebServer)\.m:[0-9]+:[0-9]+: (warning|error)" "$log" || true
+          if [ "$status" -ne 0 ]; then
+            grep -E "error:|\*\* .* FAILED \*\*" "$log" | tail -n 60 || true
+            tail -n 60 "$log"
+            exit "$status"
+          fi
+          tail -n 3 "$log"
+
+      - name: Start WebDriverAgent on the simulator
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          log="$ARTIFACTS/xcodebuild-test-without-building.log"
+          nohup xcodebuild test-without-building \
+            -project "$WDA_DIR/WebDriverAgent.xcodeproj" \
+            -scheme WebDriverAgentRunner \
+            -configuration Debug \
+            -destination "id=$SIM_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/derived-data-simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            USE_PORT="$WDA_PORT" USE_IP=127.0.0.1 MJPEG_SERVER_PORT="$MJPEG_PORT" \
+            > "$log" 2>&1 &
+          pid=$!
+          echo "$pid" > "$RUNNER_TEMP/wda.pid"
+          echo "xcodebuild test-without-building runs as pid $pid; waiting for http://127.0.0.1:$WDA_PORT/status"
+          deadline=$((SECONDS + 300))
+          until curl --silent --fail --max-time 5 "http://127.0.0.1:$WDA_PORT/status" > "$ARTIFACTS/wda-status.json"; do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "::error::xcodebuild test-without-building ended before WebDriverAgent answered"
+              tail -n 80 "$log"
+              exit 1
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::WebDriverAgent did not answer on 127.0.0.1:$WDA_PORT within 5 minutes"
+              tail -n 80 "$log"
+              exit 1
+            fi
+            sleep 3
+          done
+          echo "WebDriverAgent answers:"
+          cat "$ARTIFACTS/wda-status.json"
+          echo
+          # USE_IP reaches WebDriverAgent only through the scheme's environment, as in the plugin's start job;
+          # without it the helper would listen on every network interface.
+          bound="Using custom binding IP address: 127.0.0.1"
+          for _ in $(seq 1 30); do
+            grep -q "$bound" "$log" && break
+            sleep 2
+          done
+          if ! grep -q "$bound" "$log"; then
+            echo "::error::WebDriverAgent did not log \"$bound\"; USE_IP did not reach it"
+            grep -n "ServerURLHere" "$log" || true
+            exit 1
+          fi
+          grep -E "$bound|ServerURLHere->" "$log" || true
+
+      - name: Smoke-test the MCP server against the simulator
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          python3 plugins/iphone-use/scripts/ci_sim_smoke.py \
+            --wda-url "http://127.0.0.1:$WDA_PORT" --artifacts "$ARTIFACTS/smoke"
+
+      - name: Take a last screenshot and stop WebDriverAgent
+        if: always()
+        run: |
+          set -euo pipefail
+          artifacts="${ARTIFACTS:-$RUNNER_TEMP/iphone-use-ci}"
+          mkdir -p "$artifacts"
+          if [ -n "${SIM_UDID:-}" ]; then
+            xcrun simctl io "$SIM_UDID" screenshot "$artifacts/simulator-last-screen.png" || true
+          fi
+          if [ -f "$RUNNER_TEMP/wda.pid" ]; then
+            pid="$(cat "$RUNNER_TEMP/wda.pid")"
+            kill "$pid" 2>/dev/null || true
+            for _ in $(seq 1 30); do
+              kill -0 "$pid" 2>/dev/null || break
+              sleep 1
+            done
+            kill -9 "$pid" 2>/dev/null || true
+            echo "xcodebuild test-without-building (pid $pid) stopped"
+          fi
+
+      - name: Build WebDriverAgent for iPhones (generic iOS device, unsigned)
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          log="$ARTIFACTS/xcodebuild-build-device.log"
+          status=0
+          xcodebuild build-for-testing \
+            -project "$WDA_DIR/WebDriverAgent.xcodeproj" \
+            -scheme WebDriverAgentRunner \
+            -configuration Debug \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath "$RUNNER_TEMP/derived-data-device" \
+            CODE_SIGNING_ALLOWED=NO \
+            USE_PORT="$WDA_PORT" USE_IP=127.0.0.1 MJPEG_SERVER_PORT="$MJPEG_PORT" \
+            > "$log" 2>&1 || status=$?
+          echo "Diagnostics in the patched files (none expected):"
+          grep -E "(FBHTTPServer|FBWebServer)\.m:[0-9]+:[0-9]+: (warning|error)" "$log" || true
+          if [ "$status" -ne 0 ]; then
+            grep -E "error:|\*\* .* FAILED \*\*" "$log" | tail -n 60 || true
+            tail -n 60 "$log"
+            exit "$status"
+          fi
+          tail -n 3 "$log"
+
+      - name: Upload logs, screenshots and smoke results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-use-simulator-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/iphone-use-ci
+          if-no-files-found: warn
+          retention-days: 14

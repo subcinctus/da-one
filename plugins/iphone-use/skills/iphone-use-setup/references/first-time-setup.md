@@ -52,8 +52,9 @@ versions; follow what the screen shows.
 - **Keyboard settings:** while the helper runs it turns off the keyboard's Auto-Correction and Predictive text so
   that typed text arrives exactly. They can be turned back on in Settings > General > Keyboard.
 - **USB only by default:** the helper accepts connections only over the USB cable. It is not reachable from the
-  Wi-Fi unless the user agrees to change that later. Apps and web pages on the iPhone itself can still reach it
-  while it runs, and it keeps running after Claude Code quits, so offer to stop it when the user is done.
+  Wi-Fi unless the user agrees to change that later. It also refuses requests from web pages open on the iPhone.
+  Apps installed on the iPhone itself can still reach it while it runs, and it keeps running after Claude Code
+  quits, so offer to stop it when the user is done.
 - **Stopping:** when the user is done for the day, Claude can stop the helper. Nothing is uninstalled.
 - **Where things are kept:** settings, logs and screenshots stay in a private folder on this Mac
   (`~/.local/share/iphone-use`); the newest 40 screenshots are kept.

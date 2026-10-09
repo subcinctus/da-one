@@ -490,8 +490,16 @@ class AmendmentContentTests(unittest.TestCase):
         safety = flat(section(readme, "Safety and privacy"))
         self.assertIn("by default the helper accepts connections only over the USB cable while it runs", safety)
         self.assertIn("stop it when you are done", safety)
-        # Apps and pages on the iPhone itself can reach its loopback address; the README must not hide that.
-        self.assertIn("Apps and web pages open on the iPhone itself can still reach it", safety)
+        # The patched helper refuses web pages on the iPhone, but apps there can still reach its loopback address;
+        # the README must not hide that.
+        self.assertIn("It also refuses requests from web pages open on the iPhone.", safety)
+        self.assertIn("Apps installed on the iPhone itself can still reach it while it runs", safety)
+        for doc in ("iphone-use-setup/references/troubleshooting.md", "iphone-use-setup/references/first-time-setup.md",
+                    "iphone-use/references/preview.md"):
+            text = flat(read(PLUGIN / "skills" / doc))
+            self.assertIn("refuses requests from web pages open on the iPhone", text, doc)
+            self.assertIn("apps installed on the iphone", text.lower(), doc)
+            self.assertIn("stop it", text, doc)
         # Screen contents go to Claude: the README must not promise that everything stays on the Mac.
         self.assertNotIn("Everything stays on your Mac", readme)
         self.assertIn("sent to Claude as part of your conversation", safety)
@@ -800,19 +808,74 @@ class LegalAndRepositoryTests(unittest.TestCase):
         self.assertNotIn("\t", text)
         for phrase in ('"3.9"', '"3.12"', "runs-on: ubuntu-latest", "runs-on: macos-latest",
                        "actions/checkout@v4", "actions/setup-python@v5", '"plugins/iphone-use/**"',
-                       '".claude-plugin/**"', '".github/workflows/iphone-use-check.yml"', "pull_request:", "push:"):
+                       '".claude-plugin/**"', '".github/workflows/iphone-use-check.yml"', "cancel-in-progress:"):
             self.assertIn(phrase, text, phrase)
         self.assertEqual(text.count("run: bash plugins/iphone-use/scripts/check.sh"), 2)
-        top_level = [line.split(":")[0] for line in text.splitlines() if line and not line[0].isspace()]
-        self.assertEqual(top_level, ["name", "on", "permissions", "jobs"])
+        top_level = [line.split(":")[0] for line in text.splitlines() if line and not line[0].isspace()
+                     and not line.startswith("#")]
+        self.assertEqual(top_level, ["name", "on", "permissions", "concurrency", "jobs"])
+        # Each commit runs once: pull requests from any branch, pushes only to main.
+        triggers = section_lines(text, "on")
+        self.assertEqual([line.strip() for line in triggers if re.match(r"^  \S", line)],
+                         ["push:", "pull_request:", "workflow_dispatch:"])
+        self.assertEqual([line for line in triggers if "branches" in line], ["    branches: [main]"])
+        self.assertEqual(text.count('      - "plugins/iphone-use/**"'), 2)
         jobs = [line.strip().rstrip(":") for line in section_lines(text, "jobs") if re.match(r"^  \S", line)]
         self.assertEqual(jobs, ["linux", "macos"])
 
+    @unittest.skipUnless(IN_REPO, "repository files are not part of an installed plugin")
+    def test_simulator_workflow(self):
+        path = REPO / ".github" / "workflows" / "iphone-use-simulator.yml"
+        text = read(path)
+        self.assertNotIn("\t", text)
+        top_level = [line.split(":")[0] for line in text.splitlines() if line and not line[0].isspace()
+                     and not line.startswith("#")]
+        self.assertEqual(top_level, ["name", "on", "permissions", "concurrency", "jobs"])
+        triggers = section_lines(text, "on")
+        self.assertEqual([line.strip() for line in triggers if re.match(r"^  \S", line)],
+                         ["workflow_dispatch:", "pull_request:"])
+        paths = [line.strip()[2:].strip('"') for line in triggers if line.startswith("      - ")]
+        self.assertEqual(paths, ["plugins/iphone-use/server/wda_setup.py", "plugins/iphone-use/server/wda_client.py",
+                                 "plugins/iphone-use/server/wda_controller.py", "plugins/iphone-use/scripts/ci_*.py",
+                                 ".github/workflows/iphone-use-simulator.yml"])
+        for pattern in paths:
+            self.assertTrue(list(REPO.glob(pattern)), pattern)
+        jobs = [line.strip().rstrip(":") for line in section_lines(text, "jobs") if re.match(r"^  \S", line)]
+        self.assertEqual(jobs, ["simulator"])
+        for phrase in ("runs-on: macos-latest", "timeout-minutes: 45", "xcodebuild -version",
+                       "xcrun simctl list runtimes", "xcrun simctl list devices available -j",
+                       "xcrun simctl bootstatus \"$SIM_UDID\" -b",
+                       "-destination \"id=$SIM_UDID\"", "-destination \"generic/platform=iOS\"",
+                       "CODE_SIGNING_ALLOWED=NO", "build-for-testing", "nohup xcodebuild test-without-building",
+                       "http://127.0.0.1:$WDA_PORT/status", "Using custom binding IP address: 127.0.0.1",
+                       "actions/upload-artifact@v4"):
+            self.assertIn(phrase, text, phrase)
+        self.assertEqual(text.count("run: |"), text.count("          set -euo pipefail\n"))
+        self.assertEqual(text.count("if: always()"), 2)  # stop WebDriverAgent, upload the evidence
+        # Each CI script the workflow runs exists, is executable and is matched by the paths filter.
+        scripts = sorted(set(re.findall(r"plugins/iphone-use/scripts/(ci_\w+\.py)", text)))
+        self.assertEqual(scripts, ["ci_pick_simulator.py", "ci_prepare_wda.py", "ci_sim_smoke.py"])
+        for name in scripts:
+            script = PLUGIN / "scripts" / name
+            self.assertTrue(read(script).startswith("#!/usr/bin/env python3\n"), name)
+            self.assertTrue(script.stat().st_mode & stat.S_IXUSR, name)
+        # WebDriverAgent runs with the settings the plugin's own start job passes.
+        import wda_setup
+        argv = wda_setup.xcodebuild_argv({"source_dir": "/s", "udid": "U", "team_id": "T", "bundle_id": "b",
+                                          "device_port": 8100, "mjpeg_port": 9100}, "/state", "test-without-building")
+        for flag in ("-scheme", "-configuration"):
+            self.assertIn("%s %s" % (flag, argv[argv.index(flag) + 1]), text)
+        for setting in ("USE_PORT=", "MJPEG_SERVER_PORT=", "USE_IP=127.0.0.1"):
+            self.assertTrue([arg for arg in argv if arg.startswith(setting)], setting)
+            self.assertEqual(text.count(setting), 3, setting)  # both builds and the run
+
 
 def section_lines(yaml_text, key):
-    """Lines nested under a top-level YAML key."""
+    """Lines nested under a top-level YAML key (comments at the margin are skipped)."""
     lines, inside = [], False
     for line in yaml_text.splitlines():
+        if line.startswith("#"):
+            continue
         if line and not line[0].isspace():
             inside = line.startswith(key + ":")
             continue

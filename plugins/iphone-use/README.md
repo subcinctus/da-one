@@ -106,9 +106,10 @@ from what you said, but Claude Code itself no longer stops it). Claude never cha
 - **Money and irreversible actions:** Claude asks you before paying, transferring, trading, deleting or sending
   anything you did not explicitly ask for.
 - **USB only:** by default the helper accepts connections only over the USB cable while it runs, so other
-  devices on your Wi-Fi cannot reach it. Apps and web pages open on the iPhone itself can still reach it while it
-  runs, and it keeps running after you quit Claude Code, so stop it when you are done ("stop the iPhone
-  service"). If USB-only ever fails on your Mac, Claude asks you before allowing network access.
+  devices on your Wi-Fi cannot reach it. It also refuses requests from web pages open on the iPhone. Apps installed
+  on the iPhone itself can still reach it while it runs, and it keeps running after you quit Claude Code, so stop it
+  when you are done ("stop the iPhone service"). If USB-only ever fails on your Mac, Claude asks you before
+  allowing network access.
 - **Keyboard:** while the helper runs it turns off the iPhone keyboard's Auto-Correction and Predictive text, so
   typed text arrives exactly. Turn them back on in Settings > General > Keyboard if you like.
 - **Free Apple accounts:** the helper must be re-signed about every 7 days (ask Claude to "rebuild the iPhone
