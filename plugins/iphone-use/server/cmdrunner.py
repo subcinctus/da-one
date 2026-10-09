@@ -48,7 +48,9 @@ def run_command(argv, timeout=12.0, cwd=None, env=None, input_text=None) -> Comm
     input_text is given.
     """
     argv = list(argv)
-    program = str(argv[0]) if argv else ""
+    if not argv:
+        return CommandResult(127, "", "run_command: empty command")
+    program = str(argv[0])
     try:
         completed = subprocess.run(
             argv,
