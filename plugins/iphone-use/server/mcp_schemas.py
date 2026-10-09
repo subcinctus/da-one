@@ -374,7 +374,7 @@ INSTRUCTIONS = (
     "iPhone Use operates the user's real iPhone over USB; use these tools for anything the user wants done on "
     "their iPhone. "
     "Load the iphone-use skill for phone tasks and iphone-use-setup for installation or connection problems; if "
-    "tools seem missing, search \"iphone\" with ToolSearch. "
+    "tools seem missing, search \"iphone\" with ToolSearch and max_results 20 (17 tools). "
     "1) First phone step in a conversation: iphone_ready(recover=true). Only ready=true permits phone actions; "
     "reuse its observation, then call iphone_screen(action=open) once so the user can watch. "
     "Error service_unreachable or not_ready means setup, not failure: iphone_setup(action=status), reuse an active "

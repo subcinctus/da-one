@@ -19,6 +19,7 @@ from unittest import mock  # noqa: E402
 
 import privstate  # noqa: E402
 import wda_setup  # noqa: E402
+from errors import ToolError  # noqa: E402
 from fake_usbmuxd import FakeUsbmuxd, short_tmpdir  # noqa: E402
 from fakes_cmd import write_fake_executable  # noqa: E402
 
@@ -29,6 +30,10 @@ OLD_COMMIT = "1111111111111111111111111111111111111111"
 PBX_PATH = "WebDriverAgent.xcodeproj/project.pbxproj"
 PATCH_PATH = wda_setup.MJPEG_PATCH_PATH
 FB_NEW = (
+    "- (BOOL)startHTTPServer\n"
+    "{\n"
+    + "".join(wda_setup.CORS_HEADER_LINES)
+    + "}\n"
     "- (void)initScreenshotsBroadcaster\n"
     "{\n"
     "  self.screenshotsBroadcaster = [[FBTCPSocket alloc]\n"
@@ -441,6 +446,24 @@ class FetchJobTests(JobCase):
         self.assertLess(restore, fetch)
         self.assertLess(fetch, detach)
         self.assertEqual(read_text(os.path.join(source, PATCH_PATH)), wda_setup.apply_mjpeg_patch(FB_NEW))
+
+    def test_the_first_version_of_our_patch_is_replaced(self):
+        # mjpeg-bind-v1 left WebDriverAgent's CORS headers in place; fetch restores the file and patches it again.
+        manager = self.manager()
+        source = str(manager.owned_source)
+        legacy = wda_setup.legacy_mjpeg_patches(FB_NEW)[0]
+        self.assertIn("mjpeg-bind-v1", legacy)
+        self.checkout(source, overrides={PATCH_PATH: legacy})
+        with self.assertRaises(ToolError) as caught:
+            manager._verify_source(source)
+        self.assertEqual(caught.exception.message, wda_setup.MODIFIED_COPY)
+        job = self.wait_done(manager, manager.fetch()["job_id"])
+        self.assertEqual(job["state"], "succeeded", job)
+        self.assertIn(["-C", source, "checkout", "--", PATCH_PATH], self.git_calls())
+        text = read_text(os.path.join(source, PATCH_PATH))
+        self.assertEqual(text, wda_setup.apply_mjpeg_patch(FB_NEW))
+        self.assertNotIn("Access-Control-Allow-Origin", text)
+        self.assertEqual(manager._verify_source(source), {"patched": True})
 
     def test_modified_owned_copy_is_left_untouched(self):
         manager = self.manager()

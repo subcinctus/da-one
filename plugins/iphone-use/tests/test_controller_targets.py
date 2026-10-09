@@ -459,6 +459,16 @@ class ScreenshotFallbackTests(TargetCase):
         self.assertEqual(self.h.count("GET /screenshot"), 1)
         self.assertEqual(self.h.actions(), ["POST /wda/tap"])
 
+    def test_a_failed_capture_is_not_retried_by_the_outer_wrapper(self):
+        # A failing (or hanging) screenshot is tried once per tool call, not again by each wrapper.
+        self.fake.inject("GET", "/screenshot", error="unable to capture screen", times=None)
+        with fake_clock():
+            error = self.assert_code("postcondition_failed", lambda: self.phone.tap(
+                x=100, y=200, expect={"label": "Missing"}))
+        self.assertEqual(error.details["observation_error"]["code"], "unable to capture screen")
+        self.assertEqual(self.h.count("GET /screenshot"), 1)
+        self.assertEqual(self.h.actions(), ["POST /wda/tap"])
+
     def test_wda_click_state_error_returns_the_screen_without_repeating_the_click(self):
         for code in ("element not interactable", "element click intercepted", "invalid element state"):
             with self.subTest(code=code):

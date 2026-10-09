@@ -78,8 +78,18 @@ MIRRORING_PATTERN = "/iPhone Mirroring.app/Contents/MacOS/iPhone Mirroring"
 # line, applied only to the plugin's own checkout, makes it honour USE_IP like the command server.
 MJPEG_PATCH_PATH = "WebDriverAgentLib/Routing/FBWebServer.m"
 MJPEG_PATCH_ANCHOR = (" " * 33) + "initWithPort:(uint16_t)FBConfiguration.sharedInstance.mjpegServerPort];\n"
+MJPEG_PATCH_MARKER = "iphone-use: mjpeg-bind-v2"
 MJPEG_PATCH_LINE = ("  self.screenshotsBroadcaster.interface = FBConfiguration.sharedInstance.bindingIPAddress;"
-                    " // iphone-use: mjpeg-bind-v1\n")
+                    " // " + MJPEG_PATCH_MARKER + "\n")
+# The same patch removes WebDriverAgent's "any web page may read my answers" headers: web pages open on the
+# iPhone itself reach its loopback address, and must not read screenshots, screen text or the session id.
+CORS_HEADER_LINES = (
+    '  [self.server setDefaultHeader:@"Access-Control-Allow-Origin" value:@"*"];\n',
+    '  [self.server setDefaultHeader:@"Access-Control-Allow-Headers" value:@"Content-Type, X-Requested-With"];\n',
+)
+# The first version of the patch (screen stream only); fetch recognises it as ours and replaces it.
+LEGACY_PATCH_LINES = ("  self.screenshotsBroadcaster.interface = FBConfiguration.sharedInstance.bindingIPAddress;"
+                      " // iphone-use: mjpeg-bind-v1\n",)
 
 NETWORK_MODES = ("usb_only", "allow_network")
 DEFAULT_COUNTRY = "in"
@@ -140,6 +150,8 @@ INTERRUPTED_MESSAGE = ("The recorded worker no longer exists or cannot be verifi
                        "unrelated was signalled.")
 STOP_NOTE = "Only this plugin's own background jobs were stopped. No apps were uninstalled."
 MODIFIED_COPY = "The plugin's own WebDriverAgent copy was modified; it was left untouched."
+UNPATCHED_COPY = ("The plugin's own WebDriverAgent copy is missing its USB-only setting, so it was not used. Download "
+                  "it again with iphone_setup(action=\"fetch\"), which adds the setting.")
 NOT_CONFIGURED = ("iPhone Use is not set up yet: choose the iPhone and signing team with "
                   "iphone_setup(action=\"configure\").")
 CONFIGURE_STEP = "Run iphone_doctor to see what is missing, then iphone_setup(action=\"configure\")."
@@ -258,6 +270,11 @@ _REDACTIONS = (
     (re.compile(r"(?i)(authorization\s*[:=]\s*)(?:bearer|basic)\s+\S+"), r"\1[redacted]"),
     (re.compile(r"(?i)((?:password|passwd|authorization|access[_ -]?token|api[_ -]?key|secret)\s*[:=]\s*)"
                 r"([^\s,;]+)"), r"\1[redacted]"),
+    # Apple Accounts can be phone numbers (e.g. in India): "+91 98765 43210", and the account named by Xcode's
+    # sign-in errors ("... with account '...'", "Failed to load credentials for ...") in any spelling.
+    (re.compile(r"(?<![\w.+])\+\d[\d ()-]{7,}\d"), "[redacted phone]"),
+    (re.compile(r"(?i)(\baccount\s+['\"]|credentials (?:in keychain )?for\s+['\"]?)(?!\[)[^'\"\s,:]+"),
+     r"\1[redacted account]"),
     (re.compile(r"https?://[^/\s:@]+:[^/\s@]+@"), "https://[redacted]@"),
 )
 
@@ -288,15 +305,28 @@ def diagnose(text) -> list:
 
 
 def apply_mjpeg_patch(text: str) -> str:
-    """Insert MJPEG_PATCH_LINE right after the anchor line; already patched text is returned unchanged."""
+    """Remove the CORS header lines and insert MJPEG_PATCH_LINE right after the anchor line.
+
+    Already patched text is returned unchanged.
+    """
     if MJPEG_PATCH_LINE in text:
         return text
-    if text.count(MJPEG_PATCH_ANCHOR) != 1:
+    if text.count(MJPEG_PATCH_ANCHOR) != 1 or any(text.count(line) != 1 for line in CORS_HEADER_LINES):
         raise ToolError("prerequisite_missing",
                         "The WebDriverAgent source does not match the pinned version; fetch it again.",
                         details={"next_steps": [FETCH_STEP], "action_executed": False})
+    for line in CORS_HEADER_LINES:
+        text = text.replace(line, "", 1)
     index = text.index(MJPEG_PATCH_ANCHOR) + len(MJPEG_PATCH_ANCHOR)
     return text[:index] + MJPEG_PATCH_LINE + text[index:]
+
+
+def legacy_mjpeg_patches(text: str) -> list:
+    """The committed text with an earlier version of our patch applied (to recognise and replace it)."""
+    if text.count(MJPEG_PATCH_ANCHOR) != 1:
+        return []
+    index = text.index(MJPEG_PATCH_ANCHOR) + len(MJPEG_PATCH_ANCHOR)
+    return [text[:index] + line + text[index:] for line in LEGACY_PATCH_LINES]
 
 
 def xcodebuild_argv(config, state_dir, action) -> list:
@@ -331,7 +361,7 @@ def build_fingerprint(config, patched) -> str:
         "bundle_id": config.get("bundle_id"),
         "source_dir": config.get("source_dir"),
         "commit": WDA_COMMIT,
-        "patched": bool(patched),
+        "patched": MJPEG_PATCH_MARKER if patched else False,
         "network_mode": config.get("network_mode"),
         "device_port": config.get("device_port"),
         "mjpeg_port": config.get("mjpeg_port"),
@@ -803,9 +833,21 @@ class SetupManager:
             return False
         return working == expected and MJPEG_PATCH_LINE in working
 
+    def _usable_source(self, config) -> dict:
+        """_verify_source, plus AM-1: in usb_only mode the plugin's own checkout must carry the USB-only patch.
+
+        (A fetch interrupted between checkout and patch leaves a clean, pinned, unpatched copy whose screen
+        stream would listen on Wi-Fi.) Fetching again applies the patch.
+        """
+        source = self._verify_source(config["source_dir"])
+        if (not source["patched"] and config.get("network_mode", "usb_only") == "usb_only"
+                and _absolute_path(config["source_dir"]) == self.owned_source.resolve()):
+            raise _error("prerequisite_missing", UNPATCHED_COPY, [FETCH_STEP])
+        return source
+
     def _source_state(self, config) -> dict:
         try:
-            return {"ok": True, "patched": self._verify_source(config["source_dir"])["patched"], "error": None}
+            return {"ok": True, "patched": self._usable_source(config)["patched"], "error": None}
         except ToolError as exc:
             return {"ok": False, "patched": False, "error": exc.message}
         except Exception as exc:  # e.g. an unreadable folder; reported, never raised
@@ -1512,7 +1554,7 @@ class SetupManager:
         with self._lock():
             raw = self.config
             config = self._complete_config(raw)
-            source = self._verify_source(config["source_dir"])
+            source = self._usable_source(config)
             self._require_platform()
             transport = self._transport(raw)
             return self._create_job("build", config, source["patched"], transport.identity)
@@ -1522,7 +1564,7 @@ class SetupManager:
         with self._lock():
             raw = self.config
             config = self._complete_config(raw)
-            source = self._verify_source(config["source_dir"])
+            source = self._usable_source(config)
             self._require_platform()
             self._require_build(config, source["patched"])
             transport = self._transport(raw)
@@ -1671,14 +1713,18 @@ class SetupManager:
         steps = []
         if not configured:
             steps.append(CONFIGURE_STEP)
+        elif usb["usbmuxd"] and not usb["attached"]:
+            steps.append(CONNECT_STEP)
         if "network" in (network["control_port"], network["screen_stream"]) and self._serving(service_jobs,
                                                                                                service_states):
             steps.append(WIFI_STEP)
+        # Without the cable the helper cannot be reached at all; that is not a USB-only (loopback) problem.
+        service_ready = service.get("ready") if usb["attached"] else None
         return {
             "configured": configured,
             "config": self._public_config(raw),
             "built": built,
-            "jobs": [self._job_status(job, states.get(job["id"]), service.get("ready")) for job in jobs],
+            "jobs": [self._job_status(job, states.get(job["id"]), service_ready) for job in jobs],
             "service": service,
             "usb": usb,
             "network": network,
@@ -1746,7 +1792,7 @@ class SetupManager:
                             "recovery": {"state": "manual"},
                             "next_steps": ["Restart it from where it was started, or stop it and run "
                                            "iphone_setup(action=\"start\")."]}
-                source = self._verify_source(config["source_dir"])
+                source = self._usable_source(config)
                 self._require_build(config, source["patched"])
                 self._require_platform()
                 target = targets[0]
@@ -2013,7 +2059,7 @@ class _JobWorker:
 
     def build(self) -> None:
         config = self._snapshot()
-        source = self.manager._verify_source(config["source_dir"])
+        source = self.manager._usable_source(config)
         try:
             (self.manager.state_dir / "build.json").unlink()
         except FileNotFoundError:
@@ -2028,14 +2074,14 @@ class _JobWorker:
 
     def start(self) -> None:
         config = self._snapshot()
-        source = self.manager._verify_source(config["source_dir"])
+        source = self.manager._usable_source(config)
         self.manager._require_build(config, source["patched"])
         self.set_phase("launching")
         self.serve(config)
 
     def recover(self) -> None:
         config = self._snapshot()
-        source = self.manager._verify_source(config["source_dir"])
+        source = self.manager._usable_source(config)
         self.manager._require_build(config, source["patched"])
         self.set_phase("stopping")
         self.manager._stop_recovery_target(self.job, stop_check=self.check_stopping)
@@ -2126,13 +2172,15 @@ class _JobWorker:
             return None
 
     def _has_our_patch(self, source) -> bool:
-        """The only tracked change is exactly our patch on top of the current HEAD."""
+        """The only tracked change is exactly our patch (this or an earlier version) on top of the current HEAD."""
         shown = self._git_show(source)
         if shown is None:
             return False
         try:
-            expected = apply_mjpeg_patch(shown).encode("utf-8")
             working = (pathlib.Path(source) / MJPEG_PATCH_PATH).read_bytes()
+            if working in [text.encode("utf-8") for text in legacy_mjpeg_patches(shown)]:
+                return True
+            expected = apply_mjpeg_patch(shown).encode("utf-8")
         except (ToolError, OSError):
             return False
         return working == expected
@@ -2143,7 +2191,8 @@ class _JobWorker:
             raise RuntimeError("Could not read the pinned WebDriverAgent source; fetch it again.")
         patched = apply_mjpeg_patch(shown)
         _write_preserving_mode(pathlib.Path(source) / MJPEG_PATCH_PATH, patched.encode("utf-8"))
-        self.log("Applied the USB-only screen-stream setting to " + MJPEG_PATCH_PATH + ".")
+        self.log("Applied the USB-only settings (screen-stream address, no cross-origin access) to "
+                 + MJPEG_PATCH_PATH + ".")
 
 
 def worker_main(state_dir, job_id, token) -> int:

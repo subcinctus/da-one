@@ -204,6 +204,14 @@ class ReadyRefusalTests(ReadyCase):
         self.setup.recover.assert_not_called()
         self.assertTrue(iphone_use.result_content(self.ready())["isError"])
 
+    def test_unclear_lock_answer_is_treated_as_locked(self):
+        for value in (None, "false", 0):
+            with self.subTest(value=value):
+                self.fake.inject("GET", "/wda/locked", value=value)
+                error = self.assert_error(self.ready(), "phone_locked")
+                self.assertIs(error["action_executed"], False)
+                self.assertIsNone(self.runtime.client.session_id)
+
     def test_cold_start_errors_point_to_setup_and_never_start_anything(self):
         holder, port = refused_port()
         self.addCleanup(holder.close)

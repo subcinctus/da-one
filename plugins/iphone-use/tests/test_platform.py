@@ -397,8 +397,13 @@ class CommandRunnerTests(unittest.TestCase):
         self.assertEqual(result, CommandResult(0, "héllo\nwörld", ""))
 
     def test_stdin_is_not_inherited(self):
-        result = run_command([sys.executable, "-c", "import sys; print(repr(sys.stdin.read()))"], timeout=10)
-        self.assertEqual(result.stdout.strip(), "''")
+        # The parent's stdin carries data (as the MCP server's JSON-RPC pipe does); the child must not see it.
+        code = ("import sys; sys.path.insert(0, %r); from cmdrunner import run_command; "
+                "r = run_command([sys.executable, '-c', 'import sys; print(repr(sys.stdin.read()))'], timeout=10); "
+                "print(r.stdout.strip())" % SERVER)
+        done = subprocess.run([sys.executable, "-c", code], input=b'{"jsonrpc": "2.0", "id": 7}\n',
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+        self.assertEqual(done.stdout.decode().strip(), "''", done.stderr)
 
     def test_cwd_and_env(self):
         tmp = make_tmpdir(self)

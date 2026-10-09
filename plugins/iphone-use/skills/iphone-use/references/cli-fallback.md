@@ -5,8 +5,9 @@ the same settings, the same shared session and the same one-at-a-time lock as th
 
 ## First, check the tools
 
-1. Load them with ToolSearch (query `iphone`). Claude Code may hide MCP tools until they are searched for. Do
-   not decide from documentation or an earlier chat that they are missing.
+1. Load them with ToolSearch (query `iphone`, max_results 20; the default of 5 loads only some). Claude Code may
+   hide MCP tools until they are searched for. Do not decide from documentation or an earlier chat that they are
+   missing.
 2. If no `iphone_*` tools exist even after ToolSearch, run `python3 --version` with Bash first. A message about
    the Xcode license agreement, or a window offering to install "command line developer tools", means the plugin
    could not start (see the iphone-use-setup skill's troubleshooting), not that the phone failed. The fallback

@@ -280,8 +280,13 @@ class ScreenshotTests(HarnessCase):
     def test_original_png_is_used_on_request(self):
         self.phone.image_original = True
         image = self.phone.observe("screenshot")["image"]
-        self.assertEqual((image["mimeType"], image["width"], image["height"]), ("image/png", 1170, 2532))
-        self.assertEqual(image["pixel_to_point"], [round(390 / 1170, 4), round(844 / 2532, 4)])
+        self.assertEqual(image["mimeType"], "image/png")
+        self.assertEqual(wda_image.png_size(Path(image["path"]).read_bytes()[:32]), (1170, 2532))
+        # Claude downscales the full-size PNG to the model limits before reading it: coordinates are counted
+        # at that size, so pixel_to_point must be too.
+        self.assertEqual((image["width"], image["height"]), wda_image.fit_size(1170, 2532))
+        self.assertEqual((image["width"], image["height"]), (725, 1568))
+        self.assertEqual(image["pixel_to_point"], [round(390 / 725, 4), round(844 / 1568, 4)])
         self.assertEqual(self.h.runner.calls, [])
 
     def test_unavailable_sips_keeps_the_png(self):
@@ -289,6 +294,11 @@ class ScreenshotTests(HarnessCase):
         image = self.phone.observe("both")["image"]
         self.assertEqual(image["mimeType"], "image/png")
         self.assertEqual(Path(image["path"]).read_bytes(), self.fake.screenshot_png)
+        self.assertEqual((image["width"], image["height"]), (725, 1568))
+        # A target at y=780 points sits at pixel 780 / pixel_to_point in the image Claude sees, and maps back.
+        pixel_y = round(780 / image["pixel_to_point"][1])
+        self.assertLessEqual(pixel_y, 1568)
+        self.assertAlmostEqual(pixel_y * image["pixel_to_point"][1], 780, delta=1)
 
     def test_a_failed_conversion_keeps_the_capture(self):
         self.h.runner.on("sips", returncode=1, stderr="sips failed")

@@ -339,6 +339,54 @@ class LongInputTests(TypingCase):
         self.assertIn("replace=false", error.details["recovery"]["next_step"])
         self.assertEqual(self.email.value, "a" * 200)
 
+    def test_an_uncertain_action_still_ends_the_continuation(self):
+        # The swipe reached the phone but its answer was lost: focus is no longer known.
+        self.phone.call_budget = 0
+        first = self.phone.type_text(EMAIL, "a" * 500)
+        self.fake.inject("POST", "/wda/dragfromtoforduration", drop=True, execute=True)
+        self.assert_code("action_uncertain", lambda: self.phone.swipe())
+        error = self.assert_code("input_continuation_expired",
+                                 lambda: self.phone.type_text(continue_token=first["continue_token"]))
+        self.assertFalse(error.details["action_executed"])
+        self.assertEqual(self.email.value, "a" * 200)
+
+    def test_an_uncertain_tap_on_the_password_field_types_nothing_into_it(self):
+        self.phone.call_budget = 0
+        first = self.phone.type_text(EMAIL, "a" * 500, submit=True)
+        self.fake.inject("POST", "/wda/tap", drop=True, execute=True)
+        self.assert_code("action_uncertain", lambda: self.phone.tap(x=PASSWORD_POINT[0], y=PASSWORD_POINT[1]))
+        self.assertEqual(self.fake.focused_node().name, "password")
+        self.fake.clear_log()
+        self.assert_code("input_continuation_expired",
+                         lambda: self.phone.type_text(continue_token=first["continue_token"]))
+        self.assertEqual(self.fake.node(name="password").value or "", "")
+        self.assertEqual(self.fake.actions(), [])
+
+    def test_focus_moved_on_the_phone_itself_stops_the_continuation(self):
+        self.phone.call_budget = 0
+        first = self.phone.type_text(EMAIL, "a" * 500)
+        self.fake._focus(self.fake.node(name="password"))  # the user tapped the password field on the iPhone
+        self.fake.clear_log()
+        error = self.assert_code("not_editable", lambda: self.phone.type_text(continue_token=first["continue_token"]))
+        self.assertTrue(error.details["secure_field"])
+        self.assertFalse(error.details["action_executed"])
+        self.assertNotIn("observation", error.details)
+        self.assertEqual(self.fake.actions(), [])
+        self.assertEqual(self.fake.node(name="password").value or "", "")
+        # A field of another kind, or no focus at all, also ends it; nothing is typed.
+        for move in ("message", None):
+            with self.subTest(focus=move):
+                token = self.phone.type_text(EMAIL, "b" * 500)["continue_token"]
+                for node in self.fake.node(name="email"), self.fake.node(name="message"):
+                    node.focused = False
+                if move:
+                    self.fake._focus(self.fake.node(name=move))
+                self.fake.clear_log()
+                self.assert_code("input_continuation_expired", lambda: self.phone.type_text(continue_token=token))
+                self.assertEqual(self.fake.actions(), [])
+        self.assertEqual(self.email.value, "b" * 200)
+        self.assertEqual(self.fake.node(name="message").value or "", "")
+
     def test_reads_do_not_invalidate_and_unknown_tokens_type_nothing(self):
         self.phone.call_budget = 0
         first = self.phone.type_text(EMAIL, "a" * 300)

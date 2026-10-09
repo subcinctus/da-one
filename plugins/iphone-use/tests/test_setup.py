@@ -32,6 +32,11 @@ BUNDLE = "com.example.helper.wda"
 SCRIPT = os.path.join(SERVER, "wda_setup.py")
 PBXPROJ = "// !$*UTF8*$!\n{ archiveVersion = 1; }\n"
 FB_FIXTURE = (
+    "- (BOOL)startHTTPServer\n"
+    "{\n"
+    "  [self.server setDefaultHeader:@\"Server\" value:@\"WebDriverAgent/1.0\"];\n"
+    + "".join(wda_setup.CORS_HEADER_LINES)
+    + "}\n"
     "- (void)initScreenshotsBroadcaster\n"
     "{\n"
     "  [self readMjpegSettingsFromEnv];\n"
@@ -469,6 +474,18 @@ class DiscoverTests(SetupCase):
         self.assertEqual(manager.device_model(UDID.lower().replace("-", "")), "iPhone 16 Pro")
         self.assertIsNone(manager.device_model("00000000-0000000000000000"))
 
+    def test_wifi_only_iphone_is_not_usb_attached(self):
+        daemon = FakeUsbmuxd().start()
+        self.addCleanup(daemon.stop)
+        daemon.add_device(UDID, connection_type="Network")
+        self.env.update(daemon.env())
+        self.runner.on("xcrun", "devicectl", "list", "devices", effect=json_output_effect(devicectl_doc(
+            iphone(UDID, name="Alex's iPhone", model="iPhone 16 Pro"))))
+        self.runner.on("defaults", "export", stdout=teams_plist(PERSONAL_TEAM))
+        result = self.manager().discover()
+        self.assertFalse(result["devices"][0]["usb_attached"])
+        self.assertTrue(any("not over a USB cable" in step for step in result["next_steps"]), result["next_steps"])
+
     def test_legacy_layout_and_defensive_parsing(self):
         rows = wda_setup.parse_devices(devicectl_doc(LEGACY))
         self.assertEqual(rows[0]["udid"], "LEGACY-UDID-0001")
@@ -537,10 +554,18 @@ class SourceTests(SetupCase):
         patched = wda_setup.apply_mjpeg_patch(FB_FIXTURE)
         self.assertEqual(patched.count(wda_setup.MJPEG_PATCH_LINE), 1)
         self.assertIn(wda_setup.MJPEG_PATCH_ANCHOR + wda_setup.MJPEG_PATCH_LINE, patched)
-        self.assertEqual(patched.replace(wda_setup.MJPEG_PATCH_LINE, "", 1), FB_FIXTURE)
+        self.assertIn("mjpeg-bind-v2", wda_setup.MJPEG_PATCH_LINE)
+        # Pages on the iPhone itself must not read WebDriverAgent's answers: no CORS headers are left.
+        self.assertNotIn("Access-Control-Allow", patched)
+        self.assertIn('setDefaultHeader:@"Server"', patched)
+        unpatched = patched.replace(wda_setup.MJPEG_PATCH_LINE, "", 1).replace(
+            '"WebDriverAgent/1.0"];\n', '"WebDriverAgent/1.0"];\n' + "".join(wda_setup.CORS_HEADER_LINES), 1)
+        self.assertEqual(unpatched, FB_FIXTURE)
         self.assertEqual(wda_setup.apply_mjpeg_patch(patched), patched)
         self.assertEqual(wda_setup.MJPEG_PATCH_ANCHOR[:34], " " * 33 + "i")
-        for text in ("no anchor here\n", FB_FIXTURE + wda_setup.MJPEG_PATCH_ANCHOR):
+        no_cors = FB_FIXTURE.replace(wda_setup.CORS_HEADER_LINES[0], "")
+        for text in ("no anchor here\n", FB_FIXTURE + wda_setup.MJPEG_PATCH_ANCHOR, no_cors,
+                     FB_FIXTURE + wda_setup.CORS_HEADER_LINES[1]):
             with self.assertRaises(ToolError) as caught:
                 wda_setup.apply_mjpeg_patch(text)
             self.assertEqual(caught.exception.code, "prerequisite_missing")
@@ -578,6 +603,13 @@ class SourceTests(SetupCase):
             (owned, patched_text, PATCH_ENTRY, None, True),
             (owned, patched_text, "M  " + wda_setup.MJPEG_PATCH_PATH + "\n", None, True),
             (owned, wrong_patch, PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
+            # Our patch line plus another edit (here: the stream opened to Wi-Fi again) is not our patch.
+            (owned, patched_text.replace(wda_setup.MJPEG_PATCH_LINE, wda_setup.MJPEG_PATCH_LINE
+                                         + "  self.screenshotsBroadcaster.interface = @\"0.0.0.0\";\n"),
+             PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
+            # Our patch line with the CORS headers left in (the first patch version) is not the current patch.
+            (owned, wda_setup.legacy_mjpeg_patches(FB_FIXTURE)[0].replace("mjpeg-bind-v1", "mjpeg-bind-v2"),
+             PATCH_ENTRY, None, wda_setup.MODIFIED_COPY),
             (owned, patched_text, PATCH_ENTRY + dirty, None, wda_setup.MODIFIED_COPY),
             (owned, FB_FIXTURE, dirty, None, wda_setup.MODIFIED_COPY),
             (user, patched_text, PATCH_ENTRY, None, wda_setup.SOURCE_MODIFIED),
@@ -744,7 +776,7 @@ class DoctorTests(SetupCase):
         self.write_config(udid=UDID, team_id=TEAM, bundle_id=BUNDLE)
         self.xcode_rules(devices=(iphone(UDID, devmode="disabled"),))
         manager = self.manager()
-        self.owned_source(manager)
+        self.owned_source(manager, patched=True)
         result = manager.doctor()
         steps = [step.split(". ", 1)[1] for step in result["next_steps"]]
         self.assertEqual(steps[0], wda_setup.DEVELOPER_MODE_STEP)
@@ -754,6 +786,17 @@ class DoctorTests(SetupCase):
         self.assertEqual(steps[-1], wda_setup.KEEP_AWAKE_STEP)
         self.assertTrue(result["checks"]["paired"])
         self.assertFalse(result["checks"]["developer_mode"])
+
+    def test_unpatched_own_copy_asks_for_fetch_not_build(self):
+        self.write_config(udid=UDID, team_id=TEAM, bundle_id=BUNDLE)
+        self.xcode_rules(devices=(iphone(UDID),))
+        manager = self.manager()
+        self.owned_source(manager)
+        result = manager.doctor()
+        steps = [step.split(". ", 1)[1] for step in result["next_steps"]]
+        self.assertFalse(result["checks"]["pinned_source"])
+        self.assertTrue(any("iphone_setup(action=\"fetch\")" in step for step in steps), steps)
+        self.assertFalse(any(step.startswith("Build the iPhone helper") for step in steps), steps)
 
     def test_expired_profile_mirroring_and_wifi_steps(self):
         manager = self.healthy_setup()
@@ -806,8 +849,8 @@ class StartTests(SetupCase):
         stub_dir = os.path.join(self.tmp, "stub")
         stub = write_fake_executable(stub_dir, "stub-python", "exit 0\n")
         manager = self.manager(python=stub)
-        self.owned_source(manager)
-        self.write_build(manager)
+        self.owned_source(manager, patched=True)
+        self.write_build(manager, patched=True)
         return manager
 
     def job_files(self, manager):
@@ -820,7 +863,7 @@ class StartTests(SetupCase):
         self.write_config(udid=UDID, team_id=TEAM, bundle_id=BUNDLE)
         error = self.assertToolError("prerequisite_missing", manager.start)
         self.assertEqual(error.message, wda_setup.SOURCE_MISSING)
-        self.owned_source(manager)
+        self.owned_source(manager, patched=True)
         error = self.assertToolError("prerequisite_missing", self.manager(platform="linux").start)
         self.assertEqual(error.message, wda_setup.NEEDS_MACOS)
         os.unlink(os.path.join(self.bin, "xcodebuild"))
@@ -878,9 +921,9 @@ class StartTests(SetupCase):
         self.assertIsInstance(stored["pid"], int)
         self.assertEqual(stored["worker_entrypoint"], SCRIPT)
         self.assertEqual(stored["config"]["udid"], UDID)
-        self.assertEqual(stored["patched"], False)
+        self.assertEqual(stored["patched"], True)
         self.assertEqual(stored["config_fingerprint"],
-                         wda_setup.build_fingerprint(manager._normalized(manager.config), False))
+                         wda_setup.build_fingerprint(manager._normalized(manager.config), True))
         for path in (manager.jobs_dir / (job_id + ".json"), manager.logs_dir / (job_id + ".log")):
             self.assertEqual(stat.S_IMODE(os.stat(str(path)).st_mode), 0o600)
 
@@ -892,6 +935,43 @@ class StartTests(SetupCase):
         manager = self.manager()
         error = self.assertToolError("prerequisite_missing", manager.start)
         self.assertEqual(error.message, wda_setup.NOT_ON_USB)
+
+    def test_unpatched_own_copy_is_refused_in_usb_only_mode(self):
+        # A fetch stopped between checkout and patch leaves a clean, pinned copy without the USB-only patch.
+        manager = self.ready_to_start(url="http://127.0.0.1:%d" % self.refused_port())
+        self.owned_source(manager)
+        for action in (manager.build, manager.start):
+            with self.subTest(action=action.__name__):
+                error = self.assertToolError("prerequisite_missing", action)
+                self.assertEqual(error.message, wda_setup.UNPATCHED_COPY)
+                self.assertEqual(error.details["next_steps"], [wda_setup.FETCH_STEP])
+        self.assertEqual(self.job_files(manager), [])
+        status = manager.status()
+        self.assertFalse(status["built"])
+        # The user's explicit allow_network choice, or the user's own source_dir, may run unpatched.
+        self.write_config(udid=UDID, team_id=TEAM, bundle_id=BUNDLE, network_mode="allow_network")
+        self.assertEqual(manager._usable_source(manager._complete_config(manager.config)), {"patched": False})
+        user = make_source(os.path.join(self.tmp, "user-wda"))
+        self.git_rules(user)
+        self.write_config(udid=UDID, team_id=TEAM, bundle_id=BUNDLE, source_dir=user)
+        self.assertEqual(manager._usable_source(manager._complete_config(manager.config)), {"patched": False})
+
+    def test_wifi_only_listing_is_not_usb(self):
+        # Finder's "Show this iPhone when on Wi-Fi" with the cable unplugged: usbmuxd lists a Network entry only.
+        daemon = FakeUsbmuxd().start()
+        self.addCleanup(daemon.stop)
+        daemon.add_device(UDID, ports={8100: None}, connection_type="Network")
+        self.env.update(daemon.env())
+        manager = self.ready_to_start()
+        error = self.assertToolError("prerequisite_missing", manager.start)
+        self.assertEqual(error.message, wda_setup.NOT_ON_USB)
+        self.assertEqual(error.details["next_steps"], [wda_setup.CONNECT_STEP])
+        self.assertEqual(daemon.connects, [])
+        self.assertEqual(self.job_files(manager), [])
+        status = manager.status()
+        self.assertEqual(status["usb"], {"usbmuxd": True, "attached": False, "connection_type": None})
+        self.assertIn(wda_setup.CONNECT_STEP, status["next_steps"])
+        self.assertNotIn(wda_setup.LOOPBACK_STEP, status["next_steps"])
 
     def test_unreachable_port_creates_no_job(self):
         daemon = self.usbmuxd(UDID)
@@ -1195,8 +1275,10 @@ class StatusTests(SetupCase):
         self.assertIn(wda_setup.STALL_STEP, view["next_steps"])
 
     def loopback_case(self, action="start", phase="launching", mode="usb_only", elapsed=31, ready=False,
-                      marker=True):
+                      marker=True, usb=True):
         clock = FakeClock(start=10000.0)
+        if usb:
+            self.usbmuxd(UDID)  # attached over USB, nothing listening on the Mac's side of the tunnel
         if ready:
             self.env["IPHONE_USE_WDA_URL"] = self.fake_wda().url
         manager = self.configured()
@@ -1221,6 +1303,15 @@ class StatusTests(SetupCase):
         self.assertFalse(self.loopback_case(marker=False))
         self.assertFalse(self.loopback_case(phase="serving"))
         self.assertFalse(self.loopback_case(ready=True))
+        # Not on USB at all (cable pulled, or Wi-Fi only): plug the cable in, never relax USB-only.
+        self.env["IPHONE_USE_WDA_URL"] = ""
+        self.env["USBMUXD_SOCKET_ADDRESS"] = "unix:" + os.path.join(self.tmp, "missing-usbmuxd.sock")
+        self.assertFalse(self.loopback_case(usb=False))
+        daemon = FakeUsbmuxd().start()
+        self.addCleanup(daemon.stop)
+        daemon.add_device(UDID, ports={8100: None}, connection_type="Network")
+        self.env.update(daemon.env())
+        self.assertFalse(self.loopback_case(usb=False))
         text = wda_setup.LOOPBACK_STEP
         order = [text.index('iphone_setup(action="stop")'), text.index('network_mode="allow_network"'),
                  text.index('iphone_setup(action="build")'), text.index('iphone_setup(action="start")')]
@@ -1270,6 +1361,27 @@ class RedactionTests(unittest.TestCase):
         self.assertIn("(ABCDE12345)", redacted)
         self.assertIn("https://[redacted]@127.0.0.1:8100/status", redacted)
         self.assertEqual(wda_setup.redact(None), "")
+
+    def test_redact_phone_number_apple_accounts(self):
+        lines = ("Unable to log in with account '+91 98765 43210'. The login details for account '+91 98765 43210' "
+                 "were rejected.",
+                 "DVTDeveloperAccountManager: Failed to load credentials for +919876543210: Invalid credentials in "
+                 "keychain for 919876543210",
+                 "Unable to log in with account '919876543210'.")
+        for line in lines:
+            with self.subTest(line=line):
+                redacted = wda_setup.redact(line)
+                for secret in ("98765", "43210", "919876543210"):
+                    self.assertNotIn(secret, redacted)
+        self.assertIn("Unable to log in with account '[redacted phone]'", wda_setup.redact(lines[0]))
+        self.assertIn("for [redacted phone]", wda_setup.redact(lines[1]))
+        self.assertIn("for [redacted account]", wda_setup.redact(lines[1]))
+        self.assertIn("account '[redacted account]'", wda_setup.redact(lines[2]))
+        self.assertIn("[redacted email]", wda_setup.redact("with account 'alex@example.com'"))
+        # Team IDs, timestamps and the sign-in diagnosis are untouched.
+        for kept in ('No Account for Team "ABCDE12345"', "2026-10-08 12:00:00.123+0530 xcodebuild[123:456]"):
+            self.assertEqual(wda_setup.redact(kept), kept)
+        self.assertIn("Xcode > Settings > Accounts", wda_setup.diagnose(wda_setup.redact(lines[0]))[0])
 
     def test_diagnose_examples(self):
         hints = wda_setup.diagnose("Error Domain=XCTDaemonErrorDomain Code=41 \"Not authorized for performing UI "

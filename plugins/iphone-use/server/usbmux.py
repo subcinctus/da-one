@@ -258,21 +258,19 @@ def _normalize_udid(udid) -> str:
     return udid.upper().replace("-", "")
 
 
-def _prefer_usb(candidates) -> Optional[dict]:
-    for device in candidates:
-        if device.get("connection_type") == "USB":
-            return device
-    return candidates[0] if candidates else None
-
-
 def find_device(udid, devices) -> Optional[dict]:
-    """Exact SerialNumber match first, then case/dash-insensitive; USB preferred in both."""
-    exact = [d for d in devices if d.get("udid") == udid]
+    """The USB entry for this UDID: exact SerialNumber match first, then case/dash-insensitive.
+
+    Wi-Fi ("Network") entries never match: iPhone Use works only over the cable, and a tunnel over
+    Wi-Fi would reach the iPhone's network address, where the USB-only helper is not listening.
+    """
+    usb = [d for d in devices if d.get("connection_type") == "USB"]
+    exact = [d for d in usb if d.get("udid") == udid]
     if exact:
-        return _prefer_usb(exact)
+        return exact[0]
     wanted = _normalize_udid(udid)
-    similar = [d for d in devices if isinstance(d.get("udid"), str) and _normalize_udid(d["udid"]) == wanted]
-    return _prefer_usb(similar)
+    similar = [d for d in usb if isinstance(d.get("udid"), str) and _normalize_udid(d["udid"]) == wanted]
+    return similar[0] if similar else None
 
 
 def _check_target(udid, port):

@@ -283,7 +283,7 @@ class TextTests(unittest.TestCase):
 
     def test_instructions(self):
         text = mcp_schemas.INSTRUCTIONS
-        self.assertEqual(len(text), 1996)
+        self.assertEqual(len(text), 2026)
         self.assertLessEqual(len(text), 2048)
         self.assertNotIn("\n", text)
         self.assertNotIn("  ", text)

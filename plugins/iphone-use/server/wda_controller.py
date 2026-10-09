@@ -323,7 +323,13 @@ class PhoneController:
     # --- mutations and preview telemetry --------------------------------------------------------------
 
     def _post(self, path, payload, timeout=None, session=True):
-        """The only way a mutation reaches the phone: sent once, counted when accepted."""
+        """The only way a mutation reaches the phone: sent once, counted when accepted.
+
+        Every attempt ends a pending text continuation first, even one whose answer is lost
+        (action_uncertain): the phone may have acted, so its focus is no longer known.
+        `_type_pieces` re-arms its own continuation after its pieces.
+        """
+        self.pending_input = None
         self._telemetry(path, payload)
         if session:
             result = self.client.session("POST", path, payload, timeout=timeout)
@@ -525,10 +531,12 @@ class PhoneController:
         wda_image.prune_artifacts(self.artifacts_dir, self.keep_artifacts)
         result = {"path": str(image.path), "mimeType": image.mime_type}
         if image.width and image.height:
-            result["width"] = image.width
-            result["height"] = image.height
-            result["pixel_to_point"] = [round(viewport["width"] / image.width, 4),
-                                        round(viewport["height"] / image.height, 4)]
+            # The size Claude sees: a full-size PNG (sips missing or failed, or IPHONE_USE_IMAGE=original) is
+            # downscaled by Claude to the model limits before it is read, so its pixels are counted at that size.
+            width, height = wda_image.fit_size(image.width, image.height)
+            result["width"] = width
+            result["height"] = height
+            result["pixel_to_point"] = [round(viewport["width"] / width, 4), round(viewport["height"] / height, 4)]
         return result
 
     # --- queries and target resolution -----------------------------------------------------------------
@@ -1251,8 +1259,19 @@ class PhoneController:
                  and self.accepted_actions == plan.get("mark")
                  and self._external_seq() == plan.get("external_mark")
                  and time.monotonic() - plan.get("created", 0.0) <= INPUT_TTL)
+        self.pending_input = None
+        if valid:
+            # The user (on the phone itself) or another window may have moved the keyboard focus since:
+            # the rest goes only to a text field of the same kind, never to a password field.
+            try:
+                _path, kind = self._focused_field()
+            except ToolError as error:
+                if error.details.get("secure_field") or error.code not in ("no_focused_field", "not_editable"):
+                    raise
+                valid = False
+            else:
+                valid = kind == plan.get("kind")
         if not valid:
-            self.pending_input = None
             raise ToolError("input_continuation_expired", CONTINUATION_EXPIRED, details={
                 "action_executed": False,
                 "recovery": {"replay_action": False, "next_step": CONTINUATION_NEXT_STEP}})

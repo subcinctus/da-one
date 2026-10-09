@@ -42,8 +42,9 @@ SOFTWARE.
 - License: BSD-3-Clause
 - How it is used: WebDriverAgent is the helper app that runs on the iPhone. It is **not bundled** with this plugin.
   During setup the plugin downloads the pinned commit from GitHub onto the user's Mac, then builds and signs it there
-  with the user's own Apple account. Setup also applies a one-line local change to that downloaded copy so that the
-  iPhone's screen stream listens only on the iPhone itself by default (the plugin reaches it over the USB cable).
+  with the user's own Apple account. Setup also applies a small local change to one file of that downloaded copy
+  (`WebDriverAgentLib/Routing/FBWebServer.m`) so that the iPhone's screen stream listens only on the iPhone itself
+  by default (the plugin reaches it over the USB cable) and web pages are not allowed to read the helper's answers.
   The change is made on the user's Mac and is not distributed. WebDriverAgent's own LICENSE file stays in the
   downloaded copy.
 

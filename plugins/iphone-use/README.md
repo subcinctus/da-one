@@ -32,13 +32,19 @@ explicit go-ahead.
 2. **Connect the iPhone** with the cable, unlock it, tap **Trust**, and turn on Developer Mode
    (Settings > Privacy & Security > Developer Mode). If Developer Mode is not listed yet, Claude will help you
    find it during setup.
-3. **Add this plugin's marketplace.** In Claude Code, type:
+3. **Add this plugin's marketplace.** The plugin's GitHub repository is private, so this Mac must first be
+   signed in to GitHub with an account that may read it. The simplest way: install GitHub's `gh` tool, run
+   `gh auth login` in Terminal and answer **Yes** when it offers to sign Git in too (GitHub Desktop users: sign in
+   there as well). To check, `git ls-remote https://github.com/subcinctus/da-one` in Terminal must list the
+   repository without asking for a password. Then, in Claude Code, type:
 
    ```text
-   /plugin marketplace add subcinctus/da-one
+   /plugin marketplace add subcinctus/da-one#claude/iphone-use-plugin
    ```
 
-   (In Terminal you can run `claude plugin marketplace add subcinctus/da-one` instead.)
+   (In Terminal you can run `claude plugin marketplace add "subcinctus/da-one#claude/iphone-use-plugin"`
+   instead.) The part after `#` is the branch the plugin is on for now; once it is merged, plain
+   `subcinctus/da-one` works.
 4. **Install the plugin**:
 
    ```text
@@ -46,7 +52,8 @@ explicit go-ahead.
    ```
 
    Then restart Claude Code (or type `/reload-plugins`). On Claude Code 2.1.275 or later, steps 3 and 4 also
-   work as one command: `/plugin install iphone-use --marketplace subcinctus/da-one`.
+   work as one command (after signing in to GitHub):
+   `/plugin install iphone-use --marketplace subcinctus/da-one#claude/iphone-use-plugin`.
 5. **Paste the first-run prompt** below into Claude Code.
 
 ## First-run prompt
@@ -83,20 +90,25 @@ only read or check things (reading the screen, finding apps, the live view), whi
 ```
 
 To allow everything from this plugin, use `"mcp__plugin_iphone-use_iphone__*"` instead. The trade-off: Claude
-could then tap, type and send on your iPhone without asking you each time (it still asks before money-moving or
-irreversible steps, but Claude Code itself no longer stops it). Claude never changes these settings for you.
+could then tap, type and send on your iPhone without asking you each time (it still pays, transfers, trades,
+deletes or sends only when you asked for that exact action, and asks you first when anything is unclear or differs
+from what you said, but Claude Code itself no longer stops it). Claude never changes these settings for you.
 
 ## Safety and privacy
 
-- **Everything stays on your Mac.** Settings, logs and screenshots are kept in a private folder,
-  `~/.local/share/iphone-use`, that only your user account can read. Only the newest 40 screenshots are kept.
+- **Your data:** settings, logs and screenshots are saved in a private folder on your Mac,
+  `~/.local/share/iphone-use`, that only your user account can read; only the newest 40 screenshots are kept.
+  What Claude reads on the iPhone (screen text and screenshots) is sent to Claude as part of your conversation,
+  like anything else you share with Claude, and looking up an app by name may ask Apple's App Store. Do not open
+  screens with information you are not allowed to share with Claude.
 - **Passwords:** Claude never asks for or types your passwords, passcodes or verification codes. It pauses the
   live view while you type them yourself on the iPhone.
 - **Money and irreversible actions:** Claude asks you before paying, transferring, trading, deleting or sending
   anything you did not explicitly ask for.
 - **USB only:** by default the helper accepts connections only over the USB cable while it runs, so other
-  devices on your Wi-Fi cannot reach it. Still, stop it when you are done ("stop the iPhone service"). If USB-only
-  ever fails on your Mac, Claude asks you before allowing network access.
+  devices on your Wi-Fi cannot reach it. Apps and web pages open on the iPhone itself can still reach it while it
+  runs, and it keeps running after you quit Claude Code, so stop it when you are done ("stop the iPhone
+  service"). If USB-only ever fails on your Mac, Claude asks you before allowing network access.
 - **Keyboard:** while the helper runs it turns off the iPhone keyboard's Auto-Correction and Predictive text, so
   typed text arrives exactly. Turn them back on in Settings > General > Keyboard if you like.
 - **Free Apple accounts:** the helper must be re-signed about every 7 days (ask Claude to "rebuild the iPhone
@@ -105,7 +117,8 @@ irreversible steps, but Claude Code itself no longer stops it). Claude never cha
 
 ## Updating
 
-1. In Claude Code: `/plugin marketplace update da-one`, then `/plugin update iphone-use@da-one`.
+1. In Terminal: `claude plugin marketplace update da-one`, then `claude plugin update iphone-use@da-one` (or
+   in Claude Code: type `/plugin`, open the installed plugins, choose iphone-use and Update).
 2. Restart Claude Code.
 3. Reload the live view tab in your browser (or ask Claude to open the iPhone screen again).
 

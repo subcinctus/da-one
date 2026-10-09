@@ -66,5 +66,6 @@ browser. You cannot see it, and it is never evidence for you.
 ## Wi-Fi note
 
 By default the iPhone helper accepts connections only over the USB cable. Only if the user agreed to
-`allow_network` (see the iphone-use-setup skill) can devices on the same Wi-Fi reach it while it runs. Offer to
+`allow_network` (see the iphone-use-setup skill) can devices on the same Wi-Fi reach it while it runs. Apps and
+web pages on the iPhone itself can reach it in either mode, and it keeps running after Claude Code quits: offer to
 stop it when the user is done for the day.

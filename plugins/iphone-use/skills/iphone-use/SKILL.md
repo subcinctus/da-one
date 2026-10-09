@@ -12,8 +12,8 @@ done, and never take an action they did not ask for.
 
 ## 1. Start of a phone task
 
-- If the `iphone_*` tools are not in your tool list, load them with ToolSearch (query `iphone`) before deciding
-  they are missing. If they still do not appear, see section 12.
+- If the `iphone_*` tools are not in your tool list, load them with ToolSearch (query `iphone`, max_results 20)
+  before deciding they are missing. If they still do not appear, see section 12.
 - First phone step in each conversation: `iphone_ready(recover=true)`. Add `screenshot=true` only when you need
   to see the screen straight away; text tasks do not.
   - Only `ready=true` allows phone actions. Reuse its `observation` to plan the first step; do not observe again
@@ -139,6 +139,9 @@ Details: [lists and scrolling](references/lists-and-scrolling.md).
 - Never ask for, type or store passwords, passcodes, PINs, verification codes or Apple Account details, and
   never try to get around Face ID. That includes `iphone_batch`, the command line and scripts. Password fields
   are refused anyway (`not_editable` with `secure_field=true`).
+- If the user writes a password, passcode, PIN or verification code in the chat, never repeat it (not in your
+  reply, a question, a summary or any tool call). Just ask them to type it on the iPhone themselves, and suggest
+  changing it if it was a real password.
 - When the screen shows a sign-in, password, code or Face ID prompt:
   1. `iphone_screen(action=pause)` - hides the live picture while the user types.
   2. Ask with AskUserQuestion: name the app and exactly what the user must do on the iPhone. First option
@@ -177,7 +180,7 @@ Details: [verification](references/verification.md).
 
 ## 12. If the tools do not work
 
-- First load them with ToolSearch (query `iphone`).
+- First load them with ToolSearch (query `iphone`, max_results 20).
 - If no `iphone_*` tools exist even after ToolSearch, run `python3 --version` with Bash first. A message about
   the Xcode license or "command line developer tools" means the plugin could not start (see the
   iphone-use-setup skill's troubleshooting), not that the phone failed.

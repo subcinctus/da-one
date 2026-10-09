@@ -145,6 +145,26 @@ class BatchTests(BatchCase):
         self.assertEqual(self.email.value, "a" * 300)
         self.assertEqual(self.h.count("POST /wda/homescreen"), 0)
 
+    def test_typing_inside_a_batch_stops_at_the_batch_deadline(self):
+        # Earlier steps used 58 of the 60 seconds: typing gets only what is left, not a fresh budget.
+        with fake_clock() as clock:
+            self.phone.call_budget = 60
+            self.fake.on_drag = lambda fake, drag: clock.advance(58)
+            original = self.phone.client.session
+
+            def session(method, path, payload=None, timeout=None):
+                result = original(method, path, payload, timeout)
+                if path.endswith("/value") or path == "/wda/keys":
+                    clock.advance(1)
+                return result
+
+            self.phone.client.session = session
+            result = self.phone.batch([{"op": "swipe", "args": {}},
+                                       {"op": "type_text", "args": {"selector": EMAIL, "text": "a" * 600}}])
+        self.assertEqual(result["stop_reason"], "input_continues")
+        self.assertEqual(self.fake.typed, ["a" * 200, "a" * 200])
+        self.assertEqual(result["results"][1]["remaining_characters"], 200)
+
     def test_the_first_step_always_runs_even_without_budget(self):
         self.phone.call_budget = 0
         result = self.run_batch([HOME])

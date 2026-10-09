@@ -27,6 +27,9 @@ from version import VERSION
 PROTOCOL_VERSIONS = ("2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05")
 MAX_LINE_BYTES = 1024 * 1024
 TEXT_LIMIT = 48_000
+# Claude Code cuts the text of an isError result to 10 000 characters (UTF-16 units) by dropping its middle,
+# which breaks the JSON; such results are fitted below that instead.
+ERROR_TEXT_LIMIT = 9_500
 INLINE_TOOLS = {"iphone_screen"}
 FIT_ROUNDS = 12
 SERVER_INFO = {"name": "iphone-use", "title": "iPhone Use", "version": VERSION}
@@ -39,7 +42,12 @@ METHOD_NOT_FOUND = -32601
 INVALID_PARAMS = -32602
 
 TOO_LARGE_MESSAGE = "The result was too large to return; ask for fewer nodes or pages."
+TOO_LARGE_ACTED_MESSAGE = ("The result was too large to return, but the phone already acted. Do not repeat the "
+                           "action or the completed steps: look at the current screen (with fewer nodes) first.")
+BATCH_VERIFICATION = ("Steps of this batch already ran on the phone. Look at the current screen; do not repeat the "
+                      "completed steps.")
 EVIDENCE_KEYS = ("action_executed", "action_complete", "verification_required")
+BATCH_KEYS = ("complete", "completed_steps", "stopped_at", "resume_at", "stop_reason", "next_step")
 START_FAILURE_MESSAGE = "iPhone Use could not start because its data folder could not be prepared."
 
 
@@ -68,11 +76,15 @@ def _list_slots(envelope):
         for item in results:
             if isinstance(item, dict):
                 add(item.get("observation"), "nodes")
-    add(envelope.get("error"), "candidates")
+                add(item, "nodes")  # a batch observe step
+    error = envelope.get("error")
+    add(error, "candidates")
+    add(error.get("observation") if isinstance(error, dict) else None, "nodes")
     return slots
 
 
 def _too_large(envelope) -> dict:
+    """The replacement for a result that cannot be fitted; it keeps the evidence of what already ran."""
     error = {"code": "response_too_large", "message": TOO_LARGE_MESSAGE, "uncertain": False}
     original_error = envelope.get("error") if isinstance(envelope.get("error"), dict) else {}
     if original_error.get("uncertain") is True:
@@ -81,13 +93,31 @@ def _too_large(envelope) -> dict:
         for source in (envelope, original_error):
             if key in source and key not in error:
                 error[key] = source[key]
-    return {"ok": False, "error": error}
+    replacement = {"ok": False, "error": error}
+    results = envelope.get("results")
+    if isinstance(results, list):
+        # A batch: its progress, any unfinished text and whether its steps already acted on the phone.
+        replacement.update((key, envelope[key]) for key in BATCH_KEYS if key in envelope)
+        items = [item for item in results if isinstance(item, dict)]
+        tokens = [item["continue_token"] for item in items if isinstance(item.get("continue_token"), str)]
+        if tokens:
+            replacement["continue_token"] = tokens[-1]
+        if any(item.get("action_executed") is True for item in items) or original_error.get("action_executed") is True:
+            error.update(action_executed=True, action_complete=False, verification_required=BATCH_VERIFICATION)
+    if error.get("action_executed") is True:
+        error["message"] = TOO_LARGE_ACTED_MESSAGE
+    return replacement
 
 
-def fit_text(envelope):
-    """(envelope, compact JSON text) with the text at most TEXT_LIMIT characters."""
+def _size(text) -> int:
+    """Length in UTF-16 code units, as Claude Code counts it."""
+    return len(text.encode("utf-16-le", "surrogatepass")) // 2
+
+
+def _fit(envelope, limit):
+    """(envelope, compact JSON text) within limit by halving the longest lists, or None if impossible."""
     text = _compact(envelope)
-    if len(text) <= TEXT_LIMIT:
+    if _size(text) <= limit:
         return envelope, text
     fitted = copy.deepcopy(envelope)
     for _ in range(FIT_ROUNDS):
@@ -99,8 +129,16 @@ def fit_text(envelope):
         container[key] = items[:len(items) // 2]
         fitted["size_truncated"] = True
         text = _compact(fitted)
-        if len(text) <= TEXT_LIMIT:
+        if _size(text) <= limit:
             return fitted, text
+    return None
+
+
+def fit_text(envelope, limit=TEXT_LIMIT):
+    """(envelope, compact JSON text) with the text at most `limit` characters."""
+    fitted = _fit(envelope, limit)
+    if fitted is not None:
+        return fitted
     replacement = _too_large(envelope)
     return replacement, _compact(replacement)
 
@@ -124,27 +162,42 @@ def _image_of(envelope):
     return None
 
 
+def _image_block(image):
+    """The MCP image block for an image reference whose file exists, else None."""
+    if image is None:
+        return None
+    try:
+        path = Path(image["path"])
+        if path.is_file():
+            data = base64.b64encode(path.read_bytes()).decode("ascii")
+            mime = image.get("mimeType") if isinstance(image.get("mimeType"), str) else "image/png"
+            return {"type": "image", "data": data, "mimeType": mime}
+    except (OSError, ValueError):
+        pass
+    return None
+
+
 def result_content(envelope) -> dict:
     """MCP tools/call result: one compact JSON text block plus at most one image block."""
+    block = _image_block(_image_of(envelope)) if isinstance(envelope, dict) else None
     try:
-        fitted, text = fit_text(envelope)
+        fitted = None
+        if isinstance(envelope, dict) and envelope.get("ok") is False and block is None:
+            # isError: keep it under Claude Code's error cut; if lists cannot make it fit, the full limit (a
+            # middle cut by Claude Code) still says more than response_too_large would.
+            fitted = _fit(envelope, ERROR_TEXT_LIMIT)
+        fitted, text = fitted if fitted is not None else fit_text(envelope)
     except (TypeError, ValueError, RecursionError) as exc:
         _stderr_failure(exc)
         fitted = {"ok": False, "error": {"code": "internal_error", "message": "The iPhone tool result could not "
                                          "be encoded.", "uncertain": True}}
         text = _compact(fitted)
+    if block is not None and _image_of(fitted) is None:
+        block = None  # replaced by response_too_large: no image without its result
     content = [{"type": "text", "text": text}]
-    image = _image_of(fitted) if isinstance(fitted, dict) else None
-    if image is not None:
-        try:
-            path = Path(image["path"])
-            if path.is_file():
-                data = base64.b64encode(path.read_bytes()).decode("ascii")
-                mime = image.get("mimeType") if isinstance(image.get("mimeType"), str) else "image/png"
-                content.append({"type": "image", "data": data, "mimeType": mime})
-        except (OSError, ValueError):
-            pass
-    is_error = fitted.get("ok") is False and len(content) == 1
+    if block is not None:
+        content.append(block)
+    is_error = fitted.get("ok") is False and block is None
     return {"content": content, "isError": is_error}
 
 

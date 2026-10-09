@@ -16,7 +16,7 @@ A failed call returns `{"ok": false, "error": {...}}`. Read `error.code` first, 
 | --- | --- | --- |
 | `service_unreachable` | The Mac could not reach the iPhone helper (not running, cable, or the Mac's USB service). With `phase` connect or deadline nothing was sent; with `phase` read only a read failed. | Not a failed task. Follow `recovery`: `iphone_setup(action=status)` and the cold start in [startup](startup.md). |
 | `action_uncertain` | The action was sent, then the connection failed or timed out (`uncertain=true`). It may have happened. | Look at the current screen before deciding anything. Never repeat it automatically. |
-| `response_too_large` | The answer was too large to return. | Ask for less (`max_nodes`, fewer pages). If it was an action (`uncertain=true`), read the screen first. |
+| `response_too_large` | The answer was too large to return. | If `action_executed=true` or `uncertain=true`, the phone already acted: do not repeat it or the `completed_steps`; read the screen first (finish any `continue_token`). Otherwise ask for less (`max_nodes`, fewer pages). |
 | `invalid_response` | The helper returned something unreadable (for example a screenshot that could not be decoded). | If `uncertain=true`, treat it like `action_uncertain`. Otherwise read once more; if it repeats, run `iphone_ready`. |
 | `http_error` | The helper answered with an HTTP error and no details. | If `uncertain=true`, read the screen first. Otherwise run `iphone_ready` before continuing. |
 | `invalid_argument` | The arguments failed validation. Nothing ran (`action_executed=false`). | Fix once using `argument_path`, `unknown_fields` and `allowed_fields`, then call again. Never drop or ignore unknown fields. |

@@ -69,6 +69,9 @@ Example (app authentication):
 - Describe only the authentication method and page you actually saw.
 - Never guess passwords or PINs, and never try to get around Face ID or Touch ID.
 - Never ask the user to send a password, passcode or verification code in the chat.
+- If the user writes one in the chat anyway, never repeat it: not in your reply, a question, a summary, a note or
+  any tool call (not even "type `...` on the phone yourself"). Refer to it only as "your password" or "the code",
+  ask them to type it on the iPhone themselves, and suggest changing the password since it was shared in a chat.
 - Never put credentials in `iphone_type_text`, a batch, logs, scripts or the command-line fallback.
 - Even if a password box looks like an ordinary text field, the user types it.
 - Keep track of the current app and page, what you have collected, the steps already done and what is left.

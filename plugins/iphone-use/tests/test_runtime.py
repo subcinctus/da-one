@@ -277,6 +277,64 @@ class SessionCacheTests(HarnessTestCase):
         self.assertEqual(dict(self.runtime.phone.snapshots), {})
 
 
+class SharedActionTests(HarnessTestCase):
+    """A text continuation ends when another window (or the CLI) acts on the phone (DESIGN.md 7.15)."""
+
+    def start_typing(self, runtime):
+        self.fake.set_foreground("com.example.form")
+        runtime.phone.call_budget = 0
+        first = runtime.execute("iphone_type_text", {"selector": {"name": "email"}, "text": "a" * 500})
+        self.assertTrue(first["ok"], first)
+        self.assertEqual(first["characters"], 200)
+        return first["continue_token"]
+
+    def test_an_action_from_another_window_expires_the_continuation(self):
+        other = self.h.make_runtime(serve_preview=False)
+        token = self.start_typing(self.runtime)
+        # The other window taps the same e-mail field: the focus looks unchanged, the token still ends.
+        self.assertTrue(other.execute("iphone_tap", {"x": 195, "y": 142})["ok"])
+        self.fake.clear_log()
+        error = self.assert_error(self.runtime.execute("iphone_type_text", {"continue_token": token}),
+                                  "input_continuation_expired")
+        self.assertFalse(error["action_executed"])
+        self.assertEqual(self.fake.actions(), [])
+        self.assertEqual(self.fake.node(name="email").value, "a" * 200)
+
+    def test_another_window_focusing_the_password_field_gets_nothing_typed_into_it(self):
+        other = self.h.make_runtime(serve_preview=False)
+        token = self.start_typing(self.runtime)
+        self.assertTrue(other.execute("iphone_tap", {"x": 195, "y": 202})["ok"])
+        self.assertEqual(self.fake.focused_node().name, "password")
+        self.assert_error(self.runtime.execute("iphone_type_text", {"continue_token": token}),
+                          "input_continuation_expired")
+        self.assertEqual(self.fake.node(name="password").value or "", "")
+
+    def test_reads_from_another_window_keep_the_continuation(self):
+        other = self.h.make_runtime(serve_preview=False)
+        token = self.start_typing(self.runtime)
+        self.assertTrue(other.execute("iphone_observe", {})["ok"])
+        second = self.runtime.execute("iphone_type_text", {"continue_token": token})
+        self.assertTrue(second["ok"], second)
+        self.assertEqual(second["characters"], 400)
+        final = self.runtime.execute("iphone_type_text", {"continue_token": second["continue_token"]})
+        self.assertTrue(final["ok"], final)
+        self.assertTrue(final["input_complete"])
+        self.assertEqual(self.fake.node(name="email").value, "a" * 500)
+
+    def test_every_phone_action_is_recorded_privately_for_the_other_processes(self):
+        path = os.path.join(self.h.state_dir, "actions.json")
+        self.assertTrue(self.h.execute("iphone_observe")["ok"])
+        self.assertFalse(os.path.exists(path))
+        self.assertTrue(self.h.execute("iphone_tap", {"x": 5, "y": 5})["ok"])
+        self.assertEqual(privstate.read_json(path), {"seq": 1, "writer": self.runtime._instance_id})
+        self.assertEqual(stat.S_IMODE(os.stat(path).st_mode), 0o600)
+        other = self.h.make_runtime(serve_preview=False)
+        self.fake.locked = True  # even a refused or failed attempt counts
+        self.assert_error(other.execute("iphone_tap", {"x": 5, "y": 5}), "phone_locked")
+        self.assertEqual(privstate.read_json(path), {"seq": 2, "writer": other._instance_id})
+        self.assertNotEqual(self.runtime._instance_id, other._instance_id)
+
+
 # --- mutations: lock check, privacy pauses, channel faults ---------------------------------------------
 
 
@@ -288,6 +346,22 @@ class MutationGuardTests(HarnessTestCase):
         self.assertFalse(error["action_executed"])
         self.assertEqual(self.h.routes(), ["GET /wda/locked"])
         self.assertEqual(self.runtime.screen.pause_status(), {"paused": True, "pause_reason": "device_locked"})
+
+    def test_unclear_or_failed_lock_read_blocks_actions(self):
+        # Only an exact `false` from GET /wda/locked lets a phone action through.
+        for value in (None, "false", 0):
+            with self.subTest(value=value):
+                self.fake.inject("GET", "/wda/locked", value=value)
+                self.fake.clear_log()
+                error = self.assert_error(self.h.execute("iphone_tap", {"x": 5, "y": 5}), "phone_locked")
+                self.assertIs(error["action_executed"], False)
+                self.assertEqual(self.fake.actions(), [])
+        self.fake.inject("GET", "/wda/locked", error="unknown error")
+        self.fake.clear_log()
+        error = self.assert_error(self.h.execute("iphone_tap", {"x": 5, "y": 5}), "unknown error")
+        self.assertIs(error["action_executed"], False)
+        self.assertEqual(self.fake.actions(), [])
+        self.assertEqual(self.fake.taps, [])
 
     def test_every_mutating_tool_checks_the_lock_and_reads_do_not(self):
         self.fake.locked = True
@@ -463,6 +537,34 @@ class SetupInterplayTests(HarnessTestCase):
         self.assertTrue(observed["ok"], observed)
         self.assertEqual(observed["app"], "com.apple.Preferences")
 
+    def test_configuration_made_by_another_process_is_picked_up(self):
+        h = self.harness(url=None, via_usbmux=True)
+        runtime = h.runtime
+        error = self.assert_error(runtime.execute("iphone_ready", {}), "service_unreachable")
+        self.assertEqual(error["reason"], "not_configured")
+        self.assertFalse(runtime.toolbar_action("refresh")["service_ready"])
+        self.assert_error(runtime.toolbar_action("home"), "service_unreachable")
+        # Another Claude Code window (or Terminal) configures the iPhone; this server is not restarted.
+        other = h.make_runtime(serve_preview=False)
+        result = other.execute("iphone_setup", {"action": "configure", "udid": UDID, "team_id": "ABCDE12345",
+                                                "bundle_id": "com.example.wda.test"})
+        self.assertTrue(result["ok"], result)
+        ready = runtime.execute("iphone_ready", {})
+        self.assertTrue(ready["ok"], ready)
+        self.assertTrue(ready["ready"])
+        self.assertEqual(runtime.transport.identity, "usbmux:%s:8100" % UDID)
+        self.assertIs(runtime.phone.client, runtime.client)
+        self.assertTrue(runtime.toolbar_action("refresh")["service_ready"])
+        self.assertTrue(runtime.phone.snapshots)
+        # A later change of the device port elsewhere drops this process's session and observations.
+        config = privstate.read_config(h.state_dir)
+        config["device_port"] = 8101
+        privstate.write_json_private(os.path.join(h.state_dir, "config.json"), config)
+        error = self.assert_error(runtime.execute("iphone_observe", {}), "service_unreachable")
+        self.assertEqual(runtime.transport.identity, "usbmux:%s:8101" % UDID)
+        self.assertEqual(dict(runtime.phone.snapshots), {})
+        self.assertFalse(error["action_executed"])
+
     def test_setup_argument_errors_are_tool_errors(self):
         error = self.assert_error(self.h.execute("iphone_setup", {"action": "status", "udid": UDID}),
                                   "invalid_argument")
@@ -552,6 +654,28 @@ class EnvelopeTests(HarnessTestCase):
         content = iphone_use.result_content(envelope)
         self.assertFalse(content["isError"])
         self.assertEqual([block["type"] for block in content["content"]], ["text", "image"])
+
+    def test_a_large_batch_observation_is_shortened_not_replaced(self):
+        from phone_harness import cell, page
+        rows = [cell("Message %d: " % i + "Please find the quarterly collection report attached, regards." * 2,
+                     y=100 + (i % 12) * 60, type="StaticText") for i in range(260)]
+        rows.append(cell("Send", y=780, type="Button"))
+        self.fake.set_tree("com.example.chat", page(*rows, label="Chat"))
+        self.fake.set_foreground("com.example.chat")
+        envelope = self.h.execute("iphone_batch", {"steps": [{"op": "tap", "args": {"x": 100, "y": 800}},
+                                                             {"op": "observe", "args": {"mode": "tree",
+                                                                                        "max_nodes": 300}}]})
+        self.assertTrue(envelope["ok"], envelope.get("error"))
+        self.assertGreater(len(iphone_use._compact(envelope)), iphone_use.TEXT_LIMIT)
+        content = iphone_use.result_content(envelope)
+        self.assertFalse(content["isError"])
+        parsed = json.loads(content["content"][0]["text"])
+        self.assertTrue(parsed["ok"])
+        self.assertTrue(parsed["size_truncated"])
+        self.assertEqual(parsed["completed_steps"], 2)
+        self.assertTrue(parsed["results"][0]["action_executed"])
+        self.assertLess(len(parsed["results"][1]["nodes"]), len(envelope["results"][1]["nodes"]))
+        self.assertEqual(len(self.fake.taps), 1)
 
     def test_finished_batch_is_ok(self):
         envelope = self.h.execute("iphone_batch", {"steps": [{"op": "observe", "args": {}}]})
@@ -707,6 +831,76 @@ class ResultContentTests(unittest.TestCase):
         fitted, text = iphone_use.fit_text({"ok": True, "nodes": [1, 2, 3]})
         self.assertEqual(fitted, {"ok": True, "nodes": [1, 2, 3]})
         self.assertEqual(text, '{"ok":true,"nodes":[1,2,3]}')
+
+    def test_fit_text_shortens_batch_observe_steps_and_error_observations(self):
+        nodes = [{"type": "StaticText", "label": "y" * 40, "rect": [0, 0, 1, 1]} for _ in range(2000)]
+        envelope = {"ok": True, "complete": True, "completed_steps": 2,
+                    "results": [{"action_executed": True}, {"observation_id": "o1", "nodes": list(nodes)}]}
+        fitted, text = iphone_use.fit_text(envelope)
+        self.assertLessEqual(len(text), iphone_use.TEXT_LIMIT)
+        self.assertTrue(fitted["ok"])
+        self.assertTrue(fitted["size_truncated"])
+        self.assertEqual(fitted["completed_steps"], 2)
+        self.assertLess(len(fitted["results"][1]["nodes"]), 2000)
+        failed = {"ok": False, "error": {"code": "postcondition_failed", "observation": {"nodes": list(nodes)}}}
+        fitted, text = iphone_use.fit_text(failed)
+        self.assertLessEqual(len(text), iphone_use.TEXT_LIMIT)
+        self.assertEqual(fitted["error"]["code"], "postcondition_failed")
+        self.assertLess(len(fitted["error"]["observation"]["nodes"]), 2000)
+
+    def test_too_large_batch_keeps_its_progress_and_evidence(self):
+        envelope = {"ok": True, "complete": False, "completed_steps": 1, "stopped_at": 1, "resume_at": 2,
+                    "stop_reason": "input_continues", "next_step": "Finish the text.",
+                    "results": [{"action_executed": True, "action_complete": True, "blob": "x" * 60000},
+                                {"action_executed": True, "input_complete": False, "continue_token": "abc123abc123"}]}
+        content = iphone_use.result_content(envelope)
+        parsed = json.loads(content["content"][0]["text"])
+        self.assertTrue(content["isError"])
+        self.assertEqual(parsed["error"]["code"], "response_too_large")
+        self.assertIs(parsed["error"]["action_executed"], True)
+        self.assertIs(parsed["error"]["action_complete"], False)
+        self.assertEqual(parsed["error"]["verification_required"], iphone_use.BATCH_VERIFICATION)
+        self.assertNotIn("fewer nodes or pages", parsed["error"]["message"])
+        self.assertIn("Do not repeat", parsed["error"]["message"])
+        for key in ("complete", "completed_steps", "stopped_at", "resume_at", "stop_reason", "next_step"):
+            self.assertEqual(parsed[key], envelope[key], key)
+        self.assertEqual(parsed["continue_token"], "abc123abc123")
+        # A batch whose stopped step acted keeps that evidence too.
+        stopped = {"ok": False, "complete": False, "completed_steps": 0, "results": [],
+                   "error": {"code": "action_uncertain", "uncertain": True, "action_executed": True,
+                             "blob": "z" * 60000}}
+        parsed = json.loads(iphone_use.result_content(stopped)["content"][0]["text"])
+        self.assertIs(parsed["error"]["action_executed"], True)
+        self.assertTrue(parsed["error"]["uncertain"])
+        self.assertEqual(parsed["completed_steps"], 0)
+
+    def test_error_results_fit_under_claude_codes_error_cut(self):
+        nodes = [{"type": "Cell", "label": "Chat with a long preview line 👋 %03d" % i, "rect": [0, 60 * i, 390, 60]}
+                 for i in range(150)]
+        envelope = {"ok": False, "complete": False, "completed_steps": 1, "stopped_at": 1, "resume_at": 1,
+                    "stop_reason": "action_uncertain", "results": [{"action_executed": True,
+                                                                    "observation": {"nodes": nodes}}],
+                    "error": {"code": "action_uncertain", "message": "The answer was lost.", "uncertain": True}}
+        self.assertGreater(len(iphone_use._compact(envelope)), iphone_use.ERROR_TEXT_LIMIT)
+        content = iphone_use.result_content(envelope)
+        self.assertTrue(content["isError"])
+        text = content["content"][0]["text"]
+        self.assertLessEqual(len(text.encode("utf-16-le")) // 2, iphone_use.ERROR_TEXT_LIMIT)
+        parsed = json.loads(text)
+        self.assertTrue(parsed["size_truncated"])
+        self.assertEqual(parsed["error"]["code"], "action_uncertain")
+        self.assertEqual(parsed["stopped_at"], 1)
+        self.assertLess(len(parsed["results"][0]["observation"]["nodes"]), 150)
+        # With a screenshot attached it is not an error result, so the normal limit applies.
+        image = self.image("shot.png")
+        with_image = dict(envelope, error=dict(envelope["error"], observation={"image": image}))
+        content = iphone_use.result_content(with_image)
+        self.assertFalse(content["isError"])
+        self.assertNotIn("size_truncated", json.loads(content["content"][0]["text"]))
+        # Without lists to shorten, the full limit is used instead of dropping the result.
+        long_error = {"ok": False, "error": {"code": "unknown error", "message": "m" * 20000}}
+        parsed = json.loads(iphone_use.result_content(long_error)["content"][0]["text"])
+        self.assertEqual(parsed["error"]["code"], "unknown error")
 
 
 # --- metrics and knobs -------------------------------------------------------------------------------------

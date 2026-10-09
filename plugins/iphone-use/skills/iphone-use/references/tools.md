@@ -2,7 +2,8 @@
 
 The plugin `iphone-use` runs one MCP server named `iphone`. Claude Code shows each tool as
 `mcp__plugin_iphone-use_iphone__iphone_<name>`; the skills use the short name, for example `iphone_tap`.
-If the tools are not in your tool list, load them with ToolSearch (query `iphone`).
+If the tools are not in your tool list, load them with ToolSearch (query `iphone`, max_results 20, so that all 17
+tools load).
 
 ## The 17 tools
 

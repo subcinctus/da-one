@@ -3,7 +3,8 @@
 `Runtime.execute(name, args)` is the single entry point used by the MCP server and the
 command-line fallback. It validates the arguments once (before any device I/O), takes the
 cross-process `operation.lock` for phone operations, shares the WDA session with other
-processes through `session.json`, checks that the phone is unlocked before any mutation,
+processes through `session.json`, records every phone action in `actions.json` so another
+process's text continuation ends, checks that the phone is unlocked before any mutation,
 and turns every outcome into the result envelope (`{"ok": true, ...}` or
 `{"ok": false, "error": {...}}`).
 
@@ -47,6 +48,7 @@ READY_PENDING_CODES = {"service_unreachable", "not_ready", "invalid session id",
 SETUP_RESET_ACTIONS = ("start", "stop", "configure")
 
 SESSION_FILE = "session.json"
+ACTIONS_FILE = "actions.json"
 DEVICE_FILE = "device.json"
 OPERATION_LOCK = "operation.lock"
 STATUS_TIMEOUT = 5.0
@@ -176,6 +178,8 @@ class Runtime:
         self._threads = []
         self._lookup_lock = threading.Lock()
         self._looked_up = set()
+        self._instance_id = os.urandom(8).hex()
+        self._actions_seen = None
         self._config_error = False
         self.transport = self._resolve_transport()
         self.client = WDAClient(self.transport)
@@ -302,7 +306,11 @@ class Runtime:
         return result
 
     def _refresh_transport(self):
-        """After configure: a new transport identity gets a new client (the old session is gone)."""
+        """Follow config.json, which this or another process (window, CLI, Terminal) may have changed.
+
+        A new transport identity gets a new client: the old session, observations and focus are gone.
+        Runs only on the tool-call thread (never from a preview toolbar thread).
+        """
         transport = self._resolve_transport()
         if transport.identity == self.transport.identity and transport.kind == self.transport.kind:
             return
@@ -312,7 +320,17 @@ class Runtime:
         self.transport = transport
         self.client = client
         self.phone.client = client
-        old.close()
+        self.phone.reset()
+        _safe(old.close)
+
+    def _current_transport(self):
+        """The configured transport right now, for the preview toolbar (which never swaps the shared client)."""
+        try:
+            if self._url_invalid:
+                return UnconfiguredTransport()
+            return resolve_transport(privstate.read_config(self.state_dir), self.env)
+        except ValueError:
+            return UnconfiguredTransport()
 
     def _reset_session(self):
         """Forget the WDA session and everything tied to it (snapshots, focus, continuation)."""
@@ -323,6 +341,7 @@ class Runtime:
     # --- the operation lock and the shared session ----------------------------------------------------
 
     def _locked(self, op, args):
+        self._refresh_transport()  # another window or the CLI may have configured (or re-configured) the iPhone
         if self._config_error:
             raise self._config_failure()
         lock = privstate.FileLock(self.state_dir / OPERATION_LOCK, blocking=False)
@@ -332,12 +351,41 @@ class Runtime:
             raise ToolError("device_busy", BUSY_MESSAGE, details={"action_executed": False}) from None
         try:
             self._adopt_session()
+            self._sync_shared_actions()
             try:
                 return self._call(op, args)
             finally:
                 self._store_session()
+                if op in MUTATING_OPS:
+                    self._note_shared_action()
         finally:
             lock.release()
+
+    def _shared_actions(self):
+        """(seq, writer) of the last phone action sent by any process on this Mac, or None."""
+        saved = privstate.read_json(self.state_dir / ACTIONS_FILE, None)
+        if isinstance(saved, dict) and type(saved.get("seq")) is int and isinstance(saved.get("writer"), str):
+            return saved["seq"], saved["writer"]
+        return None
+
+    def _sync_shared_actions(self):
+        """Under operation.lock: another window or the CLI acted on the phone since our last call, so our
+        focus, geometry and any text continuation are stale (DESIGN.md 7.15)."""
+        current = self._shared_actions()
+        if current != self._actions_seen:
+            self._actions_seen = current
+            self.phone.external_action()
+
+    def _note_shared_action(self):
+        """Under operation.lock, after a phone action (sent or attempted): tell the other processes."""
+        current = self._shared_actions()
+        seq = current[0] + 1 if current is not None else 1
+        try:
+            privstate.write_json_private(self.state_dir / ACTIONS_FILE, {"seq": seq, "writer": self._instance_id})
+        except OSError:
+            self._actions_seen = None  # unknown: the next call treats the phone as changed
+            return
+        self._actions_seen = (seq, self._instance_id)
 
     def _adopt_session(self):
         """Reuse the session another process (or an earlier call) recorded for this transport."""
@@ -662,7 +710,7 @@ class Runtime:
         pause_id = self.screen.reconnect_pause_id()
         self.screen.restart()
         service_ready = False
-        probe = WDAClient(self.transport, timeout=PROBE_TIMEOUT)
+        probe = WDAClient(self._current_transport(), timeout=PROBE_TIMEOUT)
         try:
             status = probe.request("GET", "/status")
             value = status.get("value") if isinstance(status, dict) else None
@@ -688,7 +736,7 @@ class Runtime:
         except BlockingIOError:
             raise ToolError("device_busy", TOOLBAR_BUSY_MESSAGE, details={"action_executed": False}) from None
         try:
-            client = WDAClient(self.transport, timeout=TOOLBAR_TIMEOUT)
+            client = WDAClient(self._current_transport(), timeout=TOOLBAR_TIMEOUT)
             sent = False
             try:
                 client.request("POST", "/wda/homescreen", {})
@@ -702,12 +750,13 @@ class Runtime:
                     # The user changed the screen: earlier focus, geometry and continuations are gone.
                     self.phone.external_action()
                     _safe(self.screen.note_external_action)
+                    _safe(self._note_shared_action)
         finally:
             lock.release()
         return {"ok": True, "action": "home"}
 
     def _toolbar_screenshot(self):
-        client = WDAClient(self.transport, timeout=TOOLBAR_TIMEOUT)
+        client = WDAClient(self._current_transport(), timeout=TOOLBAR_TIMEOUT)
         try:
             reply = client.request("GET", "/screenshot")
         finally:

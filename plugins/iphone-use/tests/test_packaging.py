@@ -299,7 +299,8 @@ class ManifestTests(unittest.TestCase):
         self.assertRegex(plugin["version"], r"^\d+\.\d+\.\d+$")
         self.assertEqual(plugin["version"], "0.1.0")
         self.assertEqual(plugin["license"], "MIT")
-        self.assertEqual(plugin["name"], PLUGIN.name)
+        if IN_REPO:  # an installed copy lives in a versioned cache folder (e.g. .../iphone-use/0.1.0)
+            self.assertEqual(plugin["name"], PLUGIN.name)
 
     @unittest.skipUnless(IN_REPO, "repository files are not part of an installed plugin")
     def test_versions_agree(self):
@@ -489,6 +490,15 @@ class AmendmentContentTests(unittest.TestCase):
         safety = flat(section(readme, "Safety and privacy"))
         self.assertIn("by default the helper accepts connections only over the USB cable while it runs", safety)
         self.assertIn("stop it when you are done", safety)
+        # Apps and pages on the iPhone itself can reach its loopback address; the README must not hide that.
+        self.assertIn("Apps and web pages open on the iPhone itself can still reach it", safety)
+        # Screen contents go to Claude: the README must not promise that everything stays on the Mac.
+        self.assertNotIn("Everything stays on your Mac", readme)
+        self.assertIn("sent to Claude as part of your conversation", safety)
+        self.assertIn("App Store", safety)
+        permissions = flat(section(readme, "Fewer permission prompts"))
+        self.assertNotIn("still asks before money-moving or irreversible steps", permissions)
+        self.assertIn("only when you asked for that exact action", permissions)
         preview = flat(read(PLUGIN / "skills" / "iphone-use" / "references" / "preview.md"))
         self.assertIn("By default the iPhone helper accepts connections only over the USB cable", preview)
         self.assertIn("allow_network", preview)
@@ -562,6 +572,30 @@ class AmendmentContentTests(unittest.TestCase):
         for banned in ("Node", "npm", "18100", "local_port", "TIME_WAIT"):
             self.assertNotIn(banned, trouble)
 
+    def test_secrets_written_in_chat_are_never_repeated(self):
+        skill = flat(section(read(PLUGIN / "skills" / "iphone-use" / "SKILL.md"),
+                             "8. Passwords, codes, Face ID and unlocking"))
+        auth = flat(read(PLUGIN / "skills" / "iphone-use" / "references" / "authentication.md"))
+        self.assertIn("writes a password, passcode, PIN or verification code in the chat", skill)
+        self.assertIn("writes one in the chat anyway", auth)
+        for text in (skill, auth):
+            self.assertIn("never repeat it", text)
+            self.assertIn("any tool call", text)
+            self.assertIn("type it on the iPhone themselves", text)
+
+    def test_tool_search_loads_every_tool(self):
+        # ToolSearch returns 5 results by default; 16 iphone tools are deferred, so every instruction to search
+        # for them must ask for more.
+        import mcp_schemas
+        self.assertIn("ToolSearch and max_results 20", mcp_schemas.INSTRUCTIONS)
+        mentions = 0
+        for path in skill_docs() + readmes():
+            for item in doc_items(read(path)):
+                if "ToolSearch" in item and ("query" in item or "search" in item.lower().replace("toolsearch", "")):
+                    mentions += 1
+                    self.assertIn("max_results 20", item, "%s: %s" % (rel(path), item))
+        self.assertGreaterEqual(mentions, 6)
+
     def test_default_state_dir_is_never_described_as_refused(self):
         for path in skill_docs() + readmes():
             text = read(path)
@@ -587,7 +621,9 @@ class DocumentHygieneTests(unittest.TestCase):
         self.assertTrue(text.startswith("# da-one\n"))
         plugins = section(text, "Plugins")
         self.assertIn("iphone-use", plugins)
-        self.assertIn("/plugin marketplace add subcinctus/da-one", plugins)
+        self.assertIn("/plugin marketplace add subcinctus/da-one#claude/iphone-use-plugin", plugins)
+        self.assertIn("--marketplace subcinctus/da-one#claude/iphone-use-plugin", plugins)
+        self.assertIn("private", plugins)
         self.assertIn("/plugin install iphone-use@da-one", plugins)
         self.assertIn("(plugins/iphone-use/README.md)", plugins)
 
@@ -608,12 +644,18 @@ class DocumentHygieneTests(unittest.TestCase):
             "for me. Explain each step in plain English and wait for me when I need to do something on the phone."
         )])
         install = section(text, "Install in 5 steps")
-        self.assertIn("/plugin marketplace add subcinctus/da-one", install)
-        self.assertIn("claude plugin marketplace add subcinctus/da-one", install)
+        # The repository is private and the plugin is on a branch until it is merged.
+        self.assertIn("/plugin marketplace add subcinctus/da-one#claude/iphone-use-plugin", install)
+        self.assertIn('claude plugin marketplace add "subcinctus/da-one#claude/iphone-use-plugin"', install)
+        self.assertIn("--marketplace subcinctus/da-one#claude/iphone-use-plugin", install)
+        self.assertIn("gh auth login", install)
+        self.assertIn("private", install)
         self.assertIn("/plugin install iphone-use@da-one", install)
         updating = section(text, "Updating")
-        self.assertIn("/plugin marketplace update da-one", updating)
-        self.assertIn("/plugin update iphone-use@da-one", updating)
+        # /plugin has no "update" subcommand (it only opens the menu): the CLI command updates the plugin.
+        self.assertIn("claude plugin marketplace update da-one", updating)
+        self.assertIn("claude plugin update iphone-use@da-one", updating)
+        self.assertNotIn("/plugin update", updating)
         self.assertIn("/plugin uninstall iphone-use@da-one", section(text, "Uninstall"))
         self.assertIn("WebDriverAgentRunner", section(text, "Uninstall"))
         credits = section(text, "Credits and license")

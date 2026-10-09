@@ -134,6 +134,22 @@ class PhoneScriptTests(CliCase):
         self.assertEqual(code, 1)
         self.assertEqual(self.envelope(stdout)["error"]["code"], "state_dir_unsafe")
 
+    def test_a_cli_action_ends_a_text_continuation_of_the_mcp_server(self):
+        from runtime import Runtime
+        server = Runtime(state_dir=self.state_dir, wda_url=self.fake.url, env=dict(self.env), serve_preview=False)
+        self.addCleanup(server.close)
+        self.fake.set_foreground("com.example.form")
+        server.phone.call_budget = 0
+        first = server.execute("iphone_type_text", {"selector": {"name": "email"}, "text": "a" * 500})
+        self.assertEqual(first["characters"], 200, first)
+        code, stdout, _ = self.run_script(PHONE_SCRIPT, "iphone_tap", '{"x": 195, "y": 142}')
+        self.assertEqual(code, 0, stdout)
+        self.fake.clear_log()
+        envelope = server.execute("iphone_type_text", {"continue_token": first["continue_token"]})
+        self.assertEqual(envelope["error"]["code"], "input_continuation_expired", envelope)
+        self.assertEqual(self.fake.actions(), [])
+        self.assertEqual(self.fake.node(name="email").value, "a" * 200)
+
 
 class PhoneMainTests(unittest.TestCase):
     """phone.main() in-process with a stand-in Runtime (exit-code rules only)."""

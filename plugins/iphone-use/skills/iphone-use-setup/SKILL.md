@@ -126,8 +126,8 @@ Connection faults, restarts in progress, cooldowns and iPhone Mirroring conflict
 ## 10. Troubleshooting
 
 - Symptom table and fixes: [troubleshooting](references/troubleshooting.md).
-- If no `iphone_*` tools exist even after ToolSearch (query `iphone`), run `python3 --version` with Bash first;
-  an Xcode license or "command line developer tools" message means the plugin could not start.
+- If no `iphone_*` tools exist even after ToolSearch (query `iphone`, max_results 20), run `python3 --version`
+  with Bash first; an Xcode license or "command line developer tools" message means the plugin could not start.
 
 ## References
 

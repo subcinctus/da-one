@@ -6,7 +6,9 @@
   collect lists, run short batches of known steps).
 - USB connection written in plain Python: the plugin talks to the Mac's USB device service (usbmuxd) directly, so no
   Node.js, no port forwarder and no extra local network port are needed.
-- The iPhone helper (WebDriverAgent 16.14.0) accepts connections only over the USB cable by default.
+- The iPhone helper (WebDriverAgent 16.14.0) accepts connections only over the USB cable by default, and web pages
+  cannot read its answers; apps and pages on the iPhone itself can still reach it while it runs, so stop it when
+  you are done.
 - Live preview of the iPhone screen as a private page in your web browser (this Mac only), with Refresh, Home and
   Copy screenshot buttons; it pauses automatically while you sign in or unlock.
 - Guided setup in background jobs (fetch, build, start) with status polling, safe restarts of the plugin's own

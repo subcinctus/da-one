@@ -282,9 +282,18 @@ class FindDeviceTests(unittest.TestCase):
     def test_exact_match_wins_over_normalized(self):
         devices = [
             {"device_id": 1, "udid": UDID.replace("-", "").lower(), "connection_type": "USB", "product_id": 1},
-            {"device_id": 2, "udid": UDID, "connection_type": "Network", "product_id": 1},
+            {"device_id": 2, "udid": UDID, "connection_type": "USB", "product_id": 1},
         ]
         self.assertEqual(usbmux.find_device(UDID, devices)["device_id"], 2)
+
+    def test_wifi_entries_never_match(self):
+        # Finder's "Show this iPhone when on Wi-Fi": an exact Network entry must not hide a normalized USB one,
+        # and a Network-only listing is "not connected over USB".
+        usb = {"device_id": 1, "udid": UDID.replace("-", "").lower(), "connection_type": "USB", "product_id": 1}
+        wifi = {"device_id": 2, "udid": UDID, "connection_type": "Network", "product_id": 1}
+        self.assertEqual(usbmux.find_device(UDID, [wifi, usb])["device_id"], 1)
+        self.assertIsNone(usbmux.find_device(UDID, [wifi]))
+        self.assertIsNone(usbmux.find_device(UDID, [dict(wifi, connection_type="")]))
 
     def test_usb_preferred_among_exact_matches(self):
         devices = [
@@ -386,6 +395,15 @@ class FakeDaemonTests(unittest.TestCase):
         sock = usbmux.connect(UDID, 8100, timeout=2.0, env=fake.env())
         sock.close()
         self.assertEqual(fake.received()[1]["DeviceID"], 4)
+
+    def test_connect_over_wifi_only_is_device_not_found(self):
+        echo = self.start_echo()
+        fake = self.start_fake()
+        fake.add_device(UDID, ports={8100: echo.target}, connection_type="Network", device_id=3)
+        with self.assertRaises(UsbmuxError) as caught:
+            usbmux.connect(UDID, 8100, timeout=2.0, env=fake.env())
+        self.assertEqual(caught.exception.reason, "device_not_found")
+        self.assertEqual(fake.connects, [])
 
     def test_connect_matches_normalized_serial(self):
         echo = self.start_echo()
