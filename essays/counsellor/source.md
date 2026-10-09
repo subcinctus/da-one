@@ -24,69 +24,69 @@ I plan to build a studio in India where talented people without connections are 
 *Question: Why specifically do you want to attend the UCLA Producers Program?*
 I want the Producers Program because it starts with development, for features and for television. By the spring of the first year I would be pitching a slate of projects to an industry panel. As a camera assistant on Khauf and on my current project under Boney Kapoor, I have seen projects once they reach the set, not how they are developed, financed and sold. The slate pitch, and later the thesis plan, would make me do that work myself.
 The first year also covers entertainment law and international finance and distribution. I need both, because the projects I want to develop should work in India and in the United States, and I will have to understand the contracts and the money in each. I also want to produce a directing student's thesis film, because I learn best by building something with a director from the first conversation.
-Los Angeles matters to me as well. I want to see how independent producers keep a slate going between projects, and to meet people here who could later become partners for the studio I plan to build in India.
+Los Angeles matters to me as well. I want to see how independent producers keep a slate going between projects, and to meet people there who could later become partners for the studio I plan to build in India.
 *187 words (excluding \[bracket\] notes)*
 ## **4. Qualities in role models**
 *Limit: half a page maximum*
 *Question: What two to three qualities do you most admire in people you consider role models?*
 I admire people who are careful with what belongs to someone else. I first saw why it matters at Mitti to Matka, where the money we raised during COVID was meant for potters' families. On a set the same applies to a client's budget and a crew's time.
 I also admire honesty about limits. The people I respect most say clearly what they can deliver and what they cannot, even when a bigger promise would be easier to make. On the sets I have worked on, many problems started with a promise someone could not keep.
-I started out as an assistant cinematographer on short films and a camera assistant on Khauf under Pankaj Kumar, so I look up to people who explain how the work is done and trust newcomers with responsibility. I plan to run my own crews the same way.
-*143 words (excluding \[bracket\] notes)*
+I look up to people who explain how the work is done and then trust newcomers with some of it. I started out as an assistant cinematographer on short films and a camera assistant on Khauf under Pankaj Kumar, so I know what that is worth to someone new. I plan to run my own crews the same way.
+*155 words (excluding \[bracket\] notes)*
 ## **5. A difficult or stressful situation with collaborators**
 *Limit: half a page maximum*
 *Question: Briefly describe a specific difficult or stressful situation where you helped solve a problem with collaborators.*
-Between 2020 and 2022 a group of friends and I made The Classroom, a five-part web series released on YouTube. As well as co-directing, shooting and editing, I organised it, and the shoots had to be scheduled around our exams. \[What went wrong before a shoot.\]
-\[What could not move.\] \[What I did first.\] \[The decision we made.\]
-\[What we finished, and when.\]
-*40 words (excluding \[bracket\] notes)*
+Between 2020 and 2022, while we were still at school, a group of friends and I made The Classroom, a five-part web series released on YouTube. As well as co-directing, shooting and editing, I organised it, and the shoots had to be scheduled around our exams.
+On one shoot day, one of the actors dropped out at the last second. Rather than lose the day, we invented a new character on the spot, a funny sports teacher, to replace the missing role. I had to play him myself.
+Our scriptwriter was at home, not on set. The lines had been written for the role we had lost, so we worked together remotely to rewrite them to suit a sports teacher. The new role also needed a costume, and I managed to get a standard tracksuit at no cost. The story of the episode still held together.
+*146 words (excluding \[bracket\] notes)*
 ## **6. Original Treatment 1 (feature film)**
 *Limit: 3 pages maximum, double-spaced, 12pt (about 800 words)*
 *Question: Original treatment (no adaptations). Feature film treatment: title, logline, genre, story synopsis.*
-**Title:** BACKGROUND (working title)
-**Logline:** After thirty silent years as a film extra in Mumbai, a man is handed one line on a superstar's set, and when it becomes the best moment in the film, his daughter, the assistant director running that set, must choose between fighting the star's people to keep it and protecting the career her father's silence paid for.
-**Genre:** Comedy-drama
+**Title:** MARRYING THE ICE
+**Logline:** A Balti homestay hustler with a one-way ticket to Bengaluru must first help his eighty-year-old grandmother marry two glaciers and revive their village's dead stream, but the groom ice lies across the Line of Control, above the village where her brother has lived since 1971.
+**Genre:** Comic drama
 **Synopsis:**
-Kishore Pawar, 52, has appeared in more than six hundred Hindi films and has never said a word in any of them. He has been a wedding guest, a corpse, a cricket fan, and the man reading a newspaper behind the hero in three different decades. Two safari suits mean coordinators always cast him as "rich." Under the bed in his Goregaon chawl he keeps a biscuit tin of payment slips, each labelled with the star's name, and he has one piece of professional advice: stand near the tea trolley, because the camera always ends up there.
-His daughter Rhea, 26, is the first Pawar with her name typed on a call sheet. She is second assistant director on AAKHRI STATION, the comeback film of superstar Aryaman Sehgal, third generation of a film family. Rhea runs the background: three hundred people she turns into a city every night. For two years she has kept her father off her sets so nobody can say she hired family, in an industry where everyone else does.
-On a night shoot at a railway platform set in Film City, the coordinator is forty extras short and books Kishore anyway. Rhea can't send him home. Between takes she watches him fix a young extra's walk and fold a newspaper under a sleeping child's head. The scene, in which Aryaman returns to the station where his mother left him, is dying on its fourteenth take. The director, Ganesh Pillai, notices Kishore and asks him to say something as the star passes. Anything. Kishore looks at the departure board: "Gaadi late hai, saab. Sabki hoti hai." The train's late, sir. Everyone's is. Aryaman laughs, caught off guard, and then doesn't. It is the first true take of the night. The crew applauds a junior artist, which nobody has seen before.
-Kishore tells no one at home. Thirty years have taught him that scenes get cut. But in the edit the moment holds, and at the studio's internal screening the room laughs at the line, then goes still. The head of marketing makes it the final beat of the trailer.
-At the midpoint the trailer drops and Kishore's line becomes the sound of a country running late, laid over stalled trains, exam results and delayed grooms. A YouTuber finds him. Neighbours string marigolds along the chawl. A news channel puts him on a panel. For one week, Kishore is seen.
-Then Bunty, the star's manager, calls. Every comment is about the uncle, not the hero. Aryaman's camp demands the line be cut from the trailer and the film, and the studio, which needs the star's promotional tour, agrees. Worse, they want a reshoot in which Aryaman says the line himself, and for continuity they need the same passenger standing beside him, silent. Rhea's boss hands her the job: rebook her father to listen while a richer man says his words. A promotion to first AD on the studio's next film is mentioned, lightly, twice.
-Kishore makes it easy for her. He returns the news channel's fee, accepts the booking at eighteen hundred rupees for the night, and irons his safari suit.
-On the reshoot night Rhea runs a perfect set. Aryaman says "Sabki hoti hai" nineteen times, dead every time, and he knows it. Kishore stands on his mark, silent. During a lighting change Rhea finds the star where her father said the camera always ends up: at the tea trolley. Second ADs do not approach stars. She plays him the original take on her phone, his own face in the only moment of the film where he looks surprised. Aryaman watches it twice, hands back the phone and walks to set. He asks Ganesh for one more, and tells Kishore, by name, to say it.
-The line stays in the film. Bunty makes sure the promotion goes to a producer's nephew.
-On release day the Pawars sit in a single-screen cinema in Goregaon. When the line comes, the whole hall says it with him. Kishore stays through the end credits, which list no junior artists, and reads every name anyway.
-The final image: three months later, Rhea is first AD on a small independent film. The call sheet she prints names every background performer. Kishore folds his copy, "Kishore Pawar, Man at bus stop, 1 line," and places it in the biscuit tin, on top.
-*793 words (excluding \[bracket\] notes)*
+Ali Hussain, 24, meets every tourist taxi that reaches Turtuk, a Balti apricot village in Ladakh's Nubra Valley that was in Pakistan-administered Baltistan until 1971. He sells rooms in his grandmother's homestay and, at the Thang viewpoint, fifty-rupee looks through binoculars at Frano, the first village across the Line of Control. He does not mention that his great-uncle lives there. His one-way ticket, for the week the season ends, is to a Bengaluru call centre that sells Himalayan holidays.
+In August the stream in the stone channels under the apricot trees stops. Zainab Bano, 80, has never seen it dry. The white glacier that feeds it is down to a dirty thumbnail. Zainab tells Ali he is not leaving until the stream runs again. Her father knew the Balti remedy: marry the ice. White female ice and grey male ice, cut from two glaciers, are carried uphill in silence, never set down or stopped, and buried together under boulders, where in ten winters or so a glacier grows. Ali's counter-offer: he marries the ice before his flight, then goes. Zainab agrees at once, which worries him.
+In October, Ali cuts the bride from the dying glacier and packs her in apricot crates with sawdust. Only then does Zainab name the groom: Turtuk's ice has always married the grey glacier above Frano, and has not since 1971. The bride cannot stop, so she rides in Ali's taxi, which drives the road to Thang and back, day and night.
+The legal route to Frano goes through Delhi, Dubai and Islamabad. When the diesel runs out at 2 a.m., Ali keeps the bride moving on a tractor inner tube in the eddy below the village, the rope round his wrist, until he falls asleep. By morning his own binoculars find the inner tube on the shingle below Frano. "She has gone to her in-laws," says Zainab.
+A cousin in Dubai patches through a call from Frano. Sajjad Ahmed, 22, found the crates, stencilled with the homestay's number, and took them to his grandfather, Muhammad Yusuf, 84, Zainab's brother. The siblings hear each other for the first time since 1971: he was at a wedding in Frano the night the armies stopped. They talk about apricots for forty minutes before anyone mentions water. Ali, who sells Frano for fifty rupees a look, holds the phone and says nothing. Frano's stream is dying too, and the village needs a bride: the one on the shingle touched the ground, so she is only ice.
+Nothing crosses the Line by hand except the sweets the two armies swap at the brigade's Diwali flag meeting, two days before Ali's flight. Ali talks Major Deepak Sangwan, 36, into adding a box from Turtuk's families to the brigade's sweets, then tells him what will be inside. The Major's register has a column for sweets and none for ice, and he is not going to rule a new one. Across the Line, Sajjad does the same.
+At dawn on Diwali, Turtuk cuts two brides, one for Frano and one for Frano's groom. One goes into a sweet box; the men walk the other in circles under the apricot trees, waiting for the groom. At the Line a jawan, briefed on the rules, marks time through twenty minutes of handshakes and photographs with thirty-five kilos of bride on his shoulder, facing a Pakistani soldier doing the same with the groom. The boxes change shoulders without touching the table. Zainab watches through Ali's binoculars. On a roof in Frano, a hand mirror flashes.
+That night Ali carries the groom up a north-facing slope and says nothing for six hours, a personal record. A maulvi recites as bride and groom go under the boulders with charcoal, sawdust and clay pots of Shyok water. At the same hour Frano buries Turtuk's bride with its own grey ice. Two glaciers marry, one on each side.
+Ali flies to Bengaluru on the date on his ticket, charcoal still under his nails. The binocular money buys a return for next Diwali, when the boxes will carry apricots. Someone has to talk the Major round.
+Ten summers later the first meltwater comes down the stone channel. Zainab, ninety, puts her feet in it and tells Ali it is colder than it used to be. By noon it has crossed the Line, as the river does every second, without papers.
+*784 words (excluding \[bracket\] notes)*
 ## **7. Original Treatment 2 (television series)**
 *Limit: 3 pages maximum, double-spaced, 12pt (about 800 words)*
 *Question: Original treatment (no adaptations). Television treatment: title, logline, genre, premise, short character descriptions of major characters, brief synopsis of the pilot episode.*
-**Title:** CALL SHEET
-**Logline:** Four film-school graduates with no industry connections run a tiny production company out of a rented flat in Mumbai, taking every mattress ad, music video and wedding that pays the rent so they can fund the one short film they believe in.
-**Genre:** Half-hour workplace comedy-drama
-**Premise:** In Mumbai the film industry runs on surnames, and Second Unit has none that open doors. Its four partners met at film school and rent a two-bedroom flat in Andheri West that is also their office, edit suite and equipment store. They say yes to anything with a budget. Every episode is one job and one call sheet: the document that promises where everyone will be, and is wrong by eleven in the morning. The comedy comes from the work itself, the clients, borrowed locations, rented gear and favours that hold an independent shoot together in India. The drama comes from the money, which Kabir keeps in three folders on his phone, RENT, GEAR and FILM, and which always moves the wrong way. The season runs on two quiet clocks: whether they can afford to make Aisha's short film, NAMAK, before the monsoon floods the salt pans where it is set, and whether Neha leaves first.
+**Title:** BORROWED SKY
+**Logline:** In 1975 NASA lends India a satellite for one year, and an ISRO technician rides a motorcycle between forty Orissa villages keeping their first televisions alive, until Emergency officials use the evening viewings to round up men for sterilisation and she starts breaking her own sets.
+**Genre:** Period drama series that darkens into a political thriller; eight episodes of about 50 minutes.
+**Premise:** On 1 August 1975 NASA's ATS-6 satellite, lent to India for one year, starts beaming farming, health and family-planning programmes to televisions in 2,400 villages, each fed by a ten-foot chicken-wire dish. Indira Gandhi's Emergency is five weeks old. In Sambalpur, Orissa, Jharana Meher keeps forty of those sets alive. Each episode a different one goes dead, she rides in on her Rajdoot, and the fault is never in the set. It is a priest who thinks the screen steals his worshippers or a caste quarrel over who sits in front. Two clocks run underneath. The first: the loan ends on 31 July 1976, and her job with it. The second: sterilisation targets rise until district officials notice that the evening viewing puts every man in a village in one place at dusk. By spring the round-ups begin, and Jharana starts breaking her own sets so the men stay home. Saying why could get her jailed. Season one ends the night the sky goes blank.
 **Major characters:**
-Kabir Sethi (24): trained cinematographer and de facto producer. Says yes before checking, then works out how to make it true. Believes every problem is one phone call from solved.
-Aisha Qureshi (24): director and the group's conscience. She will shoot anything except a lie, which is inconvenient in advertising.
-Vikram Rane (25): production manager. Can talk his way into a temple, a police station or a closed mall at midnight. Loses anything written down, including permits, receipts and, once, a client.
-Neha Iyer (23): editor and DIT, the only one who knows whether the footage actually exists. Quietly applying for staff jobs at a post-production house, in a browser tab that is always open.
-Mrs D'Souza (60s): their landlady downstairs, a retired continuity supervisor with forty years of Hindi films behind her. She collects the rent with a red pen and a list of continuity errors in their work. She knows everyone and introduces no one, yet.
-**Pilot synopsis: "Location TBC"**
-Six days of rent left. Mrs D'Souza's notice is under the door, with a note that the boy's watch in their last music video changed wrists twice.
-Kabir accepts a one-day commercial for Nindiya Mattresses without reading the brief. Vikram has found a warehouse in Bhiwandi for free. At six the next morning they discover why: it is also booked by a Bhojpuri music video with twenty dancers, a smoke machine and a generator louder than the dancers. Vikram negotiates a border down the middle of the floor made of a blue tarpaulin and a promise of samosas.
-The client, Parul from brand marketing, arrives with the approved script and rewrites it on her phone in the car park. The mattress now has to "speak to Gen Z," cure back pain and feature a dog. Aisha refuses to film a medical claim. Kabir, who has already spent the advance on the camera rental, proposes the only thing he can: they shoot both. Parul's version before lunch, Aisha's after, and nobody tells Parul about the second.
-By noon the camera is overheating, wrapped in a wet towel and fed ice from the dancers' cooler. Vikram has found a dog, borrowed from a watchman, which falls asleep on the mattress mid-take and makes Parul laugh for the first time. Neha copies cards on a laptop balanced on a paint drum, and between batches she opens her job application and fills in one more line.
-Aisha's version is forty seconds long. A nurse comes home after a night shift and finally sleeps through the pressure cooker next door, a neighbours' quarrel and a Bhojpuri song leaking through the wall. It promises nothing. Neha cuts both films overnight on the dining table. Mrs D'Souza, climbing up with the rent book, watches the nurse version over Neha's shoulder and says only, "Keep the sound of the cooker."
-Parul sends both to her boss, the second one to show what she rejected. The boss picks the nurse.
-The money clears on day five. Kabir pays Mrs D'Souza, pays the rental house, and moves what remains, thirty-one thousand four hundred rupees, into the folder marked FILM. He doesn't announce it. Aisha sees the notification over his shoulder and says nothing either.
-That night Neha sits at the dining table with the application half finished. The other three are asleep on the gear cases. She closes the tab, for now.
-*773 words (excluding \[bracket\] notes)*
+Jharana Meher (23): weaver's daughter, radio mechanic, and the only woman on the maintenance team; her wage is the first in the house not earned at a loom. She finds a fault in a circuit by smell and one in a village by watching who sits where.
+Thomas Varghese (47): Jharana's supervisor, from Kerala, who wants Orissa's uptime to beat Rajasthan's. He hired her over eleven men. By July he must recommend one technician for a permanent post.
+Ashok Rath (42): district family-planning officer, a courteous doctor who has delivered enough ninth children to believe in his programme. His targets come from Delhi, and each is larger than the last.
+Nilamani Sahu (54): Kendupali's headmaster, who wears the set's key around his neck and oils his hair before every broadcast, in case the screen can see him too. By spring he has a quota of men to "motivate", and one place where they all sit still.
+Ed Lindqvist (38): NASA engineer who helped build ATS-6. In his Nebraska hometown the first television sat in the Grange hall. His orders: report on the hardware, stay out of Indian politics.
+Gopal Majhi (9): goatherd who skips the morning school broadcast and never misses the evening one. He knows the satellite is a god. He is the youngest of five.
+**Pilot synopsis: "Facing West"**
+1 August 1975, the first day of broadcasts. At the maintenance centre Varghese has chalked every village on a blackboard, ready for a tick or a cross. He gives Ed, just in from Maryland, a toolbox and the back seat of Jharana's Rajdoot.
+At three o'clock a boy cycles in from Kendupali: the test card is all snow. Twenty-two kilometres of laterite mud later, Ed is red to the knees. Three hundred people sit in the school ground, in rows somebody has clearly argued about. Nilamani, apologising to each row, explains the fault to Ed, because Ed is holding the toolbox. The set is fine. The dish has been turned towards the sunrise and garlanded with marigolds.
+Gopal turned it, because gods face east. Ed explains geostationary orbit with a lantern and a guava. Gopal listens politely and keeps both hands on the dish. The evening broadcast is an hour away.
+This god, Jharana tells the boy, is like Jagannath riding his chariot to his aunt's house. He is only visiting: he has come from America, he is staying above a lake in Africa, and in a year he goes home. A good host faces his guest. Gopal helps her swing the dish west-south-west, thirty degrees up. The marigolds stay.
+Kendupali's first television picture is a test card, and three hundred people applaud it.
+At the back stands a man with a notebook, his bush shirt too clean for the road. Jharana takes him for a survey man counting viewers. During the family-planning programme he watches the men, not the screen. Afterwards he introduces himself to Nilamani as Dr Ashok Rath and asks, kindly, how many of these men have three children or more.
+Jharana logs the fault: "Dish turned east. Cause: devotion." Gopal leaves the guest a banana. On Varghese's board Kendupali gets its tick; the two villages she did not reach get crosses.
+As she leaves, her headlight finds the dish, tilted west towards a borrowed satellite, marigolds on its pole. Beneath it Rath writes "Kendupali: 131 men. All present at dusk."
+*799 words (excluding \[bracket\] notes)*
 ## **8. Role in optional additional materials**
 *Limit: not stated (visual materials max 10 minutes total). Optional.*
 *Question: Indicate the role you played in the production.*
-The Classroom (2020 to 2022), five-part school web series released on YouTube. Role: co-director, cinematographer and editor; also organised the series (found places to shoot, scheduled shoots around exams, kept classmates involved). \[Episode or excerpt, running time, link.\]
-*32 words (excluding \[bracket\] notes)*
+The Classroom (2020 to 2022), five-part school web series released on YouTube. Role: co-director, cinematographer, editor and organiser (found places to shoot, scheduled shoots around exams, kept classmates involved); also played one role on screen. \[Episode or excerpt, running time, link.\]
+*35 words (excluding \[bracket\] notes)*
 ## **9. Awards and distinctions**
 *Limit: not stated. Optional.*
 *Question: List academic awards, prizes, honors, fellowships, or other distinctions you have received.*
@@ -114,7 +114,7 @@ KARAN CHAUDHARY
 Gurugram, India | \[email\] | \[phone\] | \[portfolio link\]
 EDUCATION
 B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by \[RGNIYD or TISS\]), July 2022 to June 2025
-Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Sector 54, Gurugram. Grade 12: 75%. \[Year\]
+Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram. \[Year\]
 Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, \[2018 or 2019\] to 2020
 EXPERIENCE
 Camera assistant, \[project title\], under producer Boney Kapoor, \[company\], Oct 2025 to present
@@ -132,7 +132,7 @@ SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: \[list\].
 ACHIEVEMENTS
 Football: 1st place, Gurugram city (2019); 4th place, Haryana state (2020)
-*231 words (excluding \[bracket\] notes)*
+*226 words (excluding \[bracket\] notes)*
 # **2. University of North Carolina School of the Arts (UNCSA), MFA in Filmmaking, Creative Producing concentration**
 **Early deadline: 2 November 2026 (non-binding). Final deadline: 20 January 2027.** The credential evaluation must arrive by the chosen deadline, which makes 2 November tight.
 ## **1. Letter of Intent**
