@@ -32,7 +32,7 @@
 
 ## Screenshots and pixel_to_point
 
-- Take one only when custom-drawn content, covering popups or missing labels need a visual judgement.
+- Take one only when custom-drawn content, covering popups or missing labels need a visual judgment.
 - The screenshot arrives as an image in the same result, already scaled for reading (about 720 x 1568 pixels).
 - Convert image pixels to iPhone points with `image.pixel_to_point`:
   `x = pixel_x * pixel_to_point[0]`, `y = pixel_y * pixel_to_point[1]`. Pass those points to `iphone_tap`.

@@ -179,7 +179,7 @@ Details: [verification](references/verification.md).
 
 - First load them with ToolSearch (query `iphone`).
 - If no `iphone_*` tools exist even after ToolSearch, run `python3 --version` with Bash first. A message about
-  the Xcode licence or "command line developer tools" means the plugin could not start (see the
+  the Xcode license or "command line developer tools" means the plugin could not start (see the
   iphone-use-setup skill's troubleshooting), not that the phone failed.
 - If a tool binding is broken but Python works, continue the same authorized step through the command-line
   fallback: [CLI fallback](references/cli-fallback.md).

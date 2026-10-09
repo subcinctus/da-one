@@ -1,15 +1,15 @@
 # Third-party notices
 
 iPhone Use for Claude Code is written in Python using only the Python standard library. It ships no third-party
-code. This file lists the projects it is based on or works with, and their licences.
+code. This file lists the projects it is based on or works with, and their licenses.
 
 ## 1. iPhone-use by ZHONG XIN (MIT)
 
 - Project: iPhone-use, a Codex plugin by ZHONG XIN, version 0.3.6
 - Source: https://github.com/zhongerxin/iPhone-use
-- Licence: MIT
-- How it is used: design and behaviour reference. This plugin is a fresh re-implementation for Claude Code; its tool
-  set, safety rules, setup flow and operating guidance follow the behaviour of iPhone-use 0.3.6.
+- License: MIT
+- How it is used: design and behavior reference. This plugin is a fresh re-implementation for Claude Code; its tool
+  set, safety rules, setup flow and operating guidance follow the behavior of iPhone-use 0.3.6.
 
 ```text
 MIT License
@@ -39,7 +39,7 @@ SOFTWARE.
 
 - Project: Appium WebDriverAgent, version 16.14.0, commit `d17782422d55ff1e5e0ceb74eb1fd509cc0c35b6`
 - Source: https://github.com/appium/WebDriverAgent
-- Licence: BSD-3-Clause
+- License: BSD-3-Clause
 - How it is used: WebDriverAgent is the helper app that runs on the iPhone. It is **not bundled** with this plugin.
   During setup the plugin downloads the pinned commit from GitHub onto the user's Mac, then builds and signs it there
   with the user's own Apple account. Setup also applies a one-line local change to that downloaded copy so that the
@@ -84,7 +84,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 - Project: appium-ios-device, version 3.1.24
 - Source: https://github.com/appium/appium-ios-device
-- Licence: Apache-2.0
+- License: Apache-2.0
 - How it is used: consulted only as a protocol reference for the usbmuxd wire format (message framing and the
   ListDevices and Connect requests). No code from it is included; the plugin's USB client is an independent Python
   implementation.
