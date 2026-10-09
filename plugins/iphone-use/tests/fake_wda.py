@@ -741,6 +741,7 @@ def _like_pattern(pattern):
 
 
 def _compare(actual, operator, modifiers, literal):
+    """NSPredicate-style comparison: nil or mismatched types are unequal (so only `!=` holds)."""
     if isinstance(actual, bool):
         if isinstance(literal, bool):
             expected = literal
@@ -1030,6 +1031,7 @@ class FakeWDA:
         self.submits = []
         self.buttons = []
         self.on_drag = None
+        self.handler_errors = []
         self.requests = []
         self.mjpeg = bool(mjpeg)
         self.mjpeg_fps = mjpeg_fps
@@ -1649,6 +1651,9 @@ class FakeWDA:
             return handler(params, query, arguments)
         except _Fault as fault:
             return fault
+        except Exception as exc:  # e.g. a test's on_tap callback failed: answer like WDA, never print
+            self.handler_errors.append(exc)
+            return _Fault("unknown error", "FakeWDA handler raised %s: %s" % (type(exc).__name__, exc))
 
     def _response(self, outcome, close):
         if isinstance(outcome, _Fault):

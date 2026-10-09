@@ -832,6 +832,17 @@ class GestureTests(FakeCase):
         self.ok("POST", self.s("/wda/tap"), {"x": 50, "y": 320})
         self.assertEqual(hits, ["Row"])
 
+    def test_a_failing_callback_becomes_a_wda_error(self):
+        def broken(fake, node):
+            raise RuntimeError("callback bug")
+
+        self.fake.set_tree("com.apple.Preferences", Node("Application", children=[
+            Node("Button", label="Boom", rect=(0, 0, 100, 100), on_tap=broken)]))
+        value = self.wda_error("POST", self.s("/wda/tap"), {"x": 10, "y": 10}, code="unknown error", status=500)
+        self.assertIn("RuntimeError: callback bug", value["message"])
+        self.assertEqual([type(e) for e in self.fake.handler_errors], [RuntimeError])
+        self.assertIs(self.ok("GET", "/wda/locked"), False, "the connection survives")
+
     def test_element_click_runs_on_tap(self):
         self.fake.set_foreground("com.apple.springboard")
         notes_icon = self.find("label == 'Messages'")[0]
