@@ -68,6 +68,7 @@ async function main() {
     } catch (e) {
       console.error(`[${name}] init error:`, e);
     }
+    sys.__inited = true; // even after a failed init, so a partially working system can still run
   }
   setLoading(1, 'Ready');
   try { game.hud.hideLoading(); } catch (e) { /* ignore */ }

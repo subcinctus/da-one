@@ -66,7 +66,8 @@ report.bootMs = Date.now() - t0;
 const game = (fn, arg) => page.evaluate(typeof fn === 'string' ? fn : `(${fn})(window.game, ${JSON.stringify(arg)})`);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const keys = async (code, ms) => { await page.keyboard.down(code); await wait(ms); await page.keyboard.up(code); };
-const shot = (name) => page.screenshot({ path: path.join(outDir, name.endsWith('.png') ? name : name + '.png') });
+const shot = (name) => page.screenshot({ path: path.join(outDir, name.endsWith('.png') ? name : name + '.png'), timeout: 120000 })
+  .catch((e) => report.log.push('screenshot ' + name + ' failed: ' + String(e.message || e).split('\n')[0]));
 const log = (...a) => report.log.push(a.map((x) => (typeof x === 'string' ? x : JSON.stringify(x))).join(' '));
 
 try {
@@ -82,8 +83,13 @@ try {
 }
 await wait(seconds * 1000);
 report.stats = await page.evaluate(() => (window.game && window.game.debug && window.game.debug.stats) ? window.game.debug.stats() : null).catch((e) => String(e));
-await page.screenshot({ path: shotPath });
-report.screenshot = path.relative(root, shotPath);
+page.setDefaultTimeout(120000);
+try {
+  await page.screenshot({ path: shotPath, timeout: 120000 });
+  report.screenshot = path.relative(root, shotPath);
+} catch (e) {
+  report.screenshot = 'FAILED: ' + String(e.message || e).split('\n')[0];
+}
 await browser.close();
 
 report.ok = report.pageErrors.length === 0 && report.consoleErrors.length === 0;

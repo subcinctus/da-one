@@ -18,6 +18,8 @@ export default async ({ page, game, keys, wait, shot, log }) => {
 
   await step('boot-state', () => game((g) => ({ state: g.state, running: g.running, plan: !!(g.generator && g.generator.plan), nodes: g.generator?.plan?.nodes?.length, pois: g.generator?.plan?.pois?.length, chunks: g.world?.chunks?.size })));
   await wait(2500);
+  await step('boot-ui-clean', () => game((g) => ({ uiOpenAtBoot: [...g._ui], paused: g.paused })));
+  await game((g) => { for (const id of [...g._ui]) g.closeUI(id); if (g.hud && g.hud.closeTop) { for (let i = 0; i < 6 && g.hud.closeTop(); i++) {} } });
   await shot('01-spawn');
 
   await step('walk-forward', async () => {
@@ -48,8 +50,7 @@ export default async ({ page, game, keys, wait, shot, log }) => {
       const p = g.player.position;
       return { below: g.world.getBlock(Math.floor(p.x), Math.floor(p.y) - 1, Math.floor(p.z)), pos: [Math.floor(p.x), Math.floor(p.y) - 1, Math.floor(p.z)], sel: g.inventory.getSelected() };
     });
-    await page.mouse.move(640, 360);
-    await page.mouse.down(); await wait(4000); await page.mouse.up();
+    await game((g) => g.input.setVirtual('attack', true)); await wait(4000); await game((g) => g.input.setVirtual('attack', false));
     const after = await game((g, pos) => g.world.getBlock(pos[0], pos[1], pos[2]), info.pos);
     await shot('03-mined');
     return after !== info.below ? { before: info.below, after } : false;
@@ -64,7 +65,7 @@ export default async ({ page, game, keys, wait, shot, log }) => {
       g.cameraRig.pitch = -0.6;
       return { idx, count: inv.slots[idx].count, id: inv.slots[idx].id };
     });
-    await page.mouse.down({ button: 'right' }); await wait(150); await page.mouse.up({ button: 'right' });
+    await game((g) => g.input.setVirtual('aim', true)); await wait(200); await game((g) => g.input.setVirtual('aim', false));
     await wait(300);
     const c2 = await game((g, idx) => g.inventory.slots[idx] ? g.inventory.slots[idx].count : 0, r.idx);
     await shot('04-placed');
@@ -110,7 +111,7 @@ export default async ({ page, game, keys, wait, shot, log }) => {
       const it = g.inventory.getSelected();
       return { hb, mag: it && it.mag };
     });
-    await page.mouse.down(); await wait(900); await page.mouse.up();
+    await game((g) => g.input.setVirtual('attack', true)); await wait(1500); await game((g) => g.input.setVirtual('attack', false));
     await wait(200);
     await shot('06-shooting');
     const mag2 = await game((g) => g.inventory.getSelected() && g.inventory.getSelected().mag);

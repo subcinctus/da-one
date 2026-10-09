@@ -60,6 +60,7 @@ export class Game {
    * Register a system. It becomes game[name]. Systems are updated in registration order.
    * sys may implement: init() (async ok), update(dt), lateUpdate(dt), getBlips(out), onResize(w,h).
    * sys.runWhenPaused = true  -> update() also runs while paused / UI open (HUD, menus, audio).
+   * update()/lateUpdate() are never called before the system's init() has completed (sys.__inited).
    */
   addSystem(name, sys) {
     this[name] = sys;
@@ -83,7 +84,7 @@ export class Game {
   closeUI(id) {
     if (!this._ui.delete(id)) return;
     this.input.clear();
-    if (this._ui.size === 0 && this.state === 'playing') this.input.requestLock();
+    if (this._ui.size === 0 && this.state === 'playing' && !this.paused) this.input.requestLock();
     this.events.emit('uiChanged', { open: false, id, ids: [...this._ui] });
   }
 
@@ -157,11 +158,11 @@ export class Game {
     if (run) this.time += dt;
 
     for (const s of this.systems) {
-      if (!s.update || (!run && !s.runWhenPaused)) continue;
+      if (!s.update || !s.__inited || (!run && !s.runWhenPaused)) continue;
       try { s.update(dt); } catch (e) { this._reportError(s, 'update', e); }
     }
     for (const s of this.systems) {
-      if (!s.lateUpdate || (!run && !s.runWhenPaused)) continue;
+      if (!s.lateUpdate || !s.__inited || (!run && !s.runWhenPaused)) continue;
       try { s.lateUpdate(dt); } catch (e) { this._reportError(s, 'lateUpdate', e); }
     }
     try { this.renderer.render(this.scene, this.camera); } catch (e) { this._reportError({ __name: 'renderer' }, 'render', e); }

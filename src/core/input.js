@@ -56,7 +56,9 @@ export class Input {
     this.look = { dx: 0, dy: 0 };
     this.wheel = 0;
     this.locked = false;
-    this.lockFailed = false;     // true once a pointer-lock request failed (iframe sandbox etc) -> fallback look
+    this.lockFailed = false;     // true once pointer lock is known to be unavailable (sandboxed iframe, unsupported) -> fallback look
+    this.touchMode = false;      // set by touch controls: pointer lock is never requested
+    this._lockFailures = 0;      // consecutive failed requests (a single failure can just be the browser's re-lock cooldown)
     this.mouseX = 0; this.mouseY = 0; // last client mouse position
     this._codeToActions = new Map();
     for (const [action, codes] of Object.entries(KEYMAP)) {
@@ -115,20 +117,32 @@ export class Input {
     document.addEventListener('pointerlockchange', () => {
       const was = this.locked;
       this.locked = document.pointerLockElement === c;
+      if (this.locked) this._lockFailures = 0;
       if (was !== this.locked) this.game.events.emit('pointerLockChange', { locked: this.locked });
     });
-    document.addEventListener('pointerlockerror', () => { this.lockFailed = true; });
+    document.addEventListener('pointerlockerror', () => this._lockError(null));
+  }
+
+  /**
+   * A lock request failed. Sandboxed / unsupported environments switch to fallback look immediately;
+   * anything else (e.g. Chrome's ~1 s cooldown right after the user pressed Esc) only counts as a strike,
+   * and three consecutive strikes switch to fallback look.
+   */
+  _lockError(err) {
+    const msg = String((err && (err.name + ' ' + err.message)) || '').toLowerCase();
+    if (msg.includes('sandbox') || msg.includes('notsupported') || msg.includes('not supported')) { this.lockFailed = true; return; }
+    if (++this._lockFailures >= 3) this.lockFailed = true;
   }
 
   /** Request pointer lock (must be called from a user gesture). Silently falls back if unsupported. */
   requestLock() {
-    if (this.locked || this.lockFailed) return;
+    if (this.locked || this.lockFailed || this.touchMode) return;
     const c = this.canvas;
     if (!c.requestPointerLock) { this.lockFailed = true; return; }
     try {
       const p = c.requestPointerLock();
-      if (p && p.catch) p.catch(() => { this.lockFailed = true; });
-    } catch (e) { this.lockFailed = true; }
+      if (p && p.catch) p.catch((e) => this._lockError(e));
+    } catch (e) { this._lockError(e); }
   }
 
   exitLock() { if (document.pointerLockElement) document.exitPointerLock(); }
