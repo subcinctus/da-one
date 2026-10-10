@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import { clamp } from '../core/math.js';
 import { WORLD } from '../core/config.js';
-import { TUNE, LEVELS, carsFor, evadeSeconds, searchRadius, hitChance, MIN_HIT_GAP } from './police_const.js';
+import { TUNE, LEVELS, CATCHUP, carsFor, evadeSeconds, searchRadius, hitChance, MIN_HIT_GAP } from './police_const.js';
 import { RoadNet } from './police_roads.js';
 import { PoliceCar } from './police_car.js';
 import { HeliUnit } from './police_heli.js';
@@ -79,7 +79,8 @@ export class Police {
     this._deferred = [];
     this._hitAcc = 0;
     this._lastHitT = -1e9;
-    this.stats = { cars: 0, officers: 0, helis: 0, roadblocks: 0, busts: 0, evasions: 0, shots: 0, hitRolls: 0, pSum: 0 };
+    this._aheadFlip = false;
+    this.stats = { cars: 0, officers: 0, helis: 0, roadblocks: 0, busts: 0, evasions: 0, shots: 0, hitRolls: 0, pSum: 0, aheadSpawns: 0, carBusts: 0 };
   }
 
   get isSearching() { return this.searching; }
@@ -259,7 +260,9 @@ export class Police {
       this._nextRoadblockT = now + 6;
       this._tokens.clear();
       this.trackUntil = 0;
-      this.reveal(TUNE.DISPATCH_TRACK);
+      // the first units spawn beyond sight range: dispatch follows a getaway car a little longer than a runner
+      const pl = g.player, pv = pl && pl.inVehicle;
+      this.reveal(pv && speedOf(pv) > 2.5 ? TUNE.DISPATCH_TRACK_CAR : TUNE.DISPATCH_TRACK);
     }
     if (n > prev) g.audio?.play?.('wanted_up', { volume: 1 });
     g.events.emit('wantedChanged', { level: n, prev, reason });
@@ -491,7 +494,8 @@ export class Police {
   }
 
   _cleanup(pp, now) {
-    const g = this.game;
+    const g = this.game, pv = g.player && g.player.inVehicle;
+    const fastChase = this.wanted > 0 && this.knows && !this.busting && !!pv && !!pv.velocity && speedOf(pv) > CATCHUP.AHEAD_SPEED;
     for (let i = this.cars.length - 1; i >= 0; i--) {
       const c = this.cars[i];
       if (c.removed || !c.vehicle) { this.cars.splice(i, 1); continue; }
@@ -503,7 +507,9 @@ export class Police {
       else if (c.role === 'patrol' && c.state === 'patrol') {
         drop = d > 210 || (d > 120 && !inView && c.stateT > 80);
         if (drop) this._patrolT = now + rand(12, 25);
-      } else if (d > TUNE.RELOCATE_DIST && !inView) {
+      } else if ((d > TUNE.RELOCATE_DIST || (fastChase && c.state === 'pursue' && c.role === 'pursuit' && d > CATCHUP.RELOCATE_FAST &&
+        (v.position.x - pp.x) * pv.velocity.x + (v.position.z - pp.z) * pv.velocity.z < 0)) && !inView) {
+        // left far behind: recycle (a fast getaway car gets its replacement from ahead, see _spawnPoint)
         drop = true;
         if (this.wanted > 0) this._nextCarT = Math.min(this._nextCarT, now + 1.5);
       } else if (v.position.y < -10) drop = true;
@@ -554,12 +560,27 @@ export class Police {
     return true;
   }
 
-  _spawnPoint(minD, maxD) {
+  /**
+   * Spawn point for a unit minD..maxD from the player (or the search area). ahead = a pursuit unit: when the player's
+   * vehicle is fast, about every second one comes in from roads ahead of it (cutting it off) instead of trailing.
+   */
+  _spawnPoint(minD, maxD, ahead = false) {
     const g = this.game, pl = g.player;
     let pp = pl.inVehicle && pl.inVehicle.position ? pl.inVehicle.position : pl.position;
     // while the player is hidden, reinforcements converge on the search area, not on the player
     const searchMin = this.searching && this.wanted > 0 ? 55 : 0;
     if (searchMin > 0) pp = { x: this.lastKnown.x, y: pp.y, z: this.lastKnown.z };
+    const pv = pl.inVehicle;
+    const sp = pv && pv.velocity ? speedOf(pv) : 0;
+    if (ahead && searchMin === 0 && sp > CATCHUP.AHEAD_SPEED && this.roads && this.roads.ok && (this._aheadFlip = !this._aheadFlip)) {
+      const hx = pv.velocity.x / sp, hz = pv.velocity.z / sp, ox = pp.x, oz = pp.z;
+      const fwd = (x, z) => {
+        const dx = x - ox, dz = z - oz, l = Math.hypot(dx, dz) || 1;
+        return (dx * hx + dz * hz) / l > CATCHUP.AHEAD_DOT && this._spawnOk(x, z, 0);
+      };
+      const pa = this.roads.spawnPoint(pp.x, pp.z, minD, maxD, fwd, 70);
+      if (pa) { this.stats.aheadSpawns++; return pa; }
+    }
     const accept = (x, z) => this._spawnOk(x, z, searchMin);
     let pt = this.roads && this.roads.ok ? this.roads.spawnPoint(pp.x, pp.z, minD, maxD, accept, 70) : null;
     if (!pt && this.roads && this.roads.ok) pt = this.roads.spawnPoint(pp.x, pp.z, minD * 0.7, maxD * 1.5, accept, 70);
@@ -577,7 +598,7 @@ export class Police {
   _spawnCar(swat, role) {
     const g = this.game, vs = g.vehicles;
     if (!vs || typeof vs.spawn !== 'function') return this._spawnFootUnit(swat);
-    const pt = role === 'patrol' ? this._spawnPoint(90, 140) : this._spawnPoint(TUNE.SPAWN_MIN, TUNE.SPAWN_MAX);
+    const pt = role === 'patrol' ? this._spawnPoint(90, 140) : this._spawnPoint(TUNE.SPAWN_MIN, TUNE.SPAWN_MAX, true);
     if (!pt) return null;
     const y = groundAt(g, pt.x, pt.z);
     let v = null;
@@ -885,7 +906,8 @@ export class Police {
       if (this._bustT >= TUNE.BUST_FREEZE) this._finishBust();
       return;
     }
-    if (this.wanted < 1 || pl.alive === false || pl.inVehicle) { this.bustProgress = Math.max(0, this.bustProgress - dt * 2); return; }
+    if (this.wanted < 1 || pl.alive === false) { this.bustProgress = Math.max(0, this.bustProgress - dt * 2); return; }
+    if (pl.inVehicle) { this._bustInCar(dt, pl.inVehicle); return; }
     // giving up = standing / walking slowly, crouching, or hands up (player.handsUp, if Player exposes it)
     const slow = speedOf(pl) < TUNE.BUST_SPEED || !!pl.crouching || !!pl.handsUp;
     let cop = null;
@@ -901,6 +923,38 @@ export class Police {
       if (this.bustProgress > 0.25) g.hud?.prompt?.('Officer: "Freeze! You\'re under arrest!" - move to resist');
       if (this.bustProgress >= TUNE.BUST_TIME) this._startBust();
     } else this.bustProgress = Math.max(0, this.bustProgress - dt * 1.5);
+  }
+
+  /**
+   * The suspect sits in a stopped car: an officer at the driver door pulls them out and arrests them (no endless
+   * stalemate). Driving off resists (progress resets). Not for a helicopter in the air.
+   */
+  _bustInCar(dt, v) {
+    const g = this.game, pl = g.player;
+    const moving = speedOf(v) > TUNE.CAR_BUST_SPEED || (v.isHeli && v.onGround === false);
+    if (moving || !v.position) { this.bustProgress = 0; return; }
+    let cop = null;
+    if (typeof v.getDoorPosition === 'function') v.getDoorPosition(_v, 1, 0.6);
+    else _v.copy(v.position);
+    for (const o of this.officers) {
+      if (!o.alive || o.removed || o.state === 'knocked' || o.state === 'dead' || o.state === 'leave' || o.state === 'return') continue;
+      if (Math.abs(o.position.y - v.position.y) > 2) continue;
+      if (Math.hypot(o.position.x - _v.x, o.position.z - _v.z) <= TUNE.CAR_BUST_RANGE) { cop = o; break; }
+    }
+    if (!cop) { this.bustProgress = Math.max(0, this.bustProgress - dt * 1.5); return; }
+    this.bustProgress += dt;
+    if (this.bustProgress > 0.25) g.hud?.prompt?.('Officer: "Step out of the vehicle!" - drive away to resist');
+    if (this.bustProgress < TUNE.BUST_TIME) return;
+    // dragged out of the car, then the normal arrest
+    let out = false;
+    try { out = !!g.vehicles?.exit?.({ force: true }); } catch (e) { out = false; }
+    if (!out && pl.inVehicle === v) {
+      // no Vehicles exit path (stub / car not registered as the player's): step out at the door ourselves
+      try { if (typeof pl.setInVehicle === 'function') pl.setInVehicle(null, _v.clone()); } catch (e) { /* player stub */ }
+    }
+    if (pl.inVehicle) { this.bustProgress = 0; return; }
+    this.stats.carBusts++;
+    this._startBust();
   }
 
   _startBust() {

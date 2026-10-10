@@ -22,7 +22,8 @@ const _q = [];
 const COMFORT_DECEL = 3.6;   // m/s^2 used to plan slowing for turns / stop lines
 const FOLLOW_DECEL = 4.5;    // m/s^2 assumed when computing safe following speed
 
-function humanFilter(e) {
+/** People cars must never drive into (alive, not hidden). */
+export function humanFilter(e) {
   return (e.kind === 'ped' || e.kind === 'cop' || e.kind === 'player') && e.alive !== false && !e.hidden;
 }
 
@@ -61,6 +62,13 @@ export class TrafficDriver {
     this.panicT = 0; this.panicX = 0; this.panicZ = 0;
     this.latOffset = 0; this.latTarget = 0; this.overtakeT = 0; this.pullOverT = 0;
     this.lastSteer = 0;
+    this.staticObsT = 0; this.staticRef = null; this.staticTryT = -9; // parked / abandoned car in the lane
+    this.obsInLane = false;          // the obstacle sits in our lane corridor (not only in a manoeuvre's path)
+    this.revThen = null;             // after reversing: 'pass' = try to go around what blocked us
+    this.revCheckT = 0; this.bumpT = 0;
+    this.passT = 0;                  // going around a static obstacle: tighter steering (short look-ahead)
+    this.holdRef = null;             // backed off from this obstacle: wait ~6 m behind it (room to swing out)
+    this.holdUntil = 0;
     this.ramCd = 0;
     this.exitT = -1; this.exitMood = null;
     // junction right of way
@@ -185,7 +193,7 @@ export class TrafficDriver {
       // keep the city alive around the player: far cars prefer to head back toward them
       bx = p.position.x - v.position.x; bz = p.position.z - v.position.z;
       const l = Math.hypot(bx, bz) || 1;
-      bias = l > 60 ? 0.7 : 0; bx /= l; bz /= l;
+      bias = l > 40 ? 1.0 : 0; bx /= l; bz /= l;
     }
     let total = 0;
     const w = _q;
@@ -194,7 +202,8 @@ export class TrafficDriver {
       let k = c.turn === 'straight' ? 1.0 : c.turn === 'right' ? 0.75 : 0.65;
       if (c.to.deadEnd) k *= 0.01;
       if (bias) k *= Math.max(0.05, 1 + bias * (c.to.dx * bx + c.to.dz * bz));
-      if (c.turn !== 'straight' && c.radius < this.minRadius * 0.9) k *= c.turn === 'right' ? 0.02 : 0.25;
+      // too tight for this wheelbase (buses / trucks): only when there is no other way
+      if (c.turn !== 'straight' && c.radius < this.minRadius * 0.9) k *= c.radius < this.minRadius * 0.6 ? 0.001 : 0.02;
       w.push(k);
       total += k;
     }
@@ -212,6 +221,8 @@ export class TrafficDriver {
     const opts = cur.siblings.filter((l) => l !== cur);
     const target = opts[Math.floor(Math.random() * opts.length)];
     if (!this.traffic.laneClear(this, target, this.s)) return false;
+    // never cut across people: the sideways move must keep clear of everyone on the way
+    if (!this.traffic.swerveClear(this, this.lat, target.offset - cur.offset, 30)) return false;
     this.route.length = 0;
     this.route.push(target);
     this.traffic.leaveJunctions(this);
@@ -345,7 +356,7 @@ export class TrafficDriver {
     this.scanObstacles(panic);
 
     // ---- 3. right of way at the next junction
-    let vYield = Infinity;
+    let vYield = Infinity, stopD = Infinity;
     this.yielding = false;
     if (cur.kind === 'lane' && this.route.length > 1 && this.route[1].kind === 'conn') {
       const conn = this.route[1];
@@ -359,7 +370,7 @@ export class TrafficDriver {
           this.waitT = 0;
           tr.addWaiting(this, conn.node);
         }
-        const stopD = distEnd - halfL - 0.3;
+        stopD = distEnd - halfL - 0.3;
         const brakeD = speed > 0 ? (speed * speed) / (2 * 6.5) : 0;
         const committed = stopD < Math.max(0.4, brakeD * 0.7);
         // front of the queue = nothing (car) between us and the stop line; only those take part in "first come"
@@ -384,7 +395,7 @@ export class TrafficDriver {
     let vFollow = Infinity;
     if (this.obsGap < Infinity) {
       const u = Math.max(0, this.obsSpeed);
-      const minGap = this.obsHuman ? 2.6 : panic ? 1.0 : 2.0;
+      const minGap = this.obsHuman ? 2.6 : this.holdRef && this.obsRef === this.holdRef ? 6 : panic ? 1.0 : 2.0;
       const timeGap = panic ? 0.4 : 0.8;
       const desired = minGap + timeGap * Math.max(0, speed);
       const vGap = u + 0.6 * (this.obsGap - desired);
@@ -404,8 +415,9 @@ export class TrafficDriver {
     this.vLimitDbg = vLimit;
     this.vTarget = Math.max(0, Math.min(vLimit, vCurve, vYield, vFollow, vSiren));
 
-    // ---- 6. blocked: honk, then go around / change lane
-    const blocked = vFollow < 1 && this.vTarget < 1 && !this.yielding;
+    // ---- 6. blocked: honk, then go around / change lane. Waiting at a junction does not count, unless the thing in
+    // front sits before the stop line (a parked / abandoned car near the corner would otherwise block forever)
+    const blocked = vFollow < 1 && this.vTarget < 1 && (!this.yielding || this.obsGap < stopD - 1);
     if (blocked && Math.abs(speed) < 0.8) this.blockedT += tdt;
     else this.blockedT = Math.max(0, this.blockedT - tdt * 2);
     const ref = this.obsRef;
@@ -422,6 +434,32 @@ export class TrafficDriver {
       if (this.overtakeT <= 0) this.latTarget = 0;
     }
     const other = ref && ref.ai instanceof TrafficDriver && !ref.ai.released ? ref.ai : null;
+    // ---- a parked / abandoned / broken-down / player car sits in our lane: go around it (early, while still some way
+    // back, when nobody is in it; after ~3 s for the player's car); too close to steer around -> back off first
+    const staticCar = !!ref && !this.obsHuman && !!ref.def && !ref.isHeli &&
+      (!ref.driver || ref.driver === 'player' || (ref.ai instanceof TrafficDriver && ref.ai.state === 'stopped')) &&
+      Math.abs(ref.velocity.x) + Math.abs(ref.velocity.z) < 0.5;
+    const hr = this.holdRef;
+    if (hr && (g.time > this.holdUntil || hr.removed || Math.abs(hr.velocity.x) + Math.abs(hr.velocity.z) > 1)) this.holdRef = null;
+    if (!staticCar || ref !== this.staticRef) { this.staticObsT = 0; this.staticTryT = -9; this.staticRef = staticCar ? ref : null; }
+    else if (blocked && Math.abs(speed) < 0.8) this.staticObsT += tdt;
+    if (staticCar && (this.obsInLane || this.obsGap < 4.5) && this.overtakeT <= 0 && g.time - this.staticTryT >= 1) {
+      const patience = ref.driver === 'player' ? 3 : 0.5;
+      const early = this.obsInLane && ref.driver !== 'player' && this.obsGap >= 5 && this.obsGap < 30 &&
+        (!this.yielding || this.obsGap < stopD - 1);
+      if (early || this.staticObsT > patience) {
+        this.staticTryT = g.time;
+        if (this.obsGap >= 4.5) {
+          // only the stretch just past this one car has to be clear on the other side (oncoming traffic is still
+          // projected forward by corridorClear)
+          const len = ref.def.size ? ref.def.size.l : 5;
+          if (this.obsInLane && (this.laneChange(true) || this.tryOvertake(Math.min(42, this.obsGap + len + 6)))) {
+            this.blockedT = 0; this.passT = 5; this.holdRef = null;
+          }
+        } else if (this.staticObsT > patience + 1) { this.backOff(); return; }
+      }
+    }
+    if (this.staticObsT > 9 && this.obsGap < 4.5) { this.backOff(); return; }
     // mutual block (head-on after an overtake, two cars nosed into each other): the one further off its lane,
     // or else the newer one, backs off and re-paths
     if (other && this.blockedT > 2.5 && other.obsRef === v && other.blockedT > 1.5) {
@@ -437,8 +475,15 @@ export class TrafficDriver {
     if (this.blockedT > (panic ? 1.5 : 4.5) && this.overtakeT <= 0) {
       const queue = other && other.state === 'drive' && (other.yielding || other.vTarget < 1 || other.blockedT > 0);
       const staticObs = this.obsSpeed < 0.5;
-      if (!queue && staticObs) {
-        if (!this.laneChange(true)) this.tryOvertake();
+      const playerAhead = this.obsHuman && ref === g.player;
+      // (static cars are handled above; vehicles closer than ~4 m cannot be steered around)
+      if (!queue && staticObs && !playerAhead && !staticCar && (this.obsHuman || this.obsGap >= 4)) {
+        // (both refuse when the sideways move would pass close to a person)
+        if (!this.laneChange(true) && !this.tryOvertake() && this.obsHuman && this.blockedT > 7.5) {
+          // someone stands in the lane right in front of us: back off first to make room for a wide berth
+          this.backOff();
+          return;
+        }
       } else if (this.blockedT > 14 && !this.obsHuman) {
         // long jam behind something that never moves: back off and find another way
         this.blockedT = 0;
@@ -465,17 +510,29 @@ export class TrafficDriver {
     if (v.inWater || v.flooded) this.giveUp();
   }
 
-  tryOvertake() {
+  /** Pass what is ahead on the left. dist: how far the opposite side must be clear (default 42 m). */
+  tryOvertake(dist = 42) {
     const v = this.vehicle;
     const myW = v.def.size.w / 2;
     const off = this.obsLat - (myW + this.obsAcross + 0.8);
     const lat = clamp(off, -5.5, -1.5);
-    if (!this.traffic.corridorClear(this, lat, 42)) return false;
+    // corridorClear also refuses when anyone stands near the swerve (people are never driven around closely)
+    if (!this.traffic.corridorClear(this, lat, dist)) return false;
     this.latTarget = lat;
     this.overtakeT = rand(4.5, 6);
     this.blockedT = 0;
     this.traffic._stats.overtakes = (this.traffic._stats.overtakes || 0) + 1;
     return true;
+  }
+
+  /** Too close behind something we want to pass: reverse straight back a few metres, then go around it. */
+  backOff() {
+    this.staticObsT = 0; this.staticTryT = -9; this.blockedT = 0;
+    this.overtakeT = 0; this.latTarget = 0;
+    this.revThen = 'pass';
+    if (this.obsRef && !this.obsHuman) { this.holdRef = this.obsRef; this.holdUntil = this.game.time + 20; }
+    this.startReverse(true);
+    if (this.state === 'reverse') { this.revSteer = 0; this.reverseT = rand(2.1, 2.6); }
   }
 
   /** Back up with opposite steer, then re-path. soft: a deliberate manoeuvre (counts less toward giving up). */
@@ -492,6 +549,46 @@ export class TrafficDriver {
     this.revSteer = -(Math.sign(this.lastSteer) || (Math.random() < 0.5 ? 1 : -1));
     this.traffic.leaveJunctions(this);
     if (Math.abs(v.speed) < 0.5 && this.honkCd <= 0) { this.honk(0.4); this.honkCd = 3; }
+  }
+
+  /** Something (a person or a vehicle) right behind the rear bumper: stop reversing. */
+  rearBlocked() {
+    const g = this.game, v = this.vehicle, def = v.def;
+    const halfL = def.size.l / 2, halfW = def.size.w / 2;
+    const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw);
+    const list = g.vehicles ? g.vehicles.list : null;
+    if (list) {
+      for (let i = 0; i < list.length; i++) {
+        const o = list[i];
+        if (o === v || o.removed || (o.isHeli && !o.onGround)) continue;
+        const rx = o.position.x - v.position.x, rz = o.position.z - v.position.z;
+        const back = -(rx * fx + rz * fz);
+        if (back < 0 || back > halfL + 9) continue;
+        const od = o.def || def;
+        const ext = Math.max(od.size.w, od.size.l) / 2;
+        if (Math.abs(rx * -fz + rz * fx) > halfW + ext * 0.8) continue;
+        if (back - halfL - ext < 0.9) return true;
+      }
+    }
+    const ents = g.entities;
+    if (ents && ents.query) {
+      _v.set(v.position.x - fx * (halfL + 1.5), v.position.y + 1, v.position.z - fz * (halfL + 1.5));
+      const found = ents.query(_v, 2.6, humanFilter, this.traffic._qOut);
+      for (let i = 0; i < found.length; i++) {
+        const e = found[i];
+        const rx = e.position.x - v.position.x, rz = e.position.z - v.position.z;
+        if (-(rx * fx + rz * fz) > halfL - 0.5 && Math.abs(rx * -fz + rz * fx) < halfW + 1.2) return true;
+      }
+    }
+    return false;
+  }
+
+  /** Vehicles backstop: our car touched the player at low speed. Stop and wait. */
+  onBumpedPerson() {
+    if (this.released) return;
+    this.bumpT = Math.max(this.bumpT, 1.2);
+    this.overtakeT = 0; this.latTarget = 0;
+    if (this.honkCd <= 0) { this.honk(0.5); this.honkCd = 2.5; }
   }
 
   /** Hopeless: stop and let Traffic remove the car when nobody watches. */
@@ -511,6 +608,8 @@ export class TrafficDriver {
     const speed = Math.max(0, v.speed);
     const range = 12 + speed * 2.4;
     this.obsGap = Infinity; this.obsSpeed = 0; this.obsLat = 0; this.obsAcross = 0; this.obsRef = null; this.obsHuman = false;
+    this.obsInLane = false;
+    const midMove = Math.abs(this.lat - this.latOffset) > 0.6;
     // heading reference: path tangent here
     this.routeSample(Math.max(0, this.s), _s2);
     const hx = _s2.tx, hz = _s2.tz;
@@ -533,22 +632,27 @@ export class TrafficDriver {
         const c = Math.abs(Math.sin(o.yaw) * _s.tx + Math.cos(o.yaw) * _s.tz);
         const sn = Math.sqrt(Math.max(0, 1 - c * c));
         const across = ohw * c + ohl * sn, alongExt = ohl * c + ohw * sn;
-        if (Math.abs(lat - latOff) > halfW + across + 0.35) continue;
         const gap = along - halfL - alongExt;
+        const inLane = Math.abs(lat - latOff) <= halfW + across + 0.35;
+        // mid-manoeuvre (lane change / overtake / pulling over): the body is still where it was, so also stop for
+        // anything about to be hit by where the car actually is (the swing-out itself is planned by the pass checks)
+        if (!inLane && !(midMove && gap < 1.2 && Math.abs(lat - this.lat) <= halfW + across)) continue;
         if (gap < this.obsGap && gap > -halfL) {
           this.obsGap = Math.max(0, gap);
           const ov = o.velocity;
           this.obsSpeed = ov ? ov.x * _s.tx + ov.z * _s.tz : 0;
-          this.obsLat = lat; this.obsAcross = across; this.obsRef = o; this.obsHuman = false;
+          this.obsLat = lat; this.obsAcross = across; this.obsRef = o; this.obsHuman = false; this.obsInLane = inLane;
         }
       }
     }
-    // people
+    // people: the swept corridor between the lane offset, where the car actually is and where it is steering to
+    // (overtakes / lane changes / pulling over), with a wide margin (never relaxed by panic)
     const ents = g.entities;
     if (ents && ents.query) {
       const look = Math.min(range, 6 + speed * 1.6);
       _v.set(px + hx * look * 0.5, py + 1, pz + hz * look * 0.5);
       const found = ents.query(_v, look * 0.5 + 3, humanFilter, this.traffic._qOut);
+      const lo = Math.min(latOff, this.lat, this.latTarget), hi = Math.max(latOff, this.lat, this.latTarget);
       for (let i = 0; i < found.length; i++) {
         const e = found[i];
         const rx = e.position.x - px, rz = e.position.z - pz;
@@ -557,13 +661,14 @@ export class TrafficDriver {
         this.routeSample(this.s + along, _s);
         const lat = (e.position.x - _s.x) * -_s.tz + (e.position.z - _s.z) * _s.tx;
         const er = e.radius || 0.3;
-        if (Math.abs(lat - latOff) > halfW + er + (panic ? 0.15 : 0.45)) continue;
-        if (panic && e.kind !== 'player' && speed > 8) continue; // panicking drivers plough on
+        const m = halfW + er + 1.0;
+        if (lat < lo - m || lat > hi + m) continue;
+        if (panic && e.kind !== 'player' && speed > 8) continue; // panicking drivers plough on (never into the player)
         const gap = along - halfL - er;
         if (gap < this.obsGap) {
           this.obsGap = Math.max(0, gap);
           this.obsSpeed = 0;
-          this.obsLat = lat; this.obsAcross = er; this.obsRef = e; this.obsHuman = true;
+          this.obsLat = lat; this.obsAcross = er; this.obsRef = e; this.obsHuman = true; this.obsInLane = true;
         }
       }
     }
@@ -577,10 +682,25 @@ export class TrafficDriver {
     if (this.state === 'reverse') {
       this.reverseT -= dt;
       c.throttle = -0.75; c.brake = 0; c.handbrake = false; c.steer = this.revSteer;
+      // never back into someone / something
+      this.revCheckT -= dt;
+      if (this.revCheckT <= 0) { this.revCheckT = 0.1; if (this.rearBlocked()) this.reverseT = Math.min(this.reverseT, 0); }
       if (this.reverseT <= 0) {
         this.state = 'drive';
         c.throttle = 0; c.brake = 1;
-        if (!this.repath()) this.giveUp();
+        const pass = this.revThen === 'pass';
+        this.revThen = null;
+        // after backing off to pass, keep the lane we are in (re-path only when pushed well off it)
+        if ((!pass || Math.abs(this.lat - this.latOffset) > 2.5) && !this.repath()) { this.giveUp(); return; }
+        if (pass) {
+          // now there is room to go around what blocked us
+          this.advance();
+          this.scanObstacles(this.panicT > 0);
+          const ref = this.obsRef;
+          const len = !this.obsHuman && ref && ref.def && ref.def.size ? ref.def.size.l : 0;
+          if (this.obsGap < 25 && this.obsInLane &&
+            (this.laneChange(true) || this.tryOvertake(len ? Math.min(42, this.obsGap + len + 6) : 42))) { this.passT = 5; this.holdRef = null; }
+        }
       }
       return;
     }
@@ -597,7 +717,10 @@ export class TrafficDriver {
     const r = this.route, cur = r[0];
     const turning = (cur.kind === 'conn' && cur.turn !== 'straight') ||
       (cur.kind === 'lane' && r.length > 1 && r[1].kind === 'conn' && r[1].turn !== 'straight' && cur.len - this.s < L);
-    if (turning) L = Math.max(3.6, Math.min(L, 3 + 0.45 * spd));
+    if (turning || this.passT > 0) L = Math.max(3.6, Math.min(L, 3 + 0.45 * spd));
+    if (this.passT > 0) this.passT -= dt;
+    // (long vehicles are kept off turns tighter than their turning circle by pickConn; in this vehicle model the body
+    // pivots about its centre, so they run wide rather than cutting the inside kerb)
     this.routeSample(this.s + L, _s);
     const tx = _s.x - _s.tz * this.latOffset, tz = _s.z + _s.tx * this.latOffset;
     const sy = Math.sin(v.yaw), cy = Math.cos(v.yaw);
@@ -619,6 +742,8 @@ export class TrafficDriver {
     let vT = this.vTarget;
     // emergency: something suddenly very close ahead (re-check every frame from the last scan)
     if (this.obsGap < 1.2 && speed > 1) vT = 0;
+    // just nudged a person (Vehicles backstop): hold still for a moment
+    if (this.bumpT > 0) { this.bumpT -= dt; vT = 0; }
     const err = vT - speed;
     if (vT < 0.25) {
       c.throttle = 0;

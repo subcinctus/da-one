@@ -81,10 +81,19 @@ export const totalAmmo = (item) => (item && item.kind === 'weapon' ? (item.mag |
 /** Weapons that use ammunition (mag > 0 in their definition). */
 export const usesAmmo = (weaponId) => !!(WEAPONS[weaponId] && WEAPONS[weaponId].mag > 0);
 
-/** True if a block id can be held / placed. */
+/**
+ * True for blocks that pay cash when mined (ores). Ores are never inventory items: they pay only when naturally
+ * generated, cannot be placed and are never handed out as (creative) stacks, so no place-and-mine money loop exists.
+ */
+export function isOreBlock(id) {
+  const d = BLOCKS[id];
+  return !!(d && d.value > 0);
+}
+
+/** True if a block id can be held / placed (never ores, see isOreBlock). */
 export function isPlaceableBlock(id) {
   const d = BLOCKS[id];
-  return !!(d && d.id !== 0 && d.placeable !== false);
+  return !!(d && d.id !== 0 && d.placeable !== false && !(d.value > 0));
 }
 
 /**
@@ -96,7 +105,7 @@ export function sanitizeItem(raw) {
   if (raw.kind === 'block') {
     let id = raw.id;
     if (typeof id === 'string') id = B[id] !== undefined ? B[id] : parseInt(id, 10);
-    if (!Number.isInteger(id) || !BLOCKS[id] || id === 0) return null;
+    if (!Number.isInteger(id) || !BLOCKS[id] || id === 0 || isOreBlock(id)) return null;
     const count = Math.max(0, Math.min(STACK_MAX, Math.floor(Number(raw.count) || 0)));
     return count > 0 ? { kind: 'block', id, count } : null;
   }

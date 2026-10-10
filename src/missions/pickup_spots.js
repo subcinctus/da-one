@@ -69,14 +69,18 @@ function farEnough(list, p, minD) {
   return true;
 }
 
+/** Respawn delays (s). Cash bundles are one-time finds (0 = never respawns; collected ones are saved). */
+export const RESPAWN = { default: 120, cash: 0, tnt: 600 };
+
 /**
- * All world pickup specs for a plan. Every entry respawns after `respawn` seconds (default 120).
+ * All world pickup specs for a plan. Every entry respawns after `respawn` seconds (default 120); hidden cash
+ * bundles never respawn (respawn 0) and the mine's TNT crates refill slowly (600 s).
  */
 export function worldPickupSpecs(plan, seed = 1) {
   const out = [];
   if (!plan) return out;
   const R = rng32((seed ^ 0x51c4a3) >>> 0);
-  const add = (type, p, amount, tag, respawn = 120) => {
+  const add = (type, p, amount, tag, respawn = type === 'cash' ? RESPAWN.cash : RESPAWN.default) => {
     if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.z)) return;
     out.push({ type, x: p.x, y: Number.isFinite(p.y) ? p.y : CL, z: p.z, amount, respawn, tag });
   };
@@ -125,8 +129,8 @@ export function worldPickupSpecs(plan, seed = 1) {
   const mine = plan.mine;
   if (mine && mine.cavern) add('cash', { x: mine.cavern.x + 2, y: mine.cavern.y, z: mine.cavern.z - 1 }, 500, 'mine');
   for (const m of pois(plan, 'mine')) {
-    add('block:TNT', besidePoi(m, 3, 1), 8, 'mine');
-    add('block:TNT', besidePoi(m, -3, 1), 8, 'mine');
+    add('block:TNT', besidePoi(m, 3, 1), 8, 'mine', RESPAWN.tnt);
+    add('block:TNT', besidePoi(m, -3, 1), 8, 'mine', RESPAWN.tnt);
     add('health', besidePoi(m, 0, 3.5), 60, 'mine');
   }
 

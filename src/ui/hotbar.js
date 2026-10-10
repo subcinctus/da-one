@@ -101,14 +101,25 @@ export class Hotbar {
       this._selKey = key;
       if (!first && cur) this._popName(cur);
       else if (!cur) { this.name.classList.remove('on'); this._nameT = 0; }
+    } else if (cur && this._nameT > 0) {
+      // popup still up while the count changes (placing, firing): keep its count in step with the slot
+      const html = this._popText(cur);
+      if (html !== this._nameHtml) { this._nameHtml = html; this.name.innerHTML = html; }
     }
     this._creative = creative;
   }
 
-  _popName(item) {
+  /** Popup HTML: item name + stack count (blocks) or magazine / reserve (guns). */
+  _popText(item) {
     let html = itemName(item).replace(/[<>&]/g, '');
     if (item.kind === 'weapon' && WEAPONS[item.id] && WEAPONS[item.id].mag > 0) html += '<small>' + (item.mag | 0) + ' / ' + (item.reserve | 0) + '</small>';
     else if (item.kind === 'block' && !this.game.inventory?.creative) html += '<small>x' + (item.count | 0) + '</small>';
+    return html;
+  }
+
+  _popName(item) {
+    const html = this._popText(item);
+    this._nameHtml = html;
     this.name.innerHTML = html;
     this.name.classList.add('on');
     this._nameT = 1.8;

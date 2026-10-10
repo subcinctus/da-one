@@ -48,7 +48,7 @@ export function sunriseSunset() {
 
 // ---------------------------------------------------------------------------------------------------------------
 // Palette keyframes by sun elevation e (= sunDir.y). Colours are sRGB hex, converted once to linear THREE.Colors.
-//   zen      sky zenith            hor     horizon (also fog + clear colour)
+//   zen      sky zenith            hor     horizon (also fog + clear colour + the dome below the horizon)
 //   glow     sun-side horizon glow anti    anti-solar twilight belt (pink)
 //   sunCol   sun disc tint / directional light colour
 //   hemiSky  hemisphere sky colour hemiGnd hemisphere ground colour
@@ -135,7 +135,9 @@ export function computeSkyState(e, rain = 0, s = makeSkyState()) {
     s.cloudShade.copy(s.cloud).multiplyScalar(0.62);
   }
   s.fog.copy(s.hor);
-  s.ground.copy(s.hor).multiplyScalar(0.82);
+  // the dome below the horizon must equal the fog colour exactly: fully fogged buildings / terrain and the edge of
+  // the loaded world then blend into the backdrop (no pale cut-out skyline, no visible world rim from altitude)
+  s.ground.copy(s.hor);
   s.fogScale = 1 - rain * 0.32;
   s.cloudOpacity = 0.8 + rain * 0.16;
   return s;

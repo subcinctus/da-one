@@ -11,12 +11,14 @@
 //
 // Layout: 16 columns of 32x32 cells; each cell holds a 16x16 tile surrounded by an 8 px wrap-around gutter, so every
 // mip level down to 1 px per tile samples only its own tile (no bleeding, seamless block-to-block filtering).
-// Mining crack overlays 'destroy_0'..'destroy_9' are included (transparent tiles, used by Player).
+// Mining crack overlays 'destroy_0'..'destroy_9' are included (transparent tiles, used by Player), and so are the
+// night tiles of engine_painters NIGHT_TILES (e.g. the lit room behind 'window_lit' glass), which the chunk shader
+// samples at a fixed cell offset (nightCells) for the night glow; block icons show them too.
 import * as THREE from 'three';
 import { BLOCKS, allTextureNames } from './blocks.js';
 import { PixelTile, buildCellMips, downsample, toHex } from './engine_pixels.js';
 import {
-  paintTexture, paintWaterFrame, TEXTURE_VARIANTS, WATER_FRAMES, DESTROY_STAGES,
+  paintTexture, paintWaterFrame, TEXTURE_VARIANTS, WATER_FRAMES, DESTROY_STAGES, NIGHT_TILES,
 } from './engine_painters.js';
 
 const TILE = 16;
@@ -75,6 +77,7 @@ export class TextureAtlas {
     const addName = (n) => { if (n && !seen.has(n)) { seen.add(n); names.push(n); } };
     for (const n of allTextureNames()) addName(n);
     for (let i = 0; i < DESTROY_STAGES; i++) addName('destroy_' + i);
+    for (const n of Object.values(NIGHT_TILES || {})) addName(n);
     addName('missing');
     for (const name of names) {
       const nv = Math.max(1, TEXTURE_VARIANTS[name] || 1);
@@ -106,6 +109,29 @@ export class TextureAtlas {
 
   /** True if the atlas has a tile for this name. */
   has(name) { return this._variants.has(name); }
+
+  /**
+   * Cell range of a texture's variants (they are laid out consecutively, row-major): {first, last, cols, rows}, or
+   * null for an unknown name. Shaders recover the cell index from a tile UV as
+   * floor(u * cols) + floor((1 - v) * rows) * cols.
+   */
+  cellRange(name) {
+    const nv = this._variants.get(name);
+    if (!nv) return null;
+    const a = this._byKey.get(name + '#0'), b = this._byKey.get(name + '#' + (nv - 1));
+    return a && b ? { first: a.index, last: b.index, cols: COLS, rows: this.rows } : null;
+  }
+
+  /**
+   * Night tile of a block texture (engine_painters NIGHT_TILES): {first, last, shift, cols, rows} where the night
+   * version of the day tile in cell c is cell c + shift. null when the texture has none (or variant counts differ).
+   */
+  nightCells(name) {
+    const night = NIGHT_TILES && NIGHT_TILES[name];
+    const day = this.cellRange(name), nt = night ? this.cellRange(night) : null;
+    if (!day || !nt || nt.last - nt.first !== day.last - day.first) return null;
+    return { ...day, shift: nt.first - day.first };
+  }
 
   /** UV rect {u0,v0,u1,v1} of a tile; unknown names map to a neutral fallback tile. */
   uvFor(name, variant = 0) {
@@ -246,7 +272,9 @@ export class TextureAtlas {
       }
       return out;
     }
-    const top = this.tilePixels(def.tex.top), side = this.tilePixels(def.tex.side);
+    // blocks with a night tile (lit windows) show it in their icon: the item should look lit in the inventory
+    const iconTex = (n) => (NIGHT_TILES && NIGHT_TILES[n] && this.has(NIGHT_TILES[n]) ? NIGHT_TILES[n] : n);
+    const top = this.tilePixels(iconTex(def.tex.top)), side = this.tilePixels(iconTex(def.tex.side));
     // 2:1 isometric cube: top rhombus T(24,2) R(46,13) B(24,24) L(2,13); sides 22 px tall
     const put = (o, t, u, v, shade) => {
       const tx = Math.min(15, Math.max(0, Math.floor(u * TILE))), ty = Math.min(15, Math.max(0, Math.floor(v * TILE)));

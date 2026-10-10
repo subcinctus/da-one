@@ -47,9 +47,6 @@ export class Combat {
     this._sounds = [];
     this._explodeDepth = 0;
     this._deferred = [];
-    this._light = null;
-    this._lightT = 0;
-    this._lightMax = 0;
     this._errored = false;
     this._aiRec = makeTraceRecord();
     this._aiDir = new THREE.Vector3();
@@ -63,10 +60,6 @@ export class Combat {
 
   init() {
     const g = this.game;
-    // one dedicated muzzle light for the player's shots (kept in the scene at 0 so no shader recompiles)
-    this._light = new THREE.PointLight(0xffc27a, 0, 12, 2);
-    this._light.castShadow = false;
-    g.scene.add(this._light);
     const ev = g.events;
     ev.on('playerRespawned', () => { this.pw._cancelReload(); this.pw.pendingSwing = null; });
     ev.on('playerDied', () => { this.pw._cancelReload(); this.pw.pendingSwing = null; });
@@ -122,7 +115,8 @@ export class Combat {
 
   /**
    * Generic shot for AI (cops, gang members, the police heli sniper). Applies the weapon's spread, pellets, damage
-   * (+x2 headshots), glass / TNT / impact handling, muzzle flash, tracer, positional sound and the gunfire event.
+   * (AI headshots: x aiHeadshot on NPCs, at most x1.25 on the player), glass / TNT / impact handling, muzzle flash,
+   * tracer, positional sound and the gunfire event.
    * RPG ids launch a rocket, grenade ids throw a grenade (both return null). Returns the main hit:
    * {entity, point, distance} | {block: {x,y,z,id}, point, normal, distance} | null.
    */
@@ -159,8 +153,9 @@ export class Combat {
         let head = false;
         if (isHumanoid(e) && e.alive !== false && Number.isFinite(e.height)) {
           head = rec.point.y > e.position.y + e.height * 0.83;
-          // NPC headshots on the player only sting a little more (no frustrating one-shots from a sniper cop)
-          if (head) dmg *= e === g.player ? Math.min(1.25, def.headshot ?? 2) : (def.headshot ?? 2);
+          // NPC headshots on the player only sting a little more (no frustrating one-shots from a sniper cop); NPC vs NPC
+          // keeps the AI multiplier (the big player headshot multipliers are for the player's guns only)
+          if (head) dmg *= e === g.player ? Math.min(1.25, def.headshot ?? 2) : (def.aiHeadshot ?? def.headshot ?? 2);
         }
         let h = hits.find((x) => x.entity === e);
         if (!h) { h = { entity: e, damage: 0, point: rec.point.clone(), dir: pd.clone(), headshot: false, pellets: 0 }; hits.push(h); }
@@ -298,15 +293,15 @@ export class Combat {
     return muzzleOffset(id, out || new THREE.Vector3());
   }
 
-  /** Muzzle light pulse for the player's shots. */
+  /**
+   * Extra muzzle light for the player's shots. fx.muzzleFlash already flashes a pooled light for every shot, so this
+   * only adds a second, wider pulse for the heavy guns (flash scale > 1.2: shotgun, sniper, RPG). No dedicated
+   * PointLight lives in the scene any more (one fewer light compiled into every lit shader).
+   */
   flashLight(pos, dir, k = 1) {
-    const L = this._light;
-    if (!L) return;
-    L.position.copy(pos);
-    if (dir) L.position.addScaledVector(dir, 0.15);
-    this._lightMax = 45 * k;
-    this._lightT = 0.055;
-    L.intensity = this._lightMax;
+    if (!pos || !(k > 1.2)) return;
+    try { this.game.fx?.flash?.(pos, { color: 0xffc27a, intensity: 45 * k, distance: 12, duration: 0.06, priority: 1 }); } catch (e) { /* fx */ }
+    void dir;
   }
 
   // ======================================================================================= frame
@@ -325,11 +320,6 @@ export class Combat {
     this.projectiles.update(dt);
     this.tnt.update(dt);
     for (let i = this.dummies.length - 1; i >= 0; i--) this.dummies[i].update(dt);
-    // muzzle light decay
-    if (this._light && this._lightT > 0) {
-      this._lightT -= dt;
-      this._light.intensity = this._lightT > 0 ? this._lightMax * (this._lightT / 0.055) : 0;
-    }
     this._updateGrenadeKey();
     this._updateDriveBy(dt);
   }

@@ -63,9 +63,10 @@ export class Menus {
     try { g.input?.exitLock?.(); } catch (e) { /* ignore */ }
     const m = this._mount('title');
     const box = el('div', 'bc-logo-box', m);
+    this._logoBox = box;
     let logo = null;
     try {
-      logo = createLogoCanvas(Math.min(560, Math.round(window.innerWidth * 0.84)));
+      logo = createLogoCanvas(logoWidth());
       box.appendChild(logo);
     } catch (e) {
       el('h1', '', box, 'BLOCK CITY').style.cssText = 'font:400 72px var(--font-display);margin:0;letter-spacing:.06em';
@@ -90,7 +91,53 @@ export class Menus {
     const touch = !!g.hud?.touchMode;
     foot.textContent = (touch ? 'Left stick to move · drag to look · ATK to shoot & mine' :
       'WASD move · Mouse look · F steal a car · E inventory · M map · Esc pause') + '   ·   seed ' + (g.seed ?? '');
+    this._fitTitle();
     setTimeout(() => { try { btns.querySelector('.bc-btn')?.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }, 50);
+  }
+
+  /**
+   * Short windows (embeds, previews, 800x450...): shrink the logo until the title column (logo, tagline, buttons and
+   * the footer) fits the height, so nothing is clipped or overlapped. One layout read; runs on show and on resize.
+   */
+  _fitTitle() {
+    const m = this.root, box = this._logoBox;
+    const logo = box && box.querySelector('canvas.bc-logo');
+    this._fitSize = [window.innerWidth, window.innerHeight];
+    if (!m || !logo || !logo.height) return;
+    try {
+      const cs = getComputedStyle(m);
+      const avail = m.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+      let top = Infinity, bottom = -Infinity, foot = 0;
+      for (const c of m.children) {
+        const st = getComputedStyle(c);
+        if (st.display === 'none') continue;
+        if (st.position === 'absolute') { if (c.classList.contains('foot')) foot = c.offsetHeight + 18; continue; }
+        top = Math.min(top, c.offsetTop);
+        bottom = Math.max(bottom, c.offsetTop + c.offsetHeight);
+      }
+      const over = bottom - top + foot - avail;
+      if (!(over > 0)) return;
+      const h = Math.max(56, logo.offsetHeight - over - 6);
+      const w = Math.floor(h * logo.width / logo.height);
+      const fit = createLogoCanvas(w);
+      fit.style.animation = logo.style.animation;
+      logo.replaceWith(fit);
+    } catch (e) { /* layout unavailable: keep the default size */ }
+  }
+
+  /** Window resized while the title is up: rebuild the logo at the size that fits the new window. */
+  onResize(w, h) {
+    if (this.screen !== 'title' || !this._logoBox) return;
+    const f = this._fitSize;
+    if (f && Math.abs(f[0] - (w || window.innerWidth)) < 8 && Math.abs(f[1] - (h || window.innerHeight)) < 8) return;
+    const old = this._logoBox.querySelector('canvas.bc-logo');
+    if (!old) return;
+    try {
+      const logo = createLogoCanvas(logoWidth());
+      logo.style.animation = 'none'; // no drop-in replay while resizing
+      old.replaceWith(logo);
+      this._fitTitle();
+    } catch (e) { /* keep the old logo */ }
   }
 
   _play() {
@@ -223,6 +270,7 @@ export class Menus {
   _close() {
     if (this.root) { this.root.remove(); this.root = null; }
     this.screen = null;
+    this._logoBox = null;
     this._kv = null;
     this._kvHtml = '';
   }
@@ -270,3 +318,8 @@ export class Menus {
 }
 
 function safe(fn) { try { return fn(); } catch (e) { return false; } }
+
+/** Preferred title logo CSS width (560 px max, 84% of the width); Menus._fitTitle shrinks it on short windows. */
+function logoWidth() {
+  return Math.max(160, Math.round(Math.min(560, (window.innerWidth || 1280) * 0.84)));
+}

@@ -272,7 +272,7 @@ export function buildGunShop(ctx) {
     btns.push(buy);
     if (ammo) btns.push(ammo);
   }
-  h('div', 'bcm-foot', root).innerHTML = 'Walk out of the marker to leave. <kbd>Esc</kbd> closes.';
+  h('div', 'bcm-foot', root).innerHTML = '<kbd>Esc</kbd> or ✕ to leave.';
 
   function refresh() {
     cash.refresh();
@@ -456,7 +456,7 @@ export function buildHospital(ctx) {
   });
   btn.style.maxWidth = '260px';
   void title;
-  h('div', 'bcm-foot', root).innerHTML = 'Dying is free too, but it costs you $100 and your armor.';
+  h('div', 'bcm-foot', root).innerHTML = 'Getting wasted lands you here too, with a $100 bill and no armor.';
   function refresh() {
     cash.refresh();
     const p = game.player || {};
@@ -574,7 +574,7 @@ export function buildSafehouse(ctx) {
     const info = game.save && typeof game.save.info === 'function' ? game.save.info() : null;
     sv.sub.textContent = info && info.time ? 'Last saved ' + info.ago + '.' : 'No save yet.';
     const rpSet = shops.respawnPoi === poi;
-    rp.sub.textContent = rpSet ? 'This safehouse is your respawn point.' : 'Wake up here after busts and loads.';
+    rp.sub.textContent = rpSet ? 'You wake up here after getting wasted (hospital bill still applies).' : 'Wake up here after getting wasted (hospital bill still applies).';
     rpBtn.disabled = rpSet;
     rpBtn.textContent = rpSet ? 'Respawn point set ✓' : 'Set respawn here';
     void sleepBtn;

@@ -74,6 +74,13 @@ async function main() {
   try { game.hud.hideLoading(); } catch (e) { /* ignore */ }
 
   game.state = 'title';
+  // Ask before closing / reloading the tab while playing (an accidental Ctrl+W or F5 would silently lose progress
+  // since the last autosave). Automated browsers (tools/smoke.mjs, soak harness) reload pages freely.
+  window.addEventListener('beforeunload', (e) => {
+    if (game.state !== 'playing' || navigator.webdriver) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
   game.events.emit('ready', {});
   if (game.params.get('autostart')) {
     game.startPlaying();

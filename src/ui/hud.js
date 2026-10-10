@@ -45,6 +45,8 @@ export class HUD {
     this._fpsT = 0;
     this._fpsTxt = '';
     this._lastLock = null;
+    /** UI layer ids that Esc / closeTop() never closes (their owner closes them: pause menu, sleep fade...). */
+    this.nonDismissable = new Set(['pause', 'sleep']);
   }
 
   // ================================================================== loading screen
@@ -149,12 +151,13 @@ export class HUD {
     ev.on('playerDied', () => {
       this.fx.setFilter('grayscale(1) contrast(1.12) brightness(.78)', 4.6);
       this.miningProgress = null;
-      this._delay(0.55, () => this.bigMessage('WASTED', '', { color: 'var(--wasted)', duration: 3.3 }));
+      // priority: pre-empts a queued / showing mission intro or MISSION PASSED (shown before the respawn)
+      this._delay(0.55, () => this.bigMessage('WASTED', '', { color: 'var(--wasted)', duration: 3.3, priority: true }));
     });
     ev.on('playerRespawned', () => { this.fx.clearFilter(); });
     ev.on('busted', () => {
       this.fx.setFilter('grayscale(.85) brightness(.82) contrast(1.08)', 3.8);
-      this.bigMessage('BUSTED', '', { color: 'var(--busted)', duration: 3 });
+      this.bigMessage('BUSTED', '', { color: 'var(--busted)', duration: 3, priority: true });
     });
     ev.on('vehicleEnter', (e) => {
       if (!e || !e.vehicle) return;
@@ -192,7 +195,10 @@ export class HUD {
   /** Help-text box (top-left, queued, max 3 visible). opts: {duration = 4, color}. Supports [Key] caps and *highlight*. */
   notify(text, opts = {}) { if (this.notifier) this.notifier.push(text, opts || {}); else this._pendingNotes = (this._pendingNotes || []).concat([[text, opts]]); }
 
-  /** Big centred message with letterbox bars (WASTED / BUSTED / MISSION PASSED...). opts: {color, duration = 3}. */
+  /**
+   * Big centred message with letterbox bars (WASTED / BUSTED / MISSION PASSED...). opts: {color, duration = 3,
+   * priority}: a priority message drops the queue and cuts the current one off (later messages queue behind it).
+   */
   bigMessage(title, subtitle = '', opts = {}) { this.big?.push(title, subtitle, opts || {}); }
 
   /** Contextual prompt (per-frame: call it every frame while it applies; it clears itself). */
@@ -254,8 +260,8 @@ export class HUD {
   get layerOpen() { return !!(this.panels?.open || this.panels?.confirmOpen || this.inventoryUI?.isOpen || this.fullMap?.isOpen); }
 
   /**
-   * Close the top-most closable layer (Esc): confirm > panels > inventory > map > any other open UI id.
-   * Returns true if something was closed.
+   * Close the top-most closable layer (Esc): confirm > panels > inventory > map > any other open UI id except the
+   * non-dismissable ones (pause menu, sleep fade). Returns true if something was closed.
    */
   closeTop() {
     if (!this._inited) return false;
@@ -265,7 +271,7 @@ export class HUD {
     if (this.fullMap.isOpen) { this.fullMap.close(); return true; }
     const ids = this.game._ui ? [...this.game._ui] : [];
     for (let i = ids.length - 1; i >= 0; i--) {
-      if (ids[i] === 'pause') continue;
+      if (this.nonDismissable.has(ids[i])) continue;
       this.game.closeUI(ids[i]);
       return true;
     }

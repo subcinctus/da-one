@@ -109,13 +109,15 @@ const k = (...keys) => keys.map((x) => `<kbd class="bc-key">${x}</kbd>`).join(' 
 const CONTROLS = [
   ['On foot', [
     ['Move', k('W', 'A', 'S', 'D')], ['Look', 'Mouse'], ['Sprint', k('Shift')], ['Jump / swim up', k('Space')],
-    ['Sneak', k('Ctrl') + ' or ' + k('X')], ['Camera (1st / 3rd / far)', k('C') + ' or ' + k('V')],
+    ['Sneak / dive (in water)', k('X') + ' or ' + k('Z')], ['Hands up (surrender)', 'Hold ' + k('B')],
+    ['Camera (1st / 3rd / far)', k('C') + ' or ' + k('V')],
     ['Enter / steal vehicle', k('F')], ['Shoot / punch', k('LMB')], ['Aim', k('RMB')], ['Reload', k('R')],
     ['Throw grenade', k('G')], ['Next weapon', k('Q')], ['Select hotbar slot', k('1') + ' … ' + k('9') + ' or wheel'],
   ]],
   ['Building', [
     ['Mine block (hold)', k('LMB')], ['Place block', k('RMB')], ['Pick block (creative)', k('MMB')],
-    ['Fly (creative)', 'Double-tap ' + k('Space')], ['Inventory / creative palette', k('E')],
+    ['Fly (creative)', 'Double-tap ' + k('Space')], ['Fly up / down (creative)', k('Space') + ' / ' + k('Shift')],
+    ['Fly fast (creative)', k('X')], ['Inventory / creative palette', k('E')],
   ]],
   ['Driving', [
     ['Accelerate / brake & reverse', k('W') + ' / ' + k('S')], ['Steer', k('A') + ' / ' + k('D')], ['Handbrake (drift)', k('Space')],

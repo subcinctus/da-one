@@ -1,7 +1,8 @@
-// Traffic (ARCHITECTURE.md §Traffic, NPC agent): keeps ~18 AI cars driving the road network around the player.
+// Traffic (ARCHITECTURE.md §Traffic, NPC agent): keeps ~18-26 AI cars driving the road network around the player.
 //
-//   - spawns cars 60-140 m away (closer than the fog), out of the camera frustum when possible, never overlapping,
-//     on random lanes of nav (src/ai/nav.js), weighted vehicle types with random colours, despawns them far away
+//   - spawns cars 32-105 m away (inside the fog), out of the camera frustum, never overlapping, on random lanes of
+//     nav (src/ai/nav.js; lanes heading toward the player preferred so cars flow past), weighted vehicle types with
+//     random colours; denser downtown / midtown; unseen cars beyond 100 m are recycled (hard limit ~168 m)
 //   - each car is driven by a TrafficDriver (src/ai/npc_driver.js) through vehicle.controls only
 //   - right of way at junctions (first come, first served per crossing axis, with a deadlock timeout)
 //   - reactions: gunfire / explosions -> panic; rammed or shot by the player -> honk / angry driver gets out /
@@ -14,9 +15,10 @@ import { VEHICLE_TYPES } from '../vehicles/vehicles.js';
 import { randomLook } from '../entities/humanoid.js';
 import { boxCollides } from '../core/physics.js';
 import { getNav, nearestLane } from './nav.js';
-import { TrafficDriver } from './npc_driver.js';
+import { TrafficDriver, humanFilter } from './npc_driver.js';
 import { runNavSelfTest } from './npc_selftest.js';
 import { isVisible, chunkReady, viewRadius, densityScale, weighted, rand, chance } from './npc_util.js';
+import { clamp } from '../core/math.js';
 
 const TYPES_CITY = [['sedan', 30], ['taxi', 12], ['van', 10], ['pickup', 9], ['muscle', 8], ['sports', 4], ['truck', 3], ['bus', 3]];
 const TYPES_DOWNTOWN = [['sedan', 26], ['taxi', 24], ['van', 9], ['pickup', 5], ['muscle', 6], ['sports', 6], ['truck', 2], ['bus', 5]];
@@ -27,6 +29,12 @@ const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
 const _nl = { lane: null, s: 0, d: 0 };
 const _s = { x: 0, z: 0, tx: 0, tz: 0 };
+
+/** Lateral offset after travelling d metres of a smooth (smoothstep) sideways move from a to b over ltr metres. */
+function swerveLat(a, b, d, ltr) {
+  const u = clamp(d / ltr, 0, 1);
+  return a + (b - a) * u * u * (3 - 2 * u);
+}
 
 export class Traffic {
   constructor(game) {
@@ -43,6 +51,7 @@ export class Traffic {
     this._spawnCd = 0;
     this._cleanT = 0;
     this._qOut = [];
+    this._qOut2 = [];
     this._looks = [];
     this._stats = { spawned: 0, despawned: 0, failedSpawns: 0, carjacks: 0, angry: 0, bailed: 0, honks: 0 };
     this._initialFill = true;
@@ -140,7 +149,8 @@ export class Traffic {
     if (!this.nav || !this.enabled || !g.vehicles) return;
     const focus = g.player && g.player.position ? g.player.position : g.camera.position;
     const R = viewRadius(g);
-    const despawnR = Math.max(130, Math.min(180, R + 40));
+    const despawnR = Math.max(130, Math.min(180, R + 40)); // hard limit
+    const recycleR = Math.min(100, despawnR - 10);           // unseen cars beyond this are recycled closer in
     const pv = g.vehicles.playerVehicle;
 
     // ---- drivers
@@ -157,6 +167,9 @@ export class Traffic {
       const dx = v.position.x - focus.x, dz = v.position.z - focus.z;
       const d2 = dx * dx + dz * dz;
       if (d2 > despawnR * despawnR || v.position.y < 2) { this.despawn(d); continue; }
+      // recycle unseen far cars that are not on their way back toward the player
+      if (d2 > recycleR * recycleR && v !== pv && v.velocity.x * dx + v.velocity.z * dz > -2 * Math.sqrt(d2) &&
+        !isVisible(g, v.position.x, v.position.y + 1, v.position.z, 4)) { this.despawn(d); continue; }
       // the car is burning / wrecked: the driver bails out and runs
       if ((v.onFire || v.health < v.maxHealth * 0.12) && d.exitT < 0) { this._bailOut(d, 'flee'); continue; }
       d.update(dt, d2 < 90 * 90);
@@ -199,13 +212,28 @@ export class Traffic {
     const p = g.player && g.player.position;
     const plan = g.generator && g.generator.plan;
     if (p && plan && plan.isCity && !plan.isCity(p.x, p.z)) n *= 0.6; // sparse countryside highways
-    return Math.round(Math.max(6, Math.min(22, n)));
+    else if (p && plan && plan.districtAt && this._busyNear(p, plan)) n *= 1.4; // busy city centre
+    return Math.round(Math.max(6, Math.min(26, n)));
+  }
+
+  /** Is the player in / right next to downtown or midtown? (5-point sample, refreshed at most once a second) */
+  _busyNear(p, plan) {
+    const t = this.game.time || 0;
+    if (this._busyT !== undefined && t - this._busyT < 1 && Math.abs(t - this._busyT) < 5) return this._busy;
+    this._busyT = t;
+    let k = 0;
+    for (const [ox, oz] of [[0, 0], [14, 0], [-14, 0], [0, 14], [0, -14]]) {
+      const id = plan.districtAt(p.x + ox, p.z + oz)?.id;
+      if (id === 'downtown' || id === 'midtown') k++;
+    }
+    this._busy = k >= 2;
+    return this._busy;
   }
 
   _spawnRange() {
     const R = viewRadius(this.game);
-    const rMax = Math.min(140, R - 4);
-    const rMin = Math.min(60, rMax - 22);
+    const rMax = Math.max(44, Math.min(105, R - 4));
+    const rMin = Math.min(32, rMax - 12);
     return [rMin, rMax];
   }
 
@@ -242,10 +270,16 @@ export class Traffic {
     for (let attempt = 0; attempt < 14; attempt++) {
       const lane = lanes[Math.floor(Math.random() * lanes.length)];
       if (lane.len < 8) continue;
-      const s = rand(3, lane.len - 3);
+      const s = rand(3, Math.max(3.5, lane.len - 6));
       const x = lane.x0 + lane.dx * s, z = lane.z0 + lane.dz * s;
       const d = Math.hypot(x - focus.x, z - focus.z);
       if (d < rMin || d > rMax) continue;
+      // lanes heading toward the player get twice the weight: cars flow past instead of away (and the outer band
+      // only takes cars heading in, which would otherwise be recycled again right away)
+      const away = (focus.x - x) * lane.dx + (focus.z - z) * lane.dz < 0;
+      if (away && (d > 92 || Math.random() < 0.5)) continue;
+      // and the near ring (out of view) is preferred over the far one
+      if (!mode && d > 64 && attempt < 10 && Math.random() < 0.45) continue;
       if (!chunkReady(g, x, z)) continue;
       const y = (g.generator.plan.surfaceY ? g.generator.plan.surfaceY(x, z) : 28);
       if (!mode && attempt < 10 && isVisible(g, x, y + 1, z, 4)) continue;
@@ -296,9 +330,10 @@ export class Traffic {
     v.driver = 'ai';
     v.parked = false;
     v.setDriverLook?.(d.look);
-    // roll in at a plausible speed when the road ahead is clear
+    // roll in at a plausible speed when the road ahead is clear (from a standstill close to a junction, so the
+    // driver can still stop at the line)
     const v0 = Math.min(lane.speed * 0.65, 10);
-    if (this._laneAheadClear(v, lane, s, 26)) v.velocity.set(lane.dx * v0, 0, lane.dz * v0);
+    if (lane.len - s > 22 && this._laneAheadClear(v, lane, s, 26)) v.velocity.set(lane.dx * v0, 0, lane.dz * v0);
     this.cars.push(d);
     this._stats.spawned++;
     return true;
@@ -527,6 +562,38 @@ export class Traffic {
       const ol = (o.position.x - _s.x) * -_s.tz + (o.position.z - _s.z) * _s.tx;
       const ow = o.def ? Math.max(o.def.size.w, o.def.size.l * 0.5) / 2 : 1.2;
       if (Math.abs(ol - lat) < halfW + ow + 0.6) return false;
+    }
+    // never pass close to people (the player, peds, officers by a stopped cruiser)
+    return this.swerveClear(me, me.lat, lat, dist);
+  }
+
+  /**
+   * Is the sideways move from lateral `fromLat` to `toLat` (relative to me's route; + = right) clear of people over the
+   * next `dist` metres? The move is modelled as a smooth transition over ~10 m of travel and the car body (length +
+   * width) is swept along it. Required clearance: 1.2 m (the player: 3 m, i.e. ~4 m from the swerve path).
+   */
+  swerveClear(me, fromLat, toLat, dist) {
+    const g = this.game, ents = g.entities, v = me.vehicle;
+    if (!ents || !ents.query) return true;
+    const halfW = v.def.size.w / 2, halfL = v.def.size.l / 2;
+    const ltr = Math.max(10, Math.abs(v.speed || 0) * 1.8);
+    me.routeSample(Math.max(0, me.s) + dist * 0.5, _s);
+    _v.set(_s.x, v.position.y + 1, _s.z);
+    const found = ents.query(_v, dist * 0.5 + halfL + 6, humanFilter, this._qOut2);
+    if (!found.length) return true;
+    me.routeSample(Math.max(0, me.s), _s);
+    const hx = _s.tx, hz = _s.tz;
+    for (let i = 0; i < found.length; i++) {
+      const e = found[i];
+      const rx = e.position.x - v.position.x, rz = e.position.z - v.position.z;
+      const along = rx * hx + rz * hz;
+      if (along < -halfL - 1.5 || along > dist + halfL) continue;
+      me.routeSample(Math.max(0, me.s + along), _s);
+      const el = (e.position.x - _s.x) * -_s.tz + (e.position.z - _s.z) * _s.tx;
+      // car centre travel while its body overlaps the person's position along the route
+      const a = swerveLat(fromLat, toLat, Math.max(0, along - halfL), ltr), b = swerveLat(fromLat, toLat, Math.max(0, along + halfL), ltr);
+      const m = halfW + (e.radius || 0.3) + (e === g.player ? 3 : 1.2);
+      if (el > Math.min(a, b) - m && el < Math.max(a, b) + m) return false;
     }
     return true;
   }

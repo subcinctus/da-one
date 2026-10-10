@@ -1,6 +1,7 @@
 // Save system (ARCHITECTURE.md §Save): localStorage 'blockcity.save.v1' holding money, health, armor, position, yaw,
-// inventory, missions, time of day, the safehouse respawn point and the player's world edits (compact run-length
-// text, capped at 50k entries). Wanted level is never saved. Autosaves every 60 s while playing (not during missions),
+// inventory, missions, collected one-time pickups, time of day, the safehouse respawn point and the player's world
+// edits (compact run-length text, capped at 50k entries). Wanted level is never saved, and neither is a mid-air spot.
+// Autosaves every 60 s while playing, only at calm moments (no mission, no wanted level, not mid-air, not driving),
 // after a mission is passed, and at the safehouse. init() loads an existing save unless ?newgame=1.
 import { encodeEdits, decodeEdits } from './save_codec.js';
 import { safe, notify, HAS_DOM, h, uiLayer, injectCss, fmtMoney } from './util.js';
@@ -8,6 +9,7 @@ import { safe, notify, HAS_DOM, h, uiLayer, injectCss, fmtMoney } from './util.j
 export const SAVE_KEY = 'blockcity.save.v1';
 const EDIT_CAP = 50000;
 const AUTOSAVE_EVERY = 60;
+const AUTOSAVE_RETRY = 0.5;  // seconds between retries while the moment is unsafe (mid-air, driving, wanted)
 
 function storage() {
   try { return typeof localStorage !== 'undefined' ? localStorage : null; } catch (e) { return null; }
@@ -61,16 +63,26 @@ export class SaveSystem {
     }
     this._t += dt;
     if (this._t >= this.autosaveInterval) {
-      this._t = 0;
-      if (this._canAutosave()) this.save({ reason: 'auto' });
+      // not a good moment (mid-air, driving, chased...): retry shortly instead of waiting another full interval
+      if (this._canAutosave()) { this._t = 0; this.save({ reason: 'auto' }); } else this._t = this.autosaveInterval - AUTOSAVE_RETRY;
     }
   }
 
+  /** Autosave only at calm moments: alive, no mission, no wanted level, standing / swimming / parked. */
   _canAutosave() {
     const g = this.game;
     const p = g.player;
     if (!p || p.alive === false) return false;
     if (g.missions && g.missions.active) return false;
+    if (g.police && (g.police.wanted | 0) > 0) return false;
+    if (p.flying) return false;
+    const v = p.inVehicle;
+    if (v) {
+      if (v.isHeli && !v.onGround) return false;
+      const vel = v.velocity;
+      const spd = vel && Number.isFinite(vel.x) ? Math.hypot(vel.x, vel.z) : Math.abs(Number(v.speed) || 0);
+      if (spd > 2) return false;
+    } else if (p.onGround === false && !p.inWater) return false;
     return true;
   }
 
@@ -111,19 +123,50 @@ export class SaveSystem {
         const h = typeof p.nearestPOI === 'function' ? safe(() => p.nearestPOI('hospital'), null) : null;
         if (h) { ps.position = [h.x, h.y, h.z]; ps.yaw = (h.yaw || 0) + Math.PI; }
         ps.health = 100;
-      } else if (p.inVehicle && p.inVehicle.position && Array.isArray(ps.position)) {
-        ps.position[1] = +(p.inVehicle.position.y + 0.2).toFixed(2);
+      } else if (Array.isArray(ps.position) && (p.inVehicle || p.flying || (p.onGround === false && !p.inWater))) {
+        // in a vehicle, flying or mid-jump: never store a mid-air spot (Continue would drop the player to their death)
+        ps.position = this._safeStandingSpot(p, ps.position);
       }
       data.player = ps;
     }
     if (g.inventory && typeof g.inventory.serialize === 'function') data.inventory = safe(() => g.inventory.serialize(), null);
     if (g.missions && typeof g.missions.serialize === 'function') data.missions = safe(() => g.missions.serialize(), null);
+    if (g.pickups && typeof g.pickups.serialize === 'function') data.pickups = safe(() => g.pickups.serialize(), null);
     if (g.shops && g.shops.respawnPoi) data.respawn = { x: g.shops.respawnPoi.x, z: g.shops.respawnPoi.z };
     if (g.sky && Number.isFinite(g.sky.time)) { data.time = +g.sky.time.toFixed(3); if (Number.isFinite(g.sky.dayCount)) data.day = g.sky.dayCount; }
     const ed = this._encodeEdits();
     data.edits = ed.text;
     data.editCount = ed.count;
     return data;
+  }
+
+  /**
+   * Standing spot for a player who is not standing on something right now: the vehicle's exit spot (when in one), then
+   * the ground below (world voxels; the plan's surface height as a fallback), or the water surface over water.
+   */
+  _safeStandingSpot(p, pos) {
+    const g = this.game;
+    let x = pos[0], y = pos[1], z = pos[2];
+    const v = p.inVehicle;
+    if (v) {
+      const ex = safe(() => (g.vehicles && typeof g.vehicles._findExitPos === 'function' ? g.vehicles._findExitPos(v, true) : null), null);
+      if (ex && Number.isFinite(ex.x) && Number.isFinite(ex.y) && Number.isFinite(ex.z) && Math.hypot(ex.x - x, ex.z - z) < 8) { x = ex.x; y = Math.max(y, ex.y); z = ex.z; }
+      else if (v.position && Number.isFinite(v.position.y)) y = Math.max(y, v.position.y + 0.2);
+    }
+    const w = g.world;
+    const gy = safe(() => (w && typeof w.findGround === 'function' ? w.findGround(x, z, Math.floor(y) + 1) : -1), -1);
+    if (gy > 0) {
+      y = gy;
+      // ground under water: stand (float) at the surface instead of on the sea bed
+      if (typeof w.isLiquid === 'function') {
+        const bx = Math.floor(x), bz = Math.floor(z);
+        for (let i = 0; i < 40 && safe(() => w.isLiquid(bx, y, bz), false); i++) y++;
+      }
+    } else {
+      const sy = safe(() => g.generator && g.generator.plan && typeof g.generator.plan.surfaceY === 'function' ? g.generator.plan.surfaceY(x, z) : NaN, NaN);
+      if (Number.isFinite(sy) && sy > 0) y = sy;
+    }
+    return [+x.toFixed(2), +(+y).toFixed(2), +z.toFixed(2)];
   }
 
   /** Save now. opts.reason: 'auto' | 'manual' | 'mission' | 'safehouse' | 'sleep'. Returns true on success. */
@@ -192,6 +235,8 @@ export class SaveSystem {
     }
     if (d.inventory && g.inventory && typeof g.inventory.deserialize === 'function') safe(() => g.inventory.deserialize(d.inventory));
     if (d.missions && g.missions && typeof g.missions.deserialize === 'function') safe(() => g.missions.deserialize(d.missions));
+    // one-time world pickups (cash bundles) already collected stay gone
+    if (sameWorld && d.pickups && g.pickups && typeof g.pickups.deserialize === 'function') safe(() => g.pickups.deserialize(d.pickups));
     if (Number.isFinite(d.time) && g.sky && typeof g.sky.setTime === 'function') {
       safe(() => g.sky.setTime(d.time));
       if (Number.isFinite(d.day)) g.sky.dayCount = d.day;

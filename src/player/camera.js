@@ -21,6 +21,12 @@ const _shoulder = new THREE.Vector3();
 const _desired = new THREE.Vector3();
 const _look = new THREE.Vector3();
 const _tmp = new THREE.Vector3();
+const _eyeP = new THREE.Vector3();
+const _dbPivot = new THREE.Vector3();
+const _dbPos = new THREE.Vector3();
+const _qa = new THREE.Quaternion();
+const _qb = new THREE.Quaternion();
+const _euler = new THREE.Euler(0, 0, 0, 'YXZ');
 
 /** Smooth pseudo-noise in [-1, 1] (sum of incommensurate sines). */
 function wobble(t) {
@@ -70,6 +76,15 @@ export class CameraRig {
     this.scoped = false;
     this._camTooClose = false;
     this._snapVehicle = false;
+    // tight spaces (tunnels, lobbies, back to a wall): third person switches to the first-person eye
+    this.cramped = false;
+    this._crampK = 0;        // 0..1 camera blend third -> eye
+    this._crampHold = 0;     // s left before the cramped state may change again
+    // drive-by aiming framing (over the roof, out of the aim-side window)
+    this._dbT = 0;
+    this._dbSide = 0;
+    this._dbSideS = 0;
+    this._dbDist = 2.6;
     this.viewModel = new ViewModel(game, this);
     this._ray = { origin: new THREE.Vector3(), dir: new THREE.Vector3() };
   }
@@ -191,6 +206,8 @@ export class CameraRig {
     this.scoped = false;
     this._camTooClose = false;
 
+    if (!p.alive || p.inVehicle) { this.cramped = false; this._crampK = 0; this._crampHold = 0; }
+    if (!(p.alive && p.inVehicle)) this._dbT = 0;
     if (!p.alive) {
       this._deathCam(dt, p);
     } else if (p.inVehicle) {
@@ -253,24 +270,20 @@ export class CameraRig {
     const crouch = p.crouchT || 0;
     let fov = fovBase;
     if (p.sprinting && (p.horizontalSpeed || 0) > 5) fov += CAM.sprintFovKick;
+    const fpZoom = fp || this.cramped;
     if (zoom > 1) {
       // over the shoulder only part of the zoom applies (the character would fill the screen otherwise)
-      const z = fp ? zoom : 1 + (zoom - 1) * CAM.thirdPersonZoom;
+      const z = fpZoom ? zoom : 1 + (zoom - 1) * CAM.thirdPersonZoom;
       fov = lerp(fov, fovBase / z, this._aimT);
     }
 
     if (fp) {
       // ---- first person: eye position, direct rotation, subtle view bob
-      const eye = CAM.eye - crouch * CAM.crouchDrop;
-      const amp = p.onGround && !p.inWater ? clamp((p.horizontalSpeed || 0) / 4.3, 0, 1.6) * (1 - this._aimT * 0.8) : 0;
-      const ph = (p.walkDist || 0) * Math.PI / 1.9;
-      const bobY = (Math.abs(Math.cos(ph)) - 0.5) * 0.045 * amp;
-      const bobX = Math.sin(ph) * 0.025 * amp;
-      rightFromYaw(this.yaw, _right);
-      const ty = p.position.y - stepOff + eye + bobY + this.dip;
-      cam.position.set(p.position.x + _right.x * bobX, ty, p.position.z + _right.z * bobX);
+      this.cramped = false; this._crampK = 0; this._crampHold = 0;
+      const roll = this._fpEye(p, _eyeP);
+      cam.position.copy(_eyeP);
       this._pivot.copy(cam.position);
-      cam.rotation.set(this.pitch + this.recoilPitch, this.yaw + Math.PI + this.recoilYaw, Math.sin(ph) * 0.004 * amp, 'YXZ');
+      cam.rotation.set(this.pitch + this.recoilPitch, this.yaw + Math.PI + this.recoilYaw, roll, 'YXZ');
       this._colDist = 0.5;
       return fov;
     }
@@ -318,11 +331,42 @@ export class CameraRig {
     if (snap || allowed < this._colDist) this._colDist = allowed;
     else this._colDist += (allowed - this._colDist) * damp(3.5, dt);
     _desired.copy(_shoulder).addScaledVector(_dir, -this._colDist);
+    // room the boom really has (the eased _colDist lags behind when leaving a tight spot or first person)
+    let room = allowed;
     // never inside a solid voxel (thin walls / corners the ray missed)
     for (let i = 0; i < 6 && this._solidAt(_desired); i++) {
       this._colDist = Math.max(CAM.minDist * 0.6, this._colDist - 0.35);
+      room = Math.min(room, this._colDist);
       _desired.copy(_shoulder).addScaledVector(_dir, -this._colDist);
     }
+
+    // ---- cramped (1x2 tunnels, lobbies, back to a wall): use the first-person eye + view model instead of a
+    // head that covers the crosshair or a handless pseudo first person. Hysteresis + a short minimum hold.
+    this._crampHold -= dt;
+    const shoulderK = this._off > 0.05 ? off / this._off : 1;
+    if (!this.cramped) {
+      // the shoulder offset collapsing (1-wide tunnel / corridor) puts the head right over the crosshair
+      if (room < 1.1 || (shoulderK < 0.5 && room < 3.0)) {
+        if (this._crampHold <= 0 || snap) { this.cramped = true; this._crampHold = 0.3; }
+      }
+    } else if (room > 1.6 && shoulderK >= 0.8 && (this._crampHold <= 0 || snap)) {
+      this.cramped = false; this._crampHold = 0.3;
+    }
+    const kc = snap ? 1 : Math.min(1, dt / 0.15);
+    this._crampK = this.cramped ? Math.min(1, this._crampK + kc) : Math.max(0, this._crampK - kc);
+
+    if (this._crampK > 0) {
+      const roll = this._fpEye(p, _eyeP);
+      const k = this._crampK * this._crampK * (3 - 2 * this._crampK);
+      cam.position.lerpVectors(_desired, _eyeP, k);
+      cam.rotation.set(pitch, yaw + Math.PI, roll * k, 'YXZ');
+      // first-person rules once the camera is mostly at the eye: hides the body, shows the view model, body
+      // faces the view and the interaction ray starts at the eye
+      if (this._crampK >= 0.5) this.firstPerson = true;
+      else this._camTooClose = true; // in between: never look at the inside of the head
+      return fov;
+    }
+
     this._camTooClose = this._colDist < 0.75;
     // swimming at the surface: keep the lens above the waterline (no half-submerged view) unless diving
     if (p.swimming && !p.headInWater) this._keepAboveWater(_desired);
@@ -331,11 +375,25 @@ export class CameraRig {
     return fov;
   }
 
+  /** First-person eye position (crouch, step smoothing, view bob, landing dip) into out. Returns the bob roll. */
+  _fpEye(p, out) {
+    const eye = CAM.eye - (p.crouchT || 0) * CAM.crouchDrop;
+    const amp = p.onGround && !p.inWater ? clamp((p.horizontalSpeed || 0) / 4.3, 0, 1.6) * (1 - this._aimT * 0.8) : 0;
+    const ph = (p.walkDist || 0) * Math.PI / 1.9;
+    const bobY = (Math.abs(Math.cos(ph)) - 0.5) * 0.045 * amp;
+    const bobX = Math.sin(ph) * 0.025 * amp;
+    rightFromYaw(this.yaw, _right);
+    const ty = p.position.y - (p.stepOffset || 0) + eye + bobY + this.dip;
+    out.set(p.position.x + _right.x * bobX, ty, p.position.z + _right.z * bobX);
+    return Math.sin(ph) * 0.004 * amp;
+  }
+
   /** Chase / far / hood camera. Returns the FOV kick to add. */
   _vehicleCam(dt, p, v) {
     const cam = this.game.camera;
     const def = v.def || {};
     const isHeli = def.kind === 'heli' || v.kind === 'heli';
+    const isBike = def.kind === 'bike';
     const vPos = v.position || p.position;
     const vYaw = Number.isFinite(v.yaw) ? v.yaw : p.yaw;
     const speed = Math.abs(v.speed || 0);
@@ -343,16 +401,26 @@ export class CameraRig {
     const entering = this._snapVehicle || this._lastVehicle !== v;
     this._snapVehicle = false;
     const snap = this._snap;
+    const hood = this.vehicleMode === 'hood';
 
     const far = this.vehicleMode === 'far';
     let dist = Number.isFinite(def.camDistance) ? def.camDistance : (isHeli ? CAM.heliDist : CAM.carDist);
     let height = Number.isFinite(def.camHeight) ? def.camHeight : (isHeli ? CAM.heliHeight : CAM.carHeight);
     if (far) { dist *= 1.55; height *= 1.4; }
     const pivotH = clamp((size.h || 1.6) * 0.65, 0.8, 2.5);
-    const defPitch = this.vehicleMode === 'hood' ? -0.05 : -clamp(Math.atan2(height - pivotH, dist), 0.05, 0.7);
+    const defPitch = hood ? -0.05 : -clamp(Math.atan2(height - pivotH, dist), 0.05, 0.7);
 
-    // vehicles: keep the camera above the horizon-ish
-    this.pitch = clamp(this.pitch, -1.25, this.vehicleMode === 'hood' ? 0.6 : 0.3);
+    // drive-by aiming (Combat sets p.aiming while RMB/LMB is held with a drive-by weapon): blend into the
+    // over-the-roof framing; no auto-recentre while aiming, and the look timer stays fresh so releasing the aim
+    // does not snap the view back at once
+    const driveBy = !!p.aiming && !hood && !isHeli;
+    if (p.aiming) this._lastLookTime = this.game.realTime;
+    const dbStart = driveBy && this._dbT === 0;
+    this._dbT += ((driveBy ? 1 : 0) - this._dbT) * (snap || entering ? 1 : damp(6, dt));
+    if (this._dbT < 1e-3) this._dbT = 0;
+
+    // vehicles: keep the camera above the horizon-ish (drive-by: may look up at targets on roofs)
+    this.pitch = clamp(this.pitch, -1.25, hood ? 0.6 : lerp(0.3, 0.7, this._dbT));
 
     // auto-recentre behind the vehicle 1.5 s after the last mouse input (faster when moving)
     const idle = this.game.realTime - this._lastLookTime;
@@ -363,15 +431,34 @@ export class CameraRig {
       this.pitch += (defPitch - this.pitch) * damp(1.8, dt);
     }
 
-    if (this.vehicleMode === 'hood') {
+    if (hood) {
       // hood / driver-eye cam: free look limited to the front hemisphere
       this.firstPerson = true;
-      forwardFromYaw(vYaw, _fwd);
-      rightFromYaw(vYaw, _right);
-      const eyeH = isHeli ? (size.h || 2.5) * 0.55 : Math.max(0.95, (size.h || 1.6) * 0.8);
-      const fwdOff = isHeli ? (size.l || 8) * 0.3 : (size.l || 4.5) * 0.05;
-      const sideOff = isHeli ? 0 : -(size.w || 2) * 0.18; // driver sits on the left (right-hand traffic)
-      _desired.set(vPos.x, vPos.y + eyeH, vPos.z).addScaledVector(_fwd, fwdOff).addScaledVector(_right, sideOff);
+      const m = v.meta && v.meta.driver;
+      if (m && Number.isFinite(m.y) && typeof v.localToWorld === 'function') {
+        // the driver's eye: seat position from the model (+x = driver side) raised to head height
+        const up = isHeli ? 0.8 : isBike ? 0.95 : 0.78;
+        const fwd = isHeli ? 0.3 : isBike ? 0.15 : 0.05;
+        const bob = isHeli ? 0 : clamp(Number(v.susp) || 0, -0.25, 0.25);
+        let eyeY = m.y + up;
+        if (!isHeli && !isBike && size.h > 0) {
+          // just under a low car roof its underside fills the top of the view: drop below it while the steering
+          // wheel stays low in the frame (wheel top ~ seat + 0.6), else sit at the roofline (sports cars)
+          const roofUnder = size.h - 0.07;
+          if (eyeY > roofUnder - 0.13 && eyeY < size.h + 0.04) {
+            const low = roofUnder - 0.13;
+            eyeY = low >= m.y + 0.66 ? low : size.h + 0.04;
+          }
+        }
+        v.localToWorld(m.x || 0, eyeY + bob, (m.z || 0) + fwd, _desired);
+      } else {
+        forwardFromYaw(vYaw, _fwd);
+        rightFromYaw(vYaw, _right);
+        const eyeH = isHeli ? (size.h || 2.5) * 0.55 : Math.max(0.95, (size.h || 1.6) * 0.8);
+        const fwdOff = isHeli ? (size.l || 8) * 0.3 : (size.l || 4.5) * 0.05;
+        const sideOff = isHeli ? 0 : -(size.w || 2) * 0.18; // driver sits on the left (right-hand traffic)
+        _desired.set(vPos.x, vPos.y + eyeH, vPos.z).addScaledVector(_fwd, fwdOff).addScaledVector(_right, sideOff);
+      }
       const rel = clamp(angleDiff(vYaw, this.yaw), -2.2, 2.2);
       this.yaw = wrapAngle(vYaw + rel);
       cam.position.copy(_desired);
@@ -393,7 +480,8 @@ export class CameraRig {
     this._vehPivotY += (vPos.y + pivotH - this._vehPivotY) * (snap ? 1 : damp(isHeli ? 5 : 9, dt));
     _pivot.set(vPos.x, this._vehPivotY, vPos.z);
 
-    dirFromYawPitch(this.yaw + this.recoilYaw, this.pitch + this.recoilPitch, _dir);
+    const yaw = this.yaw + this.recoilYaw, pitch = this.pitch + this.recoilPitch;
+    dirFromYawPitch(yaw, pitch, _dir);
     _tmp.copy(_dir).negate();
     const hit = this._castCam(_pivot, _tmp, this._vehDist + 0.4);
     let allowed = this._vehDist;
@@ -412,7 +500,50 @@ export class CameraRig {
     cam.up.set(0, 1, 0);
     cam.lookAt(_look);
     this._pivot.copy(_pivot);
-    return CAM.vehicleFovKick * smoothstep(14, 42, speed);
+
+    if (this._dbT > 0) this._driveByFrame(dt, v, size, pivotH, yaw, pitch, snap || entering || dbStart);
+    return CAM.vehicleFovKick * smoothstep(14, 42, speed) * (1 - this._dbT);
+  }
+
+  /**
+   * Drive-by framing, blended over the chase cam by _dbT: the pivot sits above the roof edge on the aim side
+   * (at the driver's seat), the camera ~2.6 m behind it along the view, oriented straight from yaw/pitch so the
+   * crosshair is exactly getAimRay. The view looks over the roof and out of the aim-side window.
+   */
+  _driveByFrame(dt, v, size, pivotH, yaw, pitch, snap) {
+    const cam = this.game.camera;
+    // aim side: +1 = the vehicle's right (hysteresis around straight ahead / behind)
+    rightFromYaw(Number.isFinite(v.yaw) ? v.yaw : 0, _right);
+    const d = _dir.x * _right.x + _dir.z * _right.z;
+    if (snap) this._dbSide = Math.abs(d) > 0.15 ? Math.sign(d) : 0; // aim just started: no slide from the old side
+    else if (Math.abs(d) > 0.15) this._dbSide = Math.sign(d);
+    this._dbSideS += (this._dbSide - this._dbSideS) * (snap ? 1 : damp(5, dt));
+    const m = v.meta && v.meta.driver;
+    const lz = m && Number.isFinite(m.z) ? m.z : 0;
+    const w = size.w || 2, h = size.h || 1.5;
+    // model +x is the driver (left) side, so the right side is -x
+    if (typeof v.localToWorld === 'function') v.localToWorld(-this._dbSideS * w * 0.5, 0, lz, _dbPivot);
+    else _dbPivot.copy(v.position);
+    _dbPivot.y = this._vehPivotY - pivotH + h + 0.6;
+    if (this._solidAt(_dbPivot) && typeof v.localToWorld === 'function') {
+      // scraping a wall on that side: frame from the middle of the roof instead
+      v.localToWorld(0, 0, lz, _dbPivot);
+      _dbPivot.y = this._vehPivotY - pivotH + h + 0.6;
+    }
+    // boom: pull in instantly, ease back out
+    _tmp.copy(_dir).negate();
+    const hit = this._castCam(_dbPivot, _tmp, 2.6 + 0.3);
+    const allowed = hit !== null ? Math.max(0.4, hit - 0.3) : 2.6;
+    if (snap || allowed < this._dbDist) this._dbDist = allowed;
+    else this._dbDist += (allowed - this._dbDist) * damp(4, dt);
+    _dbPos.copy(_dbPivot).addScaledVector(_dir, -this._dbDist);
+
+    const k = this._dbT * this._dbT * (3 - 2 * this._dbT);
+    _qa.copy(cam.quaternion);
+    _qb.setFromEuler(_euler.set(pitch, yaw + Math.PI, 0, 'YXZ'));
+    cam.position.lerp(_dbPos, k);
+    if (k >= 0.999) cam.quaternion.copy(_qb);
+    else cam.quaternion.slerpQuaternions(_qa, _qb, k);
   }
 
   _deathCam(dt, p) {

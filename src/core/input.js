@@ -20,7 +20,7 @@ export const KEYMAP = {
   right: ['KeyD', 'ArrowRight'],
   jump: ['Space'],                    // on foot: jump/swim up. car: handbrake. heli: ascend
   sprint: ['ShiftLeft', 'ShiftRight'], // on foot: sprint. heli: descend
-  crouch: ['ControlLeft', 'KeyX'],     // on foot: sneak (slow, no fall off edges)
+  crouch: ['KeyX', 'KeyZ'],            // on foot: sneak (slow, no fall off edges), swim dive, creative fast fly. Never Ctrl (Ctrl+W closes the tab)
   handsUp: ['KeyB'],                   // on foot: hold to surrender (hands up) - lets a 1-star cop arrest you quickly
   enterVehicle: ['KeyF'],              // enter / exit / carjack
   camera: ['KeyC', 'KeyV'],            // cycle camera mode (1st / 3rd person / far)

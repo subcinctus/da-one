@@ -117,7 +117,7 @@ Actions and default keys:
 | forward / back / left / right | WASD, arrows | |
 | jump | Space | car: handbrake; heli: ascend |
 | sprint | Shift | heli: descend |
-| crouch | Ctrl, X | |
+| crouch | X, Z | sneak, swim dive, creative fast fly. Never Ctrl: Ctrl+W closes the browser tab |
 | handsUp | B | hold to surrender (player.handsUp) |
 | enterVehicle | F | |
 | camera | C, V | |
@@ -152,7 +152,11 @@ Damage `info.source` is the entity responsible. For anything the player causes (
 
 ### 3.5 Blocks (`src/world/blocks.js`)
 
-`BLOCKS[id]` defs, `B.KEY` → id, `PLACEABLE_BLOCKS`, `breakTime(id, tool)`, `allTextureNames()`. Notable fields: `solid, opaque, transparent, cutout, liquid, shape ('cube'|'cross'), emissive, hardness, tool, color, tex{top,side,bottom}, value ($ when mined), explosive (TNT), blast (resistance), drops`.
+`BLOCKS[id]` defs, `B.KEY` → id, `PLACEABLE_BLOCKS`, `breakTime(id, tool)`, `allTextureNames()`. Notable fields: `solid, opaque, transparent, cutout, liquid, shape ('cube'|'cross'), emissive, hardness, tool, color, tex{top,side,bottom}, value ($ when mined), explosive (TNT), blast (resistance), placeable, drops`.
+
+- `value`: cash paid when the player mines a **naturally generated** block; player-placed blocks pay nothing (the player checks `world.edits`). Ores are a side income, missions stay the main one: coal 3, iron 8, gold 25, diamond 80.
+- `placeable` (default true): appears in the creative palette (`PLACEABLE_BLOCKS`) and can be held as an item. Ores are `placeable: false` and `drops: B.COBBLESTONE`, so mining one gives cobblestone plus cash and ores never become items (no place-and-mine loop).
+- `drops`: block id added to the inventory when mined (default: itself; 0 = nothing).
 
 ### 3.6 Humanoid (`src/entities/humanoid.js`)
 
@@ -250,6 +254,7 @@ Unknown names are ignored with one console.warn.
 - `time` (hours 0–24, start 9.0), `dayLength` (seconds per full day, default 1200), `nightFactor` (0 day … 1 night, smooth through dusk/dawn), `sunDir` (Vector3), `setTime(h)`.
 - Owns scene lighting: one DirectionalLight (sun/moon, optional shadows following the player when `settings.shadows`) + a HemisphereLight. Exposes them as `this.sun`, `this.hemi`.
 - Gradient sky dome (follows camera), sun and moon sprites, stars at night, a blocky cloud layer (moving), `scene.fog` colour matched to the horizon, fog distance from `settings.renderDistance * 16`, and `renderer.setClearColor`.
+- Fog contract (every fogged material, custom shaders included): Sky patches `ShaderChunk.fog_vertex` before any material compiles, so `vFogDepth = length(vec2(horizontal distance, vertical distance * 0.25))` from the camera. It is horizontal-weighted, so the loaded-chunk edge (a horizontal radius) stays hidden at any altitude and the ground below a heli or a rooftop stays crisp. `fog.far = renderDistance * 16 - 6` (x0.68 in rain) and `fog.near = 0.6 * fog.far`. Below the horizon, the dome equals the fog colour exactly (`uGround = horizon`, twilight glow masked above the horizon), so fully fogged geometry blends into the backdrop. Shaders that write their own fog must mix toward `fogColor` after the colour-space conversion, as three's built-in materials do.
 - `game.debug.setTime(h)`.
 
 ### §FX (`src/fx/fx.js`, `export class FX`, ATMOSPHERE agent)

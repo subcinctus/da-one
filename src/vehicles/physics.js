@@ -104,14 +104,16 @@ export function stepCar(v, h, world) {
     const gm = v.surfGrip, tm = v.surfTrac;
     // ---- longitudinal
     let drive = 0, decel = 0;
-    const vmax = d.maxSpeed;
+    // per-vehicle top-speed scale (police catch-up): drive force x ss, aero drag / ss^2 -> top speed ~ x ss
+    const ss = v.speedScale > 0 ? v.speedScale : 1;
+    const vmax = d.maxSpeed * ss;
     v.braking = false; v.reversing = false;
     if (thr > 0.01) {
       if (vF < -0.8) { decel += d.brake * thr; v.braking = true; }
       else {
         const f = Math.max(0, vF) / (vmax * 1.03);
         const curve = Math.max(0, 1 - f * f * f) * (0.82 + 0.18 * Math.min(1, f * 3));
-        drive += d.accel * tm * thr * curve * (hb ? 0.7 : 1);
+        drive += d.accel * tm * thr * curve * (hb ? 0.7 : 1) * ss;
       }
     } else if (thr < -0.01) {
       if (vF > 0.8) { decel += d.brake * -thr; v.braking = true; }
@@ -125,7 +127,7 @@ export function stepCar(v, h, world) {
     if (hb) { decel += d.brake * (thr > 0.01 ? 0.08 : 0.42); v.braking = v.braking || spd > 0.5; }
     if (Math.abs(thr) < 0.01) decel += 0.45 + 0.9 * Math.min(1, spd / 8); // rolling resistance + engine braking
     decel += (1 - gm) * 0.6;                                               // soft ground
-    drive -= 0.00055 * vF * Math.abs(vF);                                  // aero drag
+    drive -= (0.00055 * vF * Math.abs(vF)) / (ss * ss);                    // aero drag
     const before = vF;
     vF += drive * h;
     const dv = decel * h;
@@ -191,6 +193,7 @@ export function stepCar(v, h, world) {
 
   verticalCar(v, h, world);
   collideWorld(v, world, 0.22, 0.35);
+  if (pos.y < 1) { pos.y = 1; if (vel.y < 0) vel.y = 0; } // never below the bedrock floor
 }
 
 /** Ground following + gravity + landing for cars/bikes. */
@@ -240,11 +243,18 @@ function verticalCar(v, h, world) {
   if (deep) v.flooded = true;
 
   const vel = v.velocity;
-  if (target > -Infinity && pos.y <= target + 0.02) {
-    if (!v.onGround) {
-      const impact = Math.max(0, -vel.y);
-      if (impact > v.landImpact) v.landImpact = impact;
+  // fully buried (every probe column is solid above step height, e.g. a long vehicle sitting in a pit / crater):
+  // pop up onto the surrounding surface instead of free-falling through the ground
+  if (nWall === hs.length && maxH === -Infinity) {
+    const up = unburyHeight(v, world);
+    if (up > pos.y) {
+      pos.y = up; vel.y = 0;
+      v.onGround = true; v.airTime = 0; v._stickDrop = NaN;
+      return nWall;
     }
+  }
+  if (target > -Infinity && pos.y <= target + 0.02) {
+    if (!v.onGround) landed(v, Math.max(0, -vel.y), target);
     const dy = target - pos.y;
     if (dy > 0) pos.y += Math.min(dy, Math.max(dy * 16 * h, 2.6 * h));
     if (vel.y < 0) vel.y = 0;
@@ -254,13 +264,16 @@ function verticalCar(v, h, world) {
   } else {
     const drop = pos.y - target;
     const stick = v.onGround && drop < 1.15 && vel.y <= 0;
+    // rolling off a kerb / 1-block step: remember where the drop began so the touchdown is a soft bounce, not a
+    // 'landing' (a longer fall that started at a kerb still lands for real)
+    if (v.onGround) v._stickDrop = stick ? pos.y : NaN;
+    else if (vel.y > 2) v._stickDrop = NaN; // launched (explosion / ramp)
     vel.y -= G * (stick ? 2.6 : 1) * h;
     if (v.inWater) { vel.y = Math.max(vel.y, v.flooded ? -1.3 : -2.2); }
     vel.y = Math.max(vel.y, -PHYS.TERMINAL_VELOCITY);
     pos.y += vel.y * h;
     if (target > -Infinity && pos.y <= target) {
-      const impact = Math.max(0, -vel.y);
-      if (impact > v.landImpact && !stick) v.landImpact = impact;
+      landed(v, Math.max(0, -vel.y), target);
       pos.y = target; vel.y = 0;
       v.onGround = true; v.airTime = 0;
     } else {
@@ -269,6 +282,37 @@ function verticalCar(v, h, world) {
     }
   }
   return nWall;
+}
+
+/** Touchdown bookkeeping: real drops record landImpact (thud / damage); kerb drops only kick the suspension. */
+function landed(v, impact, y) {
+  const y0 = v._stickDrop;
+  v._stickDrop = NaN;
+  if (y0 - y <= 1.15) { // (NaN compares false)
+    v.suspV -= Math.min(0.6, 0.15 + impact * 0.06);
+    return;
+  }
+  if (impact > v.landImpact) v.landImpact = impact;
+}
+
+/**
+ * Standing height that frees a buried vehicle: per ground-probe column, the first free cell (with headroom) at or
+ * above the body; the highest of those within 12 m. Returns -Infinity when nothing is found.
+ */
+function unburyHeight(v, world) {
+  const pos = v.position, gp = v.samples.ground;
+  const sy = Math.sin(v.yaw), cy = Math.cos(v.yaw);
+  const y0 = Math.floor(pos.y), yMax = y0 + 12;
+  let best = -Infinity;
+  for (let i = 0; i < gp.length; i += 2) {
+    const lx = gp[i], lz = gp[i + 1];
+    const bx = Math.floor(pos.x + lx * cy + lz * sy), bz = Math.floor(pos.z - lx * sy + lz * cy);
+    let y = y0;
+    while (y <= yMax && (world.isSolid(bx, y, bz) || world.isSolid(bx, y + 1, bz))) y++;
+    if (y > yMax) return -Infinity;
+    if (y > best) best = y;
+  }
+  return best;
 }
 
 // ------------------------------------------------------------------------------------------------ collisions
@@ -409,14 +453,15 @@ export function stepHeli(v, h, world) {
   pos.y += vel.y * h;
   if (pos.y > 150) { pos.y = 150; vel.y = Math.min(0, vel.y); }
 
-  // ---- ground (skids): scan a few blocks below the skid probes
+  if (pos.y < 1) { pos.y = 1; if (vel.y < 0) vel.y = 0; } // never below the bedrock floor
+  // ---- ground (skids): scan a few blocks below the skid probes (deep enough for the landing cushion)
   const gp = v.samples.ground;
   let gy = -Infinity;
   for (let i = 0; i < gp.length; i += 2) {
     const wx = pos.x + gp[i] * cy + gp[i + 1] * sy, wz = pos.z - gp[i] * sy + gp[i + 1] * cy;
     const bx = Math.floor(wx), bz = Math.floor(wz);
     const top = Math.floor(pos.y + 0.6);
-    for (let y = top; y >= top - 3; y--) {
+    for (let y = top; y >= top - 5; y--) {
       if (world.isSolid(bx, y, bz)) { if (y + 1 > gy) gy = y + 1; break; }
     }
   }
@@ -433,6 +478,15 @@ export function stepHeli(v, h, world) {
   } else {
     v.onGround = false;
     v.airTime += h;
+    // ground-effect cushion: a powered descent eases off to ~3 m/s over the last 4 m (free falls still crash)
+    if (gy > -Infinity && pilot && v.rotor > 0.6 && !v.onFire && vel.y < -3) {
+      const hg = pos.y - gy;
+      if (hg < 4) {
+        vel.y += (-3 - vel.y) * (1 - Math.exp(-8 * h));
+        const floor = -3 - 1.4 * Math.max(0, hg);
+        if (vel.y < floor) vel.y = floor;
+      }
+    }
   }
   v.pitch = v.tilt;
   v.roll = v.bank;
@@ -498,7 +552,12 @@ export function collidePair(a, b, out, e = 0.25) {
   // axes: a.forward, a.right, b.forward, b.right
   _ax[0] = sa; _az[0] = ca; _ax[1] = -ca; _az[1] = sa; _ax[2] = sb; _az[2] = cb; _ax[3] = -cb; _az[3] = sb;
   const awh = a.def.size.w / 2, alh = a.def.size.l / 2, bwh = b.def.size.w / 2, blh = b.def.size.l / 2;
+  const rvx = a.velocity.x - b.velocity.x, rvz = a.velocity.z - b.velocity.z;
   let minO = Infinity, nx = 0, nz = 0;
+  // swept candidate: the axis the boxes started overlapping on most recently (time = penetration from the entry side
+  // / closing speed). At low frame rates a fast hit can be deeper than the overlap on another axis, and the
+  // minimum-overlap axis then pushes the cars sideways or through each other (tunnelling).
+  let sweptT = Infinity, snx = 0, snz = 0, sPen = 0;
   for (let i = 0; i < 4; i++) {
     const axx = _ax[i], axz = _az[i];
     const ea = awh * Math.abs(-ca * axx + sa * axz) + alh * Math.abs(sa * axx + ca * axz);
@@ -507,6 +566,18 @@ export function collidePair(a, b, out, e = 0.25) {
     const o = ea + eb - Math.abs(dist);
     if (o <= 0) return 0;
     if (o < minO) { minO = o; const s = dist >= 0 ? 1 : -1; nx = axx * s; nz = axz * s; }
+    const rv = rvx * axx + rvz * axz, cl = Math.abs(rv);
+    if (cl > 1) {
+      const s = rv > 0 ? -1 : 1;          // normal (b -> a) opposing the approach
+      const pen = ea + eb - dist * s;      // penetration measured from the side a came from
+      const t = pen / cl;
+      if (t < sweptT) { sweptT = t; snx = axx * s; snz = axz * s; sPen = pen; }
+    }
+  }
+  let corrMax = 0.6;
+  // a fresh (entered within ~2 frames), deep contact whose entry normal differs from the min-overlap normal
+  if (sweptT < 0.12 && sPen > 0.25 && snx * nx + snz * nz < 0.99) {
+    nx = snx; nz = snz; minO = sPen; corrMax = 3;
   }
   // contact point: deepest corner of either box inside the other (fallback: midpoint)
   let cx = 0, cz = 0, cn = 0;
@@ -526,7 +597,7 @@ export function collidePair(a, b, out, e = 0.25) {
   if (cn) { cx /= cn; cz /= cn; } else { cx = (pa.x + pb.x) / 2; cz = (pa.z + pb.z) / 2; }
   const ma = a.sleeping && !b.sleeping ? a.def.mass * 1.6 : a.def.mass, mb = b.sleeping && !a.sleeping ? b.def.mass * 1.6 : b.def.mass;
   const ima = 1 / ma, imb = 1 / mb;
-  const corr = Math.min(minO, 0.6) + 0.002;
+  const corr = Math.min(minO, corrMax) + 0.002;
   pa.x += nx * corr * (ima / (ima + imb)); pa.z += nz * corr * (ima / (ima + imb));
   pb.x -= nx * corr * (imb / (ima + imb)); pb.z -= nz * corr * (imb / (ima + imb));
   const Ia = ma * (a.def.size.w ** 2 + a.def.size.l ** 2) / 12 / 0.7, Ib = mb * (b.def.size.w ** 2 + b.def.size.l ** 2) / 12 / 0.7;

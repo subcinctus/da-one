@@ -268,8 +268,17 @@ export const SCREEN_CSS = `
   .bc-map .top h2 { font-size: 26px; }
 }
 @media (max-height: 520px) {
-  .bc-menu.title { gap: 10px; }
+  .bc-menu { padding-top: calc(10px + var(--st)); padding-bottom: calc(10px + var(--sb)); }
+  .bc-menu.title { gap: 10px; justify-content: safe center; }
   .bc-menu .btns { gap: 7px; }
-  .bc-btn { min-height: 40px; }
+  .bc-btn { min-height: 36px; }
+  /* the footer joins the flow under the buttons instead of floating over them */
+  .bc-menu.title .foot { position: static; padding: 0; }
+  .bc-menu.title .splash { font-size: 14px; }
+}
+@media (max-height: 380px) {
+  .bc-menu.title { gap: 7px; }
+  .bc-menu.title .tag { font-size: 12px; margin-top: -4px; }
+  .bc-menu.title .foot { display: none; }
 }
 `;

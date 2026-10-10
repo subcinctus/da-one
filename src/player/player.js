@@ -61,6 +61,8 @@ export class Player {
     this.sprinting = false;
     this.crouching = false;
     this.flying = false;
+    /** holding B on foot: surrender pose (police treat it as giving up). Blocks movement, aiming and actions. */
+    this.handsUp = false;
     /** no damage (debug) */
     this.god = false;
     /** 0..1 remaining air while the head is under water (HUD may show bubbles) */
@@ -99,6 +101,10 @@ export class Player {
     this._hitWall = false;
     this._regenEmit = 0;
     this._respawning = false;
+    this._wasFlying = false;
+    /** set when flight ends in mid-air (double-tap, creative off): the fall that follows does no damage */
+    this._safeFall = false;
+    this._swimHintShown = false;
     this.models = null;
   }
 
@@ -197,6 +203,9 @@ export class Player {
     if (reason === 'death') this.armor = 0;
     this.breath = 1;
     this.flying = false;
+    this._wasFlying = false;
+    this._safeFall = false;
+    this.handsUp = false;
     this.aiming = false;
     this.deathTime = 0;
     this.velocity.set(0, 0, 0);
@@ -308,6 +317,9 @@ export class Player {
       this.hidden = true;
       this.aiming = false;
       this.flying = false;
+      this._wasFlying = false;
+      this._safeFall = false;
+      this.handsUp = false;
       this.sprinting = false;
       this.velocity.set(0, 0, 0);
       this.humanoid?.setVisible(false);
@@ -416,13 +428,19 @@ export class Player {
     const creative = !!(g.inventory && g.inventory.creative);
     const pos = this.position, vel = this.velocity;
 
+    // ---------------- hands up (hold B): surrender pose. Kept while frozen by an arrest in progress.
+    const handsKey = input.down('handsUp');
+    this.handsUp = handsKey && this.alive && !this.inVehicle && !this.swimming && !this.flying && (!frozen || this.handsUp);
+    const still = frozen || this.handsUp;
+
     // ---------------- intents
     let ax = 0, ay = 0;
-    if (!frozen) { const m = input.moveAxis(); ax = m.x; ay = m.y; }
-    const jumpPressed = !frozen && input.pressed('jump');
-    const jumpHeld = !frozen && input.down('jump');
-    const sprintHeld = !frozen && input.down('sprint');
-    const crouchHeld = !frozen && input.down('crouch');
+    if (!still) { const m = input.moveAxis(); ax = m.x; ay = m.y; }
+    const jumpPressed = !still && input.pressed('jump');
+    const jumpHeld = !still && input.down('jump');
+    const sprintHeld = !still && input.down('sprint');
+    const crouchHeld = !still && input.down('crouch');
+    if (this.handsUp) this.aiming = false;
 
     // creative flight: double-tap Space
     if (jumpPressed && creative) {
@@ -431,10 +449,13 @@ export class Player {
         this.flying = !this.flying;
         this._lastSpaceT = -1;
         if (this.flying) vel.y = 0;
-        g.hud?.notify?.(this.flying ? 'Flying (Space up, Shift down, Ctrl fast)' : 'Flight off', { duration: 1.5 });
+        g.hud?.notify?.(this.flying ? 'Flying (Space up, Shift down, X fast)' : 'Flight off', { duration: 1.5 });
       } else this._lastSpaceT = now;
     }
     if (!creative && this.flying) this.flying = false;
+    // flight ended in mid-air (double-tap, creative switched off, debug): the drop that follows is harmless
+    if (this._wasFlying && !this.flying && !this.onGround) this._safeFall = true;
+    this._wasFlying = this.flying;
 
     forwardFromYaw(camYaw, _fwd);
     rightFromYaw(camYaw, _right);
@@ -448,6 +469,10 @@ export class Player {
     const chestWater = isLiquid(world.getBlock(bx, Math.floor(pos.y + 0.9), bz));
     const feetWater = isLiquid(world.getBlock(bx, Math.floor(pos.y + 0.2), bz));
     this.swimming = chestWater && !this.flying;
+    if (this.swimming && !this._swimHintShown) {
+      this._swimHintShown = true;
+      g.hud?.notify?.('Swimming: [Space] swim up / climb out, [X] dive', { duration: 4 });
+    }
 
     // ---------------- stance
     this.crouching = crouchHeld && !this.flying && !this.swimming;
@@ -490,12 +515,21 @@ export class Player {
       vel.y = approach(vel.y, tv, 40 * dt);
     } else if (this.swimming) {
       if (vel.y < -2) vel.y *= Math.exp(-PHYS.WATER_DRAG * 2.5 * dt); // entering water: brake the fall
-      if (jumpHeld) {
-        const headOut = !this.headInWater;
-        if (headOut && this._hitWall) vel.y = 8.6; // climb out onto the bank
-        else vel.y = approach(vel.y, 3.4, 14 * dt);
-      } else if (crouchHeld) vel.y = approach(vel.y, -3.0, 10 * dt);
-      else vel.y = approach(vel.y, -0.9, PHYS.WATER_GRAVITY * dt);
+      const headOut = !this.headInWater;
+      // water surface above the chest: first non-liquid block scanning up
+      let surfaceY = Math.floor(pos.y + 0.9);
+      for (let i = 0; i < 8 && isLiquid(world.getBlock(bx, surfaceY, bz)); i++) surfaceY++;
+      // climb out: Space, or (GTA-style) just swimming into a bank at most 1 block above the water
+      const climbV = moving && headOut && this._hitWall && !crouchHeld ? this._bankClimbV(world, surfaceY) : 0;
+      if (climbV > 0) vel.y = climbV;
+      else if (jumpHeld && headOut && this._hitWall) vel.y = 8.6; // climb out onto the bank
+      else if (jumpHeld) vel.y = approach(vel.y, 3.4, 14 * dt);
+      else if (crouchHeld) vel.y = approach(vel.y, -3.0, 10 * dt); // dive
+      else {
+        // buoyancy: float with the head just above the surface (critically damped, no bobbing)
+        const tv = clamp((surfaceY - 1.45 - pos.y) * 2.5, -1.0, 1.6);
+        vel.y = approach(vel.y, tv, 6 * dt);
+      }
       this._jumpBuf = 0;
     } else {
       vel.y = Math.max(-PHYS.TERMINAL_VELOCITY, vel.y - PHYS.GRAVITY * dt);
@@ -593,7 +627,7 @@ export class Player {
     }
     if (this.onGround && !wasOnGround) {
       const fall = this._fallPeak - pos.y;
-      if (fall > MOVE.fallSafe && !this.inWater) this.damage((fall - MOVE.fallSafe) * MOVE.fallDamagePerBlock, { type: 'fall', source: null });
+      if (fall > MOVE.fallSafe && !this.inWater && !creative && !this._safeFall) this.damage((fall - MOVE.fallSafe) * MOVE.fallDamagePerBlock, { type: 'fall', source: null });
       if (fall > 0.9) {
         g.audio?.play?.('land', { volume: clamp(fall / 6, 0.2, 1) });
         g.cameraRig?.landKick?.(clamp(fall / 7, 0.12, 1));
@@ -607,6 +641,7 @@ export class Player {
       this._airTime = 0;
     }
     if (this.onGround) this._fallPeak = pos.y;
+    if (this.onGround || this.inWater) this._safeFall = false;
 
     // ---------------- facing, footsteps
     const hs = Math.hypot(vel.x, vel.z);
@@ -635,6 +670,21 @@ export class Player {
       this._stepAcc += hs * dt;
       if (this._stepAcc > 2.4) { this._stepAcc = 0; g.audio?.play?.('splash', { volume: 0.12, pitch: 1.3 }); }
     }
+  }
+
+  /**
+   * Swimming into a bank (wish direction): the upward speed that lifts the feet onto it when its top is level with
+   * the water surface (8.6) or one block above (11.2); 0 when there is no such bank or no head room on top.
+   */
+  _bankClimbV(world, surfaceY) {
+    const dx = _wish.x, dz = _wish.z;
+    if (dx * dx + dz * dz < 0.25) return 0;
+    const reach = this.radius + 0.45;
+    const x = Math.floor(this.position.x + dx * reach), z = Math.floor(this.position.z + dz * reach);
+    const high = world.isSolid(x, surfaceY, z);
+    if (!high && !world.isSolid(x, surfaceY - 1, z)) return 0; // no bank at the waterline (lower wall: swim over it)
+    if (world.isSolid(x, surfaceY + 1, z) || (high && world.isSolid(x, surfaceY + 2, z))) return 0; // too high / no room
+    return high ? 11.2 : 8.6;
   }
 
   /** Is there a block under the box at (x,z) (sneak edge test)? */
@@ -723,12 +773,12 @@ export class Player {
       h.setHeld(item && this.models ? this.models.get(item, 'world') : null);
     }
     let state = 'normal';
-    if (this._bustedT > 0) state = 'hands_up';
+    if (this._bustedT > 0 || this.handsUp) state = 'hands_up';
     else if (this.swimming && !this.onGround) state = 'swim';
     else if (!this.onGround && !this.flying && this._airTime > 0.15) state = 'air';
     const def = item && item.kind === 'weapon' ? WEAPONS[item.id] : null;
     const gun = def && (def.kind === 'hitscan' || def.kind === 'projectile');
-    const aimPose = !!gun && (this.aiming || g.realTime - this.lastFireTime < 0.6);
+    const aimPose = !!gun && !this.handsUp && (this.aiming || g.realTime - this.lastFireTime < 0.6);
     h.animate(dt, {
       speed: this.flying ? 0 : this.horizontalSpeed,
       aiming: aimPose,
@@ -749,6 +799,8 @@ export class Player {
     this.deathTime = 0;
     this.aiming = false;
     this.flying = false;
+    this._wasFlying = false;
+    this.handsUp = false;
     this.sprinting = false;
     this._respawning = false;
     this.interact?.cancel();

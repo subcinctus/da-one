@@ -4,12 +4,14 @@
 // Public API (contract): init(onProgress), chunks, edits, getBlock, isSolid, setBlock, raycast, findGround, explode,
 // applyEdits, update, textures.
 // Extras: lateUpdate (same-frame remesh of edits), getChunk, getBlockDef, isLiquid, isOpaque, isMeshedAt, columnTop,
-// serializeEdits, materials, group, stats(), remeshAll(); debug: game.debug.remeshAll(), game.debug.worldStats(), ...
+// serializeEdits, materials, group, skyline (far-field tower proxies, engine_skyline.js), stats(), remeshAll();
+// debug: game.debug.remeshAll(), game.debug.worldStats(), game.debug.skyline(on), ...
 import * as THREE from 'three';
 import { WORLD } from '../core/config.js';
 import { voxelRaycast, findGround as physFindGround } from '../core/physics.js';
 import { BLOCKS, B } from './blocks.js';
 import { TextureAtlas } from './textures.js';
+import { SkylineLayer } from './engine_skyline.js';
 import {
   buildTables, fillPad, meshSection, mergeParts, createEnv, prepareEnv, LIGHT_SOURCES, SKY_K, COVERED_LIGHT,
   PAD_LEN, SECTIONS, SECTION_H,
@@ -29,7 +31,8 @@ const NIGHT_GLOW = 1.15;
 const FORCE_RADIUS = 1.5;   // chunks this close to the centre ignore the frame budget
 const FORWARD_BIAS = 0.35;  // load-order preference for chunks in the view direction
 const KEEP_PARTS_R = 3;      // chunks within this radius keep per-section mesh data for fast edits
-const NIGHT_LAMP = 2.3;     // strength of lamp/neon light pools at night
+const NIGHT_LAMP = 2.3;     // strength of lamp/neon light pools at night (and always, in enclosed spaces)
+const CAVE_DARK = 0.6;      // ambient multiplier on the covered-light floor for fully enclosed spaces (caves, tunnels)
 const MAX_LIGHT_R = Math.ceil(Math.max(...Object.values(LIGHT_SOURCES).map((l) => l.R)));
 const _fwd = new THREE.Vector3();
 
@@ -102,6 +105,8 @@ export class World {
     this.ready = false;
     this.renderDistance = 6;
     this.shadows = false;
+    /** Far-field skyline proxies (engine_skyline.js): towers stay visible as haze past the chunk fog. */
+    this.skyline = null;
 
     buildIdTables();
     this._datas = new Array(NX * NZ).fill(null);
@@ -152,6 +157,7 @@ export class World {
     this._tables = buildTables(this.textures);
     this._makeMaterials();
     if (game.scene && !this.group.parent) game.scene.add(this.group);
+    this._makeSkyline();
     this._applySettings(game.settings || {}, true);
     this._installDebug();
     if (game.events && game.events.on) {
@@ -204,11 +210,26 @@ export class World {
   }
 
   /**
-   * Shader injection shared by the chunk materials: the `blockLight` vertex attribute carries lamp/neon light (rgb,
-   * added at night) and sky exposure (a: covered spaces get darker), and the emissive pass gets its glow term.
+   * Shader injection shared by the chunk materials: the `blockLight` vertex attribute carries lamp/neon light (rgb)
+   * and sky exposure (a: covered spaces get darker), and the emissive pass gets its glow term.
+   *  - Lamp light: outdoors it only shows at night (uLamp), but enclosed spaces (tunnels, the mine, lobbies: low sky
+   *    exposure) are lamp-lit at any time of day, and fully enclosed fragments get a darker ambient floor.
+   *  - Glow: lamps and neon glow in their own colour; lit windows (day tile = glass) glow with their NIGHT tile (the
+   *    bright room, sampled at a fixed atlas cell offset with the same derivatives, so mips stay consistent).
+   *  - Fog (emissive pass): at night, glowing pixels stay clear of the fog until ~0.8x fog far (city lights carry).
    */
   _patchMaterial(mat, pass, glowMask) {
     const u = this._uniforms;
+    const win = this.textures.nightCells ? this.textures.nightCells('window_lit') : null;
+    const f1 = (v) => (+v).toFixed(1);
+    const defs = [
+      `#define BC_NIGHT_LAMP ${NIGHT_LAMP.toFixed(3)}`,
+      `#define BC_CAVE_DARK ${CAVE_DARK.toFixed(3)}`,
+    ];
+    if (win) {
+      defs.push('#define BC_WIN_NIGHT', `#define BC_ATLAS_COLS ${f1(win.cols)}`, `#define BC_ATLAS_ROWS ${f1(win.rows)}`,
+        `#define BC_WIN_FIRST ${f1(win.first - 0.5)}`, `#define BC_WIN_LAST ${f1(win.last + 0.5)}`, `#define BC_WIN_SHIFT ${f1(win.shift)}`);
+    }
     mat.onBeforeCompile = (shader) => {
       shader.uniforms.uLamp = u.uLamp;
       shader.uniforms.uCovered = u.uCovered;
@@ -218,20 +239,65 @@ export class World {
         .replace('#include <color_vertex>', '#include <color_vertex>\n\tvBlockLight = blockLight;');
       const glow = glowMask ? [
         '\tfloat glowMask = step( 0.998, vBlockLight.a ) * clamp( ( diffuseColor.a - 0.94 ) * 16.6667, 0.0, 1.0 );',
-        '\ttotalEmissiveRadiance += diffuseColor.rgb * glowMask * uGlow;',
+        '\tvec3 glowCol = diffuseColor.rgb;',
+        '#if defined( USE_MAP ) && defined( BC_WIN_NIGHT ) && __VERSION__ >= 300',
+        '\t{',
+        '\t\tvec2 bcDx = dFdx( vMapUv ), bcDy = dFdy( vMapUv );',
+        '\t\tvec2 bcG = vec2( vMapUv.x * BC_ATLAS_COLS, ( 1.0 - vMapUv.y ) * BC_ATLAS_ROWS );',
+        '\t\tvec2 bcCell = floor( bcG );',
+        '\t\tfloat bcC = bcCell.x + bcCell.y * BC_ATLAS_COLS;',
+        '\t\tif ( glowMask > 0.0 && bcC > BC_WIN_FIRST && bcC < BC_WIN_LAST ) {',
+        '\t\t\tfloat bcN = bcC + BC_WIN_SHIFT;',
+        '\t\t\tvec2 bcQ = vec2( mod( bcN, BC_ATLAS_COLS ), floor( bcN / BC_ATLAS_COLS ) ) + ( bcG - bcCell );',
+        '\t\t\tglowCol = textureGrad( map, vec2( bcQ.x / BC_ATLAS_COLS, 1.0 - bcQ.y / BC_ATLAS_ROWS ), bcDx, bcDy ).rgb;',
+        '#if defined( USE_COLOR_ALPHA ) || defined( USE_COLOR )',
+        '\t\t\tglowCol *= vColor.rgb;',
+        '#endif',
+        '\t\t}',
+        '\t}',
+        '#endif',
+        '\ttotalEmissiveRadiance += glowCol * glowMask * uGlow;',
       ].join('\n') : '';
-      shader.fragmentShader = shader.fragmentShader
-        .replace('uniform float opacity;', 'uniform float opacity;\nuniform float uLamp;\nuniform float uCovered;\nuniform float uGlow;\nvarying vec4 vBlockLight;')
+      let frag = shader.fragmentShader
+        .replace('uniform float opacity;', 'uniform float opacity;\nuniform float uLamp;\nuniform float uCovered;\nuniform float uGlow;\nvarying vec4 vBlockLight;\n' + defs.join('\n'))
         .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + glow)
         .replace('#include <aomap_fragment>', [
           '#include <aomap_fragment>',
-          '\tfloat skyF = mix( uCovered, 1.0, min( vBlockLight.a * 1.004, 1.0 ) );',
+          '\tfloat skyE = min( vBlockLight.a * 1.004, 1.0 );',
+          '\tfloat skyF = mix( uCovered * mix( BC_CAVE_DARK, 1.0, smoothstep( 0.0, 0.25, skyE ) ), 1.0, skyE );',
           '\treflectedLight.directDiffuse *= skyF;',
           '\treflectedLight.indirectDiffuse *= skyF;',
-          '\ttotalEmissiveRadiance += diffuseColor.rgb * vBlockLight.rgb * uLamp;',
+          '\tfloat lampK = max( uLamp, ( 1.0 - smoothstep( 0.0, 0.6, skyE ) ) * BC_NIGHT_LAMP );',
+          '\ttotalEmissiveRadiance += diffuseColor.rgb * vBlockLight.rgb * lampK;',
         ].join('\n'));
+      if (glowMask) {
+        frag = frag.replace('#include <fog_fragment>', [
+          '#ifdef USE_FOG',
+          '#ifdef FOG_EXP2',
+          '#include <fog_fragment>',
+          '#else',
+          '\tfloat fogF = smoothstep( fogNear, fogFar, vFogDepth );',
+          '\tfloat fogG = smoothstep( mix( fogNear, fogFar, 0.8 ), fogFar, vFogDepth );',
+          '\tfogF = mix( fogF, fogG, glowMask * step( 0.3, uGlow ) );',
+          '\tgl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogF );',
+          '#endif',
+          '#endif',
+        ].join('\n'));
+      }
+      shader.fragmentShader = frag;
     };
-    mat.customProgramCacheKey = () => 'blockcity-world-' + pass + '-v3';
+    mat.customProgramCacheKey = () => 'blockcity-world-' + pass + '-v4';
+  }
+
+  _makeSkyline() {
+    const plan = this.game.generator && this.game.generator.plan;
+    if (this.skyline || !plan) return;
+    try {
+      const sk = new SkylineLayer(plan, WORLD.CITY_LEVEL, this._uniforms.uGlow);
+      if (sk.mesh) { this.group.add(sk.mesh); this.skyline = sk; }
+    } catch (e) {
+      this.skyline = null; // cosmetic layer: the world works without it
+    }
   }
 
   _applySettings(s, initial) {
@@ -282,6 +348,8 @@ export class World {
     this._flushUrgent(URGENT_BUDGET_MS);
     this._stream();
     if (this._frame % 30 === 0) this._unloadFar();
+    // the skyline waits for the end of loading (all lights + fog in place): its shader compiles exactly once
+    if (this.skyline) this.skyline.update(this.game.camera, this.game.state !== 'loading' && this.game.scene ? this.game.scene.fog : null);
   }
 
   /** Edits made by systems updating after the world (player mining) are remeshed before this frame renders. */
@@ -582,11 +650,14 @@ export class World {
     return d[(x & 15) | ((z & 15) << 4) | ((y | 0) << 8)];
   }
 
-  /** Solid (collidable) block? Outside x/z -> true (invisible wall), y<0 -> true, y>=96 -> false. */
+  /**
+   * Solid (collidable) block? Outside x/z -> true at EVERY height (the invisible map wall reaches the sky, so nothing
+   * can fly over it), y<0 -> true, y>=96 inside the map -> false.
+   */
   isSolid(x, y, z) {
     if (y < 0) return true;
-    if (y >= H) return false;
     if (x < 0 || z < 0 || x >= WORLD.SIZE_X || z >= WORLD.SIZE_Z) return true;
+    if (y >= H) return false;
     const ci = (z >> 4) * NX + (x >> 4);
     const d = this._datas[ci] || this._ensureData(x >> 4, z >> 4);
     return SOLID[d[(x & 15) | ((z & 15) << 4) | ((y | 0) << 8)]] === 1;
@@ -825,6 +896,8 @@ export class World {
       lastMeshMs: +s.lastMeshMs.toFixed(2),
       glow: +this._uniforms.uGlow.value.toFixed(3),
       lamp: +this._uniforms.uLamp.value.toFixed(3),
+      lampEnclosed: NIGHT_LAMP, // lamp strength in fully enclosed spaces (tunnels, mine, lobbies) at any time of day
+      skyline: this.skyline ? this.skyline.stats() : null,
     };
   }
 
@@ -833,6 +906,13 @@ export class World {
     if (!dbg) return;
     dbg.remeshAll = () => this.remeshAll();
     dbg.worldStats = () => this.stats();
+    /** Show/hide the far-field skyline proxies (no arg: just report). Returns their stats. */
+    dbg.skyline = (on) => {
+      const sk = this.skyline;
+      if (!sk || !sk.mesh) return null;
+      if (on !== undefined) sk.disabled = !on;
+      return { enabled: !sk.disabled, ...sk.stats() };
+    };
     /** Data URL of the block atlas (level 0, upright), optionally scaled. */
     dbg.blockIds = () => ({ ...B });
     dbg.atlasURL = (scale = 2) => { const c = this.textures.toCanvas(scale); return c ? c.toDataURL() : null; };
@@ -852,6 +932,7 @@ export class World {
     for (const u of this._unsub) { try { u && u(); } catch (e) { /* ignore */ } }
     this._unsub = [];
     for (const ch of this.chunks.values()) this._unloadMeshes(ch);
+    if (this.skyline) { this.skyline.dispose(); this.skyline = null; }
     if (this.group.parent) this.group.parent.remove(this.group);
     if (this.materials) for (const k of PASSES) this.materials[k].dispose();
     this.textures.dispose();

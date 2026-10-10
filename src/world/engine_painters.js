@@ -9,7 +9,12 @@ import {
   PixelTile, rgb, mix, mul, pick, clamp01, tileNoise, rngFrom, strHash,
 } from './engine_pixels.js';
 
-export const TEXTURE_VARIANTS = { window_lit: 4, window: 2 };
+export const TEXTURE_VARIANTS = { window_lit: 4, window_lit_night: 4, window: 2 };
+/**
+ * Atlas tiles that no block face uses directly; shaders sample them at a fixed cell offset from a block tile:
+ * day tile -> night tile (same variant count, laid out right after the block tiles, see textures.js).
+ */
+export const NIGHT_TILES = { window_lit: 'window_lit_night' };
 export const WATER_FRAMES = 8;
 export const DESTROY_STAGES = 10;
 
@@ -580,7 +585,13 @@ P.window = (t, r, v) => {
   windowFrame(t);
 };
 
-P.window_lit = (t, r, v) => {
+/**
+ * Lit window, night look: the bright room behind the glass (warm ceiling light, blinds, silhouettes, curtains). It is
+ * not a block face texture: the chunk shader samples it (same variant, NIGHT_TILES[...] cells further in the atlas)
+ * for the night glow of 'window_lit' faces, so nights keep the warm detailed windows while days show glass.
+ */
+function paintLitRoom(t, v) {
+  const r = rngFor('window_lit', v); // the original lit-window noise
   const top = rgb(0xfff1c2), bot = rgb(0xf2b65a);
   t.paint((x, y) => mul(mix(top, bot, y / 15), 0.98 + 0.04 * r()));
   if (v === 0) {
@@ -603,6 +614,38 @@ P.window_lit = (t, r, v) => {
     const leaf = rgb(0x3d7a2a);
     for (const [x, y] of [[7, 10], [8, 10], [6, 11], [9, 11], [7, 11], [8, 11], [7, 9], [9, 9]]) t.set(x, y, leaf);
     for (let x = 6; x <= 9; x++) { t.set(x, 13, rgb(0x9a5a30)); t.set(x, 12, rgb(0xb06a3a)); }
+  }
+}
+P.window_lit_night = (t, r, v) => {
+  paintLitRoom(t, v);
+  windowFrame(t, GLOW_OFF);
+};
+
+/**
+ * Lit window, day look: glazing with a warm room behind it (the plain window's glass gradient tinted toward amber,
+ * faint interior shapes from the night tile, a soft reflection streak). Alpha is the glow mask exactly as on every
+ * emissive tile (255 = glows at night, frame = GLOW_OFF), so the shader's glow mask is unchanged.
+ */
+const WIN_AMBER = rgb(0xe8a050);
+P.window_lit = (t, r, v) => {
+  const room = new PixelTile(16, 16);
+  paintLitRoom(room, v);
+  const top = mul(mix(rgb(0x416b8a), WIN_AMBER, 0.27), 0.84), bot = mul(mix(rgb(0x1d3245), WIN_AMBER, 0.27), 0.84);
+  // interior detail = the room's brightness relative to its smooth gradient (blinds, silhouettes, curtains)
+  const ref = (y) => 0.98 * (255 + (242 - 255) * y / 15 + 241 + (182 - 241) * y / 15 + 194 + (90 - 194) * y / 15) / 3;
+  t.paint((x, y) => {
+    const c = room.rgbAt(x, y);
+    const k = Math.min(1.15, ((c[0] + c[1] + c[2]) / 3) / ref(y));
+    const glass = mul(mix(top, bot, y / 15), (0.6 + 0.4 * k) * (0.97 + 0.05 * r()));
+    return mix(glass, mul(c, 0.45), 0.18);
+  });
+  const s = v === 1 ? 13 : 8;
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const d = x + y;
+      if (d >= s && d <= s + 2) t.blend(x, y, rgb(0x8fb3cf), 0.3);
+      else if (d === s + 4) t.blend(x, y, rgb(0x8fb3cf), 0.14);
+    }
   }
   windowFrame(t, GLOW_OFF);
 };

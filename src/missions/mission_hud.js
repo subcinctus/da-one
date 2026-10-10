@@ -31,6 +31,16 @@ const CSS = `
 @keyframes bcm-flash { 0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.95); } 12% { opacity: 1; transform: translateX(-50%); }
   80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-8px); } }
 .bcm-hidden .bcm-mhud { display: none; }
+/* narrow windows: the top-left help notes would cover a centred card, so it parks under the top-right stack
+   (clock, weapon, stars, money: ~190 px unscaled) */
+@media (max-width: 900px) {
+  .bcm-track, .bcm-track.notimer { left: auto; right: calc(22px + env(safe-area-inset-right, 0px));
+    top: calc(16px + env(safe-area-inset-top, 0px) + 198px * var(--s, 1)); transform: scale(var(--s, 1)); transform-origin: 100% 0; }
+  /* touch portrait: the mission timer already sits under the money there */
+  .bc-hud.touch.portrait ~ .bcm-mhud .bcm-track { top: calc(16px + env(safe-area-inset-top, 0px) + 258px * var(--s, 1)); }
+  .bc-hud.touch.portrait ~ .bcm-mhud .bcm-track.notimer { top: calc(16px + env(safe-area-inset-top, 0px) + 205px * var(--s, 1)); }
+}
+@media (max-width: 900px) and (orientation: portrait) { .bcm-track { min-width: 0; max-width: 220px; } }
 `;
 
 export class MissionHUD {

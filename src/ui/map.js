@@ -146,6 +146,10 @@ export class FullMap {
       add((g) => drawBlip(g, { icon: st.icon, color: st.color, size: 7, label: st.letter || st.name }, 11, 11, 0, 1), st.name);
     }
     add((g) => drawBlip(g, { shape: 'dot', color: '#3d7bff', size: 6 }, 11, 11, 0, 1), 'Police');
+    // world pickups (pickups.js PICKUP_BLIPS): small dots, unlike the shop / hospital icons
+    for (const [color, label] of [['#ffd23f', 'Weapon pickup'], ['#ff7b7b', 'Health pickup'], ['#8fd8ff', 'Armor pickup']]) {
+      add((g) => drawBlip(g, { shape: 'dot', color, size: 4.5 }, 11, 11, 0, 1), label);
+    }
     add((g) => { g.globalAlpha = 0.3; g.fillStyle = '#ff3b30'; g.beginPath(); g.arc(11, 11, 9, 0, 7); g.fill(); g.globalAlpha = 1; g.strokeStyle = '#ff3b30'; g.setLineDash([3, 2]); g.stroke(); }, 'Police search area');
   }
 

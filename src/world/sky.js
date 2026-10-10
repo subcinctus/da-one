@@ -15,12 +15,20 @@ import { CloudLayer } from '../fx/sky_clouds.js';
 import { Rain } from '../fx/sky_rain.js';
 
 let fogPatched = false;
-/** Make three's fog radial (distance) instead of view-depth based so chunk edges stay hidden at screen corners. */
+/**
+ * Replace three's view-depth fog distance with a horizontal-weighted one (every fogged material, chunk shaders included):
+ * vFogDepth = length( horizontal distance, vertical distance * 0.25 ). Radial, so chunk edges stay hidden at screen
+ * corners; horizontal-dominant, so the loaded-chunk edge (a horizontal radius) stays hidden at any altitude while the
+ * ground straight below a heli or a rooftop stays crisp. Must run before any material compiles (Sky constructor).
+ */
 function patchRadialFog() {
   if (fogPatched) return;
   fogPatched = true;
   try {
-    THREE.ShaderChunk.fog_vertex = '#ifdef USE_FOG\n\tvFogDepth = length( mvPosition.xyz );\n#endif\n';
+    THREE.ShaderChunk.fog_vertex = '#ifdef USE_FOG\n'
+      + '\tvec3 fogW = ( vec4( mvPosition.xyz, 0.0 ) * viewMatrix ).xyz;\n' // view -> world-space offset from the camera
+      + '\tvFogDepth = length( vec2( length( fogW.xz ), fogW.y * 0.25 ) );\n'
+      + '#endif\n';
   } catch (e) { /* ShaderChunk frozen: keep depth fog */ }
 }
 
@@ -135,9 +143,10 @@ export class Sky {
   _applySettings(s) {
     if (!s || !this.sun) return;
     const rd = Math.max(2, Math.min(16, s.renderDistance || 6));
-    // fog ends a little inside the loaded radius so chunk edges are never visible
+    // fog ends a little inside the loaded radius so chunk edges are never visible; it starts late (60 %) so the
+    // readable city reaches well out (73 m clear of 122 m at RD 8) - the fog distance is horizontal (patchRadialFog)
     this._fogFar = rd * 16 - 6;
-    this._fogNear = Math.max(12, this._fogFar * 0.42);
+    this._fogNear = Math.max(12, this._fogFar * 0.6);
     const wantShadows = !!s.shadows;
     if (this.sun.castShadow !== wantShadows) {
       this.sun.castShadow = wantShadows;
@@ -327,8 +336,8 @@ export class Sky {
 
     // clouds
     _cloudLook.top.copy(st.cloud);
-    if (flash > 0) { _cloudLook.top.lerp(_flashCol, flash * 0.8); _cloudLook.bottom.lerp(_flashCol, flash * 0.6); }
     _cloudLook.bottom.copy(st.cloudShade);
+    if (flash > 0) { _cloudLook.top.lerp(_flashCol, flash * 0.8); _cloudLook.bottom.lerp(_flashCol, flash * 0.6); }
     _cloudLook.fog.copy(st.hor);
     _cloudLook.opacity = st.cloudOpacity;
     const far = Math.max(220, this._fogFar * 2.6);

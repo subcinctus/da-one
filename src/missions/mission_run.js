@@ -3,6 +3,8 @@
 // handed back to their owner systems as non-persistent so they despawn naturally once out of sight).
 import { makeStep } from './mission_steps.js';
 import { safe, notify, setWaypoint, playerPos } from './util.js';
+import { BLOCKS } from '../world/blocks.js';
+import { WEAPONS } from '../data/weapons.js';
 
 export class MissionRun {
   constructor(sys, def, opts = {}) {
@@ -24,6 +26,8 @@ export class MissionRun {
     this.bonus = 0;
     this.bonusNote = '';
     this.finished = false;
+    /** Creative mode was on at some point of the run (free blocks / TNT, instant mining): it pays nothing. */
+    this.usedCreative = false;
     this._objective = null;
     this._wp = null;
     this._timerSync = 0;
@@ -33,6 +37,7 @@ export class MissionRun {
   // ================================================================================================ lifecycle
 
   begin() {
+    this.usedCreative = !!(this.game.inventory && this.game.inventory.creative);
     if (typeof this.def.setup === 'function') {
       try { this.def.setup(this); } catch (e) { console.error('[missions] setup ' + this.def.id, e); }
     }
@@ -56,6 +61,10 @@ export class MissionRun {
   update(dt) {
     if (this.finished) return;
     this.elapsed += dt;
+    if (!this.usedCreative && this.game.inventory && this.game.inventory.creative) {
+      this.usedCreative = true;
+      if (!this.side) this.notify('*Creative mode* is on: this job will pay *nothing*.', { duration: 4.5, color: '#e5484d' });
+    }
     if (this.timeLeft !== null) {
       this.timeLeft -= dt;
       this._timerSync -= dt;
@@ -229,6 +238,47 @@ export class MissionRun {
     const p = pk.spawn(type, pos, amount, { persistent: true, mission: true, ...opts });
     if (p) this.pickups.add(p);
     return p;
+  }
+
+  /**
+   * Mission starter kit: handed out in full the first time this mission is started; any later start (replay, retry
+   * after abandoning or failing) only tops the player up to the kit amounts, so start / abandon cycles farm nothing.
+   */
+  kit(list, note) {
+    const sys = this.sys;
+    const id = this.def.id;
+    if (!sys.kitsGranted || !sys.kitsGranted.has(id)) {
+      this.give(list, note);
+      if (sys.kitsGranted) sys.kitsGranted.add(id);
+      return;
+    }
+    const added = this.giveUpTo(list);
+    if (added.length) this.notify('Kit topped up: ' + added.join(', ') + '.', { duration: 4.5, color: '#f5c518' });
+  }
+
+  /** Top the inventory up to the listed amounts (blocks: count, weapons: total rounds, tools: owned). Returns labels. */
+  giveUpTo(list) {
+    const inv = this.game.inventory;
+    const added = [];
+    if (!inv) return added;
+    for (const it of list) {
+      try {
+        if (it.kind === 'block') {
+          const n = (it.count | 0) - (typeof inv.countBlock === 'function' ? inv.countBlock(it.id) : 0);
+          if (n > 0 && inv.addBlock(it.id, n) !== false) added.push('*' + n + ' ' + ((BLOCKS[it.id] && BLOCKS[it.id].name) || 'blocks') + '*');
+        } else if (it.kind === 'weapon') {
+          const w = typeof inv.getWeapon === 'function' ? inv.getWeapon(it.id) : null;
+          const name = (WEAPONS[it.id] && WEAPONS[it.id].name) || it.id;
+          if (!w) { if (inv.addWeapon(it.id, it.ammo) !== false) added.push('a *' + name + '*'); continue; }
+          const n = (it.ammo | 0) - ((w.mag | 0) + (w.reserve | 0));
+          if (n > 0 && inv.addWeapon(it.id, n) !== false) added.push('*' + n + ' ' + name + '* ammo');
+        } else if (it.kind === 'tool' && !(inv.hasTool && inv.hasTool(it.id))) {
+          inv.addItem({ kind: 'tool', id: it.id });
+          added.push('a *' + it.id + '*');
+        }
+      } catch (e) { /* inventory stub */ }
+    }
+    return added;
   }
 
   /** Give the player items for the mission (blocks / weapons / tools), with a notification. */

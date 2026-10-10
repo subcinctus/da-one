@@ -44,10 +44,13 @@ void main() {
   vec2 hs = normalize(uSunDir.xz + vec2(1e-5));
   float az = dot(hd, hs);
   float sd = max(dot(d, uSunDir), 0.0);
+  // the twilight tints stay above the horizon: below it the dome is exactly uGround (= the fog colour), so fully
+  // fogged geometry and the edge of the loaded world blend into the backdrop
+  float above = smoothstep(-0.02, 0.05, h);
   // warm glow around the sun + along the horizon on the sun side
-  col += uGlow * uGlowAmt * (pow(sd, 6.0) * 0.55 + pow(max(az, 0.0), 2.5) * band * 0.75 + pow(sd, 48.0) * 0.6);
+  col += uGlow * uGlowAmt * above * (pow(sd, 6.0) * 0.55 + pow(max(az, 0.0), 2.5) * band * 0.75 + pow(sd, 48.0) * 0.6);
   // pink anti-solar belt (belt of Venus) at twilight
-  col += uAnti * uAntiAmt * pow(max(-az, 0.0), 1.5) * band * 0.55;
+  col += uAnti * uAntiAmt * above * pow(max(-az, 0.0), 1.5) * band * 0.55;
   // soft moon halo
   col += uMoonGlow * uMoonAmt * (pow(max(dot(d, uMoonDir), 0.0), 18.0) * 0.18 + pow(max(dot(d, uMoonDir), 0.0), 220.0) * 0.25);
   col += vec3(0.62, 0.66, 0.85) * uFlash;

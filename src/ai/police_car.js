@@ -3,7 +3,9 @@
 //
 // States:  patrol    ambient patrol at 0 stars (lane driving on the road graph, sirens off; witnesses crimes)
 //          pursue    chase: road-graph routing when far, direct pure pursuit toward the predicted player position
-//                    when close or in sight, ramming at 3+ stars, stopping ~11 m from a player on foot
+//                    when close or in sight, ramming at 3+ stars, stopping ~11 m from a player on foot.
+//                    Car chases: out of the player's view (or far behind) the cruiser's vehicle.speedScale is raised so
+//                    it can keep up with fast cars (CATCHUP rubber band); in view it drives at its normal top speed.
 //          search    the player is out of sight: drive to the last known position and sweep the search area
 //          stopped   crew is out on foot (car parked with its light bar flashing)
 //          recall    waiting for the crew to get back in (the player drove away)
@@ -13,8 +15,9 @@
 // avoidance around other vehicles; stuck recovery (reverse arc, then re-path); never drives into water.
 import * as THREE from 'three';
 import { clamp, angleDiff, lerp, smoothstep } from '../core/math.js';
-import { TUNE, LEVELS } from './police_const.js';
+import { TUNE, LEVELS, CATCHUP } from './police_const.js';
 import { rand, chance, isWaterAt, hdist, speedOf, aimShot, groundAt, losClear, SOLID_BLOCKER } from './police_util.js';
+import { isVisible } from './npc_util.js';
 import { boxCollides } from '../core/physics.js';
 
 const _p = new THREE.Vector3();
@@ -62,6 +65,8 @@ export class PoliceCar {
     this.backoffT = 0;
     this.ramming = false;
     this.allowSlide = false;
+    this.capLimited = false;   // desired speed is only limited by the car's (catch-up) top speed: coast, never brake
+    this.catchUp = false;      // rubber band active (debug)
     this.laneOff = LANE_OFF;
     // patrol / leave wandering
     this.pFrom = -1; this.pTo = -1;
@@ -143,6 +148,8 @@ export class PoliceCar {
   _detach() {
     const v = this.vehicle;
     if (!v) return;
+    // never hand a boosted car over (a stolen cruiser must not keep the catch-up top speed)
+    this._resetScale(v);
     if (v.ai === this) {
       v.ai = null;
       if (v.driver === 'ai') v.driver = null;
@@ -166,6 +173,7 @@ export class PoliceCar {
     this.lost = true; // a despawn is not a loss
     this.police.stopSiren(this);
     if (v) {
+      this._resetScale(v);
       const playerDriving = v.driver === 'player';
       if (v.ai === this) v.ai = null;
       if (!playerDriving) {
@@ -279,12 +287,20 @@ export class PoliceCar {
 
   setState(s) {
     if (this.state === s) return;
+    if (s !== 'pursue') this._resetScale(this.vehicle);
     this.state = s;
     this.stateT = 0;
     this.path.length = 0;
     this.wi = 0;
     this.pathT = 0;
     if (s === 'search') this.searchT = 0;
+  }
+
+  /** Back to the stock top speed (leaving the chase, hand-over, removal). */
+  _resetScale(v) {
+    if (v && v.speedScale !== 1) v.speedScale = 1;
+    this.capLimited = false;
+    this.catchUp = false;
   }
 
   // ============================================================================================ frame
@@ -329,9 +345,12 @@ export class PoliceCar {
     const pv = alivePlayer && pl.inVehicle && pl.inVehicle.position ? pl.inVehicle : null;
     const pp = alivePlayer ? (pv ? pv.position : pl.position) : null;
     const L = LEVELS[P.wanted] || LEVELS[1];
+    const vmax = (v.def && v.def.maxSpeed) || 46;
+    let scale = 1;            // vehicle.speedScale wanted this think (catch-up only while chasing a moving car)
     this.stopDist = 0;
     this.ramming = false;
     this.allowSlide = false;
+    this.capLimited = false;
     this.laneOff = LANE_OFF;
     this.goalY = pp ? pp.y : v.position.y;
     v.sirenOn = this.state !== 'patrol' && this.state !== 'leave';
@@ -351,11 +370,23 @@ export class PoliceCar {
         if (pv && this.pvSlowT < 1.6) {
           const ps = speedOf(pv);
           const lead = clamp(d / 30, 0.2, 1.1);
-          if (L.ram && d < 35 && this.backoffT <= 0) {
+          // rubber band: out of the player's view (or far behind the car) the cruiser may exceed its stock top speed
+          // to keep up; in view and close it drives at its normal top speed (a skilled driver can still pull away)
+          const catchV = ps + CATCHUP.LEAD + Math.max(0, d - 35) * CATCHUP.GAP_K;
+          if (pvMoving) {
+            const behind = (v.position.x - pp.x) * pv.velocity.x + (v.position.z - pp.z) * pv.velocity.z < 0;
+            const hidden = !isVisible(g, v.position.x, v.position.y + 1, v.position.z, CATCHUP.VIEW_RADIUS);
+            if (hidden || (behind && d > CATCHUP.FAR_BEHIND)) scale = clamp(catchV / vmax, 1, CATCHUP.MAX_SCALE);
+          }
+          const cap = vmax * scale;
+          // never ram head-on (an oncoming cruiser swings around behind the car first); side and rear rams are fine
+          const headOn = ps >= 8 && Math.sin(v.yaw) * pv.velocity.x + Math.cos(v.yaw) * pv.velocity.z < -0.5 * ps;
+          if (L.ram && d < 35 && this.backoffT <= 0 && !headOn) {
             // ram: aim at where the car will be
             this.goalX = pp.x + pv.velocity.x * lead * 0.6;
             this.goalZ = pp.z + pv.velocity.z * lead * 0.6;
-            this.desired = Math.min(L.speed, ps + 10);
+            this.desired = Math.min(cap, ps + 10);
+            this.capLimited = cap < ps + 10;
             this.ramming = true;
           } else if (d < 35) {
             // tail: a point behind the player's car, offset by slot so the pack spreads out
@@ -363,12 +394,14 @@ export class PoliceCar {
             const back = 8 + (this.slot % 3) * 4, side = ((this.slot % 2) * 2 - 1) * 2.2;
             this.goalX = pp.x - s * back - c * side + pv.velocity.x * 0.4;
             this.goalZ = pp.z - c * back + s * side + pv.velocity.z * 0.4;
-            this.desired = clamp(ps + (d - 9) * 0.6, 6, L.speed);
-            if (this.backoffT > 0) this.desired *= 0.6;
+            const hi = Math.max(L.speed, cap), want = ps + (d - 9) * 0.6;
+            this.desired = clamp(want, 6, hi);
+            this.capLimited = want > hi;
+            if (this.backoffT > 0) { this.desired *= 0.6; this.capLimited = false; }
           } else {
             this.goalX = pp.x + pv.velocity.x * lead;
             this.goalZ = pp.z + pv.velocity.z * lead;
-            this.desired = L.speed;
+            this.desired = Math.max(L.speed, catchV);
           }
           this.allowSlide = true;
         } else {
@@ -378,7 +411,7 @@ export class PoliceCar {
           let sx = pp.x + Math.cos(ang) * TUNE.STOP_DIST, sz = pp.z + Math.sin(ang) * TUNE.STOP_DIST;
           if (isWaterAt(g, sx, sz)) { sx = pp.x + (dx / l) * TUNE.STOP_DIST; sz = pp.z + (dz / l) * TUNE.STOP_DIST; }
           this.goalX = sx; this.goalZ = sz;
-          this.desired = d > 70 ? L.speed : Math.max(10, L.speed * 0.75);
+          this.desired = d > 70 ? L.approach : Math.max(10, L.approach * 0.75);
           this.stopDist = 0.5;
           this.allowSlide = d < 45;
           const slow = Math.abs(v.speed) < 2.5;
@@ -402,7 +435,7 @@ export class PoliceCar {
           this.searchT = rand(10, 16);
         }
         this.goalX = this.searchX; this.goalZ = this.searchZ;
-        this.desired = Math.hypot(P.lastKnown.x - v.position.x, P.lastKnown.z - v.position.z) > P.searchRadius() ? L.speed * 0.85 : 14;
+        this.desired = Math.hypot(P.lastKnown.x - v.position.x, P.lastKnown.z - v.position.z) > P.searchRadius() ? L.approach * 0.85 : 14;
         this._chooseMode();
         break;
       }
@@ -461,6 +494,12 @@ export class PoliceCar {
         break;
       }
       default: break;
+    }
+    // unit still owns the car (the switch can hand it over / detach it)
+    if (this.vehicle === v && v.ai === this) {
+      if (this.state !== 'pursue') scale = 1;
+      this.catchUp = scale > 1;
+      if (v.speedScale !== scale) v.speedScale = scale;
     }
     if (this.state === 'pursue' || this.state === 'search' || this.state === 'patrol' || this.state === 'leave') this._scanObstacles();
   }
@@ -731,7 +770,10 @@ export class PoliceCar {
     c.handbrake = false;
     if (speed > desired + 1.2) {
       c.throttle = 0;
-      c.brake = clamp((speed - desired) / 5, 0.25, 1);
+      // only over the top speed because the catch-up boost just ended (cruiser came into view): coast down, do not
+      // stamp on the brakes in front of the player. Corners, obstacles and stops still brake normally.
+      const coast = this.capLimited && desired >= this.desired - 0.5;
+      c.brake = coast ? 0 : clamp((speed - desired) / 5, 0.25, 1);
     } else {
       c.throttle = clamp((desired - speed) / 3 + 0.25, 0.15, 1);
       c.brake = 0;

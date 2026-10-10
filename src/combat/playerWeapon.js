@@ -459,7 +459,8 @@ export class PlayerWeapon {
     c.casings.eject(port, _r, sd, def.id, carrier || null, delay, fp ? 0.45 : 1);
     if (delay > 0) c.queueSound('reload', delay - 0.08, { volume: 0.5, pitch: def.id === 'shotgun' ? 1.55 : 1.3 });
     if (def.id === 'shotgun' || def.id === 'sniper' || Math.random() < 0.12) {
-      try { g.fx?.smoke?.(muzzle, { amount: def.id === 'shotgun' ? 1.6 : 0.7, color: 0xd0d0d0 }); } catch (e) { /* fx */ }
+      // a few small rising barrel wisps (not the big explosion smoke puffs: those hang at the muzzle and hide the target)
+      try { g.fx?.burst?.(muzzle, { color: 0xd8d8d8, count: def.id === 'shotgun' ? 6 : 3, speed: 0.6, size: 0.12, life: 0.45, gravity: -2 }); } catch (e) { /* fx */ }
     }
   }
 

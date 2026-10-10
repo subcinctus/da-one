@@ -34,6 +34,8 @@ export class Missions {
     /** Total money earned from missions. */
     this.earned = 0;
     this.stats = { passed: 0, failed: 0 };
+    /** Ids of missions whose starter kit (TNT, rockets, materials...) was handed out; replays only top it up. */
+    this.kitsGranted = new Set();
     this.givers = [];
     this.markers = null;
     this.mhud = null;
@@ -42,6 +44,7 @@ export class Missions {
     this._log = null;
     this._freezeT = 0;
     this._taxiT = 0;
+    this._taxiHintVeh = null;
     this._escCheck = 0;
   }
 
@@ -153,6 +156,7 @@ export class Missions {
       if (v && Math.abs(v.speed || 0) > 3) { safe(() => g.hud.prompt('Slow down to start ~y~' + gv.def.title + '~s~.')); continue; }
       const wanted = g.police ? g.police.wanted | 0 : 0;
       if (wanted > 0) { safe(() => g.hud.prompt('Lose the cops before starting a mission.')); continue; }
+      if (g.inventory && g.inventory.creative) { safe(() => g.hud.prompt('Switch off ~y~Creative mode~s~ to take jobs.')); continue; }
       gv.armed = false;
       this.start(gv.def.id);
       break;
@@ -165,9 +169,15 @@ export class Missions {
     const p = g.player;
     const v = p && p.inVehicle;
     if (v && v.type === 'taxi' && !v.destroyed && p.alive !== false) {
+      // no fares while the cops are after you (a running shift that picks up stars carries on)
+      if (g.police && (g.police.wanted | 0) > 0) {
+        this._taxiT = 0;
+        if (this._taxiHintVeh !== v) { this._taxiHintVeh = v; notify(g, 'Lose the cops to start a *taxi shift*.', { duration: 3.5, color: '#ffd23f' }); }
+        return;
+      }
       this._taxiT += dt;
       if (this._taxiT > 3) { this._taxiT = 0; this._startSide(v); }
-    } else this._taxiT = 0;
+    } else { this._taxiT = 0; if (!v) this._taxiHintVeh = null; }
   }
 
   _startSide(v) {
@@ -204,27 +214,31 @@ export class Missions {
     run.finished = true;
     const g = this.game;
     const def = run.def;
-    const first = !this.completed.has(def.id);
+    // creative mode at any point of the run (free blocks, unlimited TNT, instant mining): no pay, not marked done
+    const creative = !!run.usedCreative;
+    const first = !creative && !this.completed.has(def.id);
     let reward = def.reward || 0;
     if (typeof def.rewardFor === 'function') { try { reward = def.rewardFor(run); } catch (e) { reward = def.reward || 0; } }
     if (!first) reward = Math.round(reward / 2);
-    const total = Math.max(0, Math.round(reward + (run.bonus || 0)));
+    const total = creative ? 0 : Math.max(0, Math.round(reward + (run.bonus || 0)));
     let note = '';
     if (typeof def.passNote === 'function') { try { note = def.passNote(run) || ''; } catch (e) { note = ''; } }
+    if (creative) note = 'Creative mode: no payout';
     let record = false;
-    if (Number.isFinite(run.data.raceTime)) {
+    if (!creative && Number.isFinite(run.data.raceTime)) {
       const b = this.best[def.id];
       if (!b || run.data.raceTime < b.time) { record = !!b; this.best[def.id] = { time: +run.data.raceTime.toFixed(2), medal: run.data.medal || null }; }
     }
     run.cleanup(true);
     this.active = null;
-    if (g.player && typeof g.player.addMoney === 'function') g.player.addMoney(total, 'mission');
-    this.completed.add(def.id);
+    if (total > 0 && g.player && typeof g.player.addMoney === 'function') g.player.addMoney(total, 'mission');
+    if (!creative) this.completed.add(def.id);
     this.earned += total;
     this.stats.passed++;
     safe(() => g.hud.bigMessage('MISSION PASSED', fmtMoney(total) + (note ? '   ·   ' + note : ''), { color: '#f5c518', duration: 4.5 }));
     sound(g, 'mission_passed');
-    if (run.bonusNote) notify(g, '*' + run.bonusNote + '* included. Nice work!', { duration: 4, color: '#6ee36a' });
+    if (creative) notify(g, 'Jobs done in *Creative mode* pay nothing. Switch it off in the pause menu to earn the reward.', { duration: 5 });
+    else if (run.bonusNote) notify(g, '*' + run.bonusNote + '* included. Nice work!', { duration: 4, color: '#6ee36a' });
     if (record) notify(g, 'New personal best: *' + (run.data.raceTime || 0).toFixed(2) + ' s*!', { duration: 4, color: '#ffd23f' });
     g.events.emit('missionPassed', { mission: def.id, reward: total, first });
     this._refreshGivers(true);
@@ -241,6 +255,8 @@ export class Missions {
     const g = this.game;
     run.cleanup(false);
     if (this.active === run) this.active = null;
+    // the intro banner must not linger (or still be queued) after an abandon / early fail
+    safe(() => g.hud && g.hud.big && typeof g.hud.big.cancel === 'function' && g.hud.big.cancel(run.def.title.toUpperCase()));
     this.stats.failed++;
     const r = reason || 'Mission failed.';
     if (!quiet) {
@@ -326,10 +342,24 @@ export class Missions {
   getBlips(out) {
     if (this.active) { this.active.blips(out); return; }
     if (this.side) this.side.blips(out);
+    // the nearest open job stays pinned to the radar edge so there is always a goal in sight
+    const near = this.nearestGiver();
     for (const gv of this.givers) {
       const done = this.completed.has(gv.def.id);
-      out.push({ x: gv.poi.x, z: gv.poi.z, color: done ? '#b39a3a' : '#f5c518', icon: 'mission', label: gv.def.letter, size: done ? 4.5 : 5.5, edge: false });
+      out.push({ x: gv.poi.x, z: gv.poi.z, color: done ? '#b39a3a' : '#f5c518', icon: 'mission', label: gv.def.letter, size: done ? 4.5 : 5.5, edge: gv === near });
     }
+  }
+
+  /** Nearest mission giver ({def, poi, ...}) to `pos` (default: the player) whose mission is not completed, or null. */
+  nearestGiver(pos = playerPos(this.game), openOnly = true) {
+    if (!pos) return null;
+    let best = null, bd = Infinity;
+    for (const gv of this.givers) {
+      if (openOnly && this.completed.has(gv.def.id)) continue;
+      const d = dist2D(pos.x, pos.z, gv.poi.x, gv.poi.z);
+      if (d < bd) { bd = d; best = gv; }
+    }
+    return best;
   }
 
   // ================================================================================================ save
@@ -341,6 +371,7 @@ export class Missions {
       earned: this.earned,
       stats: { ...this.stats },
       tutorial: !!(this.tutorial && this.tutorial.done),
+      kits: [...this.kitsGranted],
     };
   }
 
@@ -351,6 +382,8 @@ export class Missions {
     this.best = o.best && typeof o.best === 'object' ? { ...o.best } : {};
     this.earned = Math.max(0, Number(o.earned) || 0);
     if (o.stats) this.stats = { passed: o.stats.passed | 0, failed: o.stats.failed | 0 };
+    // older saves have no kit list: a completed mission certainly handed its kit out already
+    this.kitsGranted = new Set((Array.isArray(o.kits) ? o.kits : [...this.completed]).filter((id) => typeof id === 'string'));
     if (o.tutorial && this.tutorial) this.tutorial.done = true;
     this._refreshGivers();
     return true;

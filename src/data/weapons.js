@@ -15,7 +15,10 @@
 //   bloom        spread growth per shot during sustained fire (fraction of the base spread)
 //   falloffStart metres after which bullet damage starts dropping (linear to falloffMin at `range`)
 //   falloffMin   damage multiplier reached at max range
-//   headshot     damage multiplier for head hits on humanoids
+//   headshot     damage multiplier for the player's head hits on humanoids (a clean pistol / SMG / rifle headshot drops
+//                an unarmoured civilian; pistol and rifle also drop gang members and cops; SWAT armour needs two)
+//   aiHeadshot   multiplier for AI shooters hitting NPCs (defaults to headshot); AI headshots on the player are always
+//                capped at 1.25 in Combat.fire (no frustrating one-shots)
 //   knockback    push (m/s) applied to the target on hit (melee / heavy guns)
 //   tracer       tracer colour (hex)
 //   flash        muzzle light intensity scale
@@ -28,13 +31,13 @@ export const WEAPONS = {
   bat:     { id: 'bat', name: 'Baseball Bat', kind: 'melee', damage: 34, rate: 1.6, range: 2.8, mag: 0, icon: '🏏', price: 150,
     knockback: 5.6, auto: true },
   pistol:  { id: 'pistol', name: 'Pistol', kind: 'hitscan', damage: 26, rate: 5, mag: 12, reload: 1.25, spread: 0.014, range: 140, auto: false, zoom: 1.3, icon: '🔫', price: 300, ammoPrice: 40,
-    sound: 'gunshot_pistol', recoil: 0.028, recoilYaw: 0.012, shake: 0.05, aimSpread: 0.4, bloom: 0.55, falloffStart: 45, falloffMin: 0.55, headshot: 2, tracer: 0xffe2a0, flash: 1, driveBy: true },
+    sound: 'gunshot_pistol', recoil: 0.028, recoilYaw: 0.012, shake: 0.05, aimSpread: 0.4, bloom: 0.55, falloffStart: 45, falloffMin: 0.55, headshot: 4, aiHeadshot: 2, tracer: 0xffe2a0, flash: 1, driveBy: true },
   smg:     { id: 'smg', name: 'SMG', kind: 'hitscan', damage: 15, rate: 13, mag: 30, reload: 1.7, spread: 0.034, range: 110, auto: true, zoom: 1.3, icon: '🔫', price: 1100, ammoPrice: 80,
-    sound: 'gunshot_smg', recoil: 0.013, recoilYaw: 0.011, shake: 0.03, aimSpread: 0.5, bloom: 0.16, falloffStart: 35, falloffMin: 0.5, headshot: 2, tracer: 0xffd27a, flash: 0.8, driveBy: true },
+    sound: 'gunshot_smg', recoil: 0.013, recoilYaw: 0.011, shake: 0.03, aimSpread: 0.5, bloom: 0.16, falloffStart: 35, falloffMin: 0.5, headshot: 4, aiHeadshot: 2, tracer: 0xffd27a, flash: 0.8, driveBy: true },
   shotgun: { id: 'shotgun', name: 'Pump Shotgun', kind: 'hitscan', damage: 13, pellets: 9, rate: 1.1, mag: 6, reload: 2.3, spread: 0.075, range: 45, auto: false, zoom: 1.2, icon: '🔫', price: 1500, ammoPrice: 90,
     sound: 'gunshot_shotgun', recoil: 0.075, recoilYaw: 0.02, shake: 0.17, aimSpread: 0.75, bloom: 0, falloffStart: 10, falloffMin: 0.25, headshot: 1.5, knockback: 0.7, tracer: 0xffc070, flash: 1.6, shellReload: 0.42 },
   rifle:   { id: 'rifle', name: 'Assault Rifle', kind: 'hitscan', damage: 30, rate: 9, mag: 30, reload: 2.0, spread: 0.018, range: 200, auto: true, zoom: 1.6, icon: '🔫', price: 3000, ammoPrice: 120,
-    sound: 'gunshot_rifle', recoil: 0.018, recoilYaw: 0.012, shake: 0.04, aimSpread: 0.4, bloom: 0.2, falloffStart: 90, falloffMin: 0.6, headshot: 2, tracer: 0xffe08a, flash: 1.1 },
+    sound: 'gunshot_rifle', recoil: 0.018, recoilYaw: 0.012, shake: 0.04, aimSpread: 0.4, bloom: 0.2, falloffStart: 90, falloffMin: 0.6, headshot: 3.5, aiHeadshot: 2, tracer: 0xffe08a, flash: 1.1 },
   sniper:  { id: 'sniper', name: 'Sniper Rifle', kind: 'hitscan', damage: 140, rate: 0.8, mag: 5, reload: 2.6, spread: 0.0015, range: 400, auto: false, zoom: 5, icon: '🎯', price: 5000, ammoPrice: 150,
     sound: 'gunshot_sniper', recoil: 0.09, recoilYaw: 0.015, shake: 0.14, hipSpread: 0.045, aimSpread: 1, bloom: 0, falloffStart: 400, falloffMin: 1, headshot: 2.5, knockback: 3.5, tracer: 0xfff0c0, flash: 1.5 },
   rpg:     { id: 'rpg', name: 'Rocket Launcher', kind: 'projectile', damage: 220, rate: 0.6, mag: 1, reload: 2.4, spread: 0.004, range: 300, auto: false, zoom: 1.5, speed: 60, blastRadius: 5.5, blastPower: 4, icon: '🚀', price: 9000, ammoPrice: 500,

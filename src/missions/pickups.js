@@ -4,7 +4,8 @@
 //   pickups.spawn(type, position, amount, { respawn: seconds|0, persistent, onCollect, mission, label })
 //     type: 'cash' | 'health' | 'armor' | 'weapon:<id>' | 'ammo:<id>' | 'block:<id|KEY>' | 'package'
 //   A spawn with neither `respawn` nor `persistent` is a DROP: it despawns after 30 s (blinking for the last 5 s).
-//   World pickups (hospital health, police armor, hidden weapons and cash, TNT at the mine...) respawn after 120 s.
+//   World pickups (hospital health, police armor, hidden weapons...) respawn after 120 s, the mine's TNT crates after
+//   600 s. Hidden cash bundles are one-time finds: serialize() lists the collected ones so a reload keeps them gone.
 import * as THREE from 'three';
 import { WEAPONS } from '../data/weapons.js';
 import { BLOCKS, B } from '../world/blocks.js';
@@ -21,6 +22,13 @@ const FLOAT_Y = 0.66;
 const MODEL_SCALE = 1.2;   // pickups read better a touch larger than life
 
 const _v = new THREE.Vector3();
+
+/** Radar / map blip styles of world pickups (also drawn in the map legend). */
+export const PICKUP_BLIPS = {
+  weapon: { shape: 'dot', color: '#ffd23f', size: 3.5 },
+  health: { shape: 'dot', color: '#ff7b7b', size: 3.5 },
+  armor: { shape: 'dot', color: '#8fd8ff', size: 3.5 },
+};
 
 /** Parse a pickup type string -> {kind, sub}. Unknown -> null. */
 export function parsePickupType(type) {
@@ -61,6 +69,8 @@ export class Pickups {
     this._settleBudget = 2;
     this._promptT = 0;
     this.stats = { collected: 0, spawned: 0 };
+    /** Keys of collected one-time world pickups (hidden cash bundles); saved by SaveSystem. */
+    this.collectedOnce = new Set();
   }
 
   init() {
@@ -305,6 +315,7 @@ export class Pickups {
 
   _finishCollect(p) {
     p.collectT = 0;
+    if (p.once && p.key) this.collectedOnce.add(p.key);
     if (p.respawn > 0) {
       p.active = false;
       p.respawnT = p.respawn;
@@ -389,9 +400,31 @@ export class Pickups {
     if (!plan) return;
     const specs = worldPickupSpecs(plan, g.seed || 1);
     for (const s of specs) {
-      const p = this.spawn(s.type, { x: s.x, y: s.y, z: s.z }, s.amount, { respawn: s.respawn || 120, label: s.type === 'cash' ? 'Cash bundle' : null });
-      if (p) p.tag = s.tag || 'world';
+      const respawn = Number.isFinite(s.respawn) && s.respawn >= 0 ? s.respawn : 120;
+      // respawn 0 = one-time find: persistent until collected, then gone for good (remembered by the save)
+      const p = this.spawn(s.type, { x: s.x, y: s.y, z: s.z }, s.amount, { respawn, persistent: respawn === 0, label: s.type === 'cash' ? 'Cash bundle' : null });
+      if (!p) continue;
+      p.tag = s.tag || 'world';
+      if (respawn === 0) { p.once = true; p.key = p.tag + ':' + Math.round(s.x) + ',' + Math.round(s.z); }
     }
+  }
+
+  // ================================================================================================ save
+
+  /** Collected one-time world pickups (hidden cash bundles): {collected: [key...]}. */
+  serialize() {
+    return { collected: [...this.collectedOnce] };
+  }
+
+  /** Remove the one-time world pickups a save already collected. */
+  deserialize(o) {
+    if (!o || !Array.isArray(o.collected)) return false;
+    for (const k of o.collected) if (typeof k === 'string') this.collectedOnce.add(k);
+    for (let i = this.list.length - 1; i >= 0; i--) {
+      const p = this.list[i];
+      if (p.once && p.key && this.collectedOnce.has(p.key)) this.remove(p);
+    }
+    return true;
   }
 
   // ================================================================================================ blips
@@ -405,9 +438,9 @@ export class Pickups {
       if (p.kind !== 'weapon' && p.kind !== 'health' && p.kind !== 'armor') continue;
       const d = Math.hypot(p.base.x - pp.x, p.base.z - pp.z);
       if (d > BLIP_R) continue;
-      if (p.kind === 'weapon') out.push({ x: p.base.x, z: p.base.z, color: '#ff9f1c', icon: 'gun', size: 4.5 });
-      else if (p.kind === 'health') out.push({ x: p.base.x, z: p.base.z, color: '#e53935', icon: 'hospital', size: 4 });
-      else out.push({ x: p.base.x, z: p.base.z, color: '#4d9bff', shape: 'square', size: 4 });
+      // small plain dots, deliberately unlike the gun-shop / hospital icons (and the police's big blue dots)
+      const st = PICKUP_BLIPS[p.kind];
+      out.push({ x: p.base.x, z: p.base.z, shape: st.shape, color: st.color, size: st.size });
     }
   }
 

@@ -285,8 +285,9 @@ varying float vShade;
 void main() {
   if (vAlpha < 0.004) discard;
   gl_FragColor = vec4(vColor * vShade, vAlpha);
-  #include <fog_fragment>
+  // fogColor is in the output colour space (three converts it), so fog goes after the conversion like built-ins do
   #include <colorspace_fragment>
+  #include <fog_fragment>
 }`;
 
 export function createSmokeMaterial() {

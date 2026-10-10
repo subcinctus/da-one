@@ -12,7 +12,7 @@
 //   - deaths drop cash (pickups.spawn('cash')), bodies despawn after 20 s
 //
 // Public API: list, spawnPed(pos, opts), panicAt(position, radius, source?), gangAggro(position, radius, target),
-// remove(ped), stats(). Debug: game.debug.spawnPeds(n), npcStats(), pedInfo(), spawnGang(n), gangAggro().
+// remove(ped), stats(), rollPlayerHit(p) (shared gang hit governor). Debug: game.debug.spawnPeds(n), npcStats(), pedInfo(), spawnGang(n), gangAggro().
 import * as THREE from 'three';
 import { WEAPONS } from '../data/weapons.js';
 import { B } from '../world/blocks.js';
@@ -25,6 +25,9 @@ import {
 const BUILT_LOTS = new Set(['building', 'tower', 'house', 'shop', 'industrial']);
 const STROLL_LOTS = new Set(['park', 'plaza']);
 const DESPAWN_R = 110;
+/** Gang gunfire on the player: minimum seconds between two landed hits (any shooter), and the accumulator cap. */
+const GANG_HIT_GAP = 0.9;
+const GANG_HIT_BANK = 1.5;
 const _v = new THREE.Vector3();
 const _ray = { origin: new THREE.Vector3(), dir: new THREE.Vector3() };
 let _pistolGeo = null;
@@ -36,7 +39,11 @@ export class Peds {
     this.list = [];
     this.nav = null;
     this.enabled = true;
-    this.stats = { spawned: 0, despawned: 0, deaths: 0, dodges: 0, fights: 0, aggro: 0, panics: 0, failedSpawns: 0 };
+    this.stats = { spawned: 0, despawned: 0, deaths: 0, dodges: 0, fights: 0, aggro: 0, panics: 0, failedSpawns: 0, gangShots: 0, gangHits: 0 };
+    // shared hit governor for gang gunfire on the player (see rollPlayerHit)
+    this._hitAcc = 0;
+    this._lastHitT = -1e9;
+    this._lastShotT = -1e9;
     this._nearEdges = [];
     this._nearLots = [];
     this._ruralFrac = 0;
@@ -76,7 +83,7 @@ export class Peds {
       // the player beating up / shooting a cop: bystanders run
       if (ent.kind === 'cop' && info.source === g.player) this.panicAt(ent.position, 14, g.player, null, 0);
     });
-    ev.on('playerRespawned', () => { this._fill = true; });
+    ev.on('playerRespawned', () => { this._fill = true; this._hitAcc = 0; });
     this._installDebug();
     try { this._initialFill(true); } catch (e) { console.warn('[peds] initial fill failed', e); }
   }
@@ -101,6 +108,24 @@ export class Peds {
     const p = _v.set(Number(pos.x) || 0, Number(pos.y), Number(pos.z) || 0);
     if (!Number.isFinite(p.y)) p.y = this._groundAt(p.x, p.z, 60);
     return this._add(p, o);
+  }
+
+  /**
+   * Decide whether one gang shot at the player with probability p lands. Shared by every armed ped (modelled on
+   * Police.rollHit): a pseudo-random accumulator spreads hits evenly (no lucky streaks) and at least GANG_HIT_GAP
+   * seconds separate two hits, so three gangsters land at most ~1 hit/s instead of bursts that kill in a few seconds.
+   */
+  rollPlayerHit(p) {
+    const now = this.game.time || 0;
+    this.stats.gangShots++;
+    this._lastShotT = now;
+    this._hitAcc = Math.min(GANG_HIT_BANK, this._hitAcc + Math.max(0, Number(p) || 0));
+    if (this._hitAcc < 0.55 + Math.random() * 0.45) return false;
+    if (now - this._lastHitT < GANG_HIT_GAP) return false;
+    this._hitAcc = Math.max(0, this._hitAcc - 1);
+    this._lastHitT = now;
+    this.stats.gangHits++;
+    return true;
   }
 
   /** Remove a pedestrian immediately (missions cleaning up their targets). */
@@ -183,6 +208,8 @@ export class Peds {
 
   update(dt) {
     const t0 = performance.now();
+    // the gang hit accumulator bleeds off during lulls (no banked hit when the player leaves cover)
+    if (this._hitAcc > 0 && (this.game.time || 0) - this._lastShotT > 2) this._hitAcc = Math.max(0, this._hitAcc - dt * 0.3);
     this._update(dt);
     const ms = performance.now() - t0;
     this._ms += (ms - this._ms) * 0.05;

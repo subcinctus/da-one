@@ -377,7 +377,8 @@ class MineBlocks extends Step {
   }
 
   onEvent(name, e) {
-    if (name !== 'blockBroken' || !e || e.byPlayer === false || !this.ids.includes(e.id)) return;
+    // only natural ores count (player-placed ones carry natural: false; a missing flag counts as natural)
+    if (name !== 'blockBroken' || !e || e.byPlayer === false || e.natural === false || !this.ids.includes(e.id)) return;
     this.n++;
     const def = BLOCKS[e.id];
     this.run.flash((def ? def.name : 'Ore') + ' ' + Math.min(this.n, this.count) + '/' + this.count, e.id === B.DIAMOND_ORE ? '#7ff3ff' : '#ffd23f');
@@ -539,6 +540,9 @@ class EvadeWanted extends Step {
 
 // ================================================================================================ placeBlocks
 
+const SIGN_OFF_T = 2;   // seconds spent outside the plot (2.5 m clear) to sign a finished build off
+const IDLE_ARM_T = 8;   // a builder who never steps into the plot arms the sign-off after this long without building
+
 class PlaceBlocks extends Step {
   start() {
     const run = this.run;
@@ -550,6 +554,9 @@ class PlaceBlocks extends Step {
     this.maxH = 0;
     this.phase = 'build';
     this.outT = 0;
+    this.idleT = 0;
+    this.armed = false;
+    this._finText = null;
     this.fence = run.fence({ x0: A.x0, z0: A.z0, x1: A.x1, z1: A.z1, y: A.y0, height: 2.4, color: MARKER_COLORS.plot });
     this.cx = (A.x0 + A.x1) / 2; this.cz = (A.z0 + A.z1) / 2;
     run.objective(this.text());
@@ -567,6 +574,9 @@ class PlaceBlocks extends Step {
       if (e.byPlayer === false) return;
       this.placed.add(key);
     } else if (!this.placed.delete(key)) return;
+    // still building (also from outside the fence): no sign-off yet
+    this.idleT = 0;
+    this.outT = 0;
     let mh = 0;
     for (const k of this.placed) { const y = +k.split(',')[1]; mh = Math.max(mh, y - this.A.y0 + 1); }
     const grew = mh > this.maxH;
@@ -583,30 +593,45 @@ class PlaceBlocks extends Step {
     ] });
   }
 
+  /** Objective while the structure is complete: bonus offer / how to sign off / signing off. */
+  _finishObjective(signing) {
+    let t;
+    if (signing) t = 'Signing off... (~y~step back in~s~ to keep building)';
+    else {
+      const how = this.armed ? 'step out of the plot' : 'step into the plot and back out';
+      t = this.maxH >= this.bonusH ? 'Great build! ~y~' + how.charAt(0).toUpperCase() + how.slice(1) + '~s~ to sign it off.'
+        : 'Nice! Build it ~y~' + this.bonusH + ' blocks tall~s~ for a bonus, or ~y~' + how + '~s~ to finish.';
+    }
+    if (t !== this._finText) { this._finText = t; this.run.objective(t); }
+  }
+
   update(dt) {
     this.t += dt;
     const run = this.run;
     if (this.phase === 'build' && this.placed.size >= this.count) {
       this.phase = 'finish';
+      this.outT = 0;
+      this.idleT = 0;
       sound(this.game, 'checkpoint');
       run.flash('Structure complete!', '#6ee36a');
-      run.objective(this.maxH >= this.bonusH
-        ? 'Great build! ~y~Step out of the plot~s~ to sign it off.'
-        : 'Nice! Build it ~y~' + this.bonusH + ' blocks tall~s~ for a bonus, or ~y~step out of the plot~s~ to finish.');
     }
     if (this.phase === 'finish') {
+      // The sign-off arms once the player has stood in the plot since the structure was completed (or after a quiet
+      // spell without building), so the 40th block placed from outside the fence does not end the job on the spot.
       const pp = run.playerPos();
-      if (pp && !this.inside(pp.x, pp.z, 2.5)) {
+      if (pp && this.inside(pp.x, pp.z, 0)) this.armed = true;
+      this.idleT += dt;
+      const ready = this.armed || this.idleT > IDLE_ARM_T;
+      if (pp && ready && !this.inside(pp.x, pp.z, 2.5)) {
         this.outT += dt;
-        if (this.outT > 0.6) {
+        if (this.outT >= SIGN_OFF_T) {
           if (this.maxH >= this.bonusH) { run.bonus += this.spec.bonus || 600; run.bonusNote = 'Height bonus ' + fmtMoney(this.spec.bonus || 600); }
           run.data.builtBlocks = this.placed.size;
           run.data.builtHeight = this.maxH;
           return true;
         }
       } else this.outT = 0;
-      // keep the objective in sync if the bonus was reached meanwhile
-      if (this.maxH >= this.bonusH && !this._bonusMsg) { this._bonusMsg = true; run.objective('Great build! ~y~Step out of the plot~s~ to sign it off.'); }
+      this._finishObjective(this.outT > 0);
     }
     return false;
   }

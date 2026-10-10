@@ -1,6 +1,12 @@
 // Vehicles system (ARCHITECTURE.md §Vehicles): spawning/removal, arcade physics orchestration, player driving,
 // enter/exit (F) + carjacking, collisions with blocks / vehicles / people, damage -> smoke -> fire -> explosion,
 // water, lights, sirens, engine audio, skid marks, parked cars streamed around the player, debug helpers.
+// Street props (lamp posts, street-tree trunks, hedges, glass) snap when a car hits them hard enough.
+//
+// Per-vehicle extras beyond the contract:
+//   vehicle.speedScale  top-speed multiplier (number, default 1, meaningful 1..1.35). Car physics scales the drive
+//                       force by it and the aero drag by 1/speedScale^2, so maxSpeed * speedScale is reachable.
+//                       Written only by the police AI (catch-up); reset to 1 whenever the player takes a vehicle.
 import * as THREE from 'three';
 import { VEHICLE_TYPES, VEHICLE_TYPE_IDS, parkedTypeForTag, gearboxRpm } from './types.js';
 import { Vehicle } from './vehicle.js';
@@ -10,6 +16,7 @@ import { Humanoid, LOOKS } from '../entities/humanoid.js';
 import { boxCollides } from '../core/physics.js';
 import { clamp, damp } from '../core/math.js';
 import { WORLD } from '../core/config.js';
+import { BLOCKS } from '../world/blocks.js';
 
 export { VEHICLE_TYPES, VEHICLE_TYPE_IDS };
 
@@ -28,6 +35,17 @@ const _q = new THREE.Quaternion();
 const _ey = new THREE.Vector3(0, 1, 0);
 const _sc = new THREE.Vector3();
 const _pt = { nx: 0, nz: 0, pen: 0 };
+
+// breakable street props: 1 = soft (glass / hedge / leaves: breaks in a car-sized patch), 2 = pole material (only
+// when it is a free-standing column: lamp posts, tree trunks), 3 = lamp head (goes with its pole)
+const PROP = new Uint8Array(256);
+for (const d of BLOCKS) {
+  if (!d) continue;
+  if (d.key === 'GLASS' || d.key === 'HEDGE' || d.key === 'LEAVES' || d.key === 'PALM_LEAVES') PROP[d.id] = 1;
+  else if (d.key === 'METAL' || d.key === 'LOG' || d.key === 'PALM_LOG') PROP[d.id] = 2;
+  else if (d.key === 'LAMP') PROP[d.id] = 3;
+}
+const _brk = [];
 
 export class Vehicles {
   constructor(game) {
@@ -54,6 +72,7 @@ export class Vehicles {
     this._contact = { x: 0, z: 0, y: 0, nx: 0, nz: 0 };
     this._entOut = [];
     this._enterLock = 0;
+    this._landPromptT = 0;
     this._time = 0;
     this._skidN = 0;
     this._warned = new Set();
@@ -84,9 +103,9 @@ export class Vehicles {
     this._spotTarget = new THREE.Object3D();
     this._spot.target = this._spotTarget;
     g.scene.add(this._spot, this._spotTarget);
-    // red/blue strobe glow for the nearest vehicle with its siren on at night
-    this._sirenLight = new THREE.PointLight(0xff2020, 0, 16, 1.6);
-    g.scene.add(this._sirenLight);
+    // (siren glow at night pulses the pooled fx lights: see _updateSirenLight)
+    this._sirenPulseT = 0;
+    this._sirenSide = false;
 
     const ev = g.events;
     ev.on('explosion', (e) => {
@@ -225,6 +244,7 @@ export class Vehicles {
     v.driver = 'player';
     v.parked = false;
     v.everPlayer = true;
+    v.speedScale = 1;
     v.wake();
     v.controls.throttle = 0; v.controls.brake = 0; v.controls.handbrake = false; v.controls.lift = 0;
     if (v.isHeli && v.onGround) v.rotor = Math.max(v.rotor, 0.15);
@@ -279,8 +299,33 @@ export class Vehicles {
     v.setDriverLook(null);
   }
 
-  /** Free standing spot beside the vehicle: driver door, passenger door, behind, in front, roof. */
-  _findExitPos(v) {
+  /**
+   * F pressed while driving. A flying heli refuses above ~4 m ('Land first'), unless it is burning or wrecked: then
+   * the player bails out onto the ground below (emergency escape). Low hovers keep the ground snap.
+   */
+  _playerExitRequest(v) {
+    const g = this.game;
+    if (v.isHeli && !v.onGround) {
+      const emergency = v.onFire || v.destroyed || v.health < v.maxHealth * 0.15;
+      const w = g.world;
+      const gy = w && typeof w.findGround === 'function' ? w.findGround(v.position.x, v.position.z, Math.floor(v.position.y + 0.5)) : -1;
+      const above = gy > 0 ? v.position.y - gy : Infinity;
+      if (above > 4 && !emergency) {
+        this._landPromptT = 2;
+        g.hud?.prompt?.('Land first (hold Shift to descend)');
+        g.audio?.play?.('error', { volume: 0.5 });
+        return false;
+      }
+      if (emergency) return this.exit({ exitPos: this._findExitPos(v, true) });
+    }
+    return this.exit();
+  }
+
+  /**
+   * Free standing spot beside the vehicle: driver door, passenger door, behind, in front, roof.
+   * snapToGround: a flying heli puts the player on the ground below at any height (emergency bail-out).
+   */
+  _findExitPos(v, snapToGround = false) {
     const g = this.game, w = g.world, d = v.def;
     const sy = Math.sin(v.yaw), cy = Math.cos(v.yaw);
     const dz = v.meta.driver ? clamp(v.meta.driver.z, -d.size.l / 2 + 0.5, d.size.l / 2 - 0.5) : 0;
@@ -292,7 +337,7 @@ export class Vehicles {
       let y;
       if (v.isHeli && !v.onGround) {
         const gy = w ? w.findGround(x, z, Math.floor(v.position.y + 1)) : -1;
-        y = gy > 0 && v.position.y - gy < 10.5 ? gy : v.position.y;
+        y = gy > 0 && (snapToGround || v.position.y - gy < 10.5) ? gy : v.position.y;
       } else {
         const gy = sampleGround(w, x, z, v.position.y + 0.5, 4);
         if (!Number.isFinite(gy)) continue;
@@ -351,7 +396,7 @@ export class Vehicles {
     }
     this._audio(dt, focus);
     this._updateSpot();
-    this._updateSirenLight(focus);
+    this._updateSirenLight(focus, dt);
     this._streamT -= dt;
     if (this._streamT <= 0) {
       this._streamT = 0.8;
@@ -405,7 +450,12 @@ export class Vehicles {
         g.audio?.play?.('ui_click', { volume: 0.3 });
       }
       g.hud?.setSpeed?.(Math.round(Math.abs(v.isHeli ? Math.hypot(v.velocity.x, v.velocity.z) : v.speed) * 3.6));
-      if (inp.pressed('enterVehicle')) this.exit();
+      if (this._landPromptT > 0) {
+        this._landPromptT -= dt;
+        if (v.isHeli && !v.onGround) g.hud?.prompt?.('Land first (hold Shift to descend)');
+        else this._landPromptT = 0;
+      }
+      if (inp.pressed('enterVehicle')) this._playerExitRequest(v);
       return;
     }
     this._enterLock -= dt;
@@ -449,6 +499,8 @@ export class Vehicles {
         v.wake();
       }
     }
+    v._preVel.copy(v.velocity);
+    v._preYawRate = v.yawRate;
     const sp = Math.hypot(v.velocity.x, v.velocity.z) + Math.abs(v.velocity.y) + Math.abs(v.yawRate) * v.def.size.l * 0.5;
     const n = clamp(Math.ceil((sp * dt) / 0.42), 1, 10);
     const h = dt / n;
@@ -470,9 +522,13 @@ export class Vehicles {
     for (let i = 0; i < n; i++) {
       const a = L[i];
       if (a.frozen) continue;
+      const ax = a.position.x, az = a.position.z, ar = a.boundR, as = a.sleeping;
       for (let j = i + 1; j < n; j++) {
         const b = L[j];
-        if (b.frozen || (a.sleeping && b.sleeping)) continue;
+        if (b.frozen || (as && b.sleeping)) continue;
+        // cheap bounding-circle reject before the OBB test
+        const rr = ar + b.boundR, dx = ax - b.position.x, dz = az - b.position.z;
+        if (dx > rr || dx < -rr || dz > rr || dz < -rr) continue;
         const imp = collidePair(a, b, c);
         if (imp > 0) {
           if (imp > 0.6) { a.wake(); b.wake(); }
@@ -485,12 +541,12 @@ export class Vehicles {
   _vehicleImpact(a, b, imp, c) {
     const g = this.game;
     const ma = a.def.mass, mb = b.def.mass;
-    if (imp > 5) {
-      const base = (imp - 5) * 10;
+    if (imp > 7) {
+      const base = (imp - 7) * 6;
       const srcA = b.driver === 'player' ? g.player : b, srcB = a.driver === 'player' ? g.player : a;
       _v.set(c.x, c.y, c.z);
-      a.damage(base * clamp((2 * mb) / (ma + mb), 0.3, 1.7), { type: 'vehicle', source: srcA, point: _v.clone() });
-      b.damage(base * clamp((2 * ma) / (ma + mb), 0.3, 1.7), { type: 'vehicle', source: srcB, point: _v.clone() });
+      this._crashDamage(a, base * clamp((2 * mb) / (ma + mb), 0.3, 1.7), { type: 'vehicle', source: srcA, point: _v.clone() });
+      this._crashDamage(b, base * clamp((2 * ma) / (ma + mb), 0.3, 1.7), { type: 'vehicle', source: srcB, point: _v.clone() });
     }
     try { a.ai?.onCollision?.(a, b, imp); } catch (e) { /* optional hook */ }
     try { b.ai?.onCollision?.(b, a, imp); } catch (e) { /* optional hook */ }
@@ -530,6 +586,15 @@ export class Vehicles {
         const vpx = v.velocity.x + v.yawRate * rz, vpz = v.velocity.z - v.yawRate * rx;
         const ev = e.velocity;
         const rel = (vpx - (ev ? ev.x : 0)) * nx + (vpz - (ev ? ev.z : 0)) * nz;
+        // backstop: an AI driver nudging the player at low speed stops dead instead of running them over
+        if (e === g.player && v.ai && v.driver !== 'player' && sp < 9) {
+          const vn = v.velocity.x * nx + v.velocity.z * nz;
+          if (vn > 0) { v.velocity.x -= vn * nx; v.velocity.z -= vn * nz; }
+          v.yawRate *= 0.5;
+          v.controls.throttle = 0; v.controls.brake = 1;
+          try { v.ai.onBumpedPerson?.(e); } catch (err) { /* optional hook */ }
+          continue;
+        }
         if (rel > 3 && (this._hitCD.get(e) || 0) <= t) {
           this._hitCD.set(e, t + 0.7);
           const source = v.driver === 'player' ? g.player : v;
@@ -580,7 +645,11 @@ export class Vehicles {
   _post(v, dt, focus) {
     const g = this.game;
     if (v.removed) return;
-    if (v.position.y < -24) { this.remove(v); return; }
+    if (v.position.y < -24) {
+      if (v === this._player) this.exit({ force: true, exitPos: this._safeGround(v.position.x, v.position.z) });
+      this.remove(v);
+      return;
+    }
     const night = g.sky ? g.sky.nightFactor || 0 : 0;
     v.alarmT -= dt;
     v.hornT -= dt;
@@ -631,7 +700,9 @@ export class Vehicles {
       }
     }
     // lights
+    const lightsWas = v.lightsOn;
     v.lightsOn = !v.destroyed && (v.lightsOverride !== null && v.lightsOverride !== undefined ? !!v.lightsOverride : (night > 0.5 && !!v.driver));
+    if (v.lightsOn !== lightsWas) v._visSynced = false;
     // simulated engine rpm (gearbox)
     if (!v.isHeli) {
       const thr = Math.abs(v.controls.throttle || 0);
@@ -642,11 +713,38 @@ export class Vehicles {
     // skid marks + tyre smoke, launch exhaust puffs, off-road dust
     if (v.distSq < 75 * 75) this._skids(v, dt); else v.skidPrev = null;
     if (!v.isHeli && !v.destroyed && v.driver && v.onGround && v.distSq < 45 * 45 && !v.inWater) this._trails(v, dt);
-    // visuals (skip far frozen vehicles: they are culled by fog anyway)
-    if (!v.frozen || v.distSq < (SIM_RADIUS + 20) ** 2) {
-      v.syncVisual(dt, g.time, { hideDriver: v === this._player && this._hoodCam() });
-    }
+    // visuals: hidden beyond the fog (no draw calls); parked cars asleep keep their last pose (no per-frame sync)
+    const show = v === this._player || this._withinFog(v);
+    v.mesh.visible = show;
+    if (show && (!v.frozen || v.distSq < (SIM_RADIUS + 20) ** 2)) {
+      const root = v.mesh.position;
+      if (!(v._visSynced && v.sleeping && !v.driver && root.x === v.position.x && root.z === v.position.z && v.mesh.rotation.y === v.yaw)) {
+        v.syncVisual(dt, g.time, { hideDriver: v === this._player && this._hoodCam() });
+        // settled while asleep (no springs moving, no flashing lights): stop syncing until something changes
+        v._visSynced = v.sleeping && !v.driver && !v.sirenOn && !(v.alarmT > 0) && !v.onFire && v.tumble === 0 &&
+          Math.abs(v.susp) < 1e-3 && Math.abs(v.suspV) < 1e-3 && Math.abs(v.position.y - v.visY) < 1e-3;
+      }
+    } else v._visSynced = false;
     if (v.isBike) this._updateRider(v, dt);
+  }
+
+  /** Is the vehicle closer to the camera than the fog end (plus its size)? */
+  _withinFog(v) {
+    const g = this.game, far = g.scene && g.scene.fog ? g.scene.fog.far : 0;
+    if (!(far > 0) || !g.camera) return true;
+    const cp = g.camera.position;
+    const dx = v.position.x - cp.x, dz = v.position.z - cp.z;
+    const r = far + 6 + v.boundR;
+    return dx * dx + dz * dz < r * r;
+  }
+
+  /** A safe standing spot on the surface at (x, z) (top of the column, or the plan's surface height). */
+  _safeGround(x, z) {
+    const g = this.game, w = g.world, plan = g.generator && g.generator.plan;
+    let y = -1;
+    try { if (w && typeof w.findGround === 'function') y = w.findGround(x, z, 95); } catch (e) { y = -1; }
+    if (!(y > 0) && plan && typeof plan.surfaceY === 'function') y = plan.surfaceY(x, z);
+    return new THREE.Vector3(x, y > 0 ? y : WORLD.CITY_LEVEL, z);
   }
 
   _hoodCam() {
@@ -656,10 +754,12 @@ export class Vehicles {
 
   _wallImpact(v) {
     const g = this.game, imp = v.impact;
+    if (!v.isHeli && imp > 6 && this._breakProps(v, imp)) return;
     _v.set(v.contactX, v.position.y + Math.min(1, v.def.size.h * 0.5), v.contactZ);
-    if (imp > 7) {
-      const k = v.isBike ? 8 : v.isHeli ? 14 : 10;
-      v.damage((imp - 7) * k, { type: 'vehicle', source: null, point: _v.clone() });
+    if (imp > 9) {
+      // softened + capped: heavy vehicles shrug off hits, one crash never takes more than 35% of the health bar
+      const kClass = v.isBike ? 0.8 : v.isHeli ? 1.4 : 1;
+      this._crashDamage(v, (imp - 9) * 5 * kClass * clamp(1500 / v.def.mass, 0.6, 1.2), { type: 'vehicle', source: null, point: _v.clone() });
     }
     if (imp > 2.5 && this._time > (v.crashFxT || 0)) {
       v.crashFxT = this._time + 0.22;
@@ -677,10 +777,123 @@ export class Vehicles {
     if (v === this._player && v.isBike && imp > 13) this._ejectRider(v, imp);
   }
 
+  /**
+   * Crash damage (walls / vehicles) with a per-hit cap: everything within 0.3 s counts as one hit and together never
+   * exceeds 35% of maxHealth. Combat damage does not go through here.
+   */
+  _crashDamage(v, raw, info) {
+    if (!(raw > 0) || v.destroyed) return;
+    const t = this._time;
+    if (!(t < (v._crashWinT || 0))) { v._crashWinT = t + 0.3; v._crashWinDmg = 0; }
+    const amt = Math.min(raw, 0.35 * v.maxHealth - v._crashWinDmg);
+    if (!(amt > 0)) return;
+    v._crashWinDmg += amt;
+    v.damage(amt, info);
+  }
+
+  /** Material class of a block as a breakable street prop (see PROP) at (x, y, z), 0 = not breakable. */
+  _propAt(w, x, y, z) {
+    const id = w.getBlock(x, y, z);
+    const k = PROP[id];
+    if (k !== 2) return k;
+    // pole material: only free-standing columns (never building walls / corners)
+    return w.isSolid(x + 1, y, z) || w.isSolid(x - 1, y, z) || w.isSolid(x, y, z + 1) || w.isSolid(x, y, z - 1) ? 0 : 2;
+  }
+
+  /**
+   * The car hit a breakable street prop (lamp post, street-tree trunk, hedge, glass) hard enough: snap it and keep
+   * most of the speed (GTA-style). Blocks are removed without recording an edit, so props return after a reload.
+   * Returns true when something broke (the normal wall impact is skipped).
+   */
+  _breakProps(v, imp) {
+    const g = this.game, w = g.world;
+    if (!w || typeof w.setBlock !== 'function') return false;
+    const cx = Math.floor(v.contactX - v.contactNX * 0.2), cz = Math.floor(v.contactZ - v.contactNZ * 0.2);
+    // body band the collision samples cover (above the step height): every solid cell there must be breakable
+    const yA = Math.floor(v.position.y + 1.11), yB = Math.max(yA, Math.floor(v.position.y + v.def.size.h - 0.12));
+    let kind = 0;
+    for (let y = yA; y <= yB; y++) {
+      const k = this._propAt(w, cx, y, cz);
+      if (k === 0) { if (w.isSolid(cx, y, cz)) return false; continue; }
+      if (k > kind) kind = k;
+    }
+    if (!kind) return false;
+    const list = _brk;
+    list.length = 0;
+    const add = (x, y, z) => { const id = w.getBlock(x, y, z); if (id) list.push(x, y, z, id); };
+    if (kind >= 2) {
+      // the connected vertical run of pole material (max 6) plus the lamp head, from the car's floor upward
+      const id0 = w.getBlock(cx, yA, cz) || w.getBlock(cx, yB, cz);
+      const fam = (id) => id === id0 || (PROP[id] === 2 && PROP[id0] === 2 && BLOCKS[id].key.endsWith('LOG') === BLOCKS[id0].key.endsWith('LOG'));
+      let y = yA;
+      while (y > yA - 3 && fam(w.getBlock(cx, y - 1, cz)) && y - 1 >= 1) y--;
+      let x = cx, z = cz, n = 0, top = y;
+      for (; n < 6; n++, y++) {
+        let id = w.getBlock(x, y, z);
+        if (!fam(id)) {
+          // bent palm trunks continue diagonally
+          let moved = false;
+          for (const [ox, oz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            if (fam(w.getBlock(x + ox, y, z + oz)) && !w.isSolid(x + ox, y - 1, z + oz)) { x += ox; z += oz; moved = true; break; }
+          }
+          if (!moved) break;
+          id = w.getBlock(x, y, z);
+        }
+        list.push(x, y, z, id);
+        top = y;
+      }
+      const head = w.getBlock(x, top + 1, z);
+      if (PROP[head] === 3) list.push(x, top + 1, z, head);
+      // a tree crown would float: clear the leaves around the top of the trunk
+      if (BLOCKS[id0] && BLOCKS[id0].key.endsWith('LOG')) {
+        const r = BLOCKS[id0].key === 'PALM_LOG' ? 4 : 2;
+        for (let yy = top - (r > 2 ? 2 : 1); yy <= top + 3; yy++) {
+          for (let dz = -r; dz <= r; dz++) {
+            for (let dx = -r; dx <= r; dx++) {
+              const id = w.getBlock(x + dx, yy, z + dz);
+              if (PROP[id] === 1 && BLOCKS[id].key !== 'GLASS' && BLOCKS[id].key !== 'HEDGE') list.push(x + dx, yy, z + dz, id);
+              else if (dx === 0 && dz === 0 && fam(id) && yy > top) list.push(x, yy, z, id);
+            }
+          }
+        }
+      }
+    } else {
+      // glass / hedge / leaves: punch a car-sized hole across the contact face
+      const tx = Math.abs(v.contactNX) > Math.abs(v.contactNZ) ? 0 : 1, tz = 1 - tx;
+      const half = Math.ceil(v.def.size.w / 2);
+      for (let k = -half; k <= half; k++) {
+        const x = cx + tx * k, z = cz + tz * k;
+        for (let y = Math.floor(v.position.y); y <= yB + 1; y++) if (PROP[w.getBlock(x, y, z)] === 1) add(x, y, z);
+      }
+    }
+    if (!list.length) return false;
+    let glass = false, fxN = 0;
+    for (let i = 0; i < list.length; i += 4) {
+      const x = list[i], y = list[i + 1], z = list[i + 2], id = list[i + 3];
+      if (!w.setBlock(x, y, z, 0, { record: false })) continue;
+      if (BLOCKS[id] && BLOCKS[id].key === 'GLASS') glass = true;
+      if (fxN++ < 12) { try { g.fx?.blockBreak?.(x, y, z, id); } catch (e) { /* ignore */ } }
+    }
+    // keep ~70% of the speed the car had before the frame (along its original direction), light damage only
+    const pv = v._preVel;
+    if (v.velocity.x ** 2 + v.velocity.z ** 2 < 0.49 * (pv.x * pv.x + pv.z * pv.z)) {
+      v.velocity.x = pv.x * 0.7; v.velocity.z = pv.z * 0.7;
+      v.yawRate = v._preYawRate * 0.7 + (v.yawRate - v._preYawRate) * 0.15;
+    }
+    _v.set(v.contactX, v.position.y + Math.min(1, v.def.size.h * 0.5), v.contactZ);
+    this._crashDamage(v, Math.max(0, imp - 6) * 2, { type: 'vehicle', source: null, point: _v.clone() });
+    if (this._time > (v.crashFxT || 0)) {
+      v.crashFxT = this._time + 0.15;
+      g.audio?.play?.(glass ? 'glass_break' : 'crash', { position: _v, volume: clamp(imp / 22, 0.35, 0.9), pitch: glass ? 1 : 1.25 });
+    }
+    if (v === this._player) g.cameraRig?.shake?.(clamp(imp / 70, 0.04, 0.2));
+    return true;
+  }
+
   _landing(v) {
     const g = this.game, imp = v.landImpact;
     v.suspV -= Math.min(4, imp * 0.11);
-    if (imp > 5 && this._time > (v.landFxT || 0)) {
+    if (imp > 7 && this._time > (v.landFxT || 0)) {
       v.landFxT = this._time + 0.25;
       _v.set(v.position.x, v.position.y + 0.2, v.position.z);
       g.audio?.play?.(imp > 11 ? 'crash' : 'land', { position: _v, volume: clamp(imp / 20, 0.25, 1), pitch: imp > 11 ? 0.75 : 0.6 });
@@ -690,7 +903,7 @@ export class Vehicles {
       }
       if (v === this._player) g.cameraRig?.shake?.(clamp(imp / 32, 0.06, 0.6));
     }
-    const limit = v.isHeli ? 7 : 15;
+    const limit = v.isHeli ? 9 : 15;
     if (imp > limit) v.damage((imp - limit) * (v.isHeli ? 40 : 22), { type: 'fall', source: null });
   }
 
@@ -710,6 +923,8 @@ export class Vehicles {
   /** Set a vehicle on fire; it explodes `fuse` seconds later unless repaired / flooded. */
   igniteVehicle(v, fuse = 4) {
     if (!v || v.destroyed || v.onFire) return;
+    // the player's own ride burns longer: bailing out is a choice, not a race
+    if (v === this._player || v.driver === 'player') fuse = Math.max(fuse, 7);
     v.onFire = true;
     v.fireT = 0;
     v.fireFuse = fuse;
@@ -976,27 +1191,28 @@ export class Vehicles {
     map.delete(v);
   }
 
-  _updateSirenLight(focus) {
-    const g = this.game, L = this._sirenLight;
-    if (!L) return;
+  /** Red/blue glow for the nearest siren-on vehicle within 60 m at night: short pulses of the pooled fx lights. */
+  _updateSirenLight(focus, dt) {
+    const g = this.game;
+    this._sirenPulseT -= dt;
+    if (this._sirenPulseT > 0) return;
     const night = g.sky ? g.sky.nightFactor || 0 : 0;
-    let best = null, bd = 45 * 45;
-    if (night > 0.2) {
-      for (const v of this.list) {
-        if (!v.sirenOn || v.destroyed || v.isHeli) continue;
-        const d = (v.position.x - focus.x) ** 2 + (v.position.z - focus.z) ** 2;
-        if (d < bd) { bd = d; best = v; }
-      }
+    if (night <= 0.2 || !g.fx || typeof g.fx.flash !== 'function') { this._sirenPulseT = 0.25; return; }
+    let best = null, bd = 60 * 60;
+    for (const v of this.list) {
+      if (!v.sirenOn || v.destroyed || v.isHeli || v.frozen) continue;
+      const d = (v.position.x - focus.x) ** 2 + (v.position.z - focus.z) ** 2;
+      if (d < bd) { bd = d; best = v; }
     }
-    // never toggle .visible on lights: it changes the light count and recompiles every material
-    if (!best) { L.intensity = 0; return; }
-    const t = g.time * 2.3;
-    const left = Math.sin(t * Math.PI * 2) > 0;
-    const strobe = (g.time * 18) % 1 < 0.62;
+    if (!best) { this._sirenPulseT = 0.2; return; }
+    this._sirenPulseT = 0.12;
+    this._sirenSide = !this._sirenSide;
+    const left = this._sirenSide;
     best.localToWorld(left ? 0.5 : -0.5, best.def.size.h + 0.45, -0.3, _v);
-    L.position.copy(_v);
-    L.color.setHex(left ? 0xff2a22 : 0x2f62ff);
-    L.intensity = strobe ? 55 * clamp((night - 0.2) / 0.4, 0, 1) : 0;
+    // each pulse ends before the next one starts, so the strobe only ever holds one of the pooled lights
+    try {
+      g.fx.flash(_v, { color: left ? 0xff2a22 : 0x2f62ff, intensity: 80 * clamp((night - 0.2) / 0.4, 0, 1), distance: 16, duration: 0.11, priority: 1 });
+    } catch (e) { /* fx stub */ }
   }
 
   _updateSpot() {

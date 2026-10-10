@@ -13,10 +13,13 @@
 //   tool         'pickaxe' | 'axe' | 'shovel' | null - matching tool breaks 5x faster
 //   color        0xRRGGBB average colour (minimap, particles, fallback texture)
 //   tex          { top, side, bottom } texture names in the procedural atlas (world/textures.js)
-//   value        cash reward ($) granted when mined by the player (ores)
+//   value        cash ($) paid when the player mines a naturally generated block (ores); player-placed blocks pay
+//                nothing. Ores are mining income, not the economy: missions ($1,200-2,500 each) stay the main income
+//                (coal 3, iron 8, gold 25, diamond 80)
 //   explosive    TNT: primes when shot / hit by explosion
 //   blast        blast resistance: explosion removes blocks where blast <= explosion power (default 1)
-//   placeable    appears in the creative palette / can be held as an item
+//   placeable    appears in the creative palette / can be held as an item (default true). Ores are placeable: false
+//                (they pay cash instead of becoming items, so there is no place-and-mine money loop)
 //   drops        block id given to inventory when mined (default: itself; 0 = nothing)
 
 export const BLOCKS = [];
@@ -80,10 +83,11 @@ def('CRATE', 'Crate', { hardness: 1.5, tool: 'axe', color: 0x9c7442 });
 def('TALL_GRASS', 'Tall Grass', { solid: false, cutout: true, shape: 'cross', hardness: 0, color: 0x6aa84f, drops: 0, blast: 0 });
 def('FLOWER_RED', 'Red Flower', { solid: false, cutout: true, shape: 'cross', hardness: 0, color: 0xd43a2f, blast: 0 });
 def('FLOWER_YELLOW', 'Yellow Flower', { solid: false, cutout: true, shape: 'cross', hardness: 0, color: 0xf2d43a, blast: 0 });
-def('COAL_ORE', 'Coal Ore', { hardness: 5, tool: 'pickaxe', color: 0x5a5a5a, value: 25, blast: 2 });
-def('IRON_ORE', 'Iron Ore', { hardness: 6, tool: 'pickaxe', color: 0x8c7b6c, value: 60, blast: 2 });
-def('GOLD_ORE', 'Gold Ore', { hardness: 6, tool: 'pickaxe', color: 0x9a8a4a, value: 150, blast: 2 });
-def('DIAMOND_ORE', 'Diamond Ore', { hardness: 8, tool: 'pickaxe', color: 0x6aa8a8, value: 500, blast: 3 });
+// ores: pay `value` when mined (natural only), drop cobblestone, never placeable / never in the creative palette
+def('COAL_ORE', 'Coal Ore', { hardness: 5, tool: 'pickaxe', color: 0x5a5a5a, value: 3, blast: 2, placeable: false, drops: B.COBBLESTONE });
+def('IRON_ORE', 'Iron Ore', { hardness: 6, tool: 'pickaxe', color: 0x8c7b6c, value: 8, blast: 2, placeable: false, drops: B.COBBLESTONE });
+def('GOLD_ORE', 'Gold Ore', { hardness: 6, tool: 'pickaxe', color: 0x9a8a4a, value: 25, blast: 2, placeable: false, drops: B.COBBLESTONE });
+def('DIAMOND_ORE', 'Diamond Ore', { hardness: 8, tool: 'pickaxe', color: 0x6aa8a8, value: 80, blast: 3, placeable: false, drops: B.COBBLESTONE });
 def('SANDSTONE', 'Sandstone', { hardness: 3, tool: 'pickaxe', color: 0xd8c98f, tex: { top: 'sandstone_top', side: 'sandstone' } });
 def('PLASTER', 'Plaster', { hardness: 2.5, tool: 'pickaxe', color: 0xd9c9a8 });
 def('STUCCO_PINK', 'Pink Stucco', { hardness: 2.5, tool: 'pickaxe', color: 0xe3a0a8 });

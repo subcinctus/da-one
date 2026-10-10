@@ -7,7 +7,7 @@ import { WORLD } from '../core/config.js';
 import { voxelRaycast } from '../core/physics.js';
 import { entityBox } from '../core/entities.js';
 import { WEAPONS } from '../data/weapons.js';
-import { toolOf, meleeDamage } from '../data/items.js';
+import { toolOf, meleeDamage, isPlaceableBlock, isOreBlock } from '../data/items.js';
 import { INTERACT } from './tuning.js';
 import { blockCubeGeometry, blockColorGeometry } from './models.js';
 
@@ -41,6 +41,7 @@ export class Interact {
     this._meleeAnimT = 0;
     this._grenadeT = 0;
     this._creativeOreNote = false;
+    this._placedOreNote = false;
     this._ray = { origin: new THREE.Vector3(), dir: new THREE.Vector3() };
     this._eye = new THREE.Vector3();
     this._start = new THREE.Vector3();
@@ -93,7 +94,8 @@ export class Interact {
     const g = this.game, p = this.player, input = g.input;
     const inv = g.inventory;
     const item = inv && inv.getSelected ? inv.getSelected() : null;
-    const frozen = !!p.frozen;
+    // hands up (surrender) counts as frozen: no fire, mine, place or grenade
+    const frozen = !!p.frozen || !!p.handsUp;
     this._breakCd -= dt; this._punchCd -= dt; this._placeCd -= dt; this._hitSndT -= dt; this._swingT -= dt;
     this._meleeAnimT -= dt; this._grenadeT -= dt;
 
@@ -263,31 +265,45 @@ export class Interact {
     const { x, y, z, id } = t;
     const def = BLOCKS[id];
     if (!def || !Number.isFinite(def.hardness) || def.liquid) return false;
+    // player-placed? (world.edits records every placement; generated blocks never appear there). Must be read
+    // before _setBlock, which overwrites the edit entry with 0.
+    const placed = !!(w && w.edits && typeof w.edits.get === 'function' && w.edits.get(x + ',' + y + ',' + z) === id);
     if (!this._setBlock(x, y, z, 0)) return false;
     const inv = g.inventory;
     const creative = !!(inv && inv.creative);
     _v.set(x + 0.5, y + 0.5, z + 0.5);
     g.fx?.blockBreak?.(x, y, z, id);
     g.audio?.play?.('block_break', { position: _v, pitch: 0.9 + Math.random() * 0.2 });
-    if (!creative && def.drops && inv && inv.addBlock) inv.addBlock(def.drops, 1);
+    // ores never become items (they pay cash instead): an ore that still drops itself yields cobblestone
+    let drop = def.drops;
+    if (drop && isOreBlock(drop)) drop = B.COBBLESTONE || 0;
+    if (!creative && drop && inv && inv.addBlock) inv.addBlock(drop, 1);
     if (def.value > 0) {
-      if (!creative) {
+      if (creative) {
+        if (!this._creativeOreNote) {
+          this._creativeOreNote = true;
+          g.hud?.notify?.('Creative mode: ores pay nothing', { duration: 3 });
+        }
+      } else if (placed) {
+        if (!this._placedOreNote) {
+          this._placedOreNote = true;
+          g.hud?.notify?.('Placed ore pays nothing', { duration: 3 });
+        }
+      } else {
         p.addMoney(def.value, 'mining');
         g.hud?.notify?.('+$' + def.value + ' ' + def.name, { color: '#46c46f', duration: 2.5 });
         g.audio?.play?.('money', { volume: 0.7 });
-      } else if (!this._creativeOreNote) {
-        this._creativeOreNote = true;
-        g.hud?.notify?.('Creative mode: ores pay nothing', { duration: 3 });
       }
     }
-    g.events.emit('blockBroken', { x, y, z, id, byPlayer: true });
+    g.events.emit('blockBroken', { x, y, z, id, byPlayer: true, natural: !placed });
     // a plant standing on the broken block pops off too
     const above = w.getBlock(x, y + 1, z);
     const ad = BLOCKS[above];
+    const abovePlaced = !!(ad && w.edits && typeof w.edits.get === 'function' && w.edits.get(x + ',' + (y + 1) + ',' + z) === above);
     if (ad && ad.shape === 'cross' && !ad.solid && this._setBlock(x, y + 1, z, 0)) {
       g.fx?.blockBreak?.(x, y + 1, z, above);
       if (!creative && ad.drops && inv && inv.addBlock) inv.addBlock(ad.drops, 1);
-      g.events.emit('blockBroken', { x, y: y + 1, z, id: above, byPlayer: true });
+      g.events.emit('blockBroken', { x, y: y + 1, z, id: above, byPlayer: true, natural: !abovePlaced });
     }
     this._swingAnim(true);
     p.noteAction();
@@ -311,7 +327,7 @@ export class Interact {
   _place(item) {
     const g = this.game, w = g.world, t = this.target, p = this.player;
     const def = BLOCKS[item.id];
-    if (!def || def.placeable === false || item.id === 0) return false;
+    if (!def || item.id === 0 || !isPlaceableBlock(item.id)) return false; // also refuses ores (old saves)
     if (!(item.count > 0) && !(g.inventory && g.inventory.creative)) return false;
     let x, y, z;
     const td = BLOCKS[t.id];

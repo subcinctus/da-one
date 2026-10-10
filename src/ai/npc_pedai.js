@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { boxCollides, hasLineOfSight } from '../core/physics.js';
 import { angleDiff } from '../core/math.js';
 import { rand, chance } from './npc_util.js';
+import { aimShot } from './police_util.js';
 
 const _a = new THREE.Vector3();
 const _b = new THREE.Vector3();
@@ -222,22 +223,40 @@ export function updateWeapon(ped, dt) {
   fireAt(ped, t, tp, d);
 }
 
+/**
+ * Chance that one gang pistol shot at the player lands (before the shared governor in Peds.rollPlayerHit): close,
+ * still targets are easier, the first shots of a fight go wild and mission gunmen are a little better shots.
+ */
+export function gangHitChance(dist, tSpeed, hostileT, persistent) {
+  let p = Math.min(0.22, Math.max(0.06, 0.22 - 0.005 * dist - (tSpeed > 3 ? 0.06 : 0)));
+  p /= 1 + Math.max(0, 1.0 - hostileT * 0.15);
+  if (persistent) p *= 1.2;
+  return p;
+}
+
 function fireAt(ped, t, tp, dist) {
   const g = ped.game, p = ped.position;
   const sy = Math.sin(ped.yaw), cy = Math.cos(ped.yaw);
   const sc = ped.scale;
   // right hand: model -X is the character's right; world right = (-cos, 0, sin)
   _muz.set(p.x + sy * 0.62 * sc - cy * 0.3 * sc, p.y + 1.38 * sc, p.z + cy * 0.62 * sc + sy * 0.3 * sc);
-  _b.set(tp.x, tp.y + (t.inVehicle ? 0.8 : 1.15), tp.z);
-  _dir.subVectors(_b, _muz).normalize();
   const tv = t.inVehicle ? t.inVehicle.velocity : t.velocity;
   const tSpeed = tv ? Math.hypot(tv.x, tv.z) : 0;
-  let spread = 0.06 + 0.003 * dist + (tSpeed > 3 ? 0.04 : 0) + (ped.hspeed > 1 ? 0.025 : 0);
-  spread *= 1 + Math.max(0, 1.0 - ped.hostileT * 0.3); // the first shots of a fight go wild
-  if (ped.persistent) spread *= 0.8;                     // mission gunmen are a bit better shots
-  spread = Math.min(0.2, spread);
-  _a.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(2 * spread);
-  _dir.add(_a).normalize();
+  if (t === g.player && ped.sys && typeof ped.sys.rollPlayerHit === 'function') {
+    // shots at the player: an explicit hit / miss decision through a shared governor (like the police), so a group
+    // of gangsters cannot land a burst of hits in a fraction of a second. Misses whiz convincingly past.
+    const hit = ped.sys.rollPlayerHit(gangHitChance(dist, tSpeed, ped.hostileT, ped.persistent));
+    aimShot(_muz, t, hit, _dir);
+  } else {
+    _b.set(tp.x, tp.y + (t.inVehicle ? 0.8 : 1.15), tp.z);
+    _dir.subVectors(_b, _muz).normalize();
+    let spread = 0.06 + 0.003 * dist + (tSpeed > 3 ? 0.04 : 0) + (ped.hspeed > 1 ? 0.025 : 0);
+    spread *= 1 + Math.max(0, 1.0 - ped.hostileT * 0.15); // the first shots of a fight go wild
+    if (ped.persistent) spread *= 0.8;                      // mission gunmen are a bit better shots
+    spread = Math.min(0.2, spread);
+    _a.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(2 * spread);
+    _dir.add(_a).normalize();
+  }
   try { g.combat?.fire?.(ped, _muz, _dir, ped.weapon || 'pistol'); } catch (e) { console.warn('[peds] combat.fire', e); }
   ped.humanoid.armR.rotation.x -= 0.35; // recoil kick
   ped.mag--;

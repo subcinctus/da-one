@@ -435,7 +435,7 @@ function demolition(plan, ctx) {
           text: 'Demolish ~o~35%~s~ of the ~o~condemned building~s~ in ' + where + '.' },
       ];
       this.setup = (run) => {
-        run.give([{ kind: 'block', id: B.TNT, count: 8 }, { kind: 'weapon', id: 'rpg', ammo: 3 }], 'Received *8 TNT* and a *Rocket Launcher* (3 rockets).');
+        run.kit([{ kind: 'block', id: B.TNT, count: 8 }, { kind: 'weapon', id: 'rpg', ammo: 3 }], 'Received *8 TNT* and a *Rocket Launcher* (3 rockets).');
       };
       return true;
     },
@@ -461,7 +461,7 @@ function diamonds(plan, ctx) {
         { type: 'gotoMarker', at: camp, radius: 2.5, text: 'Bring the haul back to ~y~' + (giver.name || 'the camp') + '~s~.' },
       ];
       this.setup = (run) => {
-        run.give([{ kind: 'tool', id: 'pickaxe' }, { kind: 'block', id: B.LAMP, count: 8 }], 'Pickaxe ready. Here are *8 lamps* for the dark tunnels.');
+        run.kit([{ kind: 'tool', id: 'pickaxe' }, { kind: 'block', id: B.LAMP, count: 8 }], 'Pickaxe ready. Here are *8 lamps* for the dark tunnels.');
       };
       return true;
     },
@@ -531,7 +531,7 @@ function builder(plan, ctx) {
         },
       ];
       this.setup = (run) => {
-        run.give([
+        run.kit([
           { kind: 'block', id: B.PLANKS, count: 64 }, { kind: 'block', id: B.BRICK, count: 64 },
           { kind: 'block', id: B.GLASS, count: 32 }, { kind: 'block', id: B.LOG, count: 16 },
         ], 'Materials delivered: *planks, bricks, glass and logs*. Select them with [1]-[9] and place with right-click.');

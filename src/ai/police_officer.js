@@ -306,9 +306,21 @@ export class Officer {
           }
           this._goal(this.searchX, this.searchZ, 3.6);
         } else if (policy === 'arrest') {
-          const close = d < 3.2;
-          if (d > 1.15) this._goal(pp.x, pp.z, close ? this.def.walk * 1.6 : this.def.run);
-          else this.hasGoal = false;
+          const car = pl.inVehicle;
+          if (car && car.position && typeof car.getDoorPosition === 'function' && speedOf(car) < TUNE.CAR_BUST_SPEED &&
+            !(car.isHeli && car.onGround === false)) {
+            // suspect sitting in a stopped car: walk up to the driver door (Police pulls them out from there)
+            car.getDoorPosition(_tp, 1, 0.6);
+            const dd = Math.hypot(_tp.x - this.position.x, _tp.z - this.position.z);
+            if (dd > 0.6) {
+              this._carDetour(car, _tp);
+              this._goal(_tp.x, _tp.z, dd < 3.2 ? this.def.walk * 1.6 : this.def.run);
+            } else this.hasGoal = false;
+          } else {
+            const close = d < 3.2;
+            if (d > 1.15) this._goal(pp.x, pp.z, close ? this.def.walk * 1.6 : this.def.run);
+            else this.hasGoal = false;
+          }
           this.faceTarget = d < 14;
         } else if (this.cover && this.unit && this.unit.state === 'roadblock' && d > 9) {
           // roadblock: stay behind the cruisers and shoot from cover until the suspect is right on top of us
@@ -410,6 +422,26 @@ export class Officer {
 
   _goal(x, z, speed) {
     this.goalX = x; this.goalZ = z; this.hasGoal = true; this.moveSpeed = speed;
+  }
+
+  /**
+   * Walking to the driver door (local +x side) of `car`: officers do not collide with vehicles, so instead of cutting
+   * through the body go around it: past the nearest end first, then along the driver side. Rewrites `door` (world
+   * point) to the next waypoint when a detour is needed.
+   */
+  _carDetour(car, door) {
+    const d = car.def && car.def.size ? car.def.size : { w: 2, l: 4.6 };
+    const hw = d.w / 2, hl = d.l / 2;
+    const sy = Math.sin(car.yaw), cy = Math.cos(car.yaw);
+    const dx = this.position.x - car.position.x, dz = this.position.z - car.position.z;
+    const lx = dx * cy - dz * sy, lz = dx * sy + dz * cy;   // officer in the car's frame (+x = driver side)
+    if (lx >= hw + 0.2) return;                           // already on the driver side: straight to the door
+    const beside = Math.abs(lz) < hl + 0.5;
+    if (beside && lx > -hw - 0.2) return;                 // standing in / against the body: shortest way out is sideways
+    const end = lz >= 0 ? 1 : -1;
+    // passenger side: walk along it past the nearest end; beyond an end: cut across to the driver-side corner
+    const tx = beside ? Math.min(lx, -hw - 0.9) : hw + 0.9, tz = end * (hl + 1.1);
+    door.set(car.position.x + tx * cy + tz * sy, door.y, car.position.z - tx * sy + tz * cy);
   }
 
   // ============================================================================================ combat

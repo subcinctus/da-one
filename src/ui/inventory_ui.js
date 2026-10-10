@@ -239,7 +239,7 @@ export class InventoryScreen {
         let txt = '', cls = 'cnt';
         if (it && it.kind === 'block' && it.count > 1) txt = String(it.count);
         else if (it && it.kind === 'weapon' && WEAPONS[it.id] && WEAPONS[it.id].mag > 0) {
-          txt = String(it.mag | 0);
+          txt = String((it.mag | 0) + (it.reserve | 0)); // same total as the HUD hotbar (tooltip: mag / reserve)
           cls = 'cnt ammo' + ((it.mag | 0) + (it.reserve | 0) === 0 ? ' zero' : '');
         }
         cnt.textContent = txt;

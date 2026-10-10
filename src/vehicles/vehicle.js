@@ -77,6 +77,8 @@ export class Vehicle {
     this.lightsOverride = null;      // true/false forces headlights; null = automatic (night)
     this.autopilot = null;           // helicopters: {x,y,z} hover target for AI pilots
     this.everPlayer = false;
+    /** Top-speed multiplier (1 = def.maxSpeed; ~1..1.35). Written only by the police AI; reset when the player enters. */
+    this.speedScale = 1;
     // ---- dynamics
     this.yawRate = 0;
     this.steer = 0;                  // smoothed steer -1..1
@@ -102,6 +104,10 @@ export class Vehicle {
     this.roll = 0;
     this.sleeping = false;
     this.sleepT = 0;
+    this._stickDrop = NaN;           // kerb drop start height (physics: soft touchdown)
+    this._preVel = new THREE.Vector3(); // velocity at the start of the frame (breakable props restore it)
+    this._preYawRate = 0;
+    this._visSynced = false;         // visuals settled while asleep (Vehicles skips syncVisual)
     // per-frame collision results
     this.impact = 0; this.scrape = 0; this.touching = false; this.landImpact = 0; this.rotorStrike = 0;
     this.contactX = 0; this.contactZ = 0; this.contactNX = 0; this.contactNZ = 0;
@@ -126,6 +132,7 @@ export class Vehicle {
     this.boundR = Math.hypot(def.size.w, def.size.l) / 2 + 0.05;
     this.skidPrev = null;
     this._lightKey = -1;
+    this._wSpin = NaN; this._wSteer = NaN; this._wDroop = NaN; // last wheel pose written to the instance buffer
     this._buildMesh();
   }
 
@@ -166,6 +173,7 @@ export class Vehicle {
     this.health = Math.max(0, this.health - a);
     if (info.source && info.source !== this) this.lastAttacker = info.source;
     this.wake();
+    this._visSynced = false;
     if (info.type === 'bullet' && info.point && g.fx && Math.random() < 0.6) {
       try { g.fx.sparks(info.point, info.normal || (info.dir ? _p.copy(info.dir).negate() : null)); } catch (e) { /* fx stub */ }
     }
@@ -201,6 +209,7 @@ export class Vehicle {
   /** Full repair: health, fire, smoke, burnt look (wreck stays destroyed only if already exploded). */
   repair() {
     this.health = this.maxHealth;
+    this._visSynced = false;
     if (this.fireHandle) { try { this.fireHandle.stop(); } catch (e) { /* ignore */ } this.fireHandle = null; }
     this.onFire = false;
     this.fireT = 0;
@@ -229,7 +238,7 @@ export class Vehicle {
   }
 
   /** Wake from physics sleep. */
-  wake() { this.sleeping = false; this.sleepT = 0; }
+  wake() { this.sleeping = false; this.sleepT = 0; this._visSynced = false; }
 
   /** World position of the driver door (left side), at standing height. */
   getDoorPosition(out = new THREE.Vector3(), side = 1, extra = 0.6) {
@@ -319,6 +328,7 @@ export class Vehicle {
 
   /** Swap the driver figure's look (e.g. the player took over). */
   setDriverLook(look) {
+    this._visSynced = false;
     if (!this.driverMesh) return;
     const old = this.driverMesh.geometry;
     this.driverMesh.geometry = driverGeometry(look || this._driverLook());
@@ -334,6 +344,7 @@ export class Vehicle {
     if (this.glassMesh) this.glassMesh.visible = !burnt;
     if (this.wheelMesh) this.wheelMesh.material = burnt ? materials().wheelBurnt : materials().wheel;
     this._lightKey = -1;
+    this._visSynced = false;
   }
 
   /** Swap to the charred wreck model. */
@@ -413,6 +424,9 @@ export class Vehicle {
   _updateWheels(droop) {
     const ws = this.def.wheels, im = this.wheelMesh;
     const steerVis = this.steer * Math.min(0.55, this.def.steer * 0.85);
+    // only rewrite / re-upload the instance matrices when the wheel pose changed
+    if (Math.abs(this.wheelSpin - this._wSpin) < 1e-4 && Math.abs(steerVis - this._wSteer) < 1e-4 && Math.abs(droop - this._wDroop) < 1e-4) return;
+    this._wSpin = this.wheelSpin; this._wSteer = steerVis; this._wDroop = droop;
     _qs.setFromAxisAngle(_ex, this.wheelSpin);
     for (let i = 0; i < ws.length; i++) {
       const w = ws[i];

@@ -4,7 +4,7 @@
 import { WEAPONS } from '../data/weapons.js';
 import { BLOCKS } from '../world/blocks.js';
 import {
-  STACK_MAX, RESERVE_MAX, starterInventory, sanitizeItem, cloneItem, canStack, itemKey, itemName, isPlaceableBlock,
+  STACK_MAX, RESERVE_MAX, starterInventory, sanitizeItem, cloneItem, canStack, itemKey, itemName, isPlaceableBlock, isOreBlock,
 } from '../data/items.js';
 
 export const SLOT_COUNT = 36;
@@ -129,6 +129,7 @@ export class Inventory {
     n = Math.floor(n);
     this.lastOverflow = 0;
     if (!BLOCKS[id] || id === 0 || !(n > 0)) return false;
+    if (isOreBlock(id)) return false; // ores are never items (they pay cash when mined, see data/items.js)
     let left = n;
     for (let i = 0; i < SLOT_COUNT && left > 0; i++) {
       const it = this.slots[i];
@@ -266,6 +267,7 @@ export class Inventory {
       }
     }
     if (!on && this.game.player && this.game.player.flying) this.game.player.flying = false;
+    this._purgeOres();
     this._changed(true);
   }
 
@@ -435,8 +437,18 @@ export class Inventory {
 
   // ------------------------------------------------------------------ internals
 
-  /** Tell listeners the contents changed after mutating an item in place (e.g. ammo). */
-  notifyChanged() { this._changed(); }
+  /** Tell listeners the contents changed after mutating an item in place (e.g. ammo, inventory screen edits). */
+  notifyChanged() { this._purgeOres(); this._changed(); }
+
+  /** Drop ore stacks (exploit leftovers / old saves / creative palette): ores are never inventory items. */
+  _purgeOres() {
+    let any = false;
+    for (let i = 0; i < SLOT_COUNT; i++) {
+      const it = this.slots[i];
+      if (it && it.kind === 'block' && isOreBlock(it.id)) { this.slots[i] = null; any = true; }
+    }
+    return any;
+  }
 
   /** Run fn with change events coalesced into one. */
   batch(fn) {

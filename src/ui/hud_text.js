@@ -104,6 +104,7 @@ export class BigMessage {
   get active() { return this.phase !== 0; }
   get title() { return this.cur ? this.cur.title : null; }
 
+  /** Queue a message. opts.priority: drop the queue and cut the current message off; it starts on the next update. */
   push(title, subtitle = '', opts = {}) {
     title = String(title == null ? '' : title);
     const item = { title, subtitle: subtitle == null ? '' : String(subtitle), color: opts.color || null,
@@ -115,8 +116,30 @@ export class BigMessage {
       this.t = item.duration;
       return;
     }
+    if (opts.priority) {
+      this.queue.length = 0;
+      this.queue.push(item);
+      if (this.phase !== 0) this._end();
+      return;
+    }
     if (this.queue.length > 3) this.queue.shift();
     this.queue.push(item);
+  }
+
+  /** Drop every queued and showing message titled `title` (case-insensitive), e.g. an abandoned mission's intro. */
+  cancel(title) {
+    const t = String(title == null ? '' : title).toUpperCase();
+    for (let i = this.queue.length - 1; i >= 0; i--) if (this.queue[i].title.toUpperCase() === t) this.queue.splice(i, 1);
+    if (!this.cur || this.phase !== 1 || this.cur.title.toUpperCase() !== t) return;
+    if (this._showNext) this._end();   // started this frame, never drawn: just drop it
+    else this.t = 0;                   // slides out on the next update
+  }
+
+  _end() {
+    this.phase = 0;
+    this.cur = null;
+    this._showNext = false;
+    if (this.root) this.root.className = 'bc-big';
   }
 
   _start(item) {
@@ -147,11 +170,7 @@ export class BigMessage {
       this.phase = 2;
       this.t = 0.6;
       this.root.className = this._base + ' show hide';
-    } else if (this.phase === 2 && this.t <= 0) {
-      this.phase = 0;
-      this.cur = null;
-      this.root.className = 'bc-big';
-    }
+    } else if (this.phase === 2 && this.t <= 0) this._end();
   }
 
   /** Remove the current message (and optionally the queue). */
