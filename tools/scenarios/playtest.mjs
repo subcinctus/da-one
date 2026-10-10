@@ -63,8 +63,12 @@ export default async ({ page, game, keys, wait, shot, log, gameWait, hold }) => 
   await game((g) => {
     const plan = g.generator.plan;
     const poi = (plan.poisOfType && plan.poisOfType('hospital')[0]) || plan.spawn; // not the spawn column we just dug into
-    g.debug.teleport(poi.x, poi.z); g.cameraRig.yaw = (poi.yaw || 0) + Math.PI / 2;
+    // 7 m along the sidewalk, clear of the hospital's shop marker (walking into a shop marker opens the shop and pauses)
+    const along = (poi.yaw || 0) + Math.PI / 2;
+    g.debug.teleport(poi.x + Math.sin(along) * 7, poi.z + Math.cos(along) * 7); g.cameraRig.yaw = along;
   });
+  await gameWait(0.3);
+  await game((g) => { for (const id of [...g._ui]) g.closeUI(id); if (g.hud && g.hud.closeTop) { for (let i = 0; i < 6 && g.hud.closeTop(); i++) {} } });
   await gameWait(0.4);
   await step('place-block', async () => {
     const r = await game((g) => {
