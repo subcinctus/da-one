@@ -47,6 +47,9 @@ const browser = await chromium.launch({
 });
 const page = await browser.newPage({ viewport: { width: w, height: h } });
 page.on('pageerror', (e) => report.pageErrors.push(String(e.stack || e)));
+page.on('crash', () => report.pageErrors.push('PAGE CRASHED (renderer process died)'));
+page.on('close', () => report.log.push('page closed'));
+browser.on('disconnected', () => report.log.push('browser disconnected'));
 page.on('console', (m) => {
   const t = m.text();
   if (m.type() === 'error') report.consoleErrors.push(t);
