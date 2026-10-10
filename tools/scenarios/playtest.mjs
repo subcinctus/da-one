@@ -60,7 +60,11 @@ export default async ({ page, game, keys, wait, shot, log, gameWait, hold }) => 
   });
 
   // the mining step leaves the player in a hole: go back to the spawn sidewalk before the next steps
-  await game((g) => { const s = g.generator.plan.spawn; g.debug.teleport(s.x, s.z); g.cameraRig.yaw = s.yaw || 0; });
+  await game((g) => {
+    const plan = g.generator.plan;
+    const poi = (plan.poisOfType && plan.poisOfType('hospital')[0]) || plan.spawn; // not the spawn column we just dug into
+    g.debug.teleport(poi.x, poi.z); g.cameraRig.yaw = (poi.yaw || 0) + Math.PI / 2;
+  });
   await gameWait(0.4);
   await step('place-block', async () => {
     const r = await game((g) => {
