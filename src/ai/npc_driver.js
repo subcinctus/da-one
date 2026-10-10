@@ -168,6 +168,14 @@ export class TrafficDriver {
     return r[i].path.sample(s, out);
   }
 
+  /** Route piece (lane or connection) at distance s along the route. */
+  routePieceAt(s) {
+    const r = this.route;
+    let i = 0;
+    while (i < r.length - 1 && s > r[i].len) { s -= r[i].len; i++; }
+    return r[i];
+  }
+
   ensureRoute() {
     const r = this.route;
     let total = this.routeRemaining();
@@ -663,6 +671,14 @@ export class TrafficDriver {
         const er = e.radius || 0.3;
         const m = halfW + er + 1.0;
         if (lat < lo - m || lat > hi + m) continue;
+        // someone standing on the sidewalk beyond the kerb (right of a lane piece) is not in our way unless they are
+        // stepping into the road: without this, a player waiting at the kerb would hold up the kerb lane forever
+        const piece = this.routePieceAt(this.s + along);
+        if (piece && piece.kind === 'lane' && piece.road && lat > piece.road.width / 2 - piece.offset + 0.1) {
+          const ev = e.velocity;
+          const vLat = ev ? ev.x * -_s.tz + ev.z * _s.tx : 0; // + = moving away from the road
+          if (vLat > -0.5) continue;
+        }
         if (panic && e.kind !== 'player' && speed > 8) continue; // panicking drivers plough on (never into the player)
         const gap = along - halfL - er;
         if (gap < this.obsGap) {

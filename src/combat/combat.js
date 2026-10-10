@@ -356,7 +356,7 @@ export class Combat {
   /** G: quick-throw a grenade when on foot (any selected item). */
   _updateGrenadeKey() {
     const g = this.game, p = g.player, input = g.input;
-    if (!p || !input || p.alive === false || p.frozen || p.inVehicle) return;
+    if (!p || !input || p.alive === false || p.frozen || p.handsUp || p.inVehicle) return;
     if (!input.pressed('grenade')) return;
     if (p.inWater && !p.onGround) return;
     const sel = g.inventory?.getSelected?.();

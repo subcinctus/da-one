@@ -87,7 +87,7 @@ export class Crosshair {
     const inVeh = !!(p && p.inVehicle);
     const aiming = !!(p && p.aiming);
     const scoped = !!(cam && cam.scoped);
-    const vis = visible && !!p && p.alive !== false && !scoped && (!inVeh || aiming);
+    const vis = visible && !!p && p.alive !== false && !p.handsUp && !scoped && (!inVeh || aiming);
     if (vis !== this._vis) { this._vis = vis; this.xh.classList.toggle('hide', !vis); }
 
     this.bloom *= Math.exp(-dt * 7);

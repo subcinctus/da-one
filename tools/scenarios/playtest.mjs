@@ -1,7 +1,7 @@
 // Full integration play-test: exercises every subsystem through the public contract and screenshots each step.
 // Usage: node tools/smoke.mjs --tag playtest --scenario tools/scenarios/playtest.mjs --seconds 1
 // Each step is isolated (a failing step is recorded, the run continues). Returns a step-by-step result table.
-export default async ({ page, game, keys, wait, shot, log }) => {
+export default async ({ page, game, keys, wait, shot, log, gameWait, hold }) => {
   const results = [];
   const step = async (name, fn) => {
     const t0 = Date.now();
@@ -24,16 +24,16 @@ export default async ({ page, game, keys, wait, shot, log }) => {
 
   await step('walk-forward', async () => {
     const before = await game((g) => g.player.position.toArray());
-    await keys('KeyW', 1500);
+    await hold('forward', 1.5);
     const after = await game((g) => g.player.position.toArray());
     const d = Math.hypot(after[0] - before[0], after[2] - before[2]);
     return d > 1 ? { moved: +d.toFixed(2) } : { moved: +d.toFixed(2), ok: false };
   });
   await step('jump', async () => {
     const y0 = await game((g) => g.player.position.y);
-    await page.keyboard.down('Space'); await wait(180);
+    await game((g) => g.input.setVirtual('jump', true)); await gameWait(0.18);
     const y1 = await game((g) => g.player.position.y);
-    await page.keyboard.up('Space'); await wait(800);
+    await game((g) => g.input.setVirtual('jump', false)); await gameWait(1);
     return y1 > y0 + 0.2 ? { rise: +(y1 - y0).toFixed(2) } : false;
   });
   await step('camera-modes', async () => {
@@ -46,16 +46,22 @@ export default async ({ page, game, keys, wait, shot, log }) => {
     // look straight down and mine the block under the player with the pickaxe (slot 1)
     await keys('Digit1', 50);
     const info = await game((g) => {
-      g.cameraRig.pitch = -1.45;
+      if (g.cameraRig.setMode) g.cameraRig.setMode('first');
+      g.cameraRig.pitch = -1.5;
       const p = g.player.position;
       return { below: g.world.getBlock(Math.floor(p.x), Math.floor(p.y) - 1, Math.floor(p.z)), pos: [Math.floor(p.x), Math.floor(p.y) - 1, Math.floor(p.z)], sel: g.inventory.getSelected() };
     });
-    await game((g) => g.input.setVirtual('attack', true)); await wait(4000); await game((g) => g.input.setVirtual('attack', false));
+    await gameWait(0.3);
+    await hold('attack', 3);
     const after = await game((g, pos) => g.world.getBlock(pos[0], pos[1], pos[2]), info.pos);
     await shot('03-mined');
+    await game((g) => { if (g.cameraRig.setMode) g.cameraRig.setMode('third'); });
     return after !== info.below ? { before: info.below, after } : false;
   });
 
+  // the mining step leaves the player in a hole: go back to the spawn sidewalk before the next steps
+  await game((g) => { const s = g.generator.plan.spawn; g.debug.teleport(s.x, s.z); g.cameraRig.yaw = s.yaw || 0; });
+  await gameWait(0.4);
   await step('place-block', async () => {
     const r = await game((g) => {
       const inv = g.inventory;
@@ -65,8 +71,9 @@ export default async ({ page, game, keys, wait, shot, log }) => {
       g.cameraRig.pitch = -0.6;
       return { idx, count: inv.slots[idx].count, id: inv.slots[idx].id };
     });
-    await game((g) => g.input.setVirtual('aim', true)); await wait(200); await game((g) => g.input.setVirtual('aim', false));
-    await wait(300);
+    await gameWait(0.3);
+    await hold('aim', 0.2);
+    await gameWait(0.3);
     const c2 = await game((g, idx) => g.inventory.slots[idx] ? g.inventory.slots[idx].count : 0, r.idx);
     await shot('04-placed');
     return c2 < r.count || (await game((g) => g.inventory.creative)) ? { before: r.count, after: c2 } : { before: r.count, after: c2, ok: false };
@@ -74,29 +81,28 @@ export default async ({ page, game, keys, wait, shot, log }) => {
 
   await step('spawn-and-enter-car', async () => {
     const r = await game((g) => {
-      const p = g.player.position, f = { x: Math.sin(g.cameraRig.yaw), z: Math.cos(g.cameraRig.yaw) };
-      const v = g.vehicles.spawn('sports', p.x + f.x * 3, p.y + 0.2, p.z + f.z * 3, g.cameraRig.yaw);
-      return v ? { type: v.type, n: g.vehicles.list.length } : null;
+      const v = g.debug.spawnCar ? g.debug.spawnCar('sports') : null;
+      return v ? { type: v.type, n: g.vehicles.list.length } : { spawned: false };
     });
     await wait(300);
-    await keys('KeyF', 80); await wait(500);
+    await keys('KeyF', 80); await gameWait(0.5);
     const inV = await game((g) => !!g.player.inVehicle);
     return inV ? r : false;
   });
   await step('drive', async () => {
     const before = await game((g) => g.player.position.toArray());
-    await page.keyboard.down('KeyW'); await wait(3000);
+    await game((g) => g.input.setVirtual('forward', true)); await gameWait(2.5);
     const speed = await game((g) => g.player.inVehicle ? g.player.inVehicle.speed : null);
     await shot('05-driving');
-    await page.keyboard.up('KeyW');
-    await keys('KeyA', 600);
+    await game((g) => g.input.setVirtual('forward', false));
+    await hold('left', 0.5);
     const after = await game((g) => g.player.position.toArray());
     const d = Math.hypot(after[0] - before[0], after[2] - before[2]);
     return d > 5 ? { distance: +d.toFixed(1), speed } : { distance: d, speed, ok: false };
   });
   await step('exit-car', async () => {
-    await keys('Space', 1500); // handbrake to stop
-    await keys('KeyF', 80); await wait(600);
+    await hold('jump', 2); // handbrake to stop
+    await keys('KeyF', 80); await gameWait(0.6);
     return await game((g) => !g.player.inVehicle) || false;
   });
 
@@ -111,8 +117,9 @@ export default async ({ page, game, keys, wait, shot, log }) => {
       const it = g.inventory.getSelected();
       return { hb, mag: it && it.mag };
     });
-    await game((g) => g.input.setVirtual('attack', true)); await wait(1500); await game((g) => g.input.setVirtual('attack', false));
-    await wait(200);
+    await gameWait(0.6); // weapon draw
+    await hold('attack', 1.2);
+    await gameWait(0.1);
     await shot('06-shooting');
     const mag2 = await game((g) => g.inventory.getSelected() && g.inventory.getSelected().mag);
     return mag2 < r.mag ? { magBefore: r.mag, magAfter: mag2 } : { magBefore: r.mag, magAfter: mag2, ok: false };
@@ -127,8 +134,8 @@ export default async ({ page, game, keys, wait, shot, log }) => {
       g.combat.explode(new p.constructor(x + 0.5, y + 0.5, z + 0.5), { radius: 4, power: 3, damage: 50, source: g.player });
       return { x, y, z, before };
     });
-    await wait(150); await shot('07-explosion');
-    await wait(4000);
+    await gameWait(0.1); await shot('07-explosion');
+    await gameWait(4);
     const after = await game((g, r) => [g.world.getBlock(r.x, r.y, r.z), g.world.getBlock(r.x, r.y + 2, r.z)], r);
     await shot('08-crater');
     return after[0] === 0 ? { after } : { after, ok: false };
@@ -136,7 +143,7 @@ export default async ({ page, game, keys, wait, shot, log }) => {
 
   await step('wanted-and-police', async () => {
     await game((g) => g.police.setWanted(2));
-    await wait(9000);
+    await gameWait(9);
     const s = await game((g) => ({ wanted: g.police.wanted, police: g.entities.list.filter((e) => e.isPolice || e.kind === 'cop').length, vehicles: g.vehicles.list.length }));
     await shot('09-police');
     await game((g) => g.police.clearWanted());
@@ -175,7 +182,7 @@ export default async ({ page, game, keys, wait, shot, log }) => {
     const ms = await game((g) => (g.debug.missions ? g.debug.missions() : null));
     const first = Array.isArray(ms) && ms.length ? (ms[0].id || ms[0]) : null;
     const r = await game((g, id) => { if (g.debug.startMission && id) g.debug.startMission(id); return { active: g.missions.active ? (g.missions.active.id || true) : null }; }, first);
-    await wait(1500); await shot('13-mission');
+    await gameWait(1.5); await shot('13-mission');
     return r.active ? { missions: Array.isArray(ms) ? ms.length : ms, ...r } : { missions: ms, ...r, ok: false };
   });
 
@@ -192,8 +199,8 @@ export default async ({ page, game, keys, wait, shot, log }) => {
 
   await step('death-respawn', async () => {
     await game((g) => g.player.damage(9999, { type: 'fall', source: null }));
-    await wait(1200); await shot('16-wasted');
-    await wait(6000);
+    await gameWait(1.2); await shot('16-wasted');
+    await gameWait(6.5);
     return await game((g) => ({ alive: g.player.alive, health: g.player.health }));
   });
 

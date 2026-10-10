@@ -459,7 +459,7 @@ export class Vehicles {
       return;
     }
     this._enterLock -= dt;
-    if (p.alive === false || p.frozen || p.inVehicle) return;
+    if (p.alive === false || p.frozen || p.handsUp || p.inVehicle) return;
     const cand = this._enterCandidate(p);
     if (cand) {
       g.hud?.prompt?.(cand.locked ? `${cand.def.name} is locked` : `Press F to enter ${cand.def.name}`);
@@ -802,7 +802,8 @@ export class Vehicles {
 
   /**
    * The car hit a breakable street prop (lamp post, street-tree trunk, hedge, glass) hard enough: snap it and keep
-   * most of the speed (GTA-style). Blocks are removed without recording an edit, so props return after a reload.
+   * most of the speed (GTA-style). Generated props are removed without recording an edit, so they return after a
+   * reload; player-placed blocks (present in world.edits) are recorded so they stay broken.
    * Returns true when something broke (the normal wall impact is skipped).
    */
   _breakProps(v, imp) {
@@ -870,7 +871,9 @@ export class Vehicles {
     let glass = false, fxN = 0;
     for (let i = 0; i < list.length; i += 4) {
       const x = list[i], y = list[i + 1], z = list[i + 2], id = list[i + 3];
-      if (!w.setBlock(x, y, z, 0, { record: false })) continue;
+      // generated street props come back after a reload; anything the player built stays smashed
+      const placed = !!(w.edits && w.edits.has(x + ',' + y + ',' + z));
+      if (!w.setBlock(x, y, z, 0, { record: placed })) continue;
       if (BLOCKS[id] && BLOCKS[id].key === 'GLASS') glass = true;
       if (fxN++ < 12) { try { g.fx?.blockBreak?.(x, y, z, id); } catch (e) { /* ignore */ } }
     }
