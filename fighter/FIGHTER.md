@@ -5,6 +5,7 @@
 - **Structure (Sifu):** a revenge story told through four chapters. Each chapter is a run of short fights through rooms, ending in a boss. A jade talisman revives you each time you die, but **older**.
 - **Combat (Absolver):** four **stances**, attacks that flow from one stance to another, and a customisable **combat deck**. The deck has 8 slots: one *main* and one *alternate* attack per stance, half of Absolver's 16. Add to that guard, feints, a stamina economy, three defensive styles (parry / absorb / avoid), and learning moves by defending against them.
 - **Tone:** serious, grounded, a little dry humour at the edges (boss quirks, deadpan lines).
+- **Performance:** runs LIGHT, like Sloclap's games. Fighters are 1–2 draw calls each, environments are about 60 draw calls at most, there is no post-processing, and nothing is allocated per frame. Combat must stay crisp at 120 fps on a mid-range laptop.
 - **Look:** light, clean, beautiful low-poly at **120 fps**. **No atmospheric effects**: no fog, bloom, volumetrics, ambient particles or post-processing. The only effects are **subtle, Absolver-like hit effects**: short limb trails, small impact flashes and shards, a few frames of hitstop, and gentle shake.
 
 One self-contained HTML file. three.js r160 via esbuild. No assets, no network: everything is procedural, including the meshes, the poses and the WebAudio sound.
@@ -17,7 +18,7 @@ One self-contained HTML file. three.js r160 via esbuild. No assets, no network: 
 2. **Implement the contracted APIs exactly.** Other agents are coding against them in parallel without seeing your code. You may add more API, but never rename or remove contracted API.
 3. **Code defensively across modules.** Other modules may still be stubs. Use optional chaining and `typeof fn === 'function'` checks, and never throw because another system returned `null`. Constructors must not touch other systems; wire things together in `init()` or lazily.
 4. **No new dependencies.** Allowed: `three` (r160, `import * as THREE from 'three'`; `three/examples/jsm/...` allowed) and browser APIs. No network, no external assets.
-5. **120 fps budget.** Total frame time must stay under 8 ms on a mid-range laptop.
+5. **Run light, like Sloclap's games: a 120 fps budget.** Total frame time must stay under 8 ms on a mid-range laptop.
    - Your `fixedUpdate` runs 120 times per second. Keep it lean.
    - No per-frame allocations in hot paths.
    - Share geometries and materials. Use few draw calls (merge static geometry; aim for ≤ 15 meshes per fighter).
@@ -147,7 +148,8 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
 
 **`new Animator(model)`:**
 - `setLocomotion({ stance, vx, vz, speed, guard, locked, crouch })` is called every sim step. `vx`/`vz` are local m/s, +z forward and +x right. The base layer blends the stance idle with walk / strafe / back-step cycles in that stance, and the guard pose on the upper body when `guard`.
-- `playAction(trackOrName, { fade = 0.06, speed = 1, loop = false, onEnd })` returns a handle `{ name, time, duration, done, stop() }`. It plays a move track (a move object with `.keys`) or a registered clip as a full-body override, cross-fading from the current pose.
+- `playAction(trackOrName, { fade = 0.06, speed = 1, loop = false, onEnd, startAt = 0, fromCurrent = true })` returns a handle `{ name, time, duration, done, stop() }`. `startAt` begins the track mid-way (combo chaining, §6b). It plays a move track (a move object with `.keys`) or a registered clip as a full-body override. The cross-fade always starts from the exact pose currently displayed.
+- `freezeAction(seconds)` holds the current action pose (the strike hold in §6b).
 - `stopAction(fade = 0.1)`.
 - `update(dt)`: advance at sim rate and apply to the skeleton. Combat calls this from `fixedUpdate`.
 - `lookAt(targetPos | null)`: subtle head/chest aim at the opponent.
@@ -189,6 +191,9 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
   hitstun: 0.32, blockstun: 0.16,       // seconds
   push: 0.35,                           // knockback metres on hit (heavy ~1.0+, knockdown when props.knockdown)
   lunge: 0.4,                           // forward root motion metres during startup->active
+  chainIn: 0.08,                        // COMBO FLOW: when chained from another attack, start this track at this time
+                                        //   (skips the settle-from-stance part of the wind-up). Default 40% of startup.
+  holdOut: 0.05,                        // COMBO FLOW: how long this move's strike pose lingers when chained out of it
   props: { break, stop, double, charge, duck, jump, strafe, knockdown },  // booleans, all optional
   hits: [{ t: 0.20, dur: 0.07, limb: 'handR', damage: 8 }], // optional: multiple hit windows (double)
   keys: [ { t: 0, pose: 'stance:FR' }, ..., { t: 0.57, pose: 'stance:FL' } ], // full-body pose keys
@@ -213,6 +218,30 @@ Hard rules:
 - The first key is `'stance:<start>'` at t = 0, and the last key is `'stance:<end>'` at t = duration.
 - The anticipation, strike and follow-through in between are readable: the limb reaches full extension at the hit time.
 - Mirrored variants can be produced with `mirrorTrack`.
+
+**Interconnected combos (Absolver).** Every attack ends in a stance, and the next attack comes from that stance's slots, so the whole library is one flow graph:
+- Every stance has starters ending in at least 3 different stances.
+- From any stance, every other stance is reachable within 2 moves.
+- End poses set up the next stance's moves naturally. For example, a right hook that ends in FL has loaded the hips for a left body shot.
+- The STARTER_DECK's main attacks form a loop through all four stances. The alternates branch off it.
+
+### 6b. Combo flow: skip the animation, but never teleport (the Sloclap feel)
+
+Chained attacks must feel **quick and fluid**, never like animations playing back to back, and never like a teleport. A move's timeline: `[0, startup)` wind-up, `[startup, startup+active)` strike, then recovery back to `'stance:<end>'` at `duration`.
+
+- **Standalone.** With no follow-up, the move plays fully, including its recovery into the end stance.
+- **Chained.** A follow-up attack is buffered (light or heavy) by the time the current move reaches `cancel`:
+  1. **The recovery is skipped.** At the end of the current move's last active window, the animator **freezes the strike pose for `holdOut`** (default 0.05 s, about 6 frames at 120 Hz). The last attack's form visibly stays for a moment.
+  2. **The follow-up starts `chainIn` seconds into its own track** (default 40% of its startup), cross-fading from the frozen strike pose over **`CHAIN_BLEND = 0.06 s`** (never below 0.04 s). That very short blend is the "tiniest glimpse" of the limbs moving from one form to the next: no snap, no full recovery.
+  3. The follow-up's simulated move time starts at `chainIn`, so its real strike comes at `startup − chainIn` after the blend begins. Chains are faster than standalone attacks but still readable and reactable.
+  4. The follow-up comes from the slots of the previous move's **end stance**.
+  5. A string is at most 3 attacks. After the third, the move plays its recovery fully (string end) before a new string can start.
+  6. Alternates can be inserted at any point with the same rules.
+  7. **Defensive cancels:** dodge / defend / guard pressed after `cancel` also skip the recovery, with the same hold + fast blend.
+- **Animator API.**
+  - `animator.freezeAction(seconds)` holds the current action pose.
+  - `animator.playAction(track, { startAt, fade, fromCurrent: true })` starts a track mid-way, blending from the exact current displayed pose, which may be frozen or mid-blend.
+- **Combat** owns the timing and calls those two methods.
 
 **Deck:** `deck = { FR: { main: moveId, alt: moveId }, FL: {...}, BR: {...}, BL: {...} }` (8 slots). A move may only occupy a slot of its own `start` stance. The STARTER_DECK uses 8 different moves that flow well. For example, chaining main attacks visits several stances.
 
@@ -261,7 +290,7 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
   - The player without lock-on faces the movement direction, and attacks auto-aim at the nearest enemy within 3 m in front (soft lock).
 - **Strings.**
   - `light` performs `deck[stance].main`; `heavy` performs `deck[stance].alt`.
-  - Inputs during an attack's cancel window chain. After a move ends, the fighter is in `move.end` stance.
+  - Inputs during an attack's cancel window chain, following **§6b**: hold the strike pose for `holdOut`, skip the recovery, and start the next move at its `chainIn` with a 0.06 s blend. After a move ends, the fighter is in `move.end` stance.
   - A string is at most **3 attacks**. After the third, the next attack waits for a short string-end recovery (0.15 s).
   - Alternates may be used at any point in a string.
 - **Stamina.**
