@@ -6,31 +6,42 @@
 //   BL  mirror of BR, root yaw -145
 // Root yaw is interpolated linearly by the rig, so the sign convention matters: + = turned to the fighter's left.
 // Exported so ANIM/debug tools can adopt or compare; registerReferenceStances() only fills names that are missing.
+//
+// The root height, torso and planted feet are taken from the registered anim stances (anim/poses.js STANCE_SPEC) so the
+// root calibration in index.js is a no-op and in-between keys keep their feet on the floor. Keys were authored against
+// the older reference heights (AUTHORED_UP); defineMove shifts each key's root by the difference at BAKE time, so IK
+// re-plants the feet instead of the whole body (feet included) sinking at runtime.
 import { bake, spec } from './posekit.js';
 import { hasPose, registerPose, mirrorPose } from '../../anim/rig.js';
+import { STANCE_SPEC as ANIM_STANCE } from '../../anim/poses.js';
 
 /** Stance root yaw (degrees) the move library assumes. */
 export const STANCE_YAW = { FR: 25, FL: -25, BR: 145, BL: -145 };
-export const STANCE_UP = -0.07;
+/** Root height of the registered front stance. */
+export const STANCE_UP = ANIM_STANCE.FR.root.up;
+/** Root heights the move keys were originally authored against (front / back stances). */
+export const AUTHORED_UP = { FR: -0.07, FL: -0.07, BR: -0.08, BL: -0.08 };
+
+const plant = (f) => ({ at: [f.p[0], 0, f.p[2]], yaw: f.yaw || 0, ...(f.pitch ? { pitch: f.pitch } : {}) });
 
 /** Spec of the FR stance (fighter frame: x = own left, z = toward the opponent). */
 export const FR_SPEC = {
-  root: { yaw: 25, up: STANCE_UP },
-  hips: [2, -4, 0], spine: [5, -6, 0], chest: [5, -8, 0],
-  footR: { at: [-0.05, 0, 0.27], yaw: 10 },
-  footL: { at: [0.17, 0, -0.25], yaw: 40, pitch: 8 },
-  handR: { at: [-0.03, 1.4, 0.38], pole: [-0.5, -1, -0.1] },
-  handL: { at: [0.07, 1.43, 0.17], pole: [0.6, -1, -0.2] },
+  root: { yaw: 25, up: ANIM_STANCE.FR.root.up },
+  hips: ANIM_STANCE.FR.hips.slice(), spine: ANIM_STANCE.FR.spine.slice(), chest: ANIM_STANCE.FR.chest.slice(),
+  footR: plant(ANIM_STANCE.FR.footR),
+  footL: plant(ANIM_STANCE.FR.footL),
+  handR: { at: ANIM_STANCE.FR.handR.p.slice(), pole: [-0.5, -1, -0.1] },
+  handL: { at: ANIM_STANCE.FR.handL.p.slice(), pole: [0.6, -1, -0.2] },
 };
 
 /** Spec of the BR stance: turned away, right shoulder toward the opponent, peeking over it. */
 export const BR_SPEC = {
-  root: { yaw: 145, up: STANCE_UP - 0.01 },
-  hips: [2, -6, 0], spine: [4, -12, 0], chest: [6, -18, 0],
-  footR: { at: [-0.06, 0, 0.21], yaw: 120 },
-  footL: { at: [0.2, 0, -0.27], yaw: 160, pitch: 6 },
-  handR: { at: [0.02, 1.45, 0.25], pole: [-0.4, -1, 0.3] },
-  handL: { at: [0.16, 1.4, 0.02], pole: [0.7, -1, -0.3] },
+  root: { yaw: 145, up: ANIM_STANCE.BR.root.up },
+  hips: ANIM_STANCE.BR.hips.slice(), spine: ANIM_STANCE.BR.spine.slice(), chest: ANIM_STANCE.BR.chest.slice(),
+  footR: plant(ANIM_STANCE.BR.footR),
+  footL: plant(ANIM_STANCE.BR.footL),
+  handR: { at: ANIM_STANCE.BR.handR.p.slice(), pole: [-0.4, -1, 0.3] },
+  handL: { at: ANIM_STANCE.BR.handL.p.slice(), pole: [0.7, -1, -0.3] },
 };
 
 const FR = bake(FR_SPEC);

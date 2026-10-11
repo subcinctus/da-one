@@ -1,6 +1,7 @@
 // LAST STANCE move library (FIGHTER.md §6 / §6b).
 //   MOVES          id -> move (player library + boss signatures + focus attacks)
 //   STARTER_DECK   the player's first deck (main attacks loop FR -> BR -> FL -> BL)
+//   STARTER_EXTRA  moves a new run has learned but not equipped (one per stance; consumers fall back to [])
 //   ENEMY_DECKS    thug, brawler, swift, heavy, tadao, madame_shu, brick, mr_golden
 //   FOCUS_MOVES    { strike, sweep } (right-lead ids; focusMoveFor(kind, stance) picks the side)
 //   COMBO_ROUTES   named showcase strings for the UI
@@ -12,10 +13,10 @@ import { BACK_MOVES } from './lib-back.js';
 import { BOSS_MOVE_LIST, FOCUS_MOVE_LIST, BOSS_OWNER } from './lib-boss.js';
 import { REFERENCE_STANCES, STANCE_YAW, registerReferenceStances } from './stances-ref.js';
 import { CHAIN_BLEND, HOLD_OUT } from './define.js';
-import { STARTER_DECK, ENEMY_DECKS, BOSS_PHASE2_DECKS, COMBO_ROUTES, routeInputs } from './decks.js';
+import { STARTER_DECK, STARTER_EXTRA, ENEMY_DECKS, BOSS_PHASE2_DECKS, COMBO_ROUTES, routeInputs } from './decks.js';
 import { attachMoves } from './debug.js';
 
-export { CHAIN_BLEND, HOLD_OUT, STARTER_DECK, ENEMY_DECKS, BOSS_PHASE2_DECKS, COMBO_ROUTES, BOSS_OWNER, REFERENCE_STANCES, STANCE_YAW, registerReferenceStances };
+export { CHAIN_BLEND, HOLD_OUT, STARTER_DECK, STARTER_EXTRA, ENEMY_DECKS, BOSS_PHASE2_DECKS, COMBO_ROUTES, BOSS_OWNER, REFERENCE_STANCES, STANCE_YAW, registerReferenceStances };
 
 /** Focus attacks (FIGHTER.md §7): strike = unblockable fast stun, sweep = knockdown. */
 export const FOCUS_MOVES = { strike: 'focus_still_water', sweep: 'focus_uprooting' };
@@ -38,8 +39,9 @@ const rootDelta = (st) => {
   return d.some((v) => Math.abs(v) > 1e-4) ? d : null;
 };
 function calibrated(m) {
-  const s = getPose('stance:' + m.start), e = getPose('stance:' + m.end);
   const c = m._cal;
+  if (c.sn === undefined || c.st !== m.start || c.et !== m.end) { c.st = m.start; c.et = m.end; c.sn = 'stance:' + m.start; c.en = 'stance:' + m.end; }
+  const s = getPose(c.sn), e = getPose(c.en);
   if (c.s === s && c.e === e) return c.keys;
   c.s = s; c.e = e;
   const ds = rootDelta(m.start), de = rootDelta(m.end);

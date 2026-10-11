@@ -1,8 +1,9 @@
 // String planner (pure): picks which buttons an AI presses for its next string, following the Absolver flow graph.
 // Each attack ends in a stance and the follow-up comes from THAT stance's slot, so a string is a walk through the
 // deck: light/heavy at step i plays deck[stance_i][main/alt] and moves to its end stance. Up to 3 attacks.
-// Scored on damage, signature use, mix-ups (height changes), what the player keeps doing (habits) and archetype
-// taste, with seeded noise so the same situation does not always produce the same string. No allocations: results
+// Scored on (compressed) damage, signature use, mix-ups (height changes), what the player keeps doing (habits),
+// variety (recent moves and openers) and archetype taste, with seeded noise so the same situation does not always
+// produce the same string. No allocations: results
 // are written into a caller-owned `out` object.
 import { deckInfo, STANCE_IDS } from './moveinfo.js';
 
@@ -28,6 +29,9 @@ export function makePlan() {
  *   rng                      () => 0..1
  *   noise                    random score spread (default 3)
  *   recent                   ids of the last few moves it threw (variety penalty)
+ *   openers                  ids of its last string openers, most recent first (reusing one costs 10 / 6 / 3)
+ *   lastOpenStance           stance its previous opener came from (switching back there just to repeat it: -6)
+ *   sigLRU, sigMRU           ids of its least / most recently used signatures (+5 / -5 to open with when sigOnly)
  * }
  * Returns out.len (0 when nothing affordable).
  */
@@ -45,7 +49,8 @@ export function planString(ctx, out) {
       for (let bits = 0; bits < combos; bits++) {
         const sc = scoreSeq(ctx, st0, L, bits, budget, want, rng);
         if (sc === null) continue;
-        const total = sc - (switching ? (ctx.switchPenalty ?? 5) : 0);
+        // a stance switch whose only point is the stance of the previous opener is the same string again
+        const total = sc - (switching ? (ctx.switchPenalty ?? 5) + (st0 === ctx.lastOpenStance ? 6 : 0) : 0);
         if (total > out.score) {
           out.score = total;
           out.len = L;
@@ -76,9 +81,10 @@ function scoreSeq(ctx, stance, L, bits, budget, want, rng) {
     const m = deckInfo(ctx.deck, st, kind);
     cost += m.stamina;
     if (i === 0 && ctx.sigOnly && !m.signature) return null;
-    // later hits of a string connect less often: weight them down a little
+    // later hits of a string connect less often: weight them down a little. Damage is compressed so habits,
+    // mix-ups and variety decide plans rather than the single biggest number in the deck.
     const w = i === 0 ? 1 : i === 1 ? 0.85 : 0.7;
-    let v = m.damage * w;
+    let v = (4 + m.damage * 0.4) * w;
     if (m.signature) v += ctx.sigBias || 0;
     if (kind === 'heavy') v += (ctx.heavyBias || 0) * 4;
     // answer the player's habits (Absolver mind games)
@@ -95,6 +101,11 @@ function scoreSeq(ctx, stance, L, bits, budget, want, rng) {
     const rc = ctx.recent;
     if (rc) for (let r = 0; r < rc.length; r++) if (rc[r] === m.id) v -= i === 0 ? 4.5 : 2;
     if (i === 0) {
+      // the same opener again is a read waiting to happen (Absolver): the more recent, the worse
+      const op = ctx.openers;
+      if (op) for (let r = 0; r < op.length && r < OPENER_PENALTY.length; r++) if (op[r] === m.id) v -= OPENER_PENALTY[r];
+      // signature-only strings rotate through the signatures
+      if (ctx.sigOnly && m.signature) { if (m.id === ctx.sigLRU) v += 5; else if (m.id === ctx.sigMRU) v -= 5; }
       // the opener has to reach, and quick ones are worth more when punishing
       if (ctx.dist > 0) v -= Math.max(0, ctx.dist - (m.reach + 0.9)) * 6;
       v -= (ctx.fast || 0) * m.firstHit * 40;
@@ -111,6 +122,8 @@ function scoreSeq(ctx, stance, L, bits, budget, want, rng) {
 }
 
 const NO_HABITS = { block: 0, parry: 0, duck: 0, jump: 0, side: 0, dodge: 0, absorb: 0 };
+/** Cost of reusing an opener, by recency (ctx.openers[0] = the previous string's opener). */
+const OPENER_PENALTY = [10, 6, 3];
 
 /** Weighted pick of a string length from weights [w1, w2, w3]. */
 export function pickLength(weights, rng = Math.random) {

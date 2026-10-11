@@ -7,12 +7,21 @@
 //   footL: [x, y, z] | { at, pole, ankle | pitch, yaw }                        ankle position; pole = where the knee points
 //   root:  { fwd, right, up, yaw }   look: false disables the automatic head aim at the opponent
 // Planted feet (y <= 0.1) are flattened on the ground; lifted feet keep a natural pointed foot unless `ankle` is given.
+// A planted foot pitched more than PLANT_PITCH (heel raised) pivots on the ball of the foot: the ankle rises and shifts so
+// the ball stays where the flat foot's ball was. Lifted feet are kept above the floor (ball and heel >= FLOOR_CLEAR).
 import * as THREE from 'three';
 import { createSkeleton, mirrorPose, JOINTS } from '../../anim/rig.js';
 
 const D2R = Math.PI / 180;
 const R2D = 180 / Math.PI;
 const ANKLE_H = 0.075; // ankle height above the ground for a planted foot
+const BALL = [0, -0.04, 0.16]; // ball of the foot in the ankle frame (rig STRIKE_POINTS foot*)
+const HEEL_DROP = 0.06;        // heel bottom below the ankle
+const FLOOR_CLEAR = 0.015;     // lifted feet: ball / heel stay at least this high
+const PLANT_PITCH = 8;         // planted feet: pitch up to this keeps the ankle at ANKLE_H (matches anim/ik.js stances)
+/** Ball-of-foot height drop and horizontal reach (ankle frame -> ground frame) for a foot pitched `p` degrees. */
+const ballDrop = (p) => -BALL[1] * Math.cos(p * D2R) + BALL[2] * Math.sin(p * D2R);
+const ballReach = (p) => BALL[2] * Math.cos(p * D2R) + BALL[1] * Math.sin(p * D2R);
 
 const LIMBS = {
   L: {
@@ -119,6 +128,13 @@ function jointYaw(name) {
 
 const normLimbSpec = (v) => (Array.isArray(v) ? { at: v } : v);
 
+/** Fighter-frame height of a point given in a joint's frame (scratch skeleton, current rotations). */
+function footPointY(name, offset) {
+  const sk = skel();
+  sk.root.updateMatrixWorld(true);
+  return _o.fromArray(offset).applyMatrix4(sk.joints[name].matrixWorld).y;
+}
+
 /** Bake a spec into a rig pose (degrees). Pure; result is a fresh object. */
 export function bake(spec) {
   if (typeof spec === 'string') return spec;
@@ -153,14 +169,32 @@ export function bake(spec) {
     const limb = LIMBS[side].leg;
     if (f && !Array.isArray(spec[limb.upper])) {
       const planted = f.at[1] <= 0.1;
-      const at = planted ? [f.at[0], ANKLE_H + Math.max(0, f.at[1]), f.at[2]] : f.at;
+      const at = planted ? [f.at[0], ANKLE_H + Math.max(0, f.at[1]), f.at[2]] : f.at.slice();
+      if (planted && (f.pitch || 0) > PLANT_PITCH) {
+        // heel raise: pivot on the ball (it stays where a PLANT_PITCH foot's ball is)
+        at[1] += ballDrop(f.pitch) - ballDrop(PLANT_PITCH);
+        if (typeof f.yaw === 'number') {
+          const dz = ballReach(PLANT_PITCH) - ballReach(f.pitch);
+          at[0] += Math.sin(f.yaw * D2R) * dz; at[2] += Math.cos(f.yaw * D2R) * dz;
+        }
+      }
       // default knee pole: forward of the hips, slightly outward
       const pole = f.pole || rotY(pose.root.yaw + (pose.hips?.[1] || 0), [side === 'L' ? 0.25 : -0.25, 0.1, 1]);
-      sk.root.updateMatrixWorld(true);
-      solveLimb(pose, limb, 'leg', at, pole, f.reach || 0.995);
-      if (Array.isArray(f.ankle)) { pose[limb.end] = f.ankle.slice(); setRot(sk.joints[limb.end], pose[limb.end]); }
-      else if (planted || f.flat) solveAnkle(pose, limb, f.yaw ?? jointYaw(limb.lower), f.pitch || 0);
-      else { pose[limb.end] = [f.pitch ?? 30, 0, 0]; setRot(sk.joints[limb.end], pose[limb.end]); }
+      const solveFoot = () => {
+        sk.root.updateMatrixWorld(true);
+        solveLimb(pose, limb, 'leg', at, pole, f.reach || 0.995);
+        if (Array.isArray(f.ankle)) { pose[limb.end] = f.ankle.slice(); setRot(sk.joints[limb.end], pose[limb.end]); }
+        else if (planted || f.flat) solveAnkle(pose, limb, f.yaw ?? jointYaw(limb.lower), f.pitch || 0);
+        else { pose[limb.end] = [f.pitch ?? 30, 0, 0]; setRot(sk.joints[limb.end], pose[limb.end]); }
+      };
+      solveFoot();
+      // keep a lifted foot out of the floor: raise the ankle target until ball and heel clear it
+      for (let it = 0; it < 3 && !planted; it++) {
+        const low = Math.min(footPointY(limb.end, BALL), footPointY(limb.end, [0, 0, 0]) - HEEL_DROP);
+        if (low >= FLOOR_CLEAR - 1e-4) break;
+        at[1] += FLOOR_CLEAR - low;
+        solveFoot();
+      }
     }
     const h = normLimbSpec(spec['hand' + side]);
     const arm = LIMBS[side].arm;

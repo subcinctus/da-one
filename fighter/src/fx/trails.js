@@ -1,8 +1,8 @@
 // TrailField: Absolver-like limb swing trails. A short tapered ribbon follows a fighter's strike point (hand / foot /
-// elbow / knee) through the last part of the wind-up and the active frames, pale white with a hint of the fighter's
-// accent, mostly additive, each sample fading out over ~0.12 s of SIMULATION time (so trails freeze with hitstop and
-// linger in slow motion). All trails live in one dynamic mesh = one draw call; Catmull-Rom subdivision keeps arcs
-// smooth at 60 Hz. When a chained follow-up holds the strike pose (§6b), emission stops and the trail fades on the held
+// elbow / knee) through the strike segment (wind-up extreme -> end of the hit window, never the withdrawal), pale white
+// with a hint of the fighter's accent, mostly additive, each sample fading out over ~0.12 s of SIMULATION time (so
+// trails freeze with hitstop and linger in slow motion). All trails live in one dynamic mesh = one draw call;
+// Catmull-Rom subdivision keeps arcs smooth at 60 Hz. When a chained follow-up holds the strike pose (§6b), emission stops and the trail fades on the held
 // form, so the last attack's shape visibly lingers for a beat before the next move begins.
 import * as THREE from 'three';
 import { makeFxMaterial, markRange } from './material.js';
@@ -126,8 +126,10 @@ export class TrailField {
         const inMove = f.state === 'attack' && f.move === this.move[i];
         if (this.manual[i]) emit = now <= this.until[i] && !hold && f.alive;
         else if (inMove && !hold) {
+          // auto trails draw the strike segment only: never past the hit window's end (a forced `until` from
+          // combat's per-window trail() call would otherwise paint the arm's withdrawal into the recovery)
           const mt = f.moveTime;
-          emit = (mt >= this.t0[i] && mt <= this.t1[i]) || (now <= this.until[i] && mt >= this.t0[i]);
+          emit = mt >= this.t0[i] && mt <= this.t1[i];
           if (!emit && st === ARMED && mt < this.t0[i]) { anyLive = true; continue; }   // still waiting for the swing
         }
         if (!emit) {

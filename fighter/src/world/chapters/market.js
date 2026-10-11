@@ -15,9 +15,13 @@ const C = {
   goods: [0xe8553f, 0xf2a03d, 0x9bc35a, 0xf4d06f, 0xe9e1cf, 0xc0392b, 0x7fb069, 0xd98e5a],
 };
 
+// Fighters are lit by real lights only (the lanterns are baked into the environment's vertex glow), so the night has
+// a soft periwinkle sky fill, a warm lantern-side `fill` (non-shadow, roughly opposite the moon, ~35 deg up) and a
+// warm bounce from the stone: fighters read at ~140/255 (light gi) instead of ~40, the frame at ~80 instead of ~50.
 export const light = {
-  sunDir: [-0.42, 0.78, 0.42], sun: 0xa9bbff, sunI: 0.9,
-  hemiSky: 0x5a6ea8, hemiGround: 0x7a5040, hemiI: 1.3, exposure: 1.15,
+  sunDir: [-0.42, 0.78, 0.42], sun: 0xa9bbff, sunI: 1.1,
+  hemiSky: 0x9aa0d0, hemiGround: 0x8a6050, hemiI: 2.0, exposure: 1.4,
+  fill: { color: 0xffb27a, intensity: 1.2, dir: [0.58, 0.57, -0.58] },
   sky: { top: 0x070d24, mid: 0x182350, horizon: 0x4b3f66, bottom: 0x161220, sun: 0xe6ecff, sunSize: 0.0009, halo: 0.35, midH: 0.28 },
 };
 
@@ -50,7 +54,7 @@ function facade(B, sd, u0, u1, h, rng, lights, opts = {}) {
   if (wdt > 1.8) {
     const a = u0 + 0.35, c = u1 - 0.35;
     if (shop) {
-      b.glow(0.45);
+      b.glow(0.32);   // lit shopfront (toned down: the panel also takes the sky fill now)
       sideBox(b, sd, a, c, 0.03, 0.06, 0.25, 2.55, 0xffa860);
       b.glow(0);
       // interior silhouettes: shelves + a mullion
@@ -74,7 +78,7 @@ function facade(B, sd, u0, u1, h, rng, lights, opts = {}) {
       const u = u0 + wdt * ((i + 0.5) / n);
       const lit = rng() < 0.45;
       sideBox(b, sd, u - 0.42, u + 0.42, -0.05, 0, y - 0.06, y + 1.26, mix(col, 0x000000, 0.4));
-      if (lit) b.glow(0.5);
+      if (lit) b.glow(0.36);
       sideBox(b, sd, u - 0.36, u + 0.36, -0.06, -0.05, y, y + 1.2, lit ? pick(rng, [0xffae5c, 0xff9d4a, 0xffc070]) : C.winDim);
       b.glow(0);
       sideBox(b, sd, u - 0.025, u + 0.025, -0.07, -0.05, y, y + 1.2, mix(col, 0x000000, 0.4));
@@ -297,13 +301,13 @@ function bossRoom(B, a, ctx) {
     L.box(B.m, 0, h - 0.25, -0.35, segW + 0.45, 0.25, 0.75, mix(col, 0x000000, 0.35));
     const lit = rng() < 0.6;
     if (lit) {
-      B.m.glow(0.45); L.box(B.m, 0, 0.25, 0.01, segW - 0.7, 2.3, 0.02, 0xffa860); B.m.glow(0);
+      B.m.glow(0.32); L.box(B.m, 0, 0.25, 0.01, segW - 0.7, 2.3, 0.02, 0xffa860); B.m.glow(0);
       L.box(B.m, 0, 1.35, 0.025, segW - 0.7, 0.07, 0.02, 0x4a3326);
       lights.push({ x: L.px(0, 0.7), y: 1.4, z: L.pz(0, 0.7), color: lin(0xffb46a), intensity: 0.7, range: 3.4 });
     }
     for (let y = 3.6; y < h - 1.2; y += 2.2) for (const u of [-0.8, 0.8]) {
       const on = rng() < 0.5;
-      if (on) B.m.glow(0.5);
+      if (on) B.m.glow(0.36);
       L.box(B.m, u, y, 0.01, 0.7, 1.2, 0.03, on ? 0xffae5c : C.winDim);
       B.m.glow(0);
       L.box(B.m, u, y, 0.03, 0.05, 1.2, 0.02, mix(col, 0x000000, 0.4));

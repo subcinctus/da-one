@@ -10,6 +10,7 @@ export const COLORS = {
   jade: [0.37, 0.75, 0.6],
   jadeLight: [0.66, 0.93, 0.82],
   dust: [0.8, 0.77, 0.71],
+  glint: [1, 0.95, 0.84],
 };
 
 /** Per-weight hit look: flash radius / life, shard count range, speeds, streak length. */
@@ -156,4 +157,22 @@ export function rising(F, x, y, z, count, radius, h0, h1, s0, s1, len, width, li
     P.r = col[0]; P.g = col[1]; P.b = col[2];
     F.spawn(P);
   }
+}
+
+/** Telegraph glint: a tiny sparkle on a limb, drifting with the fighter (vx, vz). Hard core + faint halo, 2 sprites. */
+export function glint(F, x, y, z, vx, vz, size, life, col, alpha) {
+  resetSprite(P);
+  P.x = x; P.y = y; P.z = z; P.vx = vx; P.vz = vz;
+  P.shape = SHAPE.FLASH; P.core = 0.5; P.orient = ORIENT.CAMERA; P.spin = 0.785;
+  P.size0 = size * 0.5; P.size1 = size; P.grow = 3;
+  P.life = life; P.alpha = alpha; P.add = 0.95; P.pull = 0.18; P.fadePow = 1.5; P.fadeIn = 0.2;
+  P.r = col[0]; P.g = col[1]; P.b = col[2];
+  F.spawn(P);
+  resetSprite(P);
+  P.x = x; P.y = y; P.z = z; P.vx = vx; P.vz = vz;
+  P.shape = SHAPE.SOFT; P.core = 0.1; P.orient = ORIENT.CAMERA;
+  P.size0 = size * 1.1; P.size1 = size * 1.7; P.grow = 2;
+  P.life = life; P.alpha = alpha * 0.35; P.add = 1; P.pull = 0.18; P.fadePow = 1.4; P.fadeIn = 0.2;
+  P.r = col[0]; P.g = col[1]; P.b = col[2];
+  return F.spawn(P);
 }

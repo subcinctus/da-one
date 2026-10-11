@@ -1,5 +1,6 @@
 // Combat system (game.combat): owns the fighters, steps them at 120 Hz (player controller / dummy brains -> fighter
-// state machines -> hit resolution -> collisions + world bounds -> animators) and renders them interpolated.
+// state machines -> hit resolution -> collisions + world bounds -> animators) and renders them interpolated (root
+// position / yaw lerped here, joint poses via animator.render(alpha) every display frame).
 // See FIGHTER.md §7 (rules), §6b (combo flow) and §8 (events). Fighter logic: fighter.js, contacts: hits.js.
 import * as THREE from 'three';
 import { lerpAngle, angleDiff, yawTo } from '../core/math.js';
@@ -271,6 +272,13 @@ export class Combat {
       root.position.lerpVectors(f.prevPosition, f.position, a);
       root.rotation.y = lerpAngle(f.prevYaw, f.yaw, a);
       if (!f.alive && f.deadTime > CORPSE_TIME) root.position.y = -0.6 * Math.min(1, (f.deadTime - CORPSE_TIME) / CORPSE_SINK);
+      // joint poses at display rate: the animator blends its last two sim poses by the same alpha as the root
+      const an = f.animator;
+      if (an && typeof an.render === 'function') {
+        try { an.render(a); } catch (e) {
+          if (!f._renderErr) { f._renderErr = true; console.warn('[combat] animator.render error', e); }
+        }
+      }
     }
   }
 

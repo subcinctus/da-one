@@ -1,7 +1,8 @@
 // PlayerController: turns game.input into the player Fighter's intent each sim step.
 //   Movement is camera-relative (derived from the real camera, falling back to cameraRig.yaw); with lock-on the
 //   fighter strafes around its target. LB toggles lock-on to the best enemy in front within 12 m, RS click / a right
-//   stick flick (pad, stance button not held) cycles targets, and a dead target hands the lock to the next nearest.
+//   stick flick (pad: stick from centre past |x| 0.85 with the stance button up) cycles targets, and a dead target
+//   hands the lock to the next nearest.
 import * as THREE from 'three';
 import { angleDiff, yawTo } from '../core/math.js';
 import { T } from './constants.js';
@@ -82,13 +83,18 @@ export class PlayerController {
       if (t) t = this.lockTarget = this._cycle(f, t, camYaw, -1, true) || t;
       else t = this.lockTarget = this._pickBest(f, camYaw);
     }
-    // right-stick flick (pad only, stance not held) cycles left / right
-    if (t && inp.padType && !stanceHeld && inp.look) {
-      const lx = inp.look.x;
-      if (this._flickArmed && Math.abs(lx) > 0.85) {
+    // right-stick flick (pad only) cycles left / right. Arming is tracked every step, locked or not: holding the stance
+    // button disarms it, and only a stick back near centre with RT up re-arms it. So letting go of RT a few frames
+    // before the stick re-centres (the natural end of a stance flick) never reads as a target flick, and a stick that
+    // was already deflected (camera steering) when the lock came on does not cycle either.
+    if (inp.padType && inp.look) {
+      const lx = Math.abs(inp.look.x) || 0;
+      if (stanceHeld) this._flickArmed = false;
+      else if (lx < 0.4) this._flickArmed = true;
+      else if (this._flickArmed && lx > 0.85) {
         this._flickArmed = false;
-        t = this.lockTarget = this._cycle(f, t, camYaw, lx > 0 ? -1 : 1, false) || t;
-      } else if (Math.abs(lx) < 0.4) this._flickArmed = true;
+        if (t) t = this.lockTarget = this._cycle(f, t, camYaw, inp.look.x > 0 ? -1 : 1, false) || t;
+      }
     }
     it.lockTarget = t;
   }

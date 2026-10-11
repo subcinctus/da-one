@@ -8,7 +8,11 @@
 //          backoff (step out after a string)   retreat (out of stamina)   taunt   stunned   phase (boss phase shift)
 // Overlay: threat reactions to the player's attacks, decided after a 0.15-0.35 s reaction delay and executed with
 //          imperfect timing (block / parry / avoid / absorb / dodge), counters after a successful defence, and whiff
-//          punishes. No allocations in update(): every scratch value lives on the instance.
+//          punishes. The delay runs on a string clock (later hits of a string are timed from its opener, so they
+//          can be answered), a read of an opener the player keeps repeating is answered at the 0.15 s fairness
+//          floor, and an enemy squared up to a player who keeps swinging raises its guard now and then (pressure
+//          guard: anticipation, dropped to attack). No allocations in update(): every scratch value lives on the
+//          instance.
 import { makeRng } from '../core/math.js';
 import { info as moveInfoOf, deckReach, phase2Decks, signaturesOf } from './moveinfo.js';
 import { makePlan, planString, pickLength, avoidKindFor } from './plan.js';
@@ -21,7 +25,14 @@ const STUN = { hitstun: true, stagger: true, guardbroken: true, blockstun: true,
 /** Fighter states from which a buffered counter press still comes out (parry recover, avoid / absorb counters). */
 const COUNTER_OK = { idle: true, move: true, block: true, recover: true, avoid: true, absorb: true };
 const ABILITY = { forsaken: 'parry', kahlt: 'absorb', windfall: 'avoid' };
-const CHARGE_POINT = 0.65;   // combat starts charging at ~65% of the wind-up
+/** Fairness floor (FIGHTER.md §11): no reaction is ever decided sooner than this after the attack starts. */
+const REACT_FLOOR = 0.15;
+/** Below this time-to-hit a reaction is simply too late (about one sim step: the guard / parry would not be up). */
+const REACT_LATE = 0.01;
+/** Share of block / dodge chance a fully smart fighter turns into its style ability against a read opener. */
+const READ_SHIFT = 0.75;
+/** Chance (x profile.smart) to feint-cancel its own wind-up to defend a strike that would land first (Absolver). */
+const CANCEL_SMART = 0.6;
 
 export class Brain {
   /**
@@ -81,8 +92,10 @@ export class Brain {
 
     // incoming threat (reaction overlay)
     this.th = { on: false, attacker: null, move: null, info: null, hitAt: 0, decideAt: 0, decided: false, choice: null,
-      lead: 0, pressed: false, avoidKind: 'duck', side: 1, guardEnd: 0, keep: false };
+      lead: 0, pressed: false, avoidKind: 'duck', side: 1, guardEnd: 0, keep: false, read: false, reactAt: 0,
+      cancel: false, stringBy: null, stringT0: -1e9 };
     this.guardUntil = 0;
+    this.pressGuardUntil = 0;   // pressure guard (anticipation while the player keeps swinging), dropped to attack
     this.lastHitAt = -1e9;
     this.hitsTaken = 0;
 
@@ -102,13 +115,25 @@ export class Brain {
     this._ctx = {
       deck: null, stance: 'FR', len: 1, budget: 100, heavyBias: 0, sigBias: 0, sigOnly: false, habits: ai.habits.rates,
       dist: 0, fast: 0, allowSwitch: false, switchCost: 5, switchPenalty: 5, rng: this.rng, noise: 3,
+      recent: null, openers: null, lastOpenStance: null, sigLRU: null, sigMRU: null,
     };
-    this.stats = { strings: 0, attacks: 0, defends: 0, counters: 0, punishes: 0, feints: 0 };
+    // defends = executed parry / avoid / absorb / dodge presses (abilities = the style ones); blocks = block choices;
+    // reads = defensive choices made on a read opener; guards = pressure guards raised; turtles = guard after a combo
+    this.stats = { strings: 0, attacks: 0, defends: 0, counters: 0, punishes: 0, feints: 0, abilities: 0, blocks: 0,
+      reads: 0, guards: 0, turtles: 0, cancels: 0 };
+    this.comboHits = 0;
     this.recent = ['', '', '', ''];
     this.recentIdx = 0;
+    // own string openers, most recent first (the planner avoids repeating them), the stance the last one came from,
+    // and when each signature was last thrown (signature-only strings rotate to the least recently used one)
+    this.openers = ['', '', ''];
+    this.lastOpenStance = null;
+    this.sigIds = [];
+    this.sigLast = {};
     this.hasSigs = false;
     this._phasePending = false;
     this._ctx.recent = this.recent;
+    this._ctx.openers = this.openers;
     this.refreshReach();
   }
 
@@ -116,7 +141,8 @@ export class Brain {
   refreshReach() {
     const deck = this.fighter && this.fighter.deck;
     this.reach = deckReach(deck);
-    this.hasSigs = signaturesOf(deck).length > 0;
+    this.sigIds = signaturesOf(deck);
+    this.hasSigs = this.sigIds.length > 0;
   }
 
   // ============================================================================================ public hooks
@@ -138,6 +164,9 @@ export class Brain {
   onThreat(attacker, move, chained, now) {
     const f = this.fighter;
     if (!f.alive || this.dormant) return;
+    const th = this.th, pr = this.profile;
+    // string clock: when this attacker's current string began (even if its opener was not aimed at me)
+    if (!chained || th.stringBy !== attacker) { th.stringBy = attacker; th.stringT0 = now; }
     const inf = moveInfoOf(move);
     if (!inf) return;
     const dx = f.position.x - attacker.position.x, dz = f.position.z - attacker.position.z;
@@ -148,19 +177,25 @@ export class Brain {
       const ang = Math.abs(wrap(Math.atan2(dx, dz) - attacker.yaw));
       if (ang > inf.arcHalf + 0.45 && d > 1.0) return;
     }
-    const th = this.th, pr = this.profile;
     const st = f.state;
     // guard already up (or reeling behind it): holding it is not a reaction, so decide at once
-    th.keep = now < this.guardUntil || st === 'block' || st === 'blockstun';
+    th.keep = now < this.guardUntil || this._pressGuardOn(now) || st === 'block' || st === 'blockstun';
     th.on = true;
     th.attacker = attacker;
     th.move = move;
     th.info = inf;
     th.hitAt = now + Math.max(0.02, inf.firstHit - (chained ? inf.chainIn : 0));
-    th.decideAt = th.keep ? now : now + pr.reaction[0] + this.rng() * (pr.reaction[1] - pr.reaction[0]);
+    // a read: the player keeps opening with this move, so it is answered at the fairness floor (Absolver: mix up)
+    th.read = !!(this.ai.isRead && this.ai.isRead(inf.id));
+    const react = th.read ? REACT_FLOOR : Math.max(REACT_FLOOR, pr.reaction[0] + this.rng() * (pr.reaction[1] - pr.reaction[0]));
+    // later hits of a string are timed from its opener: the reaction to the string has already happened.
+    // reactAt gates every defensive press; holding a guard that is already up is not a reaction (decided at once).
+    th.reactAt = chained ? Math.max(now, th.stringT0 + react) : now + react;
+    th.decideAt = th.keep ? now : th.reactAt;
     th.decided = false;
     th.choice = null;
     th.pressed = false;
+    th.cancel = false;
   }
 
   /** One of this fighter's own attacks started (attackStart). */
@@ -170,13 +205,22 @@ export class Brain {
     if (chained) this.planIdx++;
     else { this.planIdx = 0; this.feinted = false; }
     this.stats.attacks++;
-    if (inf) this.recent[this.recentIdx++ & 3] = inf.id;
-    if (inf && inf.signature) this.stringsSinceSig = 0;
+    if (inf) {
+      this.recent[this.recentIdx++ & 3] = inf.id;
+      if (!chained) {
+        const o = this.openers;
+        for (let k = o.length - 1; k > 0; k--) o[k] = o[k - 1];
+        o[0] = inf.id;
+        this.lastOpenStance = inf.start;
+      }
+      if (inf.signature) { this.stringsSinceSig = 0; this.sigLast[inf.id] = now; }
+    }
     // charge moves: hold the button through the charge point for a while
     if (inf && inf.charge) {
       const pr = this.profile;
       const hold = pr.charge[0] + this.rng() * (pr.charge[1] - pr.charge[0]);
-      const point = Math.max(0, inf.firstHit * CHARGE_POINT - (chained ? inf.chainIn : 0));
+      // combat holds the charge on the move's chargeAt (move time); a chained move starts its clock at chainIn
+      const point = Math.max(0.01, inf.chargeAt - (chained ? inf.chainIn : 0));
       this.chargeUntil = hold > 0.05 ? now + point + hold : 0;
     } else this.chargeUntil = 0;
   }
@@ -204,13 +248,18 @@ export class Brain {
 
   /** This fighter took a clean hit. */
   onHit(now) {
+    // hits closer together than this belong to the same combo
+    this.comboHits = now - this.lastHitAt < 0.8 ? this.comboHits + 1 : 1;
     this.lastHitAt = now;
     this.hitsTaken++;
     this.th.on = false;
     this.urgentAt = -1;
     if (this.dormant) this.wake(0);
-    // after eating a combo, some turtle up for a moment (the player has to mix up / break the guard)
-    if (this.rng() < this.profile.block * 0.5) this.guardUntil = Math.max(this.guardUntil, now + 0.45 + this.rng() * 0.5);
+    // after eating a combo, some turtle up for a moment (the player has to mix up / break the guard); one roll per combo
+    if (this.comboHits === 2 && this.rng() < this.profile.block * 0.5) {
+      this.guardUntil = Math.max(this.guardUntil, now + 0.45 + this.rng() * 0.5);
+      this.stats.turtles++;
+    }
   }
 
   /** Director granted / revoked the attack token. */
@@ -287,6 +336,9 @@ export class Brain {
       if (this.mode !== 'stunned') this._setMode('stunned');
     }
 
+    // ---- pressure guard (anticipation, not a reaction)
+    if (this.mode === 'engage' || this.mode === 'circle') this._pressureGuard(dt, now, p, dist, free);
+
     switch (this.mode) {
       case 'circle': this._circle(dt, now, p, dist, ux, uz, free); break;
       case 'engage': guard = this._engage(dt, now, p, dist, ux, uz, free); break;
@@ -315,7 +367,7 @@ export class Brain {
     const m = Math.hypot(mx, mz);
     if (m > 1) { mx /= m; mz /= m; }
     it.moveX = mx; it.moveZ = mz;
-    it.guard = guard || now < this.guardUntil;
+    it.guard = guard || this._pressGuardOn(now) || now < this.guardUntil;
   }
 
   _setMode(m, dur = 0) {
@@ -392,6 +444,7 @@ export class Brain {
 
   _beginWindup(now) {
     const pr = this.profile;
+    this.pressGuardUntil = 0;   // the guard drops to attack (part of the read)
     const first = this.plan.moves[0];
     this.telegraphSig = !!(first && first.signature);
     const dur = (pr.telegraph[0] + this.rng() * (pr.telegraph[1] - pr.telegraph[0])) + (this.telegraphSig ? 0.12 : 0);
@@ -422,6 +475,7 @@ export class Brain {
 
   _pressOpener(now) {
     const pr = this.profile;
+    this.pressGuardUntil = 0;
     if (this.plan.len <= 0) { this._setMode('backoff', 0.4); return; }
     this._press(this.plan.kinds[0]);
     this.pressedAt = now;
@@ -561,6 +615,28 @@ export class Brain {
 
   // ============================================================================================ reactions
 
+  /**
+   * Pressure guard: squared up (engage / circle) to a player who is in range, facing me and has swung within the
+   * last 1.5 s, the guard comes up for 0.4-0.8 s at a rate of block x 0.5 per second. Respects the stamina floor;
+   * dropped the moment this enemy decides to attack (_beginWindup / _pressOpener / _startUrgent).
+   */
+  /** The pressure guard is up (only ever written in engage / circle). */
+  _pressGuardOn(now) { return now < this.pressGuardUntil && (this.mode === 'engage' || this.mode === 'circle'); }
+
+  _pressureGuard(dt, now, p, dist, free) {
+    const f = this.fighter, pr = this.profile;
+    if (f.stamina < pr.staminaFloor) { this.pressGuardUntil = 0; return; }
+    if (now < this.pressGuardUntil || !free) return;
+    const ai = this.ai;
+    if (now - (ai.playerAttackAt ?? -1e9) > 1.5) return;
+    if (dist > (ai.playerReach || 1.6) + 0.4) return;
+    if (p.target !== f) {
+      const ang = Math.abs(wrap(Math.atan2(f.position.x - p.position.x, f.position.z - p.position.z) - p.yaw));
+      if (ang > 0.7) return;
+    }
+    if (this.rng() < pr.block * 0.5 * dt) { this.pressGuardUntil = now + 0.4 + this.rng() * 0.4; this.stats.guards++; }
+  }
+
   /** Returns true while a defensive action owns this step. */
   _threatStep(now, free) {
     const th = this.th;
@@ -582,10 +658,15 @@ export class Brain {
       else if (th.hitAt < now + 0.05) th.hitAt = now + 0.05;   // charging: unknown, keep waiting
     }
     if (!th.decided) {
-      if (now < th.decideAt) return false;
+      if (now < th.decideAt - 1e-6) return false;
       th.decided = true;
       this._decide(now, free);
-      if (th.choice && this.mode === 'windup') this._setMode('engage');
+      if (th.cancel && !th.decided) return true;   // own wind-up feinted this step: defend from its recovery next
+      if (th.choice) {
+        if (th.read) this.stats.reads++;
+        if (th.choice === 'block') this.stats.blocks++;
+        if (this.mode === 'windup') this._setMode('engage');
+      }
     }
     const c = th.choice;
     if (!c) return false;
@@ -594,11 +675,13 @@ export class Brain {
       if (now > th.hitAt + th.guardEnd) { th.on = false; return false; }
       return true;   // stand and block (guard written by _finish)
     }
-    if (now >= th.hitAt - th.lead) {
-      if (!(free || f.state === 'switch')) { th.on = false; return false; }   // got hit / busy meanwhile
+    if (now >= th.hitAt - th.lead && now >= th.reactAt - 1e-6) {
+      const ok = free || f.state === 'switch' || (th.cancel && f.state === 'recover');
+      if (!ok) { th.on = false; return false; }   // got hit / busy meanwhile
       this._executeDefence(c);
       th.pressed = true;
       this.stats.defends++;
+      if (c !== 'dodge') this.stats.abilities++;
     }
     return true;
   }
@@ -608,18 +691,39 @@ export class Brain {
     th.choice = null;
     const tth = th.hitAt - now;
     const st = f.state;
-    const canMove = free || st === 'switch';
+    // the feint recovery allows defend / guard at once (combat _feint), so a cancelled wind-up can still defend
+    const canMove = free || st === 'switch' || (th.cancel && st === 'recover');
     const canBlock = canMove || st === 'blockstun';
-    if (!canBlock || (tth < 0.03 && !th.keep)) return;   // busy attacking (trade) or simply too late
+    if (tth < REACT_LATE && !th.keep) return;   // simply too late
+    if (!canBlock) {
+      // busy attacking: trade, unless it is smart enough to feint its own wind-up (Absolver) to defend a strike that
+      // lands before its own. Decided after the reaction delay like any reaction; the defence follows next step.
+      if (st === 'attack' && !th.cancel && this._canCancel(tth) && this.rng() < pr.smart * CANCEL_SMART) {
+        f.intent.feint = true;
+        th.cancel = true;
+        th.decided = false;
+        th.decideAt = now;
+        this.stats.cancels++;
+        if (this.stringOn) this._endString(now, false);   // the string is over (and a counter can follow the defence)
+      }
+      return;
+    }
     const ab = ABILITY[f.style] || 'parry';
     if (th.keep) {
-      // already behind the guard: keep it, unless a guard breaker is coming and it can read that
-      let c = this.rng() < 0.88 ? 'block' : null;
+      // already behind the guard: keep it, unless a guard breaker is coming and it can read that. Out of the guard
+      // its style ability (parry / avoid / absorb from guard) is a reaction: pressed no sooner than reactAt, and
+      // only when that still leaves time before the hit.
+      const inTime = th.reactAt <= th.hitAt - REACT_LATE;
+      // how sticky the guard is follows the archetype's taste for blocking (thugs block a little, brawlers turtle)
+      let c = this.rng() < Math.min(0.9, 0.5 + pr.block) ? 'block' : null;
+      const pAbKeep = pr.ability + (th.read ? (pr.block + pr.dodge) * pr.smart * READ_SHIFT : 0);
+      if (canMove && inTime && !inf.brk && !(inf.focus && ab !== 'avoid') && f.stamina >= 10 && this.rng() < pAbKeep) c = ab;
       if (inf.brk && this.rng() < pr.smart) {
-        c = canMove && (pr.dodge + pr.ability) > 0.1 && f.stamina >= 12 ? (ab === 'avoid' ? 'avoid' : 'dodge') : null;
-        if (!c) this.guardUntil = now;     // drop the guard: eat the hit rather than the guard break
+        c = canMove && inTime && (pr.dodge + pr.ability) > 0.1 && f.stamina >= 12 ? (ab === 'avoid' ? 'avoid' : 'dodge') : null;
+        if (!c) { this.guardUntil = now; this.pressGuardUntil = 0; }   // drop the guard: eat the hit, not the break
       }
       if (c) this._setChoice(c, inf, pr);
+      if (c && c !== 'block') this.guardUntil = Math.max(this.guardUntil, th.reactAt);   // guard stays up until then
       return;
     }
     let pAb = pr.ability, pBl = pr.block, pDo = pr.dodge;
@@ -629,6 +733,12 @@ export class Brain {
       if (smart) { pDo += pBl * 0.7; pBl = 0; if (ab === 'absorb') { pDo += pAb * 0.5; pAb = 0; } }
       else pBl *= 0.6;
     }
+    // a read is met with the style ability (parry / avoid / absorb + counter) rather than a plain block or dodge,
+    // the more so the smarter the fighter: same total chance to defend, a sharper answer
+    if (th.read && !inf.brk && !(inf.focus && ab !== 'avoid')) {
+      const k = pr.smart * READ_SHIFT;
+      pAb += (pBl + pDo) * k; pBl *= 1 - k; pDo *= 1 - k;
+    }
     if (f.stamina < 10) { pAb = 0; pDo = 0; }
     const r = this.rng();
     let c = null;
@@ -636,7 +746,18 @@ export class Brain {
     else if (r < pAb + pBl) c = 'block';
     else if (r < pAb + pBl + pDo) c = 'dodge';
     if (c && c !== 'block' && !canMove) c = null;
+    if (!c && th.cancel) c = 'block';   // it gave up its own attack to defend: at least guard
     if (c) this._setChoice(c, inf, pr);
+  }
+
+  /** Can this fighter feint its own current attack to defend a strike landing in `tth` s (before its own hit)? */
+  _canCancel(tth) {
+    const f = this.fighter, a = f.atk, info = a && a.info;
+    if (!info || a.phase !== 'run' || a.focus || this.feintThis) return false;
+    if (f.moveTime >= info.firstStart - 0.03) return false;          // too late in the wind-up to feint
+    if (f.stamina < 12) return false;
+    const mine = typeof f.timeToHit === 'function' ? f.timeToHit() : -1;
+    return mine < 0 || mine > tth + 0.02;                              // charging, or its strike would land second
   }
 
   _setChoice(c, inf, pr) {
@@ -647,7 +768,7 @@ export class Brain {
     else if (c === 'avoid') { th.lead = 0.03 + u * (0.22 + sk * 0.2); th.avoidKind = avoidKindFor(inf); }
     else if (c === 'absorb') th.lead = 0.08 + u * (0.3 + sk * 0.25);
     else if (c === 'dodge') { th.lead = 0.09 + u * (0.13 + sk * 0.14); th.side = this.rng() < 0.5 ? -1 : 1; }
-    else th.guardEnd = Math.max(0.12, inf.lastEnd - inf.firstHit) + 0.18;
+    else th.guardEnd = Math.max(0.12, inf.lastEnd - inf.firstHit) + 0.14;
     th.choice = c;
   }
 
@@ -686,6 +807,7 @@ export class Brain {
 
   _startUrgent(now, dist, st) {
     if (this.mode === 'attack' || this.mode === 'phase') return;
+    this.pressGuardUntil = 0;
     this._plan(now, dist, this.urgentFast, false);
     if (this.plan.len <= 0) return;
     const first = this.plan.moves[0];
@@ -713,9 +835,13 @@ export class Brain {
     c.heavyBias = pr.heavyBias;
     c.sigBias = pr.sigBias || 0;
     c.sigOnly = !!this.bossId && this.stringsSinceSig >= 3 && fast < 0.5 && this.hasSigs;
+    c.sigLRU = c.sigOnly ? this._sigLRU(false) : null;
+    c.sigMRU = c.sigOnly ? this._sigLRU(true) : null;
+    c.lastOpenStance = this.lastOpenStance;
     c.dist = dist;
     c.fast = fast;
-    c.allowSwitch = allowSwitch && fast < 0.5 && (pr.allStances || this.rng() < pr.switch);
+    // a signature string may switch stance to reach the signature (both of Brick's live in BR)
+    c.allowSwitch = allowSwitch && fast < 0.5 && (pr.allStances || c.sigOnly || this.rng() < pr.switch);
     c.switchPenalty = pr.allStances ? 2 : 6;
     c.noise = this.bossId ? 2.5 : 4;
     planString(c, this.plan);
@@ -726,6 +852,18 @@ export class Brain {
     const tr = (this.ai.target(f) || f).radius || 0.35;
     this.engageDist = Math.max(1.0, reach * 0.82 + tr * 0.5);
     this.startDist = reach + tr + 0.2;
+  }
+
+  /** The signature in the deck thrown longest ago (never thrown counts as oldest), or with mru the latest one. */
+  _sigLRU(mru) {
+    const ids = this.sigIds;
+    let best = null, bt = mru ? -Infinity : Infinity;
+    for (let i = 0; i < ids.length; i++) {
+      const t = this.sigLast[ids[i]];
+      const v = typeof t === 'number' ? t : -1e9;
+      if (mru ? v > bt : v < bt) { bt = v; best = ids[i]; }
+    }
+    return mru && bt <= -1e9 ? null : best;
   }
 
   _press(kind) {

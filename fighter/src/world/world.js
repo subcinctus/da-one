@@ -10,7 +10,8 @@
 // room.exit (point in front of it) for fight rooms. Entry gates start open, exit gates closed.
 // setGate(room, false) closes both of a room's gates; setGate(room, true) opens both.
 // Look: merged vertex-coloured meshes per room (+ baked light glow), one shadowed sun fitted to the active room,
-// a hemisphere light and a gradient sky dome. No fog, no particles, no post.
+// a hemisphere light, an optional non-shadow fill (chapter light `fill: { color, intensity, dir }`) and a gradient
+// sky dome. No fog, no particles, no post.
 import * as THREE from 'three';
 import { buildLayout, CHAPTER_IDS } from './layout.js';
 import { Walkable } from './walk.js';
@@ -61,6 +62,14 @@ export class World {
     cam.near = 1; cam.far = 120; cam.left = -10; cam.right = 10; cam.top = 10; cam.bottom = -10;
     g.scene.add(sun);
     g.scene.add(sun.target);
+
+    // Fill: one cheap non-shadow directional light, always present so shader programs stay the same across chapters
+    // (intensity 0 unless the chapter's light table has `fill`). Its target stays at the origin; only the direction
+    // matters. Lights the fighters where a chapter's light is otherwise only baked into the walls (night market).
+    const fill = (this.fill = new THREE.DirectionalLight(0xffffff, 0));
+    fill.castShadow = false;
+    fill.position.set(0, 1, 0);
+    g.scene.add(fill);
 
     g.events?.on?.('settingsChanged', (s) => { if (this.sun) this.sun.castShadow = s?.shadows !== false; });
 
@@ -162,6 +171,14 @@ export class World {
     this.hemi.color.set(L.hemiSky);
     this.hemi.groundColor.set(L.hemiGround);
     this.hemi.intensity = L.hemiI;
+    const F = L.fill;
+    if (F && this.fill) {
+      this.fill.color.set(F.color ?? 0xffffff);
+      this.fill.intensity = F.intensity ?? 0.8;
+      const d = F.dir || [0, 1, 0];
+      this.fill.position.set(d[0], d[1], d[2]).normalize();
+      this.fill.updateMatrixWorld();
+    } else if (this.fill) this.fill.intensity = 0;
     this.sky.userData.apply(L.sky, this._sunDir);
     g.scene.background.set(L.sky.horizon);
     if (g.renderer) g.renderer.toneMappingExposure = L.exposure ?? 1;

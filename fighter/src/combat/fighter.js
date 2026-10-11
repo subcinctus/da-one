@@ -5,12 +5,23 @@
 // COMBO FLOW (FIGHTER.md §6b), the heart of the feel:
 //   standalone   : the move plays fully, recovery included, into 'stance:<end>'.
 //   chained      : a light/heavy pressed any time during the attack is queued. At the end of the last active window
-//                  the animator FREEZES the strike pose for move.holdOut (the form visibly lingers), then the
-//                  follow-up from the END stance's slot starts at moveTime = next.chainIn with a CHAIN_BLEND (0.06 s)
-//                  cross-fade from the frozen pose: recovery skipped, wind-up shortened, never a teleport.
-//   late chain   : pressed during the recovery -> same, with a slightly shorter hold.
-//   string cap 3 : the third attack always plays its full recovery, then a short STRING_END lockout.
-//   defensive    : dodge / defend / guard after the cancel point use the same hold + fast blend.
+//                  the animator FREEZES the strike pose for move.holdOut (the form visibly lingers; a connected
+//                  hit's hitstop counts toward it, never below HOLD_MIN = 3 frames), then the follow-up from the END
+//                  stance's slot starts at moveTime = next.chainIn with a CHAIN_BLEND (0.06 s) cross-fade from the
+//                  frozen pose: recovery skipped, wind-up shortened, never a teleport.
+//   late chain   : pressed during the recovery -> no freeze (the pose is already relaxing): the follow-up cross-fades
+//                  straight from the current pose. Late defensive cancels (after the strike) do the same.
+//   string cap 3 : the third attack always plays its full recovery, then a short STRING_END lockout. A press made
+//                  after its strike stays buffered and starts a new string when the lockout ends; presses made
+//                  during its wind-up are dropped (mashing does not auto-start a new string).
+//   defensive    : dodge / defend / guard after the cancel point skip the recovery with the same fast blend (a hold
+//                  only when the cancel point is the strike end itself; later the pose is relaxing, so no freeze).
+//   charge       : charge moves hold on moveInfo.chargeAt (the authored anticipation key) while the button is held,
+//                  with a small alternating tremble; events chargeStart / chargeFull / chargeRelease / chargeCancel.
+//
+// INPUT BUFFER: presses age from the press (T.BUFFER), except presses made during a committed stretch (dodge, avoid,
+// parry, absorb, recover, switch, an attack past its strike): those age from the moment their action becomes legal
+// (lazily recorded in legalT at the first legal check), capped at T.BUFFER_MAX_WAIT in total. Stuns reset this.
 import * as THREE from 'three';
 import { clamp, damp, wrapAngle, angleDiff, yawTo } from '../core/math.js';
 import { STANCES, STYLES } from '../data/stances.js';
@@ -19,6 +30,13 @@ import { moveInfo, slotMove, focusMove } from './movedata.js';
 
 let NEXT_ID = 1;
 const NEVER = 1e9;
+const _tremble = { x: 0.3, z: 0.2 };   // charge tremble flinch direction (fighter space), x alternates sign
+/** States that keep presses waiting for legality (see INPUT BUFFER above). */
+const COMMITTED = { dodge: true, avoid: true, parry: true, absorb: true, recover: true, switch: true };
+/** A committed state entered within this long of the previous stretch's end continues it (1.5 sim steps). */
+const CONTIGUOUS = 0.0125;
+/** Buffer key -> legality key. */
+const LEGAL_KEY = { light: 'attack', heavy: 'attack', dodge: 'dodge', defend: 'defend', focus: 'focus', feint: 'feint', stance: 'stance' };
 
 /** A fresh intent object (see FIGHTER.md §7 Intent). */
 export function makeIntent() {
@@ -97,13 +115,21 @@ export class Fighter {
       next: null, nextT: 0, nextDir: { x: 0, z: 0 },
       win: -1, hitIds: [], anyContact: false, struck: false,
       chargeable: false, charging: false, chargeT: 0, chargeDone: false, chargePoint: 0, chargeMult: 1, chargeBreak: false,
+      chargeFull: false, trembleT: 0, trembleSign: 1,
       focus: null, exhausted: false, chained: false, aim: null, aimYaw: null, startedAt: 0,
+      struckAt: NEVER,   // sim time the last active window ended (the strike is done)
+      stopServed: 0,     // hitstop already served on this attack's hits (counts toward the chain hold)
     };
     // input buffers (sim time of the last unconsumed press)
     this.buf = { light: -NEVER, heavy: -NEVER, dodge: -NEVER, defend: -NEVER, focus: -NEVER, feint: -NEVER };
     this.bufDodge = { x: 0, z: 0 };
     this.pendingStance = null;
     this.pendingStanceT = -NEVER;
+    // committed stretches (see INPUT BUFFER): start time, flag, when the last one ended, when each action became legal
+    this.lockT0 = NEVER;
+    this._committed = false;
+    this._uncommitT = -NEVER;
+    this.legalT = { attack: -NEVER, dodge: -NEVER, defend: -NEVER, focus: -NEVER, feint: -NEVER, stance: -NEVER };
 
     // timers / windows
     this.lastSpend = -NEVER;
@@ -124,7 +150,7 @@ export class Fighter {
     this.killer = null;
     this._staminaOutSent = false;
     this._stateSeen = 'idle';
-    this._loco = { stance: this.stance, vx: 0, vz: 0, speed: 0, guard: false, locked: false, crouch: false };
+    this._loco = { stance: this.stance, vx: 0, vz: 0, speed: 0, guard: false, locked: false, crouch: false, yaw: this.yaw, x: this.position.x, z: this.position.z };
     this._lookPos = new THREE.Vector3();
   }
 
@@ -268,6 +294,10 @@ export class Fighter {
     l.guard = this.isGuarding();
     l.locked = !!this.target;
     l.crouch = false;
+    // sim-space facing and position: turn shuffle / look-at stay independent of the display rate
+    l.yaw = this.yaw;
+    l.x = this.position.x;
+    l.z = this.position.z;
     try {
       if (typeof an.setLocomotion === 'function') an.setLocomotion(l);
       if (typeof an.lookAt === 'function') {
@@ -327,18 +357,38 @@ export class Fighter {
     }
   }
 
-  _fresh(kind, window = T.BUFFER) { return this.game.time - this.buf[kind] <= window; }
+  /**
+   * Age of a press made at `pressT` for legality key `lk`. Presses made during the current committed stretch age from
+   * the moment the action became legal (never more than BUFFER_MAX_WAIT after the press). Call with mark = true only
+   * where the action IS legal right now: the first such call since the stretch began records that moment in legalT.
+   */
+  _pressAge(lk, pressT, mark = true) {
+    const now = this.game.time;
+    if (pressT < this.lockT0 - 1e-6) return now - pressT;
+    if (now - pressT > T.BUFFER_MAX_WAIT + 1e-6) return Infinity;
+    let legal = this.legalT[lk];
+    if (legal < this.lockT0 - 1e-6) {
+      if (!mark) return 0;           // still waiting for legality: live
+      legal = this.legalT[lk] = now;
+    }
+    return now - Math.max(pressT, legal);
+  }
+  _fresh(kind, window = T.BUFFER) { return this._pressAge(LEGAL_KEY[kind] || kind, this.buf[kind], false) <= window; }
   _take(kind, window = T.BUFFER) {
-    if (this.game.time - this.buf[kind] <= window) { this.buf[kind] = -NEVER; return true; }
+    if (this._pressAge(LEGAL_KEY[kind] || kind, this.buf[kind]) <= window) { this.buf[kind] = -NEVER; return true; }
     return false;
   }
   _pressedNow(kind) { return this.buf[kind] >= this.game.time - 1e-6; }
-  _resetBuffers() { for (const k in this.buf) this.buf[k] = -NEVER; this.pendingStance = null; }
+  _resetBuffers() {
+    for (const k in this.buf) this.buf[k] = -NEVER;
+    this.pendingStance = null;
+    this.lockT0 = NEVER; this._committed = false; this._uncommitT = -NEVER;
+  }
 
   /** Most recent buffered attack ('light' | 'heavy') within the buffer window, consumed. */
   _takeAttack() {
-    const now = this.game.time, l = this.buf.light, h = this.buf.heavy;
-    const lOk = now - l <= T.BUFFER, hOk = now - h <= T.BUFFER;
+    const l = this.buf.light, h = this.buf.heavy;
+    const lOk = this._pressAge('attack', l) <= T.BUFFER, hOk = this._pressAge('attack', h) <= T.BUFFER;
     if (!lOk && !hOk) return null;
     const kind = lOk && (!hOk || l >= h) ? 'light' : 'heavy';
     this.buf[kind] = -NEVER;
@@ -360,6 +410,21 @@ export class Fighter {
   // ============================================================================================ state plumbing
 
   _enter(state, dur = 0) {
+    const now = this.game.time;
+    if (COMMITTED[state]) {
+      // a new committed stretch, unless one ended this step or the previous one (recover -> idle -> switch is one
+      // stretch, so an attack buffered behind the switch still waits for the switch end)
+      if (!this._committed && now - this._uncommitT > CONTIGUOUS) this.lockT0 = now;
+      this._committed = true;
+    } else if (FREE_STATES[state]) {
+      if (this._committed) this._uncommitT = now;
+      this._committed = false;   // lockT0 stays: presses from the stretch now age from their legal time
+    } else {
+      // attacks (until their strike ends) and reactions: presses age from the press again
+      this._committed = false;
+      this.lockT0 = NEVER;
+      this._uncommitT = -NEVER;
+    }
     this.state = state;
     this.stateTime = 0;
     this.stateDur = dur;
@@ -383,6 +448,7 @@ export class Fighter {
     const s = this.state;
     this._stateSeen = s;
     this.stateTime = 0;
+    this.lockT0 = NEVER; this._committed = false; this._uncommitT = -NEVER;
     if (s !== 'attack') this._clearAttack();
     if (s === 'getup') {
       if (this.health > 0) this.alive = true;
@@ -400,6 +466,7 @@ export class Fighter {
 
   _clearAttack() {
     const a = this.atk;
+    if (a.charging && a.info) this.game.events.emit('chargeCancel', { fighter: this, move: a.move, charge: Math.min(1, a.chargeT / T.CHARGE_MAX) });
     a.info = null; a.move = null; a.string = 0; a.phase = 'run'; a.next = null; a.charging = false; a.focus = null; a.aim = null; a.aimYaw = null;
     this.move = null;
     this.moveTime = 0;
@@ -408,11 +475,7 @@ export class Fighter {
   // ============================================================================================ free states
 
   _freeStep(dt) {
-    // focus move ready + attack, dodge, defend, attack, stance switch (priority order)
-    if (this._tryDodge(false)) return 0;
-    if (this._tryDefend(false)) return 0;
-    if (this._tryAttack()) return 0;
-    if (this._tryStance()) return 0;
+    if (this._freeActions()) return 0;
     const guard = !!this.intent.guard;
     const it = this.intent;
     const moving = Math.hypot(it.moveX, it.moveZ) > 0.1 || this.locoVel.lengthSq() > 0.04;
@@ -423,6 +486,16 @@ export class Fighter {
     }
     if (this.target) this._turnToward(this.target.position, guard ? T.TURN_BLOCK : T.TURN_LOCKED, dt);
     return guard ? T.GUARD_SPEED : 1;
+  }
+
+  /**
+   * Buffered actions of a free state, in priority order: dodge, defend, stance switch, attack (focus moves included).
+   * A live stance flick goes before a buffered attack (e.g. RT flick + X on the same frame): the attack stays buffered
+   * through the switch (the switch continues the same committed stretch, so it ages from the switch end) and comes
+   * out of the NEW stance when _switchStep finishes.
+   */
+  _freeActions() {
+    return this._tryDodge(false) || this._tryDefend(false) || this._tryStance() || this._tryAttack();
   }
 
   _tryAttack() {
@@ -438,7 +511,7 @@ export class Fighter {
     const st = this.pendingStance;
     if (!st) return false;
     this.pendingStance = null;
-    if (this.game.time - this.pendingStanceT > T.BUFFER || st === this.stance) return false;
+    if (this._pressAge('stance', this.pendingStanceT) > T.BUFFER || st === this.stance) return false;
     const from = this.stance;
     this.stance = st;
     this._spend(T.SWITCH_COST);
@@ -492,8 +565,11 @@ export class Fighter {
     a.info = info; a.move = m; a.phase = 'run'; a.holdT = 0; a.holdDur = 0;
     a.next = null; a.nextT = 0; a.win = -1; a.hitIds.length = 0; a.anyContact = false; a.struck = false;
     a.chargeable = !!info.props.charge && !focusKind;
-    a.charging = false; a.chargeT = 0; a.chargeDone = false; a.chargeMult = 1; a.chargeBreak = false;
-    a.chargePoint = clamp(info.firstStart * T.CHARGE_POINT, (chained ? info.chainIn : 0) + 0.01, Math.max(0.01, info.firstStart - 0.04));
+    a.charging = false; a.chargeT = 0; a.chargeDone = false; a.chargeMult = 1; a.chargeBreak = false; a.chargeFull = false;
+    a.trembleT = 0; a.trembleSign = 1;
+    // the charge holds exactly on the authored anticipation extreme (moveInfo.chargeAt), never inside the strike
+    a.chargePoint = clamp(info.chargeAt, (chained ? info.chainIn : 0) + 0.01, Math.max(0.01, info.firstStart - 0.04));
+    a.struckAt = NEVER; a.stopServed = 0;
     a.focus = focusKind || null;
     a.exhausted = this.stamina <= 0;
     a.chained = !!chained;
@@ -563,19 +639,42 @@ export class Fighter {
       if (a.holdT >= a.holdDur - 1e-6) this._doNext();
       return;
     }
-    // 5. charge: the wind-up freezes while the button is held (up to CHARGE_MAX)
-    if (a.chargeable && !a.chargeDone && this.moveTime >= a.chargePoint) {
-      if (this.intent.charge && a.chargeT < T.CHARGE_MAX) {
-        a.charging = true;
+    // 5. charge: the wind-up holds on its anticipation pose while the button is held (up to CHARGE_MAX). The move
+    //    clock and the animator stop together, one step at a time, so the release resumes in sync with no hitch;
+    //    a small alternating flinch makes the hold read as straining instead of a hang. Events: chargeStart,
+    //    chargeFull (break earned: CHARGE_BREAK x CHARGE_MAX), chargeRelease (the strike goes), chargeCancel (hit / feint).
+    // (the hold starts on the last step at or before chargePoint, so it never shows the first instant of the strike)
+    if (a.chargeable && !a.chargeDone && this.moveTime + dt > a.chargePoint + 1e-6) {
+      if (this.intent.charge && a.chargeT < T.CHARGE_MAX - 1e-6) {
+        if (!a.charging) {
+          a.charging = true;
+          a.trembleT = 0;
+          this.game.events.emit('chargeStart', { fighter: this, move: a.move, max: T.CHARGE_MAX });
+        }
         a.chargeT = Math.min(T.CHARGE_MAX, a.chargeT + dt);
-        this._freeze(dt * 2 + 0.005);
-        if (a.chargeT < T.CHARGE_MAX) return;
+        this._freeze(dt);   // exactly this step (not longer): the animator stands still exactly while moveTime does
+        a.trembleT -= dt;
+        if (a.trembleT <= 0) {
+          a.trembleT += T.CHARGE_TREMBLE_EVERY;
+          const an = this.animator;
+          if (an && typeof an.flinch === 'function') {
+            _tremble.x = 0.3 * a.trembleSign;
+            try { an.flinch(_tremble, T.CHARGE_TREMBLE); } catch (e) { /* optional */ }
+          }
+          a.trembleSign = -a.trembleSign;
+        }
+        // full = the charge now breaks guard (the cue goes out the moment break is earned, once)
+        if (!a.chargeFull && a.chargeT >= T.CHARGE_MAX * T.CHARGE_BREAK - 1e-6) {
+          a.chargeFull = true;
+          this.game.events.emit('chargeFull', { fighter: this, move: a.move });
+        }
+        return;
       }
       a.charging = false;
       a.chargeDone = true;
-      const k = a.chargeT / T.CHARGE_MAX;
+      const k = Math.min(1, a.chargeT / T.CHARGE_MAX);
       a.chargeMult = 1 + T.CHARGE_DAMAGE * k;
-      a.chargeBreak = k >= 0.98;
+      a.chargeBreak = k >= T.CHARGE_BREAK - 1e-6;
       if (a.chargeT > 0) this.game.events.emit('chargeRelease', { fighter: this, move: a.move, charge: k });
     }
     // 6. advance the move timeline
@@ -593,6 +692,11 @@ export class Fighter {
     // end of the last active window: the strike is done, the fighter now flows into the END stance
     if (!a.struck && t >= info.lastEnd) {
       a.struck = true;
+      a.struckAt = now;
+      // from here on the attack is a committed stretch for the buffer: a stance flick (or, at the string cap, an
+      // attack press) made after the strike waits for its legal time instead of expiring in the recovery
+      this.lockT0 = now;
+      this._committed = true;
       const from = this.stance;
       if (STANCES.includes(info.end) && info.end !== from) {
         this.stance = info.end;
@@ -602,23 +706,36 @@ export class Fighter {
     }
     if (a.struck) {
       const next = a.next;
+      // late = the strike ended steps ago and the pose is already relaxing into the recovery: no freeze, the
+      // follow-up cross-fades (CHAIN_BLEND) straight from the current pose
+      const late = t - info.lastEnd > dt * 1.5;
       if (next === 'light' || next === 'heavy') {
         if (this._canChainAttack()) {
-          // on time (queued before the strike ended): hold the strike pose for holdOut; late: a little shorter
-          const late = t - info.lastEnd > dt * 1.5;
-          this._beginHold(late ? info.holdOut * T.LATE_HOLD_SCALE : info.holdOut);
+          if (late) this._doNext();
+          else this._beginHold(this._holdDur(info));
           return;
         }
-        // string capped / exhausted / focus: keep it as an ordinary buffered press for after the move
-        this.buf[next] = a.nextT;
+        // string capped / exhausted / focus: a press made after the strike stays buffered and fires once attacks are
+        // legal again (after the STRING_END lockout); presses from the wind-up / strike are dropped (no auto-restart)
+        if (a.nextT >= a.struckAt - 1e-6) this.buf[next] = a.nextT;
         a.next = null;
       } else if (t >= info.cancel) {
         if ((next === 'dodge' || next === 'defend') && now - a.nextT > T.DEFENSIVE_QUEUE) a.next = null;
-        if (a.next) { this._beginHold(info.holdOut * (t - info.lastEnd > dt * 1.5 ? T.LATE_HOLD_SCALE : 1)); return; }
-        if (this.intent.guard) { a.next = 'guard'; this._beginHold(info.holdOut * (t - info.lastEnd > dt * 1.5 ? T.LATE_HOLD_SCALE : 1)); return; }
+        if (!a.next && this.intent.guard) a.next = 'guard';
+        if (a.next) {
+          if (late) this._doNext();
+          else this._beginHold(this._holdDur(info));
+          return;
+        }
       }
     }
     if (t >= info.duration) this._finishAttack();
+  }
+
+  /** Strike-form hold before an on-time follow-up: holdOut, minus the hitstop a connected hit already served. */
+  _holdDur(info) {
+    const a = this.atk;
+    return a.anyContact ? Math.max(T.HOLD_MIN, info.holdOut - a.stopServed) : Math.max(T.HOLD_MIN, info.holdOut);
   }
 
   _beginHold(dur) {
@@ -655,11 +772,13 @@ export class Fighter {
     if (a.info && STANCES.includes(a.info.end)) this.stance = a.info.end;
     this._clearAttack();
     this._stop(0.1);
+    // string end lockout: buffered presses / flicks made after the strike wait for it (committed stretch continues)
     if (lock > 0) this._recover(lock, NEVER, 0, 0, 0);
     else {
       this._enter('idle');
-      // a press buffered during the last recovery frames starts a new string right away
-      this._tryAttack();
+      // a stance flick made after the strike switches now (it waited through the recovery), then a press buffered
+      // during the last recovery frames starts a new string
+      this._freeActions();
     }
   }
 

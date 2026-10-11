@@ -6,6 +6,7 @@ import * as MV from './moves/index.js';
 import { mergePoses } from '../anim/rig.js';
 import { STANCES } from '../data/stances.js';
 import { T } from './constants.js';
+import { clamp } from '../core/math.js';
 
 /** Read an export of the moves module by name (tolerates a stub that does not export it yet). */
 function mv(name) { return MV ? MV[name] : undefined; }
@@ -58,7 +59,9 @@ const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
 /**
  * Runtime timing for a move (cached). Fields: move, id, start, end, weight, height, path, limb, startup, active,
  * recovery, duration, hits [{t, dur, end, limb, damage}], firstStart, lastEnd, cancel, chainIn, holdOut, damage,
- * stamina, guardDamage, reach, arcHalf (rad), hitstun, blockstun, push, lunge, props, learn, boss.
+ * stamina, guardDamage, reach, arcHalf (rad), hitstun, blockstun, push, lunge, props, learn, boss,
+ * chargeAt (move time where a charge move holds: the authored anticipation key, else 0.65 x first hit time),
+ * hitstop (seconds of hit pause on a clean hit: the move's own, else by weight).
  */
 export function moveInfo(m) {
   let info = INFO.get(m);
@@ -86,10 +89,11 @@ export function moveInfo(m) {
   let lastEnd = 0;
   for (const h of hits) lastEnd = Math.max(lastEnd, h.end);
   const chainInRaw = num(m.chainIn, startup * 0.4);
+  const weight = m.weight || 'light';
   info = {
     move: m, id: m.id || 'move', name: m.name || m.id || 'Move',
     start: m.start || 'FR', end: m.end || m.start || 'FR',
-    weight: m.weight || 'light', height: m.height || 'mid', path: m.path || 'horizontal', limb,
+    weight, height: m.height || 'mid', path: m.path || 'horizontal', limb,
     startup, active, recovery, duration, hits, firstStart, lastEnd: Math.min(lastEnd, duration),
     cancel: Math.min(duration, num(m.cancel, lastEnd + 0.04)),
     // a chained move always keeps a little wind-up so the follow-up is readable, never a teleport
@@ -100,6 +104,9 @@ export function moveInfo(m) {
     hitstun: Math.max(0.05, num(m.hitstun, 0.3)), blockstun: Math.max(0.04, num(m.blockstun, 0.15)),
     push: Math.max(0, num(m.push, 0.3)), lunge: Math.max(0, num(m.lunge, 0.3)),
     props: m.props || {}, learn: num(m.learn, 0), boss: !!m.boss,
+    // charge moves hold on their authored anticipation extreme (never inside the strike burst)
+    chargeAt: clamp(num(m.chargeAt, firstStart * T.CHARGE_POINT), 0.01, Math.max(0.01, firstStart - 0.04)),
+    hitstop: Math.max(0, num(m.hitstop, T.HITSTOP[weight] || T.HITSTOP.light)),
   };
   INFO.set(m, info);
   return info;

@@ -10,6 +10,12 @@ export const STARTER_DECK = {
   BL: { main: 'bl_reverse_palm', alt: 'bl_spinning_backfist' },
 };
 
+/**
+ * Learned-but-unequipped starter moves: a new run knows these too, so the first rest point offers a real choice.
+ * One per stance, each ending in a different stance (FL->FR, FR->BR, BR->FL, BL->FR) so swapping one in reroutes a string.
+ */
+export const STARTER_EXTRA = ['fl_twin_sparrows', 'fr_gate_kick', 'br_flying_knee', 'bl_scissor_kicks'];
+
 /** Named decks for enemy archetypes and bosses (AI: `deck[stance].main / .alt`). */
 export const ENEMY_DECKS = {
   thug: {
@@ -19,22 +25,22 @@ export const ENEMY_DECKS = {
     BL: { main: 'bl_whip_fist', alt: 'bl_reverse_palm' },
   },
   brawler: {
-    FR: { main: 'fr_liver_hook', alt: 'fr_falling_axe' },
+    FR: { main: 'fr_liver_hook', alt: 'fr_turning_backfist' },
     FL: { main: 'fl_liver_hook', alt: 'fl_wheel_kick' },
     BR: { main: 'br_mule_kick', alt: 'br_temple_bell' },
-    BL: { main: 'bl_mule_kick', alt: 'bl_iron_palm' },
+    BL: { main: 'bl_mule_kick', alt: 'bl_spinning_heel' },
   },
   swift: {
     FR: { main: 'fr_snap_backfist', alt: 'fr_snap_jab' },
-    FL: { main: 'fl_twin_sparrows', alt: 'fl_reverse_elbow' },
-    BR: { main: 'br_whip_fist', alt: 'br_flying_knee' },
+    FL: { main: 'fl_twin_sparrows', alt: 'fl_turning_backfist' },
+    BR: { main: 'br_spinning_backfist', alt: 'br_flying_knee' },
     BL: { main: 'bl_scissor_kicks', alt: 'bl_whip_fist' },
   },
   heavy: {
     FR: { main: 'fr_gate_kick', alt: 'fr_falling_axe' },
     FL: { main: 'fl_gate_kick', alt: 'fl_wheel_kick' },
     BR: { main: 'br_temple_bell', alt: 'br_spinning_heel' },
-    BL: { main: 'bl_iron_palm', alt: 'bl_spinning_heel' },
+    BL: { main: 'bl_iron_palm', alt: 'bl_dragon_tail' },
   },
   tadao: {
     FR: { main: 'tadao_compound_interest', alt: 'tadao_late_fee' },

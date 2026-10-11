@@ -318,6 +318,9 @@ export function makeMaterials() {
     /** Glass / clear panels (transparent, no depth write). */
     glass: (() => {
       const m = std({ roughness: 0.1, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }, 'glass');
+      // r160 draws transparent DoubleSide materials in two passes (back, then front) and flags needsUpdate before
+      // each, rebuilding program parameters twice per mesh per frame. Panes are thin at alpha 0.22: one pass is fine.
+      m.forceSinglePass = true;
       return m;
     })(),
   };

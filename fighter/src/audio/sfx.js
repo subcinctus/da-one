@@ -265,6 +265,45 @@ function feint(sr, r) {
   return o;
 }
 
+/** Enemy telegraph: a soft foot scuff + cloth snap as the guard drops into the wind-up. */
+function tell(sr, r) {
+  const o = makeBuf(0.16, sr);
+  noise(o, { len: 0.1, type: 'bandpass', freq: (t) => 800 + 700 * Math.min(1, t / 0.05), q: 0.9, env: (t) => envSwell(t, 0.03, 0.06, 2), g: 0.8 }, sr, r);   // scuff
+  noise(o, { t: 0.035, len: 0.06, type: 'bandpass', freq: 1700 * (1 + 0.12 * r.bi()), q: 1.6, a: 0.0006, d: 0.016, g: 0.75 }, sr, r);              // sleeve snap
+  noise(o, { t: 0.035, len: 0.01, type: 'highpass', freq: 3200, q: 0.7, a: 0.0002, d: 0.002, g: 0.3 }, sr, r);
+  tone(o, { f0: 95, f1: 70, glide: 0.02, a: 0.002, d: 0.03, g: 0.3 }, sr);                                                                       // weight
+  return o;
+}
+
+/** Heavy / signature telegraph (guard breakers, knockdowns): a short inhale, then the weight drops into the stance. */
+function tellHeavy(sr, r) {
+  const o = makeBuf(0.42, sr);
+  noise(o, { len: 0.2, type: 'bandpass', freq: (t) => 1200 + 900 * Math.min(1, t / 0.16), q: 1.1, env: (t) => envSwell(t, 0.15, 0.04, 1.6), g: 0.55 }, sr, r); // inhale
+  noise(o, { len: 0.2, type: 'highpass', freq: 3800, q: 0.7, env: (t) => envSwell(t, 0.15, 0.03, 2), g: 0.12 }, sr, r);
+  tone(o, { t: 0.17, f0: 80, f1: 50, glide: 0.03, a: 0.002, d: 0.06, g: 0.7, drive: 1.3 }, sr);                                           // foot plant
+  noise(o, { t: 0.17, len: 0.12, type: 'lowpass', freq: 900, q: 0.8, a: 0.001, d: 0.035, g: 0.6 }, sr, r);
+  noise(o, { t: 0.18, len: 0.12, type: 'bandpass', freq: 1000 * (1 + 0.1 * r.bi()), q: 1.3, a: 0.001, d: 0.03, g: 0.45 }, sr, r);      // heavy cloth
+  return o;
+}
+
+/** Charge hold: strained breath + cloth tension rising for up to ~1 s (stopped with a short fade on release). */
+function charge(sr, r) {
+  const len = 1.0, o = makeBuf(len, sr);
+  const env = (t) => Math.min(1, t / 0.1) * (0.5 + 0.5 * Math.min(1, t / 0.6)) * (t > 0.9 ? Math.max(0, 1 - (t - 0.9) / 0.1) : 1);
+  noise(o, { len, type: 'bandpass', freq: (t) => 500 + 1300 * Math.min(1, t / 0.7), q: 1.4, env, am: glidingTremolo(9, 24, 0.35, 0.35), g: 0.7 }, sr, r);
+  noise(o, { len, type: 'lowpass', freq: 320, q: 0.7, env, g: 0.35 }, sr, r);
+  noise(o, { len, type: 'highpass', freq: 4200, q: 0.7, env: (t) => env(t) * Math.min(1, t / 0.5), g: 0.08 }, sr, r);
+  return o;
+}
+
+/** Charge full (the strike now breaks guard): a tiny bright tick. */
+function chargeFull(sr, r) {
+  const o = makeBuf(0.12, sr);
+  partials(o, { freqs: [2350, 2350 * 2.32], amps: [0.5, 0.2], decays: [0.03, 0.015], a: 0.0005 }, sr);
+  noise(o, { len: 0.006, type: 'highpass', freq: 3500, q: 0.7, a: 0.0001, d: 0.0015, g: 0.6 }, sr, r);
+  return o;
+}
+
 function gate(sr, r) {
   const o = makeBuf(1.15, sr);
   noise(o, { len: 0.8, type: 'lowpass', freq: 180, q: 0.7, env: (t) => Math.min(1, t / 0.1) * (t < 0.7 ? 1 : Math.exp(-(t - 0.7) / 0.05)), g: 0.9 }, sr, r);
@@ -362,6 +401,10 @@ export const SFX = {
   victory: { gen: victory, variants: 1, vol: 0.75, rev: 0.3, ui: true },
   feint: { gen: feint, variants: 2, vol: 0.35, rev: 0.03, combat: true },
   heal: { gen: heal, variants: 1, vol: 0.4, rev: 0.2 },
+  tell: { gen: tell, variants: 3, vol: 0.7, rev: 0.05, prio: 0, combat: true, throttle: 0.05 },
+  tell_heavy: { gen: tellHeavy, variants: 2, vol: 0.7, rev: 0.08, combat: true },
+  charge: { gen: charge, variants: 2, vol: 0.5, rev: 0.06, combat: true },
+  charge_full: { gen: chargeFull, variants: 1, vol: 0.45, rev: 0.06, combat: true },
 };
 
 /** Contract names (FIGHTER.md §10). 'step' resolves to the current surface's step_<surface>. */

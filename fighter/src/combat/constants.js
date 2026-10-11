@@ -6,10 +6,14 @@ export const T = {
   CHAIN_BLEND: 0.06,        // cross-fade from the held strike pose into the follow-up (never below CHAIN_BLEND_MIN)
   CHAIN_BLEND_MIN: 0.04,
   HOLD_OUT: 0.05,           // default strike-pose hold when chaining out of a move
-  LATE_HOLD_SCALE: 0.6,     // a chain pressed during recovery holds the (already relaxing) pose a little shorter
+  HOLD_MIN: 0.025,          // the strike form always holds >= 3 frames; a connected hit's hitstop counts toward holdOut
+                            // (a chain pressed during the recovery does not freeze at all: it blends on from the pose)
   CHAIN_MIN_LEAD: 0.06,     // a chained move always keeps >= this much wind-up before its first hit (readable)
   ATTACK_FADE: 0.08,        // blend into a fresh (non-chained) attack
-  BUFFER: 0.2,              // input buffer outside of attacks
+  BUFFER: 0.2,              // input buffer outside of attacks. A press made during a committed stretch (dodge,
+                            // defence, recovery, stance switch, an attack past its strike) ages from the moment that
+                            // action becomes legal instead of from the press...
+  BUFFER_MAX_WAIT: 0.6,     // ...but never waits longer than this in total (stale presses never fire)
   DEFENSIVE_QUEUE: 0.25,    // a dodge/defend pressed during an attack still fires at the chain point if this recent
   STRING_MAX: 3,
   STRING_END: 0.15,         // lockout after the third attack's full recovery
@@ -45,7 +49,11 @@ export const T = {
 
   // ---- feints / charge
   FEINT_REFUND: 0.5, FEINT_RECOVERY: 0.12, FEINT_ATTACK_AT: 0.06,
-  CHARGE_MAX: 0.6, CHARGE_DAMAGE: 0.6, CHARGE_POINT: 0.65,
+  CHARGE_MAX: 0.6, CHARGE_DAMAGE: 0.6,
+  CHARGE_BREAK: 0.98,       // charge fraction from which the strike gains `break` (chargeFull is emitted then)
+  CHARGE_POINT: 0.65,       // fallback charge hold point (fraction of the first hit time) for moves without chargeAt
+  CHARGE_TREMBLE: 0.6,      // flinch impulse (animator.flinch amount) of the straining tremble while a charge is held
+  CHARGE_TREMBLE_EVERY: 0.08, // seconds between tremble impulses (alternating side)
 
   // ---- hit reactions
   KNOCKDOWN_TIME: 1.1, GETUP_TIME: 0.8,
@@ -65,7 +73,7 @@ export const T = {
   FOCUS_STRIKE_STUN: 1.1,
 
   // ---- hit feel
-  HITSTOP: { light: 0.035, medium: 0.055, heavy: 0.08 },
+  HITSTOP: { light: 0.045, medium: 0.06, heavy: 0.085 },  // fallback per weight; moves carry their own `hitstop`
   HITSTOP_BLOCK: 0.03, HITSTOP_PARRY: 0.07, HITSTOP_KILL: 0.09, HITSTOP_FOCUS: 0.09, HITSTOP_ABSORB: 0.04,
   SHAKE: { light: 0.12, medium: 0.22, heavy: 0.4 },
 

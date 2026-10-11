@@ -3,7 +3,9 @@
 //   encounters -> rooms (rest points between them: deck editor) -> boss intro -> boss -> victory card -> next chapter
 //   -> epilogue + credits after the last one.
 //   Death (Sifu): deathCounter += 1, age += deathCounter, short aging card, revive where you fell. Age 70 = game over:
-//   the chapter restarts at the age it was entered with.
+//   the chapter restarts at the state it was entered with, plus slack (progress.gameOverRestart: three more deaths
+//   always fit). Relief: a fight room cleared without dying in it, and each boss, lower the counter by one. Chapter
+//   select replays from the chapter's recorded entry state (age + counter), never better than a game over.
 // API: progress, chapterId, showTitle(), quickStart(), newGame(style), continueGame(), playChapter(id),
 //   startChapter(id, opts), restartChapter(), revivePlayer(), completeChapter(), ageDamageMult(), ageHealthMult(),
 //   canEditDeck(), setDeck(deck), save(), hasSave().
@@ -25,6 +27,11 @@ function storage() { try { return window.localStorage || null; } catch (e) { ret
 const starterDeck = () => MV.STARTER_DECK || null;
 const libMove = (id) => { const t = MV.MOVES; return t && t[id] ? t[id] : null; };
 const isPlayerMove = (id) => { const m = libMove(id); return !!(m && !m.boss && !m.focus); };
+/** Learned-but-unequipped starter moves (moves library; [] when absent), filtered to real player moves. */
+const starterExtra = () => {
+  const list = Array.isArray(MV.STARTER_EXTRA) ? MV.STARTER_EXTRA : [];
+  return MV.MOVES ? list.filter(isPlayerMove) : list.slice();
+};
 
 export class Flow {
   constructor(game) {
@@ -33,7 +40,7 @@ export class Flow {
     /** Current chapter id (null before the first chapter). */
     this.chapterId = null;
     /** Progress (see progress.js). */
-    this.progress = P.newProgress({ starterDeck: starterDeck() });
+    this.progress = P.newProgress({ starterDeck: starterDeck(), starterExtra: starterExtra() });
     this.layout = null;
     /** 'boot' | 'title' | 'loading' | 'playing' | 'dying' | 'aging' | 'victory' | 'ending' */
     this.phase = 'boot';
@@ -49,6 +56,7 @@ export class Flow {
     this._victoryT = -1;
     this._victoryBoss = null;
     this._chapter = { deaths: 0, learned: 0 };
+    this._roomDeaths = 0;      // player deaths since the current fight room started (room-clear relief)
     this._lockedOnce = false;
     this._restLine = 0;
     this._showRest = null;
@@ -66,13 +74,22 @@ export class Flow {
       else if (f.team !== 'player') this.progress.stats.kills = (this.progress.stats.kills || 0) + 1;
     });
     ev.on('bossDefeated', (e) => this._onBossDefeated(e || {}));
-    ev.on('roomStarted', () => { this.restAvailable = false; });
+    ev.on('roomStarted', () => { this.restAvailable = false; this._roomDeaths = 0; });
     ev.on('bossIntro', () => { this.restAvailable = false; });
     ev.on('roomCleared', () => {
       this.restAvailable = true;
+      // Sifu-style relief: a room cleared without dying in it calms the talisman (counter -1)
+      const p = this.progress;
+      let sub = '';
+      if (this._roomDeaths === 0 && p.deathCounter > 0) {
+        p.deathCounter--;
+        sub = `Clean room · death counter ${p.deathCounter + 1} → ${p.deathCounter}`;
+        g.events.emit('deathCounterRelief', { counter: p.deathCounter, reason: 'room' });
+      }
+      this._roomDeaths = 0;
       const hud = g.hud;
       if (hud && typeof hud.toast === 'function') {
-        hud.toast(REST_LINES[this._restLine++ % REST_LINES.length], { label: 'Room cleared', kind: 'info', ms: 3200 });
+        hud.toast(REST_LINES[this._restLine++ % REST_LINES.length], { label: 'Room cleared', kind: 'info', ms: 3200, sub });
       }
       this.save();
     });
@@ -93,10 +110,10 @@ export class Flow {
     this._hasSave = !!raw;
     this.progress = raw
       ? P.sanitizeProgress(raw, {
-        starterDeck: starterDeck(), isMove: MV.MOVES ? isPlayerMove : null,
+        starterDeck: starterDeck(), starterExtra: starterExtra(), isMove: MV.MOVES ? isPlayerMove : null,
         startOf: MV.MOVES ? (id) => libMove(id).start : null, chapterIds: ORDER,
       })
-      : P.newProgress({ starterDeck: starterDeck() });
+      : P.newProgress({ starterDeck: starterDeck(), starterExtra: starterExtra() });
   }
 
   /** True when a started run exists in storage. */
@@ -147,7 +164,7 @@ export class Flow {
     const ch = chapterById(params.get('chapter')) || CHAPTERS[0];
     const style = STYLES[params.get('style')] ? params.get('style') : 'forsaken';
     this.ephemeral = true;
-    this.progress = P.newProgress({ style, starterDeck: starterDeck(), chapterId: ch.id });
+    this.progress = P.newProgress({ style, starterDeck: starterDeck(), starterExtra: starterExtra(), chapterId: ch.id });
     g.events.emit('gameStart', { quick: true });
     await this.startChapter(ch.id, { card: false, banner: false });
   }
@@ -156,7 +173,7 @@ export class Flow {
   async newGame(style = 'forsaken') {
     const g = this.game;
     this.ephemeral = false;
-    this.progress = P.newProgress({ style, starterDeck: starterDeck() });
+    this.progress = P.newProgress({ style, starterDeck: starterDeck(), starterExtra: starterExtra() });
     this.save();
     const token = ++this._token;
     g.events.emit('gameStart', { style });
@@ -174,13 +191,16 @@ export class Flow {
     await this.startChapter(this.progress.chapterId || ORDER[0], { resume: true });
   }
 
-  /** Chapter select: replay a chapter at the lowest age it was entered with. */
+  /**
+   * Chapter select: replay a chapter from its recorded entry state (lowest entry age and the counter that came with
+   * it) when that is younger than now; a replay equals a game over and is never better than one.
+   */
   async playChapter(id) {
     const ch = chapterById(id);
     if (!ch) return;
     const p = this.progress;
-    const entry = p.entryAge && p.entryAge[ch.id];
-    if (typeof entry === 'number' && entry < p.age) { p.age = entry; p.deathCounter = 0; }
+    const st = P.chapterReplayState(p, ch.id);
+    p.age = st.age; p.deathCounter = st.counter;
     this.ephemeral = false;
     this.game.events.emit('gameStart', { chapter: ch.id });
     await this.startChapter(ch.id);
@@ -202,6 +222,7 @@ export class Flow {
     if (opts.resume) { p.chapterId = ch.id; p.started = true; } else P.enterChapter(p, ch.id);
     this.save();
     this._chapter = { deaths: 0, learned: 0 };
+    this._roomDeaths = 0;
     const m = g.menus;
     if (m && typeof m.closeAll === 'function') m.closeAll();
     if (g.paused) g.setPaused(false);
@@ -271,14 +292,21 @@ export class Flow {
     const p = this.progress;
     const r = P.applyDeath(p);
     this._chapter.deaths++;
+    this._roomDeaths++;
     g.events.emit('playerAged', { age: Math.min(P.AGE_MAX, p.age), deaths: p.deaths, counter: p.deathCounter });
     const m = g.menus;
     if (r.gameOver) {
       g.events.emit('gameOver', { chapterId: this.chapterId });
-      if (m && typeof m.card === 'function') await m.card({ kind: 'gameover', from: r.from, to: P.AGE_MAX, counter: r.counter, entryAge: p.chapterEntryAge });
-      if (token !== this._token) return;
-      P.resetToChapterEntry(p);
+      // back to the chapter's entry state plus slack (three more deaths always fit); applied and saved before the
+      // card, so quitting from the card never leaves an age-70 run behind
+      const restart = P.applyGameOverRestart(p);
       this.save();
+      const ch = chapterById(this.chapterId);
+      const replayHint = restart.age >= 55 && !!ch && ch.index > 1;
+      if (m && typeof m.card === 'function') {
+        await m.card({ kind: 'gameover', from: r.from, to: P.AGE_MAX, counter: r.counter, entryAge: restart.age, entryCounter: restart.counter, replayHint });
+      }
+      if (token !== this._token) return;
       g.events.emit('playerAged', { age: p.age, deaths: p.deaths, counter: p.deathCounter });
       this.busy = false;
       await this.restartChapter();

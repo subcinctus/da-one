@@ -1,6 +1,11 @@
 // Per-fighter animation: base layer (stance idle + breathing, in-stance walk / strafe / back-step cycles, sprint,
 // guard on the upper body) + action layer (moves and clips as full-body overrides with cross-fades) + additive
 // head/chest look-at and hit flinch, then cloth springs. Runs at sim rate (Combat calls update() in fixedUpdate).
+// RENDER RATE: update() applies the new sim pose to the skeleton; render(alpha) (called by Combat.update once per
+// displayed frame, after the root lerp) re-applies a blend of the last two sim poses (and cloth angles) so limbs move
+// every displayed frame at 144 Hz and in slow motion. A fighter whose owner never calls render() still animates.
+// SIM-SPACE INPUTS: setLocomotion({ yaw, x, z }) gives the fighter's sim yaw / position; when present the turn-in-place
+// shuffle, look-at and flinchWorld use them instead of model.root (which is render-interpolated).
 //
 // COMBO FLOW (FIGHTER.md §6b): playAction ALWAYS cross-fades from the exact pose displayed last step (snapshot of the
 // blended output, even when the previous action is frozen or mid-fade), can start a track part-way (startAt = chainIn)
@@ -8,10 +13,11 @@
 // holds the current pose (strike hold) without advancing time. Allocation-free per step.
 import * as THREE from 'three';
 import { PoseBuffer, sampleTrack, trackDuration, strikePointWorld, JOINT_INDEX } from './rig.js';
-import { damp, smoothstep, wrapAngle } from '../core/math.js';
+import { damp, smoothstep, wrapAngle, EASE } from '../core/math.js';
 import { ensureAnimData, getClip, STANCE_BUF, GUARD_BUF, CROUCH_BUF, LOCO } from './registry.js';
 import { WALK, RUN } from './poses.js';
 import { ClothSim } from './cloth.js';
+import { legFK, legIK, FOOT_BALL } from './ik.js';
 
 /** Default cross-fade into a chained move (FIGHTER.md §6b CHAIN_BLEND). */
 export const CHAIN_BLEND = 0.06;
@@ -22,6 +28,70 @@ const HIPS = JOINT_INDEX.hips, SPINE = JOINT_INDEX.spine, CHEST = JOINT_INDEX.ch
 const CHAIN = [HIPS, SPINE, CHEST, NECK, HEAD];
 const Y = new THREE.Vector3(0, 1, 0);
 const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+
+// Planted-foot pass (after the pose is final), while an action (move / clip) drives the body: a foot whose ball is
+// near the floor may not travel more than FOOT_STEP per sim step over the ground (in sim/world space when Combat gives
+// the sim pose, else fighter space), never less than the body itself moves (dodges / knockbacks keep their authored
+// feet). It lags the sampled foot by at most FOOT_LAG and converges back at that rate, so a held foot never drifts
+// away; lifted feet catch up. Locomotion (base layer) is never limited: any lag left dissolves over a few steps.
+// Feet are also kept out of the floor. Two-bone IK (anim/ik.js) only on steps where a foot is corrected.
+const FOOT_PLANT_H = 0.13;  // ball height (m): limited below (the play-test's 'planted' threshold)
+const FOOT_CATCH = 5;       // above it, a lifted foot's lag decays per step by this much per metre of ball height
+const FOOT_STEP = 0.027;    // max planted ball travel per 1/120 s step (m)
+const FOOT_FAST_BODY = 0.036; // body travel per step (m) above which planted feet simply move with it (dodges, knockbacks)
+const FOOT_LAG = 0.22;      // max distance between the displayed and the sampled ball (m)
+const FOOT_FLOOR = -0.008;  // lowest ball / heel height (m) during actions (visible penetration only)
+const FOOT_MIN_FIX = 0.002; // corrections smaller than this are skipped (2-bone IK is touchy near a straight leg)
+const HEEL_DROP = 0.06;     // heel bottom below the ankle (m, unscaled)
+const SIDES = ['L', 'R'];
+const _ft = new THREE.Vector3();
+
+// Foot-space interpolation (feet on or leaving / reaching the floor). Slerping joints between two poses whose root
+// yaw differs (a turning key pair, or a chain cross-fade out of a held strike) swings a planted foot along an arc:
+// 10-20 cm per step. When a foot is planted in EITHER pose, its ball is instead placed on the straight line between the
+// two balls (its orientation slerped) and the leg is solved with IK, so planted feet slide / pivot exactly as authored
+// and a foot leaving or reaching the floor (below FOOT_LINE_MAX_H) goes straight up / down. Between two track keys feet
+// lifted in both keys keep the joint arcs; in a cross-fade (chains, clip changes) every foot below FOOT_LINE_MAX_H
+// takes the straight line, so a foot folding into the next move never dips through the floor. Kicks keep their arcs.
+const FOOT_LINE_MAX_H = 0.45; // above this ball height (either pose) a cross-fading foot keeps the joint-space arc
+const _kA = new PoseBuffer(), _kB = new PoseBuffer(), _bf = new PoseBuffer();
+const _ba = new THREE.Vector3(), _bb = new THREE.Vector3(), _bo = new THREE.Vector3();
+const _fqa = new THREE.Quaternion(), _fqb = new THREE.Quaternion();
+/** dst (already = blend(A, B, k) in joint space): feet re-placed in foot space (all = lifted ones too). s = scale. */
+function plantBlend(dst, A, B, k, s, all = false) {
+  if (!(k > 0 && k < 1)) return;
+  for (let i = 0; i < 2; i++) {
+    const side = SIDES[i];
+    let F = legFK(A, side, s);
+    const pa = F.B.y < FOOT_PLANT_H;
+    _ba.copy(F.B); _fqa.copy(F.qA);
+    F = legFK(B, side, s);
+    const pb = F.B.y < FOOT_PLANT_H;
+    // feet lifted in both (track keys) and high feet (kicks) keep their joint arcs: a straight line through the hip
+    // region would fold the leg violently
+    if ((!all && !pa && !pb) || ((!pa || !pb) && Math.max(_ba.y, F.B.y) > FOOT_LINE_MAX_H)) continue;
+    _bb.copy(F.B); _fqb.copy(F.qA);
+    _ba.lerp(_bb, k); _fqa.slerp(_fqb, k);
+    // ankle = ball - footRotation * ballOffset
+    _bo.fromArray(FOOT_BALL).multiplyScalar(s).applyQuaternion(_fqa);
+    _ft.copy(_ba).sub(_bo);
+    legFK(dst, side, s);
+    legIK(dst, side, s, _ft, _fqa);
+  }
+}
+/** Foot-space interpolation of a (non-looping) track's planted feet between its two bracketing keys. */
+function plantTrack(track, t, out, s) {
+  const keys = track.keys;
+  if (track.loop || !keys || keys.length < 2 || !(t > keys[0].t) || t >= keys[keys.length - 1].t) return;
+  let i = 1;
+  while (i < keys.length - 1 && t > keys[i].t) i++;
+  const p = keys[i - 1], k = keys[i];
+  const span = k.t - p.t;
+  if (!(span > 1e-6)) return;
+  const u = (EASE[k.ease || 'inOut'] || EASE.inOut)((t - p.t) / span);
+  _kA.setPose(p.pose); _kB.setPose(k.pose);
+  plantBlend(out, _kA, _kB, u, s);
+}
 
 // scratch (module level: single-threaded, never held across calls)
 const _qP = new THREE.Quaternion();
@@ -60,7 +130,7 @@ export class Animator {
     this.model = model || null;
     this.skel = model?.skeleton || null;
     this.stance = 'FR';
-    this.loco = { stance: 'FR', vx: 0, vz: 0, speed: 0, guard: false, locked: true, crouch: false };
+    this.loco = { stance: 'FR', vx: 0, vz: 0, speed: 0, guard: false, locked: true, crouch: false, hasSim: false, yaw: 0, x: 0, z: 0 };
     this.phase = 0;
     this.runPhase = 0;
     this.wLoco = 0; this.wRun = 0; this.wGuard = 0; this.wCrouch = 0; this.locoAngle = 0;
@@ -73,6 +143,8 @@ export class Animator {
     this.from = new PoseBuffer();
     this.mix = new PoseBuffer().copy(STANCE_BUF.FR);  // displayed pose before additives (snapshot source)
     this.out = new PoseBuffer().copy(STANCE_BUF.FR);  // displayed pose
+    this.prevOut = new PoseBuffer().copy(this.out);   // previous sim step's pose (render interpolation)
+    this._r = new PoseBuffer();                       // render-frame blend scratch
     this.layer = 'base';          // 'base' | 'action' | 'exit'
     this.action = null;           // current handle
     this.fadeT = 0; this.fadeDur = 0;
@@ -88,6 +160,9 @@ export class Animator {
     // cloth
     this.cloth = new ClothSim(model);
     this.prevRoot = new Float32Array(4);
+    // planted-foot pass state: displayed ball XZ per foot (world when hasSim, else fighter space)
+    this.feet = { L: { x: 0, z: 0, sx: 0, sz: 0 }, R: { x: 0, z: 0, sx: 0, sz: 0 }, init: false, px: 0, pz: 0, yaw: 0, sim: false };
+    this.footPass = true;
     this._lastYaw = null;
     this.yawRate = 0;
     this.vel = new THREE.Vector3();
@@ -96,10 +171,17 @@ export class Animator {
 
   // ---------------------------------------------------------------------------------------------- inputs
 
-  /** Called every sim step by Combat: { stance, vx, vz (local m/s, +x right, +z forward), speed, guard, locked, crouch }. */
+  /**
+   * Called every sim step by Combat: { stance, vx, vz (local m/s, +x right, +z forward), speed, guard, locked, crouch,
+   * yaw?, x?, z? (sim-space facing / position; optional, preferred over the render-interpolated model.root) }.
+   */
   setLocomotion(o) {
     if (!o) return;
     const L = this.loco;
+    if (typeof o.yaw === 'number' && Number.isFinite(o.yaw)) {
+      L.hasSim = true; L.yaw = o.yaw;
+      L.x = Number.isFinite(o.x) ? o.x : 0; L.z = Number.isFinite(o.z) ? o.z : 0;
+    }
     if (o.stance && STANCE_OK[o.stance]) L.stance = o.stance;
     L.vx = +o.vx || 0;
     L.vz = +o.vz || 0;
@@ -145,6 +227,7 @@ export class Animator {
       exitFade: typeof opts.exitFade === 'number' ? opts.exitFade : (track.exitFade ?? 0.1),
       onEnd: typeof opts.onEnd === 'function' ? opts.onEnd : null,
       done: false,
+      fresh: true,          // first update shows startAt itself (time == the caller's move clock on every step)
       ax: 0, ar: 0, ay: 0,
       stop(fade = 0.1) { if (self.action === handle) self.stopAction(fade); else handle.done = true; },
     };
@@ -208,8 +291,8 @@ export class Animator {
 
   /** flinch() with a world-space direction (e.g. the `hit` event's dir). */
   flinchWorld(dirWorld, amount = 0.5) {
-    if (!dirWorld || !this.model) return;
-    const yaw = this.model.root.rotation.y, c = Math.cos(yaw), s = Math.sin(yaw);
+    if (!dirWorld || (!this.model && !this.loco.hasSim)) return;
+    const yaw = this.loco.hasSim ? this.loco.yaw : this.model.root.rotation.y, c = Math.cos(yaw), s = Math.sin(yaw);
     // world -> fighter: x' (left) = x cos - z sin, z' = x sin + z cos ; contract x is +right
     const lx = dirWorld.x * c - dirWorld.z * s, lz = dirWorld.x * s + dirWorld.z * c;
     _v.set(-lx, 0, lz);
@@ -232,11 +315,13 @@ export class Animator {
   /** Advance at sim rate and apply to the skeleton. */
   update(dt) {
     if (!(dt > 0)) dt = 1 / 120;
+    this.prevOut.copy(this.out);
     this.time += dt;
     this._updateBase(dt);
     this._updateAction(dt);
     this.out.copy(this.mix);
     this._additives(dt);
+    if (this.skel && this.footPass) this._plantFeet(dt);
     if (this.skel) this.out.applyTo(this.skel);
     if (this.trace) this._traceStep();
     // body velocity for cloth: locomotion + root-offset motion (fighter space, x = own left)
@@ -248,13 +333,25 @@ export class Animator {
     this.vel.x += (vx - this.vel.x) * 0.5; this.vel.y += (vy - this.vel.y) * 0.5; this.vel.z += (vz - this.vel.z) * 0.5;
     pr.set(r);
     if (this.skel) this.cloth.update(dt, this.out, this.vel.x, this.vel.y, this.vel.z);
-    // decaying hit flash
+    // decaying hit flash (sim rate is fine: it is a slow fade)
     const f = this.model && this.model._flash;
     if (f && f.t > 0) {
       f.t -= dt;
       const k = f.t > 0 ? f.t / f.dur : 0;
       this.model.setTint(f.color, f.amount * k * k);
     }
+  }
+
+  /**
+   * Render-rate pose: re-apply slerp(previous sim pose, current sim pose, alpha) and the cloth angles to the skeleton.
+   * Call once per displayed frame after the root lerp (alpha = the game's sim interpolation factor). No allocation.
+   */
+  render(alpha) {
+    if (!this.skel) return;
+    const a = alpha > 0 ? (alpha < 1 ? alpha : 1) : 0;
+    if (a >= 1) this.out.applyTo(this.skel);
+    else blendWrap(this._r, this.prevOut, this.out, a).applyTo(this.skel);
+    this.cloth.render(a);
   }
 
   _updateBase(dt) {
@@ -265,10 +362,10 @@ export class Animator {
       this.stance = L.stance;
     }
     const st = this.stance;
-    // turning in place: a small in-stance shuffle instead of sliding feet
+    // turning in place: a small in-stance shuffle instead of sliding feet (sim yaw when Combat provides it)
     const root = this.model && this.model.root;
-    if (root) {
-      const ry = root.rotation.y;
+    if (L.hasSim || root) {
+      const ry = L.hasSim ? L.yaw : root.rotation.y;
       let d = this._lastYaw === null ? 0 : wrapAngle(ry - this._lastYaw);
       if (d > 0.5 || d < -0.5) d = 0; // teleports / spawns
       this._lastYaw = ry;
@@ -321,7 +418,10 @@ export class Animator {
     if (this.wGuard > 0.005) base.blendJoints(GUARD_BUF[st], this.wGuard * (1 - this.wRun), UPPER);
     if (this.baseFadeT < this.baseFadeDur) {
       this.baseFadeT += dt;
-      blendWrap(base, this.baseFrom, base, ease(this.baseFadeT / this.baseFadeDur));
+      const kb = ease(this.baseFadeT / this.baseFadeDur);
+      _bf.copy(base);
+      blendWrap(base, this.baseFrom, _bf, kb);
+      if (this.skel && this.footPass) plantBlend(base, this.baseFrom, _bf, kb, this.skel.body.scale.x || 1);
     }
   }
 
@@ -330,23 +430,36 @@ export class Animator {
     if (this.layer === 'exit') {
       this.fadeT += dt;
       const k = this.fadeDur > 0 ? ease(this.fadeT / this.fadeDur) : 1;
-      if (k >= 1) { this.layer = 'base'; this.mix.copy(this.base); } else blendWrap(this.mix, this.from, this.base, k);
+      if (k >= 1) { this.layer = 'base'; this.mix.copy(this.base); }
+      else {
+        blendWrap(this.mix, this.from, this.base, k);
+        if (this.skel && this.footPass) plantBlend(this.mix, this.from, this.base, k, this.skel.body.scale.x || 1, true);
+      }
       return;
     }
     const a = this.action;
     if (!a) { this.layer = 'base'; this.mix.copy(this.base); return; }
     if (this.freezeT > 0) this.freezeT -= dt;
-    else if (!(a.done && a.hold)) { a.time += dt * a.speed; this.fadeT += dt; }
+    else if (!(a.done && a.hold)) {
+      // a freshly played action shows startAt on its first step (the caller set its own clock to startAt this step)
+      if (!a.fresh) a.time += dt * a.speed;
+      this.fadeT += dt;
+    }
+    a.fresh = false;
     let ended = false;
     if (!a.loop && a.time >= a.duration && !a.done) { a.done = true; ended = true; }
-    sampleTrack(a.track, a.loop ? a.time : (a.time < a.duration ? a.time : a.duration), this.act);
+    const ts = a.loop ? a.time : (a.time < a.duration ? a.time : a.duration);
+    sampleTrack(a.track, ts, this.act);
+    if (this.skel && this.footPass) plantTrack(a.track, ts, this.act, this.skel.body.scale.x || 1);
     if (a.ax || a.ar || a.ay) {
       const w = 1 - ease(a.duration > 0 ? a.time / (a.duration * 0.85) : 1);
       this.act.root[0] += a.ax * w; this.act.root[1] += a.ar * w; this.act.root[3] += a.ay * w;
     }
     const k = this.fadeDur > 0 ? ease(this.fadeT / this.fadeDur) : 1;
-    if (k < 1) blendWrap(this.mix, this.from, this.act, k);
-    else this.mix.copy(this.act);
+    if (k < 1) {
+      blendWrap(this.mix, this.from, this.act, k);
+      if (this.skel && this.footPass) plantBlend(this.mix, this.from, this.act, k, this.skel.body.scale.x || 1, true);
+    } else this.mix.copy(this.act);
     if (ended) {
       const cb = a.onEnd;
       if (!a.hold) this.stopAction(a.exitFade);
@@ -368,10 +481,12 @@ export class Animator {
     const layerLook = this.layer === 'action' && this.action ? this.action.look : 1;
     let wantW = 0, wantYaw = this.lookYaw, wantPitch = 0;
     const root = this.model && this.model.root;
-    if (this.hasLook && root) {
+    const L = this.loco;
+    if (this.hasLook && (root || L.hasSim)) {
       const tp = this.lookObj ? this.lookObj.position : this.lookTarget;
-      const dx = tp.x - root.position.x, dz = tp.z - root.position.z;
-      const ry = root.rotation.y, c = Math.cos(ry), s = Math.sin(ry);
+      const px = L.hasSim ? L.x : root.position.x, pz = L.hasSim ? L.z : root.position.z;
+      const dx = tp.x - px, dz = tp.z - pz;
+      const ry = L.hasSim ? L.yaw : root.rotation.y, c = Math.cos(ry), s = Math.sin(ry);
       const lx = dx * c - dz * s, lz = dx * s + dz * c; // fighter space (x = own left)
       // current head facing (fighter space)
       _qP.setFromAxisAngle(Y, out.root[3]);
@@ -384,7 +499,7 @@ export class Animator {
       let ty = tp.y;
       if (!this.lookObj && ty < 0.3) ty += 1.5; else if (this.lookObj) ty += 1.5;
       const scale = this.skel ? this.skel.body.scale.y : 1;
-      const hy = root.position.y + (1.62 + out.root[2]) * scale;
+      const hy = (root ? root.position.y : 0) + (1.62 + out.root[2]) * scale;
       const hd = Math.max(0.5, Math.hypot(lx, lz));
       wantPitch = Math.atan2(ty - hy, hd);
       wantPitch = wantPitch > 0.45 ? 0.45 : wantPitch < -0.5 ? -0.5 : wantPitch;
@@ -408,6 +523,59 @@ export class Animator {
     this._worldDelta(NECK, 0, ly * 0.33, false);
     this._worldDelta(HEAD, 0.4, ly * 0.45, fl);
     if (hasLook) { addLocal(out, NECK, -lp * 0.4, 0, 0); addLocal(out, HEAD, -lp * 0.6, 0, 0); }
+  }
+
+  /** Planted-foot pass on `out` (see FOOT_* above). */
+  _plantFeet(dt) {
+    const L = this.loco, F = this.feet, s = this.skel.body.scale.x || 1;
+    const sim = L.hasSim;
+    const yaw = sim ? L.yaw : 0, px = sim ? L.x : 0, pz = sim ? L.z : 0;
+    const c = Math.cos(yaw), sn = Math.sin(yaw);
+    // how far the body itself travelled this step (planted feet move with a FAST body: dodges, knockbacks)
+    let body = 0;
+    if (F.init && F.sim === sim) {
+      body = Math.hypot(px - F.px, pz - F.pz);
+      if (body > 0.5 || Math.abs(wrapAngle(yaw - F.yaw)) > 0.8) F.init = false;   // teleport / respawn
+    } else F.init = false;
+    const reset = !F.init;
+    F.init = true; F.sim = sim; F.px = px; F.pz = pz; F.yaw = yaw;
+    const step = body > FOOT_FAST_BODY ? body * 1.1 : FOOT_STEP;
+    const limit = this.layer !== 'base';
+    // a move may exempt a deliberately skimming foot (floor sweeps: track.freeFeet = ['footR'])
+    const free = this.layer === 'action' && this.action && this.action.track ? this.action.track.freeFeet : null;
+    for (let i = 0; i < 2; i++) {
+      const side = SIDES[i], st = F[side];
+      const fk = legFK(this.out, side, s);
+      // sampled ball in world (sim) space: model root rotation y = yaw, fighter x = own left
+      const bx = px + fk.B.x * c + fk.B.z * sn, bz = pz - fk.B.x * sn + fk.B.z * c;
+      const h = fk.B.y;
+      if (reset || (free && free.indexOf(side === 'L' ? 'footL' : 'footR') >= 0)) { st.x = bx; st.z = bz; }
+      else if (!limit) {
+        // locomotion: no limit, the lag behind the sampled foot (if any) fades out
+        st.x = bx + (st.x - st.sx) * 0.6; st.z = bz + (st.z - st.sz) * 0.6;
+      } else if (h > FOOT_PLANT_H) {
+        // lifted: the lag behind the sampled foot decays (faster the higher the foot is), never a one-step snap
+        const keep = Math.max(0, Math.min(0.85, 1 - (h - FOOT_PLANT_H) * FOOT_CATCH));
+        st.x = bx + (st.x - st.sx) * keep; st.z = bz + (st.z - st.sz) * keep;
+      } else {
+        // planted: travels at most `step` toward the sampled foot
+        let dx = bx - st.x, dz = bz - st.z;
+        const d = Math.hypot(dx, dz);
+        if (d > step) { st.x += dx * (step / d); st.z += dz * (step / d); } else { st.x = bx; st.z = bz; }
+        dx = st.x - bx; dz = st.z - bz;
+        const lag = Math.hypot(dx, dz);
+        if (lag > FOOT_LAG) { st.x = bx + dx * (FOOT_LAG / lag); st.z = bz + dz * (FOOT_LAG / lag); }
+      }
+      st.sx = bx; st.sz = bz;
+      // correction back in fighter space
+      const wx = st.x - bx, wz = st.z - bz;
+      const fx = wx * c - wz * sn, fz = wx * sn + wz * c;
+      const low = Math.min(h, fk.A.y - HEEL_DROP * s);
+      const lift = limit && low < FOOT_FLOOR ? FOOT_FLOOR - low : 0;
+      if (fx * fx + fz * fz < FOOT_MIN_FIX * FOOT_MIN_FIX && lift < FOOT_MIN_FIX) continue;
+      _ft.set(fk.A.x + fx, fk.A.y + lift, fk.A.z + fz);
+      legIK(this.out, side, s, _ft);
+    }
   }
 
   /** Rotate joint j by (flinch * fk, yaw) in fighter space; _qP holds its parent's world rotation and is advanced. */
@@ -459,6 +627,6 @@ export class Animator {
   }
 
   /** Snap cloth springs (after spawning / teleporting the fighter). */
-  resetSecondary() { this.cloth.reset(); this.prevRoot.set(this.out.root); this.vel.set(0, 0, 0); }
+  resetSecondary() { this.cloth.reset(); this.prevRoot.set(this.out.root); this.prevOut.copy(this.out); this.vel.set(0, 0, 0); this.feet.init = false; }
 }
 

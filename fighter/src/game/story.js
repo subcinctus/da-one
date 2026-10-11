@@ -40,7 +40,7 @@ export const CHAPTER_STORY = {
 /** Victory card per boss: one serious line + one dry one. */
 export const VICTORY = {
   tadao: ['Tadao closes his ledger for the last time.', 'His final invoice is marked "paid in full".'],
-  madame_shu: ['The lanterns go out one by one along Canal Street.', 'The stalls will reopen under new management. The noodles may improve.'],
+  madame_shu: ['The lanterns go out one by one along Canal Street.', 'The stalls will reopen under new management.'],
   brick: ['Brick goes down like a dropped barbell.', 'For the first time in eleven years, he takes a rest day.'],
   mr_golden: ['Mr. Golden sits down in his own garden and does not get up.', 'The deed is still in his pocket. You leave him the pen.'],
 };
@@ -105,10 +105,11 @@ export function agingLine(age) {
   return AGE_LINES[21];
 }
 
-/** Game over (age 70): the talisman stops. */
+/** Game over (age 70): the talisman stops. `replay` is shown when the restart age is 55+ (and an earlier chapter exists). */
 export const GAME_OVER = {
   title: 'The talisman goes quiet.',
   lines: ['Even jade has its limits.', 'You begin the chapter again: younger, and considerably more annoyed.'],
+  replay: 'Replay an earlier chapter from Chapters to arrive younger.',
 };
 
 /** After the final chapter. */
@@ -126,7 +127,7 @@ export const CREDITS = [
   ['Built with', 'three.js, WebAudio, and nothing downloaded'],
   ['Inspired by', 'Sloclap\'s Absolver and Sifu'],
   ['Every mesh, pose and sound', 'Procedural. No assets were harmed.'],
-  ['Special thanks', 'Master Lan, who would have hated the noodles'],
+  ['Special thanks', 'Master Lan, who would have corrected everyone\'s stance'],
 ];
 
 /** Style select copy (abilities on the defend button). */

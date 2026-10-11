@@ -43,7 +43,7 @@ One self-contained HTML file. three.js r160 via esbuild. No assets, no network: 
   - Use `alpha` to interpolate visual transforms between the previous and current sim states if you need smoothness. Fighters do this themselves (§5).
 - **Hit feel:**
   - `game.hitstop(s)` freezes the simulation for `s` real seconds; typical values are 0.03–0.09.
-  - `game.slowmo(scale, s)` slows the simulation down.
+  - `game.slowmo(scale, s)` slows the simulation down for `s` real seconds, then eases back to 1 (exponential, rate 18/s: about 0.15 s to 95%, 0.23 s from 0.25 to 1; no one-frame snap). A new call sets its scale at once. A `timeScale` set to 0 by hand (test harnesses) is never eased.
   - Both are owned by core; combat and FX call them.
 
 ## 2. Loop & systems (`core/game.js`, `main.js`)
@@ -70,7 +70,11 @@ One self-contained HTML file. three.js r160 via esbuild. No assets, no network: 
 
 ## 3. Input (`core/input.js`)
 
-Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `input.pressed(a)`, `input.consume(a, window)`, `input.buffered(a)`, `input.stanceFlick()`, `input.padType` (`'xbox' | 'ps' | 'generic' | null`), and `input.rumble(strong, weak, ms)`. UI code passes `force = true` to read input while a UI layer is open. Virtual input for tests and overlays: `setVirtual(action, bool)`, `setVirtualMove(x, y)`, `setVirtualLook(x, y)`, `virtualStance(st)`.
+Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.lookDelta {x, y}`, `input.down(a)`, `input.pressed(a)`, `input.consume(a, window)`, `input.buffered(a)`, `input.stanceFlick()`, `input.padType` (`'xbox' | 'ps' | 'generic' | null`), `input.gamepadBlocked`, and `input.rumble(strong, weak, ms)`. UI code passes `force = true` to read input while a UI layer is open. Virtual input for tests and overlays: `setVirtual(action, bool)`, `setVirtualMove(x, y)`, `setVirtualLook(x, y)`, `virtualStance(st)`.
+
+- **Look.** `input.look` is the right stick (plus virtual look) only: a per-second **rate**, −1..1, that the camera multiplies by `dt`. `input.lookDelta` is the mouse motion of this frame as an **angle delta** in 60 Hz stick-seconds (`dx × 0.06 × mouseSensitivity / 60`, y inverted): the camera multiplies it by the same rad/s factor as `look` but **not** by `dt`, so mouse sensitivity does not depend on the frame rate. Never fold the mouse back into `look`.
+- **Pad type.** Xbox is tested first (`xbox|045e|xinput`), then PlayStation (`054c|playstation|dualsense|dualshock`), else `'generic'`. A bare "Wireless Controller" is not a Sony marker: Bluetooth Xbox pads report it too.
+- **Blocked Gamepad API.** When `navigator.getGamepads()` throws (an iframe permissions policy), `input.gamepadBlocked` becomes true and input emits `gamepad { connected: false, blocked: true }` and `gamepadBlocked` once. Keyboard and mouse keep working. The title shows a one-line notice and the HUD a one-time toast; a blocked notice never opens the pause menu.
 
 | Action | Pad (Xbox / PS) | Keyboard / mouse | Meaning |
 |---|---|---|---|
@@ -86,7 +90,7 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
 | pause | Start / Options | Esc, P | |
 | deck | Back / Share | I | combat deck (only at rest points) |
 
-`input.stanceFlick()` returns the stance chosen this frame (`'FR' | 'FL' | 'BR' | 'BL'`) or `null`. Up = front, down = back, right = R, left = L.
+`input.stanceFlick()` returns the stance chosen this frame (`'FR' | 'FL' | 'BR' | 'BL'`) or `null`. Up = front, down = back, right = R, left = L. A flick is a **new** quadrant after the stance button went down: when RT (or R) goes down, a right stick (or WASD) deflection that has already held for 2+ polls only seeds the last quadrant and does not switch (steering the camera then pressing RT is not a flick); a deflection that arrives with the press (same or previous poll) still counts as a chord. From then on, every change of quadrant (including from centre) is a flick. Number keys and `virtualStance` are unaffected.
 
 ## 4. Rig & poses (`anim/rig.js`, core)
 
@@ -152,6 +156,9 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
 - `freezeAction(seconds)` holds the current action pose (the strike hold in §6b).
 - `stopAction(fade = 0.1)`.
 - `update(dt)`: advance at sim rate and apply to the skeleton. Combat calls this from `fixedUpdate`.
+- `render(alpha)`: re-apply a blend of the last two sim poses (and the cloth angles) at the game's sim interpolation factor. Combat calls it once per displayed frame from `update(dt, alpha)`, after the root lerp, so limbs move every displayed frame at 144 Hz and in slow motion. A fighter whose owner never calls it still animates at sim rate.
+- `setLocomotion` also takes optional `yaw`, `x`, `z`: the fighter's sim-space facing and position. When given, the turn-in-place shuffle, the planted-foot pass, look-at and flinches use them instead of the render-interpolated `model.root`.
+- **Displayed time = move time.** A freshly played action shows `startAt` on its first step (it does not advance on the step it starts), so the displayed action time always equals Combat's `moveTime`: the pose never runs a sim step ahead of the move clock.
 - `lookAt(targetPos | null)`: subtle head/chest aim at the opponent.
 - `strikePoint(name, out)`.
 
@@ -170,6 +177,7 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
 `src/combat/moves/index.js` exports:
 - `MOVES`: an object of move id → move.
 - `STARTER_DECK`.
+- `STARTER_EXTRA`: move ids a new run has **learned but not equipped** (one per stance, each ending in a different stance), so the first rest point already offers a real deck choice. Flow adds them to `progress.learned` in new runs and in loaded saves (consumers fall back to `[]`).
 - `ENEMY_DECKS`: named decks for archetypes and bosses.
 - `FOCUS_MOVES` = `{ strike, sweep }`, two move ids.
 
@@ -194,6 +202,8 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
   chainIn: 0.08,                        // COMBO FLOW: when chained from another attack, start this track at this time
                                         //   (skips the settle-from-stance part of the wind-up). Default 40% of startup.
   holdOut: 0.05,                        // COMBO FLOW: how long this move's strike pose lingers when chained out of it
+  hitstop: 0.06,                        // hit pause on a clean hit (seconds); default by weight (0.045 / 0.06 / 0.085)
+  chargeAt: 0.12,                       // charge moves: the CHARGE POINT, the authored anticipation key the charge holds on
   props: { break, stop, double, charge, duck, jump, strafe, knockdown },  // booleans, all optional
   hits: [{ t: 0.20, dur: 0.07, limb: 'handR', damage: 8 }], // optional: multiple hit windows (double)
   keys: [ { t: 0, pose: 'stance:FR' }, ..., { t: 0.57, pose: 'stance:FL' } ], // full-body pose keys
@@ -217,6 +227,9 @@ Gameplay reads: `input.move {x, y}`, `input.look {x, y}`, `input.down(a)`, `inpu
 Hard rules:
 - The first key is `'stance:<start>'` at t = 0, and the last key is `'stance:<end>'` at t = duration.
 - The anticipation, strike and follow-through in between are readable: the limb reaches full extension at the hit time.
+- **Hit keys ease `'in'`.** The segment that ends on the hit key (t = startup) uses `'in'`: the limb accelerates INTO contact (contact speed about 2× the segment average). Never `'snap'` or another decelerating ease there: the body would pop 40°+ in one sim step and the limb would already be still when the hit lands. Wind-up keys default to `'inOut'`, keys inside the active window to `'linear'`, recovery keys to `'out'`.
+- **Follow-through `'hold'` key.** The key at the end of the active window (`'hold'`) is a real follow-through pose, not a copy of the hit key: the limb keeps travelling a little past contact (pass `'out'` explicitly), so the active window is never dead still and the frozen chain form (§6b) reads as a strike carried through.
+- **Charge point.** A `charge` move's `chargeAt` names the authored anticipation key the charge holds on (always before the first hit window). Combat and AI both use it; neither derives a charge point from startup.
 - Mirrored variants can be produced with `mirrorTrack`.
 
 **Interconnected combos (Absolver).** Every attack ends in a stance, and the next attack comes from that stance's slots, so the whole library is one flow graph:
@@ -231,7 +244,8 @@ Chained attacks must feel **quick and fluid**, never like animations playing bac
 
 - **Standalone.** With no follow-up, the move plays fully, including its recovery into the end stance.
 - **Chained.** A follow-up attack is buffered (light or heavy) by the time the current move reaches `cancel`:
-  1. **The recovery is skipped.** At the end of the current move's last active window, the animator **freezes the strike pose for `holdOut`** (default 0.05 s, about 6 frames at 120 Hz). The last attack's form visibly stays for a moment.
+  1. **The recovery is skipped.** At the end of the current move's last active window, the animator **freezes the strike pose for `holdOut`** (default 0.05 s, about 6 frames at 120 Hz). The last attack's form visibly stays for a moment. For a strike that **connected**, the hitstop already served on its hits counts toward the hold: `hold = max(HOLD_MIN = 0.025, holdOut − hitstop served)`, so a hit does not freeze twice. Each move's own `hitstop` is used (§6).
+     A **late chain** (the follow-up pressed during the recovery, after the strike) gets **no hold**: the pose is already relaxing, so the follow-up cross-fades straight from the current pose. Late defensive cancels do the same.
   2. **The follow-up starts `chainIn` seconds into its own track** (default 40% of its startup), cross-fading from the frozen strike pose over **`CHAIN_BLEND = 0.06 s`** (never below 0.04 s). That very short blend is the "tiniest glimpse" of the limbs moving from one form to the next: no snap, no full recovery.
   3. The follow-up's simulated move time starts at `chainIn`, so its real strike comes at `startup − chainIn` after the blend begins. Chains are faster than standalone attacks but still readable and reactable.
   4. The follow-up comes from the slots of the previous move's **end stance**.
@@ -275,7 +289,7 @@ Chained attacks must feel **quick and fluid**, never like animations playing bac
 
 ```js
 intent = { moveX, moveZ,            // desired world-space move direction * magnitude (0..1)
-           light, heavy,            // attack presses (consumed on use; Combat buffers 0.2 s)
+           light, heavy,            // attack presses (consumed on use; Combat buffers them, see Input buffer below)
            guard,                   // held
            dodge, dodgeDir: {x, z}, // press + world direction (zero = back)
            defend,                  // style ability press
@@ -284,6 +298,8 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
            feint,                   // guard tap during own startup
            lockTarget }             // Fighter or null (player lock-on)
 ```
+
+**Input buffer.** A press waits 0.2 s (`T.BUFFER`). A press made during a committed stretch (dodge, avoid, parry, absorb, recover, a stance switch, or an attack past its strike) ages from when its action becomes **legal**, not from the press, and never waits longer than 0.6 s in total (`T.BUFFER_MAX_WAIT`): stale presses never fire. Stuns reset this. A stance flick in the same frame as an attack press is applied **before** the attack, so RT flick + X attacks from the new stance.
 
 **Rules (Absolver feel):**
 - **Facing.**
@@ -330,7 +346,7 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
     - `input.rumble`, `cameraRig.shake`, FX and audio;
     - focus gain for the attacker.
   - Combo hits on a fighter already in hitstun use reduced hitstun (scaling) so infinite juggles are impossible.
-- **Charge.** Hold the attack button on `charge` moves (up to 0.6 s extra) for up to +60% damage and `break` at full charge.
+- **Charge.** Hold the attack button on `charge` moves (up to 0.6 s extra) for up to +60% damage and `break` at full charge. The move holds on its authored `chargeAt` key (with a small alternating tremble so the hold reads as straining), not a per-step freeze mid-swing. Events: `chargeStart`, `chargeFull` (break earned), `chargeRelease` (the strike goes), `chargeCancel` (hit or feint).
 - **Focus (Sifu).**
   - The meter (0–100) fills from landing hits (+4), parries / avoids (+15), and blocks (+3).
   - `focus` + `light` at ≥ 50 performs `FOCUS_MOVES.strike`, an unblockable fast stun.
@@ -348,7 +364,8 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
 | Event | Payload | Emitter |
 |---|---|---|
 | `ready`, `gameStart` | `{}` | core / flow |
-| `pauseChanged`, `uiChanged`, `settingsChanged`, `gamepad` | — | core |
+| `pauseChanged`, `uiChanged`, `settingsChanged`, `gamepad` | — (`gamepad`: `{ connected, id }`, or `{ connected: false, blocked: true }` once when the Gamepad API is blocked) | core |
+| `gamepadBlocked` | `{ reason }` (once: the embedding page forbids the Gamepad API) | core |
 | `attackStart` | `{ fighter, move }` | combat |
 | `attackWhiff` | `{ fighter, move }` | combat |
 | `hit` | `{ attacker, defender, move, damage, point: Vector3, dir: Vector3, heavy, counter, killed }` | combat |
@@ -357,6 +374,7 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
 | `avoided` | `{ attacker, defender, move, kind: 'duck' / 'left' / 'right' / 'jump' / 'dodge' }` | combat |
 | `absorbed` | `{ attacker, defender, move, point, pierced }` | combat |
 | `feint` | `{ fighter, move }` | combat |
+| `chargeStart`, `chargeFull`, `chargeRelease`, `chargeCancel` | `{ fighter, move, ... }` (`chargeStart` adds `max`, the longest hold) | combat |
 | `stanceChanged` | `{ fighter, from, to }` | combat |
 | `staminaOut` | `{ fighter }` | combat |
 | `guardBroken` | `{ fighter }` | combat |
@@ -369,6 +387,7 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
 | `bossIntro`, `bossPhase`, `bossDefeated` | `{ bossId, ... }` | encounters |
 | `chapterStart`, `chapterComplete` | `{ chapterId }` | flow |
 | `playerAged` | `{ age, deaths, counter }` | flow |
+| `deathCounterRelief` | `{ counter, reason: 'room' }` (a fight room cleared without dying in it) | flow |
 | `gameOver` | `{ chapterId }` | flow |
 | `dialogue` | `{ speaker, text, mood, block }` (`block`: true = modal dialogue box that pauses the sim) | encounters / flow → menus show it |
 | `enemyTelegraph` | `{ fighter, move }` (an AI is about to attack: brief readable wind-up) | ai |
@@ -382,21 +401,27 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
 **`game.flow.progress`:**
 
 ```js
-{ age: 20, deaths: 0, deathCounter: 0, chapterId: 'laundromat', chapterEntryAge: 20,
+{ age: 20, deaths: 0, deathCounter: 0, chapterId: 'laundromat', chapterEntryAge: 20, chapterEntryCounter: 0,
   style: 'forsaken', deck, learned: Set/array of moveIds, learn: {moveId: points},
-  completedChapters: [], bestAge: {} }
+  completedChapters: [], bestAge: {},
+  entryAge: {},       // chapterId -> lowest age the chapter was entered with
+  entryCounter: {} }  // chapterId -> the death counter that came with entryAge (0..50)
 ```
+
+A new run (and every loaded save) has the starter deck's moves and `STARTER_EXTRA` learned.
 
 Saved to `localStorage` (`laststance.save.v1`), with every access wrapped in try/catch.
 
 **Aging (Sifu).**
 - On the player's death: `deathCounter += 1` and `age += deathCounter`.
-- If `age >= 70`, the game is over (`gameOver`): restart the chapter at `chapterEntryAge` with a fresh roster.
+- If `age >= 70`, the game is over (`gameOver`): restart the chapter at `chapterEntryAge` / `chapterEntryCounter` with a fresh roster, plus **slack** (`progress.gameOverRestart`): the counter drops until three more deaths fit under 70 (`age + 3 × counter + 6 < 70`), and if even counter 0 cannot fit them (entry age 64+) the age drops to 63. The result becomes the chapter's entry state, so repeated game overs are stable and a chapter can never lock into one-death game overs. When the restart age is 55+ (and an earlier chapter exists), the game over card adds "Replay an earlier chapter from Chapters to arrive younger."
+- **Relief.** Clearing a fight room without dying in it lowers the counter by 1 (minimum 0; `deathCounterRelief`). Defeating a boss lowers it by 1.
+- **Entry state.** `entryAge` / `entryCounter` record the best state each chapter was entered with (lowest age, then lowest counter at that age). Chapter select replays from it when it is younger than the current state, so a replay (for example Pause → Quit to Title → Chapters) equals a game over and is never better than one. It never resets the counter to 0.
 - Otherwise show a short aging card. Keep it quietly humorous and tied to the age: "31. Your knees file a formal complaint."
 - Then call `revivePlayer()`: stand up where you fell (`getup`), full health, and the enemies keep their health.
 - **Age modifiers:** damage ×(1 + (age − 20) × 0.012) and max health ×(1 − (age − 20) × 0.008). Combat reads `flow.ageDamageMult()` / `flow.ageHealthMult()`.
 
-**Flow API:** `showTitle()`, `quickStart()`, `startChapter(id)`, `revivePlayer()`, `completeChapter()`, `ageDamageMult()`, `ageHealthMult()`, `chapterId`.
+**Flow API:** `showTitle()`, `quickStart()`, `startChapter(id)`, `playChapter(id)` (chapter select), `revivePlayer()`, `completeChapter()`, `ageDamageMult()`, `ageHealthMult()`, `chapterId`.
 
 **Chapter flow:**
 1. A story card, written as short serious lines plus one dry joke.
@@ -409,6 +434,10 @@ Saved to `localStorage` (`laststance.save.v1`), with every access wrapped in try
 8. After the final chapter: the epilogue.
 
 **Rest points:** the deck editor is available between rooms, at the gate after a room is cleared ("Press Back to edit your deck").
+
+**Boss names** in `data/chapters.js` carry a quoted epithet (`'Tadao "The Accountant"'`): the boss title card and the boss bar show it; speaker plates and the victory card use the plain name (`splitBossName`).
+
+**HUD layout (keep the fight clear).** Mid-fight barks are subtitles at the **top centre** on a light plate; blocking dialogue stays at the bottom. The boss block stays low (bottom 2.2em) at every width; only its width shrinks. The gameplay HUD and its contextual prompts hide under opaque screens, blocking dialogue and camera cinematics (`cameraRig.inCinematic`, e.g. the boss intro). The lock-on chevron sits just above the target's health bar, never over the body. The HUD caches the viewport size (`onResize`) and projects all world markers before writing any style, so it never forces a synchronous layout per frame.
 
 ## 10. World, Camera, FX, Audio
 
@@ -466,6 +495,9 @@ Saved to `localStorage` (`laststance.save.v1`), with every access wrapped in try
 - **Crowd director (Sifu):** at most **2 enemies attack at once** (attack tokens). Others circle at 3–5 m, feint, and taunt.
 - **Reactions:** chance-based block / parry / avoid scaled by archetype and chapter, punishing whiffs, respecting stamina, and spacing to their move reach.
 - **Fairness:** a short telegraph before every attack, plus a reaction delay of 0.15–0.35 s.
+  - The delay runs on a **string clock**: the later hits of a player string are timed from its opener (the reaction to the string has already happened), so they can be answered.
+  - A **read** (an opener the player keeps repeating) is answered at the 0.15 s fairness floor, never sooner.
+  - **Pressure guard:** an enemy squared up to a player who keeps swinging raises its guard now and then. This is anticipation, not a reaction, and it is dropped to attack.
 
 **`Encounters` (system `game.encounters`).**
 - `startChapter(chapterId, layout)` and `getRoster(chapterId)`.

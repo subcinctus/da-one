@@ -31,7 +31,7 @@ function genericInfo(stance, kind) {
     id: 'generic_' + key, move: null, start: stance, end: stance, weight: heavy ? 'medium' : 'light',
     height: heavy ? 'mid' : 'high', path: 'thrust', limb: 'handR', startup: heavy ? 0.3 : 0.18,
     firstHit: heavy ? 0.3 : 0.18, lastEnd: heavy ? 0.38 : 0.24, duration: heavy ? 0.74 : 0.5, cancel: heavy ? 0.42 : 0.3,
-    chainIn: heavy ? 0.12 : 0.07, holdOut: 0.05, reach: heavy ? 1.9 : 1.6, arcHalf: 0.5, lunge: 0.3,
+    chainIn: heavy ? 0.12 : 0.07, holdOut: 0.05, reach: heavy ? 1.9 : 1.6, arcHalf: 0.5, lunge: 0.3, chargeAt: heavy ? 0.195 : 0.117,
     damage: heavy ? 12 : 7, stamina: heavy ? 14 : 8, hits: 1, props: {}, brk: false, stop: false, knockdown: false,
     charge: false, duck: false, jump: false, strafe: false, signature: false, focus: false,
   };
@@ -76,6 +76,9 @@ export function info(m) {
     lunge: Math.max(0, num(m.lunge, 0.3)),
     damage: num(m.damage, 8), stamina: Math.max(0, num(m.stamina, 8)), hits, props,
     brk: !!props.break, stop: !!props.stop, knockdown: !!props.knockdown, charge: !!props.charge,
+    // move time where a charge move holds (same rule as combat/movedata.moveInfo.chargeAt): the authored
+    // anticipation key, else 0.65 x the first hit time, always at least 0.04 s before the strike
+    chargeAt: Math.min(Math.max(0.01, num(m.chargeAt, firstHit * 0.65)), Math.max(0.01, firstHit - 0.04)),
     duck: !!props.duck, jump: !!props.jump, strafe: !!props.strafe,
     signature: !!m.boss, focus: !!m.focus,
   };
@@ -117,10 +120,11 @@ export function signaturesOf(deck) {
   return out;
 }
 
-/** Longest reach among the moves of a deck (spacing for circling / punishes). */
+const SLOT_KINDS = ['light', 'heavy'];
+/** Longest reach among the moves of a deck (spacing for circling / punishes). Allocation-free. */
 export function deckReach(deck) {
   let r = 0;
-  for (const st of STANCE_IDS) for (const k of ['light', 'heavy']) r = Math.max(r, deckInfo(deck, st, k).reach);
+  for (let i = 0; i < STANCE_IDS.length; i++) for (let k = 0; k < SLOT_KINDS.length; k++) r = Math.max(r, deckInfo(deck, STANCE_IDS[i], SLOT_KINDS[k]).reach);
   return r || 1.6;
 }
 

@@ -9,6 +9,7 @@
 // absorbed (counters + habits), knockdown (barks). Emitted: enemyTelegraph, aiFeint, bossPhase, dialogue.
 import { Brain } from './brain.js';
 import { Director } from './director.js';
+import { deckReach } from './moveinfo.js';
 import { ARCHETYPES, BOSSES, resolveProfile } from './archetypes.js';
 import { KNOCKDOWN_LINES, lineDuration } from '../levels/dialogue.js';
 
@@ -48,6 +49,12 @@ export class AI {
     this.brains = [];
     this.director = new Director(this);
     this.habits = new Habits();
+    /** The player's last 4 string openers (move ids): an opener in here is a read (answered at the 0.15 s floor). */
+    this.reads = ['', '', '', ''];
+    this._readIdx = 0;
+    /** Sim time of the player's last attackStart, and the reach of its deck (pressure guard). */
+    this.playerAttackAt = -1e9;
+    this.playerReach = 1.6;
     this.chapterIndex = 1;
     this.enabled = true;
     this._seed = 1337;
@@ -71,7 +78,7 @@ export class AI {
       ev.on('absorbed', (e) => { if (!e?.pierced) this._onDefence(e, 'absorb'); });
       ev.on('avoided', (e) => this._onDefence(e, e?.kind === 'dodge' ? 'dodge' : 'avoid', e?.kind));
       ev.on('knockdown', (e) => this._onKnockdown(e));
-      ev.on('chapterStart', () => this.habits.reset());
+      ev.on('chapterStart', () => { this.habits.reset(); this.resetReads(); });
     }
     this._installDebug();
   }
@@ -129,6 +136,16 @@ export class AI {
   /** Chapter difficulty (1..4): brains attached afterwards use it. */
   setDifficulty(index = 1) { this.chapterIndex = Math.max(1, Math.min(4, index | 0 || 1)); }
 
+  /** True when the player opened one of its last 4 strings with move `id` (the enemies have seen it coming). */
+  isRead(id) {
+    const r = this.reads;
+    for (let i = 0; i < r.length; i++) if (r[i] === id) return true;
+    return false;
+  }
+
+  /** Forget the player's openers (new chapter). */
+  resetReads() { for (let i = 0; i < this.reads.length; i++) this.reads[i] = ''; this._readIdx = 0; this.playerAttackAt = -1e9; }
+
   /** The living player, or null. */
   target(f) {
     const p = this.game.player;
@@ -160,7 +177,11 @@ export class AI {
     if (!f || !e.move) return;
     const now = this.game.time;
     if (f === this.game.player) {
+      this.playerAttackAt = now;
+      if (!e.chained) this.playerReach = deckReach(f.deck);
+      // threats are judged against the openers seen BEFORE this one, then this opener joins the ring
       for (let i = 0; i < this.brains.length; i++) this.brains[i].onThreat(f, e.move, !!e.chained, now);
+      if (!e.chained && e.move.id) this.reads[this._readIdx++ & 3] = e.move.id;
       return;
     }
     const b = f.ai && f.ai.fighter === f ? f.ai : this.brainOf(f);

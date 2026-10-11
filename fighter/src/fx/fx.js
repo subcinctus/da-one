@@ -1,6 +1,6 @@
 // FX system (system `fx`, FIGHTER.md §10): subtle, Absolver-like hit effects only. No fog / bloom / post.
-//   trail(fighter, limb, duration)   tapered limb ribbon (also armed automatically from 'attackStart' so it starts a
-//                                    little before the active frames and stops on the §6b strike hold)
+//   trail(fighter, limb, duration)   tapered limb ribbon (also armed automatically from 'attackStart' over each hit's
+//                                    strike segment: wind-up extreme -> end of the hit window; stops on the §6b hold)
 //   hit(point, dir, heavy, opts)     2-3 frame white flash + 4-10 tiny angular shards along dir; heavy: thin ring
 //   block(point, opts)               small grey-blue spark (guard break: + ring)
 //   parry(point, opts)               crisp bright flash, thin rings, a short time-scale dip (player involved)
@@ -10,6 +10,8 @@
 //   death(fighter)                   brief fade of the mask colour (restored on revive)
 //   dust(point, amount)              tiny puff, only where a body lands (knockdown / death)
 //   learned(fighter)                 jade ground ring + rising streaks
+//   glint(fighter, limb, alpha)      0.12 s faint sparkle on a limb: the wind-up tell of guard breakers / knockdowns
+//                                    ('enemyTelegraph' heavy / break / knockdown) and of a full charge ('chargeFull')
 // Draw calls: sprites 1 + trails 1 + ghosts (0-2, only while visible) <= 4. Everything pooled; zero per-frame
 // allocations. FX listens to combat events itself; combat may also call trail() directly (it does, per hit window).
 // Emits 'bodyLanded' { fighter, point, kind: 'knockdown' | 'death' } when a falling body reaches the floor (audio).
@@ -18,10 +20,10 @@ import { SpriteField } from './sprites.js';
 import { TrailField } from './trails.js';
 import { GhostPool } from './ghost.js';
 import { Vignette } from './vignette.js';
-import { COLORS, HIT, flash, star, ring, shards, puff, inward, rising } from './recipes.js';
+import { COLORS, HIT, flash, star, ring, shards, puff, inward, rising, glint } from './recipes.js';
 import { displayRGB } from './material.js';
 
-/** Trail look per move weight: lead = seconds of wind-up shown before the hit window. */
+/** Trail look per move weight. Trails start at the strike segment (last key before the hit); 2 x lead is the fallback. */
 const TRAIL = {
   light: { lead: 0.07, life: 0.12, width: 0.044, alpha: 0.8 },
   medium: { lead: 0.09, life: 0.13, width: 0.054, alpha: 0.84 },
@@ -33,6 +35,19 @@ const DUST = {
   laundromat: [0.86, 0.86, 0.82], market: [0.56, 0.6, 0.62], gym: [0.95, 0.95, 0.93], tower: [0.82, 0.78, 0.7],
 };
 const MASK_DIM = new THREE.Color(0x55585e);
+
+/** Start of the strike segment that lands at move time `t`: the last key before it, else t - 2 x lead. */
+function strikeFrom(m, t, lead) {
+  const keys = m && m.keys;
+  let from = -1;
+  if (Array.isArray(keys)) {
+    for (let i = 0; i < keys.length; i++) {
+      const kt = keys[i] && keys[i].t;
+      if (typeof kt === 'number' && kt < t - 1e-4 && kt > from) from = kt;
+    }
+  }
+  return from >= 0 ? from : Math.max(0, t - 2 * lead);
+}
 const MAX_WATCH = 8;
 
 export class FX {
@@ -77,9 +92,18 @@ export class FX {
 
   // ============================================================================================ public API
 
-  /** Limb trail on `fighter` following STRIKE_POINT `limb` for `duration` seconds of sim time. */
+  /**
+   * Limb trail on `fighter` following STRIKE_POINT `limb` for `duration` seconds of sim time. While the fighter is
+   * attacking, emission never runs past the move's last active frame (no ribbon along the withdrawal).
+   */
   trail(fighter, limb, duration = 0.12) {
     if (!this.trails || !fighter || !fighter.animator) return;
+    const info = fighter.state === 'attack' && fighter.atk ? fighter.atk.info : null;
+    if (info && typeof info.lastEnd === 'number' && typeof fighter.moveTime === 'number') {
+      const left = info.lastEnd - fighter.moveTime;
+      if (left <= 0) return;
+      if (duration > left) duration = left;
+    }
     const l = limb || (fighter.move && fighter.move.limb) || 'handR';
     this._trailLook(fighter, (fighter.move && fighter.move.weight) || 'light', l);
     this.trails.extend(fighter, l, duration, this.game.time, this._to);
@@ -223,6 +247,17 @@ export class FX {
     puff(F, x, y + 1.15, z, 0, 0.1, 0, 0.1, 0.45, 0.35, COLORS.jadeLight, 0.2, 1);
   }
 
+  /** Faint 0.12 s glint on `fighter`'s striking limb (telegraph of a guard breaker / knockdown, full charge). */
+  glint(fighter, limb, alpha = 0.55) {
+    const F = this.sprites;
+    const an = fighter && fighter.animator;
+    if (!F || !an || typeof an.strikePoint !== 'function') return;
+    const p = an.strikePoint(limb || 'handR', this._v);
+    if (!isFinite(p.x) || !isFinite(p.y) || !isFinite(p.z)) return;
+    const v = fighter.velocity;
+    glint(F, p.x, p.y, p.z, v ? v.x || 0 : 0, v ? v.z || 0 : 0, 0.085, 0.12, COLORS.glint, alpha);
+  }
+
   /** Kahlt heal: a little jade sparkle on the healer. */
   heal(fighter) {
     const F = this.sprites;
@@ -267,6 +302,13 @@ export class FX {
       this.absorb(e.point, o);
     });
     on('absorbHeal', (e) => this.heal(e.fighter));
+    // wind-up tells: only guard breakers / knockdowns / heavy strings (the AI flags heavy = heavy weight or break)
+    on('enemyTelegraph', (e) => {
+      const m = e.move, pr = m && m.props;
+      if (e.counter || !e.fighter || !(e.heavy || (pr && (pr.break || pr.knockdown)))) return;
+      this.glint(e.fighter, (m && m.limb) || 'handR', 0.5);
+    });
+    on('chargeFull', (e) => { if (e.fighter) this.glint(e.fighter, (e.move && e.move.limb) || 'handR', 0.6); });
     on('defend', (e) => { if (e.fighter && typeof e.kind === 'string' && e.kind.startsWith('avoid')) this.ghosts.arm(e.fighter, this.game.scene, this.game.time); });
     on('dodge', (e) => { if (e.fighter) this.ghosts.arm(e.fighter, this.game.scene, this.game.time); });
     on('avoided', (e) => { if (e.defender) { const o = this._bo; o.dodge = e.kind === 'dodge'; o.force = false; this.avoid(e.defender, o); } });
@@ -304,6 +346,8 @@ export class FX {
     const weight = e.focus ? 'heavy' : m.weight || 'light';
     const start = e.chained && info ? info.chainIn || 0 : 0;
     const hits = info && info.hits && info.hits.length ? info.hits : (Array.isArray(m.hits) && m.hits.length ? m.hits : null);
+    // each window is armed over its strike segment: from the last key before the hit (the wind-up extreme) to the
+    // end of the hit window, so the ribbon traces the strike arc, not the wind-up or the withdrawal
     if (hits) {
       for (let k = 0; k < hits.length && k < 3; k++) {
         const h = hits[k];
@@ -311,13 +355,13 @@ export class FX {
         const T = this._trailLook(f, weight, limb);
         const t = typeof h.t === 'number' ? h.t : m.startup || 0.2;
         const end = typeof h.end === 'number' ? h.end : t + (typeof h.dur === 'number' ? h.dur : m.active || 0.07);
-        this.trails.arm(f, m, limb, Math.max(start, t - T.lead), end, this._to);
+        this.trails.arm(f, m, limb, Math.max(start, strikeFrom(m, t, T.lead)), end, this._to);
       }
     } else {
       const limb = m.limb || 'handR';
       const T = this._trailLook(f, weight, limb);
       const t = typeof m.startup === 'number' ? m.startup : 0.2;
-      this.trails.arm(f, m, limb, Math.max(start, t - T.lead), t + (typeof m.active === 'number' ? m.active : 0.07), this._to);
+      this.trails.arm(f, m, limb, Math.max(start, strikeFrom(m, t, T.lead)), t + (typeof m.active === 'number' ? m.active : 0.07), this._to);
     }
   }
 
@@ -421,7 +465,7 @@ export class FX {
     /**
      * Trigger an effect in front of the player: 'hit' | 'medium' | 'heavy' | 'counter' | 'kill' | 'block' |
      * 'guardbreak' | 'parry' | 'absorb' | 'pierce' | 'avoid' | 'dust' | 'focus' | 'learned' | 'heal' | 'trail' |
-     * 'death' | 'all'. opts: { x, y, z } world point override, { fighter } for avoid / death / trail.
+     * 'glint' | 'death' | 'all'. opts: { x, y, z } world point override, { fighter } for avoid / death / trail.
      */
     d.fx = (kind = 'hit', opts = {}) => {
       const p = g.player;
@@ -450,6 +494,7 @@ export class FX {
         case 'learned': self.learned(p); break;
         case 'heal': self.heal(p); break;
         case 'trail': if (f) self.trail(f, opts.limb || 'handR', opts.duration || 0.3); break;
+        case 'glint': if (f) self.glint(f, opts.limb || 'handR'); break;
         case 'death': if (opts.fighter) self.death(opts.fighter); break;
         case 'all':
           for (const k of ['hit', 'medium', 'heavy', 'counter', 'kill', 'block', 'guardbreak', 'parry', 'absorb', 'pierce', 'avoid', 'dust', 'focus', 'learned', 'heal', 'trail']) d.fx(k, opts);

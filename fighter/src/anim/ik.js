@@ -10,7 +10,7 @@
 //   add:   { joint: [x, y, z] }  local rotation post-multiplied after everything (small additive tweaks).
 // Never used per frame: allocations here are fine.
 import * as THREE from 'three';
-import { createSkeleton, JOINTS } from './rig.js';
+import { createSkeleton, JOINTS, JOINT_INDEX, OFFSET } from './rig.js';
 import { DEG } from '../core/math.js';
 
 /** Ankle height above the ground for a planted foot (rest pose ankle is 0.07 m up). */
@@ -200,4 +200,89 @@ export function lockArms(spec, pose) {
   delete out.handL; delete out.handR;
   for (const j of ['shoulderL', 'elbowL', 'wristL', 'shoulderR', 'elbowR', 'wristR']) out[j] = (pose[j] || [0, 0, 0]).slice();
   return out;
+}
+
+// ------------------------------------------------------------------------------------------------ runtime leg solver
+// Allocation-free FK / two-bone IK on a PoseBuffer (q: 17 quaternions, root: [fwd, right, up, yawRad]) in FIGHTER space
+// (the model root's frame: x = own left, y = up, z = forward). `scale` = the skeleton body's uniform scale. Used every sim
+// step by the Animator's planted-foot pass; module scratch only, results are valid until the next call.
+
+/** Ball of the foot in the ankle frame (rig STRIKE_POINTS footL / footR). */
+export const FOOT_BALL = [0, -0.04, 0.16];
+const RT_LEG = {
+  L: { thigh: JOINT_INDEX.thighL, knee: JOINT_INDEX.kneeL, ankle: JOINT_INDEX.ankleL, off: OFFSET.thighL },
+  R: { thigh: JOINT_INDEX.thighR, knee: JOINT_INDEX.kneeR, ankle: JOINT_INDEX.ankleR, off: OFFSET.thighR },
+};
+const RT_HIPS = JOINT_INDEX.hips;
+const LEG_A = Math.abs(OFFSET.kneeL[1]), LEG_B = Math.abs(OFFSET.ankleL[1]);
+/** Last legFK() result: H = hip joint (thigh origin), K = knee, A = ankle, B = ball; qH/qT/qK/qA = world rotations. */
+export const LEG_FK = {
+  H: new THREE.Vector3(), K: new THREE.Vector3(), A: new THREE.Vector3(), B: new THREE.Vector3(),
+  qH: new THREE.Quaternion(), qT: new THREE.Quaternion(), qK: new THREE.Quaternion(), qA: new THREE.Quaternion(),
+};
+const _rq = new THREE.Quaternion();
+const _rq2 = new THREE.Quaternion();
+const _rv = new THREE.Vector3();
+const _rv2 = new THREE.Vector3();
+const _rp = new THREE.Vector3();
+const readBufQ = (buf, i, q) => { const o = i * 4; return q.set(buf.q[o], buf.q[o + 1], buf.q[o + 2], buf.q[o + 3]); };
+const writeBufQ = (buf, i, q) => { const o = i * 4; buf.q[o] = q.x; buf.q[o + 1] = q.y; buf.q[o + 2] = q.z; buf.q[o + 3] = q.w; };
+
+/** Forward kinematics of one leg ('L' | 'R') of a pose buffer. Returns LEG_FK. */
+export function legFK(buf, side, scale = 1) {
+  const L = RT_LEG[side], F = LEG_FK, r = buf.root;
+  _rq.setFromAxisAngle(Y, r[3]);                                            // body
+  _rp.set(-r[1], r[2], r[0]);
+  _rv.fromArray(OFFSET.hips).multiplyScalar(scale).applyQuaternion(_rq).add(_rp);   // hips position
+  F.qH.copy(_rq).multiply(readBufQ(buf, RT_HIPS, _rq2));
+  F.H.fromArray(L.off).multiplyScalar(scale).applyQuaternion(F.qH).add(_rv);
+  F.qT.copy(F.qH).multiply(readBufQ(buf, L.thigh, _rq2));
+  F.K.fromArray(OFFSET.kneeL).multiplyScalar(scale).applyQuaternion(F.qT).add(F.H);
+  F.qK.copy(F.qT).multiply(readBufQ(buf, L.knee, _rq2));
+  F.A.fromArray(OFFSET.ankleL).multiplyScalar(scale).applyQuaternion(F.qK).add(F.K);
+  F.qA.copy(F.qK).multiply(readBufQ(buf, L.ankle, _rq2));
+  F.B.fromArray(FOOT_BALL).multiplyScalar(scale).applyQuaternion(F.qA).add(F.A);
+  return F;
+}
+
+/**
+ * Two-bone IK: move one leg of `buf` so its ankle reaches `target` (fighter space), keeping the knee's swing plane as
+ * close as possible (minimal thigh rotation). The foot keeps its fighter-space orientation, or takes `footQ` (a
+ * fighter-space ankle rotation) when given. Call right after legFK(buf, side, scale) on the same buffer (uses LEG_FK).
+ */
+export function legIK(buf, side, scale, target, footQ = null) {
+  const L = RT_LEG[side], F = LEG_FK;
+  const a = LEG_A * scale, b = LEG_B * scale;
+  // knee hinge: angle between thigh and shin from the law of cosines
+  _rv.subVectors(target, F.H);
+  let d = _rv.length();
+  const dMin = Math.abs(a - b) + 0.02 * scale, dMax = (a + b) * 0.999;
+  d = d < dMin ? dMin : d > dMax ? dMax : d;
+  let c = (d * d - a * a - b * b) / (2 * a * b);
+  c = c > 1 ? 1 : c < -1 ? -1 : c;
+  const phiNew = Math.acos(c);
+  _rv2.subVectors(F.K, F.H).normalize();
+  _rp.subVectors(F.A, F.K).normalize();
+  let cc = _rv2.dot(_rp);
+  cc = cc > 1 ? 1 : cc < -1 ? -1 : cc;
+  const phiCur = Math.acos(cc);
+  const kq = readBufQ(buf, L.knee, _rq);
+  const sign = kq.x * kq.w >= 0 ? 1 : -1;                                   // legs bend +X (shin back)
+  _rq2.setFromAxisAngle(X, sign * (phiNew - phiCur));
+  kq.multiply(_rq2);
+  writeBufQ(buf, L.knee, kq);
+  // ankle with the new knee and the old thigh
+  F.qK.copy(F.qT).multiply(kq);
+  _rv2.fromArray(OFFSET.ankleL).multiplyScalar(scale).applyQuaternion(F.qK).add(F.K);
+  // swing the thigh so the hip -> ankle line points at the target
+  _rv2.sub(F.H).normalize();
+  _rv.normalize();
+  _rq2.setFromUnitVectors(_rv2, _rv);
+  F.qT.premultiply(_rq2);
+  _rq.copy(F.qH).invert().multiply(F.qT);
+  writeBufQ(buf, L.thigh, _rq);
+  // foot keeps its fighter-space orientation (or takes footQ): ankleLocal = (qT * qKnee)^-1 * qA
+  F.qK.copy(F.qT).multiply(readBufQ(buf, L.knee, _rq2));
+  _rq.copy(F.qK).invert().multiply(footQ || F.qA);
+  writeBufQ(buf, L.ankle, _rq);
 }

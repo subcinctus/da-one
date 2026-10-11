@@ -247,12 +247,19 @@ function dressRoom(B, a, ctx, shell) {
     for (const p of slots(a, 'maxX', 2.6, 0.75, 0.6)) squatRack(B, p.x, p.z, p.yaw, rng);
     slots(a, 'maxZ', 1.3, 0.55, 0.6).forEach((p, k) => (k % 2 ? plateStack(b, p.x, p.z, rng) : bench(B, p.x, p.z, p.yaw)));
     slots(a, 'minZ', 0.9, 0.4, 0.6).forEach((p, k) => kettlebell(b, p.x, p.z, 0.8 + (k % 3) * 0.2, k % 2 ? C.plate : pick(rng, C.plateRim)));
-    // mirror wall
-    b.glow(0.12);
-    sideBox(b, sMaxZ, a.wall.minX + 0.8, a.wall.maxX - 0.8, -0.03, 0, 0.4, 2.3, 0xc3d4dc);
-    b.glow(0);
-    sideBox(b, sMaxZ, a.wall.minX + 0.75, a.wall.maxX - 0.75, -0.035, 0, 2.3, 2.36, C.steel);
-    for (let u = a.wall.minX + 0.8; u <= a.wall.maxX - 0.79; u += (a.wall.maxX - a.wall.minX - 1.6) / 8) sideBox(b, sMaxZ, u - 0.015, u + 0.015, -0.035, 0, 0.4, 2.3, C.steel);
+    // mirror wall, built per solid wall segment so it never runs across a doorway (inset 0.2 m at doorway ends)
+    const m0 = a.wall.minX + 0.8, m1 = a.wall.maxX - 0.8;
+    for (const [s0, s1] of segs(sMaxZ)) {
+      const u0 = Math.max(m0, s0 > sMaxZ.from + 1e-3 ? s0 + 0.2 : s0);
+      const u1 = Math.min(m1, s1 < sMaxZ.to - 1e-3 ? s1 - 0.2 : s1);
+      if (u1 - u0 < 1) continue;
+      b.glow(0.12);
+      sideBox(b, sMaxZ, u0, u1, -0.03, 0, 0.4, 2.3, 0xc3d4dc);
+      b.glow(0);
+      sideBox(b, sMaxZ, u0 - 0.05, u1 + 0.05, -0.035, 0, 2.3, 2.36, C.steel);
+      const n = Math.max(1, Math.round((u1 - u0) / 1.7));
+      for (let k = 0; k <= n; k++) { const u = u0 + (u1 - u0) * (k / n); sideBox(b, sMaxZ, u - 0.015, u + 0.015, -0.035, 0, 0.4, 2.3, C.steel); }
+    }
     banner(b, sMinZ, a.wall.maxX - 2.2, 2.7, 1.5);
   } else if (a.index === 2) {
     // mat hall: wall pads, lockers, wooden dummies, weapon racks

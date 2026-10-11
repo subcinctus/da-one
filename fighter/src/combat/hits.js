@@ -109,7 +109,12 @@ const FLINCH = { light: 0.35, medium: 0.6, heavy: 0.9 };
 
 function feel(game, a, d, weight, stop, dir, extra = 0) {
   const g = game;
-  if (stop > 0 && typeof g.hitstop === 'function') g.hitstop(stop);
+  if (stop > 0 && typeof g.hitstop === 'function') {
+    g.hitstop(stop);
+    // the attacker's strike form already stood still for this long: it counts toward the chain hold (§6b)
+    const atk = a.atk;
+    if (atk && a.state === 'attack' && !(g.settings && g.settings.hitPause === false)) atk.stopServed = Math.max(atk.stopServed || 0, stop);
+  }
   if (!involvesPlayer(g, a, d)) return;
   const cam = g.cameraRig;
   const sh = (T.SHAKE[weight] || T.SHAKE.light) + extra;
@@ -198,7 +203,7 @@ export function contact(combat, a, d, info, h) {
     d.pushVel.addScaledVector(dir, info.push * 0.6 * T.PUSH_DECAY);
     d.gainFocus(T.FOCUS_BLOCK);
     addLearn(g, d, move, T.LEARN_BLOCK);
-    feel(g, a, d, broken ? 'medium' : 'light', broken ? T.HITSTOP.medium : T.HITSTOP_BLOCK, broken ? dir : null);
+    feel(g, a, d, broken ? 'medium' : 'light', broken ? T.HITSTOP.medium : Math.max(T.HITSTOP_BLOCK, 0.6 * info.hitstop), broken ? dir : null);
     return;
   }
   if (pierced) {
@@ -282,5 +287,5 @@ function cleanHit(combat, a, d, info, h) {
     d.pushVel.addScaledVector(dir, info.push * T.PUSH_DECAY);
   }
   flinch(d, dir, armored ? 0.3 : FLINCH[weight] || 0.4);
-  feel(g, a, d, weight, focus ? T.HITSTOP_FOCUS : (T.HITSTOP[info.weight] || T.HITSTOP.light), dir);
+  feel(g, a, d, weight, focus ? T.HITSTOP_FOCUS : info.hitstop, dir);
 }

@@ -107,10 +107,11 @@ const CSS = `
 .ls-ebar i { position: absolute; inset: 0; transform-origin: 0 50%; }
 .ls-ebar .chip { background: var(--ember); }
 .ls-ebar .fill { background: var(--ink); }
-.ls-ret { position: absolute; left: 0; top: 0; width: 1.9em; height: 1.9em; margin: -.95em 0 0 -.95em; opacity: 0; transition: opacity .2s; will-change: transform; color: var(--ink); }
+/* lock-on chevron: anchored at the target's bar (height + 0.16 m); its tip points down just above the bar */
+.ls-ret { position: absolute; left: 0; top: 0; width: 1.25em; height: .875em; margin: -1.4em 0 0 -.625em; opacity: 0; transition: opacity .2s; will-change: transform; color: var(--ink); }
 .ls-ret.on { opacity: .95; }
 .ls-ret svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
-.ls-ret.lockin svg { animation: ls-lockin .25s ease-out; }
+.ls-ret.lockin svg { animation: ls-retin .25s ease-out; }
 
 .ls-toasts { position: absolute; right: 3em; top: 26%; display: flex; flex-direction: column; align-items: flex-end; gap: .55em; }
 .ls-toast { background: rgba(12,13,16,.76); border-left: 2px solid var(--jade); padding: .55em 1em .6em .85em; min-width: 12em; max-width: 24em;
@@ -159,8 +160,10 @@ const CSS = `
 .ls-dlg .text.aside { font-style: italic; color: var(--muted); font-size: 1.2em; }
 .ls-dlg .text.angry, .ls-dlg .text.threat { letter-spacing: .02em; }
 .ls-dlg .text.grunt { letter-spacing: .08em; }
-.ls-dlg.bark { width: min(40em, 80vw); bottom: 23%; }
-.ls-dlg.bark .panel { background: linear-gradient(90deg, rgba(10,11,13,0), rgba(10,11,13,.6) 18%, rgba(10,11,13,.6) 82%, rgba(10,11,13,0)); border-top: 0; padding: .7em 2em .8em; text-align: center; }
+/* barks (mid-fight subtitles) sit at the top centre, clear of the fighters and the boss block; block dialogue stays low */
+.ls-dlg.bark { width: min(40em, 80vw); top: 11%; bottom: auto; }
+.ls-dlg.bark .panel { background: linear-gradient(90deg, rgba(10,11,13,0), rgba(10,11,13,.4) 18%, rgba(10,11,13,.4) 82%, rgba(10,11,13,0)); border-top: 0; padding: .6em 2em .7em; text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,.65), 0 0 10px rgba(0,0,0,.35); }
 .ls-dlg.bark .plate { font-size: .64em; margin-bottom: .4em; padding-bottom: .3em; }
 .ls-dlg.bark .text { font-size: 1.12em; }
 .ls-dlg .next { position: absolute; right: 1.1em; bottom: .9em; opacity: 0; transition: opacity .2s; }
@@ -196,6 +199,8 @@ const CSS = `
 .ls-mi .sub { display: block; font-size: .62em; letter-spacing: .2em; color: var(--muted); margin-top: .25em; text-transform: none; letter-spacing: .06em; }
 .ls-mi.disabled { opacity: .35; }
 .ls-version { position: absolute; right: 3em; bottom: 2.2em; font-size: .66em; letter-spacing: .3em; color: var(--muted); }
+.ls-padblocked { position: absolute; right: 3.3em; bottom: 2.4em; max-width: 60vw; text-align: right; font-size: .6em; letter-spacing: .08em; line-height: 1.35; color: var(--gold); opacity: .9; }
+.ls-title.padblocked .ls-version { bottom: 5.2em; }
 
 /* generic panel screens */
 .ls-page { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 3.2em 4.5em 5.4em; }
@@ -305,6 +310,7 @@ const CSS = `
 .ls-aging .meta b { color: var(--ink); font-size: 1.3em; letter-spacing: .05em; margin-left: .4em; }
 .ls-aging.over .num { color: #d9cbb4; }
 .ls-aging.over .k { color: var(--ember); }
+.ls-aging .line .replay { display: block; margin-top: .8em; font-style: normal; font-family: var(--font); font-size: .58em; letter-spacing: .12em; color: var(--gold); }
 
 /* deck editor */
 .ls-deck .body { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .78fr) minmax(0, 1fr); gap: 2.2em; }
@@ -405,13 +411,15 @@ const CSS = `
 @keyframes ls-pulse { 0% { transform: scale(1.18); } 100% { transform: scale(1); } }
 @keyframes ls-qflash { 0% { transform: scale(1.12); filter: drop-shadow(0 0 6px rgba(244,239,230,.9)); } 100% { transform: scale(1); filter: none; } }
 @keyframes ls-lockin { 0% { transform: scale(1.8) rotate(45deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes ls-retin { 0% { transform: translateY(-.7em) scale(1.5); opacity: 0; } 100% { transform: none; opacity: 1; } }
 @keyframes ls-blink { 0% { opacity: 1; } 100% { opacity: .25; } }
 @keyframes ls-shake { 0%, 100% { transform: none; } 25% { transform: translateX(-.25em); } 75% { transform: translateX(.25em); } }
 @keyframes ls-strike { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
 @media (max-width: 1100px) {
-  .ls-boss { bottom: 7.4em; width: min(34em, 56vw); }
-  .ls-prompt { bottom: 11.6em; }
+  /* the boss block stays low (between the player bars and the stance quadrant); only its width shrinks */
+  .ls-boss { width: min(30em, 48vw); }
+  .ls-prompt { bottom: 8.6em; }
   .ls-bar { width: 17em; } .ls-bar.st { width: 13em; }
   .ls-deck .body { grid-template-columns: minmax(0, 1.25fr) minmax(0, .62fr) minmax(0, 1fr); gap: 1.4em; }
   .ls-page { padding: 2.2em 2.6em 4.6em; }

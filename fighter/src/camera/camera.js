@@ -4,22 +4,34 @@
 //   pivot  P (player chest, damped)      psi  orbit yaw      phi  pitch      D  arm length    side  lateral offset
 //   camera C = P - fwd(psi)·D·cos(phi) + up·D·sin(phi) + right(psi)·side
 //   look   L = P + fwd(psi)·aF + right(psi)·aR + up·aY
-// Unlocked: Sifu-like orbit on the right stick (sensitivity / invert settings), gentle drift behind the run.
+// Unlocked: Sifu-like orbit on the right stick (sensitivity / invert settings; the mouse as a per-frame angle from
+//   input.lookDelta), gentle drift behind the run, and combat framing: with an enemy within 6 m the arm backs off and
+//   rises, and an idle stick lets the yaw drift so the nearest enemy is never hidden behind the player's body.
+//   After an RT + stick stance flick, stick look stays off until the stick re-centres.
 // Locked (Absolver): camera swung behind the player's right shoulder by BETA, looking ~60% of the way to the
 //   target, so the player sits left of centre and the target centre-right. Closer target = higher, tighter.
 //   Target switches re-centre through the same damping.
 // Spring arm: the arm shortens against room bounds + margin (world.cameraClip) and ceilings, never through walls.
-// Extras: shake(amount), punch(dir), cinematic(target, duration), title orbit, debug fly / fixed pose.
+// Extras: shake(amount), punch(dir), cinematic(target, duration) (opens with a cut; hides the player's body if the
+// camera gets inside it; the exit cuts when a blend would pass through the player), title orbit, debug fly / fixed pose.
 // `yaw` = current view heading (forward = (sin yaw, 0, cos yaw)) for camera-relative movement.
 import * as THREE from 'three';
 import { damp, clamp, lerp, lerpAngle, wrapAngle, smoothstep } from '../core/math.js';
 import { Shake } from './shake.js';
 
 const FOLLOW = { D: 3.75, side: 0.42, aF: 2.2, aR: 0.42, aY: -0.12, height: 1.45 };
+// Unlocked combat framing (Sifu): while a living enemy is within `range`, the arm backs off, rises and moves a little
+// further over the shoulder; with the right stick idle for `idle` s the yaw also drifts (< 1 rad/s) so the nearest
+// enemy is not hidden behind the player's body (enemy right of centre, player on the left third).
+const FRAME = { range: 6, D: 4.3, side: 0.6, aR: 0.6, phi: 0.3, sep: 0.2, gain: 3, maxRate: 0.9, idle: 0.25 };
 const LOCK = { beta: 0.52, Dmin: 3.7, Dmax: 5.2, toward: 0.6, height: 1.4 };
 const YAW_RATE = 2.7;     // rad/s at full stick, sensitivity 1
 const PITCH_RATE = 1.7;
 const PITCH_MIN = -0.3, PITCH_MAX = 0.95;
+// Cinematics: minimum clearance between the camera and the player's body axis (vertical segment, 0..BODY_H).
+// 1.2 m from the axis = 0.9 m from the surface of a 0.3 m-radius body. Closer -> the player is hidden.
+const CLEAR = 1.2, BODY_H = 1.8;
+const ZERO2 = { x: 0, y: 0 };
 
 export class CameraRig {
   constructor(game) {
@@ -42,6 +54,9 @@ export class CameraRig {
     this._userYaw = 0; this._userPitch = 0.2;
     this._arm = 1;
     this._idle = 0;
+    this._fight = 0;          // 0..1 eased "enemy within FRAME.range" (unlocked combat framing)
+    this._stancePrev = false; // stance button state last frame
+    this._lookGate = false;   // stick look ignored after a stance release until the stick re-centres
     this._target = null;
     this._snap = true;
     this._titleA = 0.6;
@@ -49,8 +64,12 @@ export class CameraRig {
     // outputs + transitions
     this._pos = new THREE.Vector3(0, 3, -5);
     this._look = new THREE.Vector3(0, 1, 0);
+    this._gp = new THREE.Vector3(0, 3, -5); // gameplay pose of the latest frame (before cinematic / blend overlays)
+    this._gl = new THREE.Vector3(0, 1, 0);
+    this._gpValid = false;
     this._blend = { t: 1, dur: 1, pos: new THREE.Vector3(), look: new THREE.Vector3() };
-    this._cine = { on: false, t: 0, dur: 0, out: 0.6, target: new THREE.Vector3(), track: null, from: new THREE.Vector3(), opts: null };
+    this._cine = { on: false, t: 0, dur: 0, out: 0.6, target: new THREE.Vector3(), track: null, from: new THREE.Vector3(), opts: null, cut: false, first: false };
+    this._hidden = null;      // player model hidden by the cinematic body guard
     this._fly = null;
     this._fixed = null;
     this._lastClass = 'title';
@@ -77,7 +96,8 @@ export class CameraRig {
       return !!this._fixed;
     };
     dbg.camera = () => ({ mode: this.mode, yaw: +this.yaw.toFixed(3), pitch: +this._phi.toFixed(3), D: +this._D.toFixed(2), arm: +this._arm.toFixed(2),
-      pos: g.camera.position.toArray().map((v) => +v.toFixed(2)), cinematic: this._cine.on });
+      pos: g.camera.position.toArray().map((v) => +v.toFixed(2)), cinematic: this._cine.on, fight: +this._fight.toFixed(2),
+      playerHidden: !!this._hidden, lookGate: this._lookGate });
     this.snap();
   }
 
@@ -98,7 +118,10 @@ export class CameraRig {
   /**
    * Boss-intro cinematic: frame `target` (Vector3, {x,y,z}, or a Fighter to track) for `duration` real seconds,
    * then blend back to gameplay. opts: { height (look height, 1.55), distance (2.8), side (+1 right / -1 left),
-   * offset (framing shift, 0.55), from ({x, z}: direction from the target toward the camera; default toward the player) }
+   * offset (framing shift, 0.55), from ({x, z}: direction from the target toward the camera; default toward the player),
+   * swoop (false: the cinematic opens with a CUT; true: the old world-space swoop from the gameplay camera) }
+   * The player's body is hidden whenever the cinematic camera gets within 0.9 m of it; the exit blend cuts instead
+   * when its straight path would pass through the player.
    */
   cinematic(target, duration = 2.5, opts = null) {
     const c = this._cine;
@@ -107,6 +130,7 @@ export class CameraRig {
     c.track = target && !target.isVector3 && target.position ? target : null;
     c.target.set(pos.x || 0, pos.y || 0, pos.z || 0);
     c.on = true; c.t = 0; c.dur = Math.max(0.3, duration); c.opts = opts;
+    c.cut = !opts?.swoop; c.first = true;
     // camera approach direction: from the target toward the player (we look at the boss's face)
     const p = this._playerPos();
     if (opts?.from) c.from.set(opts.from.x, 0, opts.from.z);
@@ -116,12 +140,19 @@ export class CameraRig {
     c.from.normalize();
   }
 
-  /** End a running cinematic early (blends back). */
-  endCinematic() { if (this._cine.on) { this._cine.on = false; this._startBlend(0.6); } }
+  /** End a running cinematic early (blends back, or cuts when the blend would pass through the player). */
+  endCinematic() {
+    if (this._cine.on) { this._cine.on = false; this._exitCinematic(this.game.camera.position, 0.6); }
+    this._showPlayer();
+  }
   get inCinematic() { return this._cine.on; }
 
   /** Snap all smoothing to the current desired view (after teleports / chapter loads). */
-  snap() { this._snap = true; this._blend.t = 1; this.shaker.clear(); }
+  snap() {
+    this._snap = true; this._blend.t = 1; this.shaker.clear();
+    this._lookGate = false; this._gpValid = false;
+    this._showPlayer();
+  }
 
   // ------------------------------------------------------------------ frame
 
@@ -151,10 +182,15 @@ export class CameraRig {
       c.t += dt;
       if (c.track?.position) c.target.copy(c.track.model?.root?.position || c.track.position);
       this._cinePose(c);
-      const w = smoothstep(0, 0.45, c.t);
+      if (c.first) {
+        c.first = false;
+        // open with a cut (a world-space swoop from behind the player flies through the player's body)
+        if (c.cut) { this._blend.t = 1; this.shaker.clear(); }
+      }
+      const w = c.cut ? 1 : smoothstep(0, 0.45, c.t);
       this._pos.lerp(this._cp, w);
       this._look.lerp(this._cl, w);
-      if (c.t >= c.dur) { c.on = false; this._startBlend(0.7); }
+      if (c.t >= c.dur) { c.on = false; this._exitCinematic(this._pos, 0.7); }
     }
     // transition blend (mode changes, cinematic exit)
     const b = this._blend;
@@ -164,8 +200,64 @@ export class CameraRig {
       this._pos.lerpVectors(b.pos, this._pos, e);
       this._look.lerpVectors(b.look, this._look, e);
     }
+    this._guardBody();
     this.shaker.update(dt);
     this._write(cam);
+  }
+
+  /**
+   * Leave a cinematic: blend from `from` back to the gameplay pose over `dur`, or cut when the straight blend path
+   * passes within CLEAR of the player's body.
+   */
+  _exitCinematic(from, dur) {
+    if (this._gpValid && this._pathNearBody(from, this._gp)) {
+      this._blend.t = 1;
+      this._pos.copy(this._gp); this._look.copy(this._gl);
+      this.shaker.clear();
+    } else this._startBlend(dur);
+    this._showPlayer();
+  }
+
+  /** Distance from (x, y, z) to the player's body axis (vertical segment from the feet to BODY_H). */
+  _bodyDist(x, y, z) {
+    const P = this._playerPos();
+    if (!P) return Infinity;
+    const y0 = P.y || 0;
+    const cy = y < y0 ? y0 : y > y0 + BODY_H ? y0 + BODY_H : y;
+    const dx = x - P.x, dy = y - cy, dz = z - P.z;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+
+  /** Does the straight segment a -> b pass within CLEAR of the player's body? (sampled, no allocation) */
+  _pathNearBody(a, b) {
+    for (let i = 0; i <= 16; i++) {
+      const t = i / 16;
+      if (this._bodyDist(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t) < CLEAR) return true;
+    }
+    return false;
+  }
+
+  /** Cinematic safety net: hide the player's model while a cinematic (or its exit blend) puts the camera inside it. */
+  _guardBody() {
+    const active = this._cine.on || this._blend.t < 1;
+    if (!active || this._lastClass !== 'play') { if (this._hidden) this._showPlayer(); return; }
+    const d = this._bodyDist(this._pos.x, this._pos.y, this._pos.z);
+    if (d < CLEAR) this._hidePlayer();
+    else if (d > CLEAR + 0.15 && this._hidden) this._showPlayer();
+  }
+
+  _hidePlayer() {
+    const m = this.game.player?.model;
+    if (!m || typeof m.setVisible !== 'function' || this._hidden === m) return;
+    this._showPlayer();
+    m.setVisible(false);
+    this._hidden = m;
+  }
+
+  _showPlayer() {
+    const m = this._hidden;
+    this._hidden = null;
+    if (m && typeof m.setVisible === 'function') m.setVisible(true);
   }
 
   _startBlend(dur) {
@@ -226,6 +318,20 @@ export class CameraRig {
       this._pivot.z += (pz - this._pivot.z) * k;
     }
 
+    // stance button + look gate: after the stance button (RT) is released with the stick still deflected (an RT + flick
+    // stance switch), stick look stays off until the stick re-centres, so the unlocked camera never swings.
+    const lk = input?.look || ZERO2;
+    const stanceHeld = typeof input?.down === 'function' && !!input.down('stance');
+    const lmag = Math.hypot(lk.x || 0, lk.y || 0);
+    if (this._stancePrev && !stanceHeld && lmag > 0.4) this._lookGate = true;
+    if (this._lookGate && lmag < 0.3) this._lookGate = false;
+    this._stancePrev = stanceHeld;
+
+    // nearest living enemy within FRAME.range (unlocked combat framing)
+    const E = this._nearestEnemy(player, px, pz);
+    if (this._snap) this._fight = E ? 1 : 0;
+    else this._fight += ((E ? 1 : 0) - this._fight) * damp(2.5, dt);
+
     // desired rig parameters
     let psi, phi, D, side, aF, aR, aY, rate;
     if (T) {
@@ -248,27 +354,43 @@ export class CameraRig {
       this._userPitch = phi;
       this._target = tgt;
     } else {
-      // right stick orbit (ignored while the stance button is held: the stick picks a stance then)
-      const lk = input?.look || { x: 0, y: 0 };
-      const stanceHeld = typeof input?.down === 'function' && input.down('stance');
+      // right stick orbit: a rate x dt (ignored while the stance button is held: the stick picks a stance then)
       const sens = s.cameraSensitivity ?? 1, inv = s.invertY ? -1 : 1;
-      let lx = stanceHeld ? 0 : lk.x || 0, ly = stanceHeld ? 0 : lk.y || 0;
+      const gated = stanceHeld || this._lookGate;
+      const lx = gated ? 0 : lk.x || 0, ly = gated ? 0 : lk.y || 0;
       this._userYaw = wrapAngle(this._userYaw - lx * YAW_RATE * sens * dt);
       this._userPitch = clamp(this._userPitch - ly * PITCH_RATE * sens * inv * dt, PITCH_MIN, PITCH_MAX);
+      // mouse: a per-frame angle (input.lookDelta, in 60 Hz stick-seconds), so sensitivity does not depend on the
+      // frame rate. Without lookDelta, mouse motion arrives folded into input.look (above).
+      const md = input?.lookDelta;
+      let mouse = 0;
+      if (md && !stanceHeld) {
+        const mx = md.x || 0, my = md.y || 0;
+        if (mx || my) {
+          this._userYaw = wrapAngle(this._userYaw - mx * YAW_RATE * sens);
+          this._userPitch = clamp(this._userPitch - my * PITCH_RATE * sens * inv, PITCH_MIN, PITCH_MAX);
+          mouse = Math.abs(mx) + Math.abs(my);
+        }
+      }
+      if (Math.abs(lx) + Math.abs(ly) > 0.05 || mouse > 1e-5) this._idle = 0; else this._idle += dt;
       // gentle drift behind a running player when the stick is idle
-      if (Math.abs(lx) + Math.abs(ly) > 0.05) this._idle = 0; else this._idle += dt;
       const v = player.velocity;
       const sp = v ? Math.hypot(v.x || 0, v.z || 0) : 0;
+      const f = this._fight;
       if (this._idle > 0.8 && sp > 1.2) {
         const head = Math.atan2(v.x, v.z);
         const diff = wrapAngle(head - this._userYaw);
         if (Math.abs(diff) < 2.2) this._userYaw = wrapAngle(this._userYaw + diff * damp(0.55 * Math.min(1, sp / 4.2), dt));
-        this._userPitch += (0.2 - this._userPitch) * damp(0.4, dt);
+        this._userPitch += (lerp(0.2, FRAME.phi, f) - this._userPitch) * damp(0.4, dt);
       }
+      // combat framing (stick idle only, so it never fights the player): orbit until the nearest enemy clears the
+      // player's silhouette, and keep the pitch at FRAME.phi or above.
+      if (E && this._idle > FRAME.idle && this._gpValid) this._frameEnemy(E, px, pz, dt);
       this._target = null;
       psi = this._userYaw; phi = this._userPitch;
-      D = FOLLOW.D + clamp((sp - 2.8) / 1.4, 0, 1) * 0.35;
-      side = FOLLOW.side; aF = FOLLOW.aF; aR = FOLLOW.aR; aY = FOLLOW.aY;
+      D = lerp(FOLLOW.D, FRAME.D, f) + clamp((sp - 2.8) / 1.4, 0, 1) * 0.35;
+      side = lerp(FOLLOW.side, FRAME.side, f); aR = lerp(FOLLOW.aR, FRAME.aR, f);
+      aF = FOLLOW.aF; aY = FOLLOW.aY;
       rate = 18;
     }
 
@@ -286,6 +408,59 @@ export class CameraRig {
       this._aY += (aY - this._aY) * k;
     }
     this._compose(dt);
+    this._gp.copy(this._pos); this._gl.copy(this._look); this._gpValid = true;
+  }
+
+  /** Nearest living enemy of `player` within FRAME.range of (px, pz): its (interpolated) position, or null. */
+  _nearestEnemy(player, px, pz) {
+    const fs = this.game.combat?.fighters;
+    if (!fs || !fs.length) return null;
+    let best = null, bd = FRAME.range * FRAME.range;
+    for (let i = 0; i < fs.length; i++) {
+      const e = fs[i];
+      if (!e || e === player || !e.alive || e.team === player.team || !e.position) continue;
+      const q = e.model?.root?.position || e.position;
+      const dx = q.x - px, dz = q.z - pz, d2 = dx * dx + dz * dz;
+      if (d2 < bd) { bd = d2; best = q; }
+    }
+    return best;
+  }
+
+  /**
+   * Unlocked combat framing: b = bearing of the enemy minus bearing of the player, both seen from the gameplay camera.
+   * Orbiting right (psi up) moves a farther enemy right of the player on screen (b down), so an enemy hidden behind
+   * the player is pushed out on the side it already leans to (right by default), at < FRAME.maxRate rad/s.
+   */
+  _frameEnemy(E, px, pz, dt) {
+    const C = this._gp;
+    const pdx = px - C.x, pdz = pz - C.z, edx = E.x - C.x, edz = E.z - C.z;
+    const pd2 = pdx * pdx + pdz * pdz, ed2 = edx * edx + edz * edz;
+    if (ed2 > pd2) {
+      const b = wrapAngle(Math.atan2(edx, edz) - Math.atan2(pdx, pdz));
+      const ab = Math.abs(b);
+      if (ab < FRAME.sep) {
+        // orbit needed per radian of b grows as the enemy gets closer behind the player: (camDist + r) / r
+        const pd = Math.sqrt(pd2), r = Math.max(0.5, Math.sqrt(ed2) - pd);
+        const geo = clamp((pd + r) / r, 1, 3);
+        const step = Math.min((FRAME.sep - ab) * damp(FRAME.gain, dt) * geo, FRAME.maxRate * dt);
+        let dir = b > 0.06 ? -1 : b < -0.06 ? 1 : 0;
+        if (dir === 0) {
+          // dead behind the player: orbit right (enemy right of centre) unless a wall is closer on that side
+          dir = 1;
+          if (this._clipAt(this._psi - 0.3) > this._clipAt(this._psi + 0.3) + 0.05) dir = -1;
+        }
+        this._userYaw = wrapAngle(this._userYaw + dir * step);
+      }
+    }
+    if (this._userPitch < FRAME.phi) this._userPitch += (FRAME.phi - this._userPitch) * damp(2, dt) * this._fight;
+  }
+
+  /** Spring-arm clearance (0..1) the rig would have at orbit yaw `psi` with the current arm parameters. */
+  _clipAt(psi) {
+    const world = this.game.world;
+    if (typeof world?.cameraClip !== 'function') return 1;
+    const P = this._pivot, fx = Math.sin(psi), fz = Math.cos(psi), ch = Math.cos(this._phi) * this._D;
+    return world.cameraClip(P.x, P.z, P.x - fx * ch - fz * this._side, P.z - fz * ch + fx * this._side);
   }
 
   /** Rig parameters -> this._pos / this._look, with spring arm + ceiling. */
@@ -356,8 +531,9 @@ export class CameraRig {
   _updateFly(dt) {
     const g = this.game, f = this._fly, input = g.input, cam = g.camera;
     const lk = input?.look || { x: 0, y: 0 }, mv = input?.move || { x: 0, y: 0 };
-    f.yaw = wrapAngle(f.yaw - (lk.x || 0) * 2.2 * dt);
-    f.pitch = clamp(f.pitch - (lk.y || 0) * 1.6 * dt, -1.4, 1.4);
+    const md = input?.lookDelta || ZERO2;   // mouse: a per-frame angle (no dt)
+    f.yaw = wrapAngle(f.yaw - (lk.x || 0) * 2.2 * dt - (md.x || 0) * 2.2);
+    f.pitch = clamp(f.pitch - (lk.y || 0) * 1.6 * dt - (md.y || 0) * 1.6, -1.4, 1.4);
     const sp = 6 * dt;
     const fx = Math.sin(f.yaw) * Math.cos(f.pitch), fy = -Math.sin(f.pitch), fz = Math.cos(f.yaw) * Math.cos(f.pitch);
     const rx = -Math.cos(f.yaw), rz = Math.sin(f.yaw);

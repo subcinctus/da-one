@@ -65,7 +65,9 @@ export const ARCHETYPES = {
 
 /**
  * Bosses: a base archetype plus per-phase overrides. Phase 2 starts at 50% health (line in levels/dialogue.js).
- * sigBias pushes signature moves; allStances lets it switch to any stance for the string it wants.
+ * sigBias nudges signature moves (small: the planner's variety terms and the every-3rd-string signature cadence
+ * bring them in, so a fight is a mix rather than one repeated signature string); allStances lets it switch to any
+ * stance for the string it wants.
  */
 export const BOSSES = {
   tadao: {
@@ -73,23 +75,23 @@ export const BOSSES = {
     // The Accountant: tidy, patient, parries, punishes every rounding error.
     phases: [
       { speed: 0.8, ring: [2.6, 3.4], aggression: 0.8, cooldown: [0.7, 1.3], strings: [0.4, 0.5, 0.1],
-        telegraph: [0.2, 0.3], reaction: [0.2, 0.3], block: 0.38, ability: 0.26, dodge: 0.04, timing: 0.65, smart: 0.7,
-        punish: 0.8, counter: 0.8, feint: 0.08, guardUp: 0.4, heavyBias: 0.1, switch: 0.1, sigBias: 6,
+        telegraph: [0.2, 0.3], reaction: [0.2, 0.3], block: 0.26, ability: 0.38, dodge: 0.04, timing: 0.65, smart: 0.7,
+        punish: 0.8, counter: 0.8, feint: 0.08, guardUp: 0.4, heavyBias: 0.1, switch: 0.1, sigBias: 2,
         staminaFloor: 18, staminaResume: 45, charge: [0.2, 0.45], backoff: [0.3, 0.6] },
       { speed: 0.9, aggression: 0.95, cooldown: [0.45, 0.9], strings: [0.15, 0.45, 0.4], telegraph: [0.17, 0.26],
-        reaction: [0.17, 0.26], ability: 0.4, block: 0.3, feint: 0.3, sigBias: 10, charge: [0.4, 0.6], switch: 0.2 },
+        reaction: [0.17, 0.26], ability: 0.4, block: 0.3, feint: 0.3, sigBias: 4, charge: [0.4, 0.6], switch: 0.2 },
     ],
   },
   madame_shu: {
     base: 'swift', style: 'windfall', health: 260, damage: 1.0, name: 'Madame Shu', look: 'madame_shu',
     // Long legs, longer memory: keeps you at kicking distance and slips everything.
     phases: [
-      { speed: 0.95, ring: [3.0, 3.8], aggression: 0.8, cooldown: [0.6, 1.2], strings: [0.3, 0.5, 0.2],
-        telegraph: [0.18, 0.28], reaction: [0.19, 0.28], block: 0.1, ability: 0.36, dodge: 0.2, timing: 0.7, smart: 0.7,
-        punish: 0.7, counter: 0.85, feint: 0.12, guardUp: 0.05, heavyBias: 0.15, switch: 0.25, sigBias: 6,
+      { speed: 0.95, ring: [3.0, 3.8], aggression: 0.7, cooldown: [0.75, 1.35], strings: [0.3, 0.5, 0.2],
+        telegraph: [0.18, 0.28], reaction: [0.19, 0.28], block: 0.1, ability: 0.42, dodge: 0.2, timing: 0.7, smart: 0.7,
+        punish: 0.7, counter: 0.85, feint: 0.12, guardUp: 0.05, heavyBias: 0.15, switch: 0.25, sigBias: 2,
         staminaFloor: 22, staminaResume: 50, backoff: [0.35, 0.7] },
       { aggression: 1, cooldown: [0.35, 0.8], strings: [0.1, 0.4, 0.5], telegraph: [0.16, 0.24], reaction: [0.16, 0.25],
-        ability: 0.48, dodge: 0.22, counter: 0.95, feint: 0.2, sigBias: 10, switch: 0.35 },
+        ability: 0.48, dodge: 0.22, counter: 0.95, feint: 0.2, sigBias: 4, switch: 0.35 },
     ],
   },
   brick: {
@@ -97,11 +99,11 @@ export const BOSSES = {
     // Absorbs your best shot, then answers with furniture-grade force.
     phases: [
       { speed: 0.74, ring: [2.6, 3.4], aggression: 0.8, cooldown: [0.9, 1.5], strings: [0.5, 0.45, 0.05],
-        telegraph: [0.26, 0.35], reaction: [0.24, 0.32], block: 0.22, ability: 0.36, dodge: 0, timing: 0.55, smart: 0.6,
-        punish: 0.7, counter: 0.75, feint: 0, guardUp: 0.35, heavyBias: 0.6, switch: 0.1, sigBias: 7,
+        telegraph: [0.26, 0.35], reaction: [0.24, 0.32], block: 0.16, ability: 0.36, dodge: 0, timing: 0.55, smart: 0.6,
+        punish: 0.7, counter: 0.75, feint: 0, guardUp: 0.35, heavyBias: 0.6, switch: 0.1, sigBias: 2,
         staminaFloor: 14, staminaResume: 40, charge: [0.3, 0.6], backoff: [0.4, 0.8] },
       { speed: 0.84, aggression: 0.95, cooldown: [0.55, 1.0], strings: [0.3, 0.5, 0.2], telegraph: [0.22, 0.32],
-        ability: 0.5, sigBias: 11, charge: [0.5, 0.6], feint: 0.08 },
+        ability: 0.5, sigBias: 4, charge: [0.5, 0.6], feint: 0.08 },
     ],
   },
   mr_golden: {
@@ -110,11 +112,11 @@ export const BOSSES = {
     allStances: true,
     phases: [
       { speed: 0.92, ring: [2.8, 3.6], aggression: 0.85, cooldown: [0.55, 1.0], strings: [0.2, 0.5, 0.3],
-        telegraph: [0.18, 0.27], reaction: [0.18, 0.27], block: 0.3, ability: 0.3, dodge: 0.12, timing: 0.7, smart: 0.85,
-        punish: 0.8, counter: 0.85, feint: 0.18, guardUp: 0.25, heavyBias: 0.1, switch: 0.55, sigBias: 6,
+        telegraph: [0.18, 0.27], reaction: [0.18, 0.27], block: 0.24, ability: 0.3, dodge: 0.12, timing: 0.7, smart: 0.85,
+        punish: 0.8, counter: 0.85, feint: 0.18, guardUp: 0.25, heavyBias: 0.1, switch: 0.55, sigBias: 2,
         staminaFloor: 20, staminaResume: 48, charge: [0.2, 0.5], backoff: [0.3, 0.6] },
       { aggression: 1, cooldown: [0.35, 0.75], strings: [0.05, 0.4, 0.55], telegraph: [0.15, 0.23], reaction: [0.15, 0.24],
-        ability: 0.42, block: 0.26, dodge: 0.14, feint: 0.32, switch: 0.7, sigBias: 10 },
+        ability: 0.42, block: 0.2, dodge: 0.14, feint: 0.32, switch: 0.7, sigBias: 4 },
     ],
   },
 };

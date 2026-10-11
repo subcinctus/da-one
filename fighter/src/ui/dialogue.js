@@ -109,6 +109,9 @@ export class Dialogue {
   update(dt) {
     const pad = this.game.input ? this.game.input.padType : null;
     if (pad !== this._pad) { this._pad = pad; refreshGlyphs(this.el, pad); }
+    // a bark waiting under an opaque screen (aging card, deck editor) is not drawn through it
+    const covered = !this.blocking && this.menus.covered();
+    if (covered !== this._covered) { this._covered = covered; this.el.style.visibility = covered ? 'hidden' : ''; }
     if (!this.cur) {
       if (this.linger > 0) { this.linger -= dt; if (this.linger <= 0) this.el.classList.remove('on'); }
       return;

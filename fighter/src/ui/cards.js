@@ -12,7 +12,8 @@ const LINE_GAP = 0.85;   // seconds between revealed lines
 export class CardScreen extends Screen {
   /**
    * opts.kind: 'story' {chapterId} | 'premise' | 'aging' {from, to, counter, line, deaths} |
-   *            'gameover' {age, line} | 'victory' {bossId, chapterId, age, deaths, learned} | 'epilogue'
+   *            'gameover' {from, counter, entryAge, entryCounter, replayHint} |
+   *            'victory' {bossId, chapterId, age, deaths, learned} | 'epilogue'
    */
   constructor(menus, opts = {}) {
     super(menus, { id: 'card', uiId: 'card' });
@@ -36,7 +37,7 @@ export class CardScreen extends Screen {
       head = `<div class="k">Chapter ${roman(ch.index)}</div><h1>${esc(ch.title)}</h1><div class="st">${esc(ch.subtitle)}</div><div class="rule"></div>`;
       lines = st.lines; joke = st.joke; cont = 'Begin';
     } else if (this.kind === 'premise') {
-      head = '<div class="k">Seven years ago</div><div class="rule" style="margin-top:1.2em"></div>';
+      head = '<div class="k">The Lan Dojo</div><div class="rule" style="margin-top:1.2em"></div>';
       lines = PREMISE.slice(0, -1); joke = null;
       extra = `<p class="last" style="margin-top:1.8em;font-style:normal;letter-spacing:.04em">${esc(PREMISE[PREMISE.length - 1])}</p>`;
       cont = 'Continue';
@@ -83,8 +84,10 @@ export class CardScreen extends Screen {
           stroke-dasharray="257.6" stroke-dashoffset="257.6" transform="rotate(-90 50 50)"/>${pips}</svg>
         <div class="num">${o.from ?? to}</div></div>
       <div class="k">${over ? esc(GAME_OVER.title) : 'The talisman revives you'}</div>
-      <div class="line">${esc(over ? GAME_OVER.lines.join(' ') : o.line || '')}</div>
-      <div class="meta">${over ? `<span>Back to age<b>${o.entryAge ?? 20}</b></span>` : `<span>Death counter<b>${counter}</b></span><span>Deaths<b>${o.deaths ?? counter}</b></span>`}</div>
+      <div class="line">${esc(over ? GAME_OVER.lines.join(' ') : o.line || '')}${over && o.replayHint && GAME_OVER.replay
+        ? `<span class="replay">${esc(GAME_OVER.replay)}</span>` : ''}</div>
+      <div class="meta">${over ? `<span>Back to age<b>${o.entryAge ?? 20}</b></span>${typeof o.entryCounter === 'number' ? `<span>Death counter<b>${o.entryCounter}</b></span>` : ''}`
+        : `<span>Death counter<b>${counter}</b></span><span>Deaths<b>${o.deaths ?? counter}</b></span>`}</div>
       <div class="ls-hintbar" style="opacity:0;transition:opacity .4s">${hint('confirm', over ? 'Begin again' : 'Rise')}</div>`;
     this.$num = el.querySelector('.num');
     this.$arc = el.querySelector('.arc');

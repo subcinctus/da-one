@@ -58,6 +58,7 @@ export class Game {
     this.alpha = 0;
     this.timeScale = 1;   // slowmo
     this._slowT = 0;
+    this._slowEase = false; // true from slowmo() until the scale has eased back to 1
     this._hitstopT = 0;   // remaining real seconds of frozen simulation
     this._acc = 0;
     this.systems = [];
@@ -85,8 +86,8 @@ export class Game {
 
   /** Freeze the simulation for `seconds` of real time (impact pause). Overlapping calls keep the longest. */
   hitstop(seconds) { if (this.settings.hitPause === false) return; this._hitstopT = Math.max(this._hitstopT, seconds); }
-  /** Scale simulation speed to `scale` for `seconds` of real time, then ease back to 1. */
-  slowmo(scale, seconds) { this.timeScale = scale; this._slowT = seconds; }
+  /** Scale simulation speed to `scale` for `seconds` of real time, then ease back to 1 (exponential, ~0.15 s to 95%). */
+  slowmo(scale, seconds) { this.timeScale = scale; this._slowT = seconds; this._slowEase = true; }
 
   saveSettings() {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings)); } catch (e) { /* ignore */ }
@@ -117,8 +118,14 @@ export class Game {
     this.frame++;
     this.input.poll();
 
-    // slow motion recovery (real time)
-    if (this._slowT > 0) { this._slowT -= raw; if (this._slowT <= 0) this.timeScale = 1; }
+    // slow motion: hold the scale for _slowT real seconds, then ease back to 1 (about 0.15 s, no one-frame snap that
+    // would jump a swing started inside the window to 4x speed). A new slowmo() call sets its scale at once.
+    // Only a slowmo() eases back: a timeScale set to 0 by hand (test harnesses freeze the sim that way) is left alone.
+    if (this._slowT > 0) this._slowT -= raw;
+    else if (this._slowEase) {
+      if (this.timeScale > 0 && this.timeScale !== 1) this.timeScale += (1 - this.timeScale) * (1 - Math.exp(-raw * 18));
+      if (!(this.timeScale > 0) || this.timeScale > 0.99) { if (this.timeScale > 0) this.timeScale = 1; this._slowEase = false; }
+    }
 
     const run = this.running;
     if (run) {

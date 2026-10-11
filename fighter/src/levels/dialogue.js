@@ -19,7 +19,7 @@ export const BOSS_INTROS = {
   ],
   brick: [
     { text: 'Hnnh.', mood: 'grunt' },
-    { text: '(He slides an invoice across the mat. Line one: "Hnnh." Line two: "Hnnh, again." Total due: you.)', mood: 'aside' },
+    { text: '(He chalks his hands. Twice. Then once more, for you.)', mood: 'aside' },
     { text: 'Membership. Overdue.', mood: 'grunt' },
   ],
   mr_golden: [
@@ -43,7 +43,7 @@ export const BOSS_DEFEAT = {
   tadao: { text: 'Put it... on my tab.', mood: 'weak' },
   madame_shu: { text: 'Tell them... the broth was fine.', mood: 'weak' },
   brick: { text: 'Should have... done cardio.', mood: 'weak' },
-  mr_golden: { text: 'My lawyers... will be in touch.', mood: 'weak' },
+  mr_golden: { text: 'The pen... was a gift.', mood: 'weak' },
 };
 
 /** Hit during the intro: the boss skips the formalities. */
@@ -71,7 +71,7 @@ export const ROOM_LINES = {
   gym: [
     'Members only.',
     'Your form is terrible. Let me fix it.',
-    'Brick hasn\'t missed a day in nine years.',
+    'Brick hasn\'t missed a day in eleven years.',
     'Spot me? No? Okay.',
   ],
   tower: [

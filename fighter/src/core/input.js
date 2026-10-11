@@ -2,13 +2,18 @@
 //
 // Gameplay reads (inside fixedUpdate):
 //   input.move            {x, y}  left stick / WASD. x = right(+), y = forward/up(+). Radial deadzone applied, length <= 1
-//   input.look            {x, y}  right stick (per second rate, -1..1) / mouse delta converted to the same scale
+//   input.look            {x, y}  right stick (+ virtual look): a per-second RATE, -1..1. No mouse in it.
+//   input.lookDelta       {x, y}  mouse look this frame as an ANGLE delta in 60 Hz stick-seconds (multiply by the same
+//                                 rad/s factor as look, but NOT by dt), so mouse sensitivity does not depend on frame rate
 //   input.down('guard')   held
 //   input.pressed('light')       went down during the most recent frame (edge)
 //   input.consume('light', 0.15) true if 'light' was pressed within the last 0.15 s of SIM time and not yet consumed.
 //                                Use this for combat inputs so presses during hitstop / recovery are buffered.
 //   input.stanceFlick()   'FR'|'FL'|'BR'|'BL'|null : stance chosen this frame (stance button held + right-stick quadrant, or 1-4 keys)
+//                         A stick already deflected when the stance button goes down is not a flick: only a new quadrant
+//                         (from centre or another quadrant) after the press is.
 //   input.padType         'xbox' | 'ps' | 'generic' | null (null = keyboard/mouse is the last used device)
+//   input.gamepadBlocked  true when the embedding page forbids the Gamepad API (events 'gamepad' {blocked} + 'gamepadBlocked')
 //   input.rumble(strong, weak, ms)
 // While game.uiOpen, gameplay queries return neutral values; UI code passes force=true.
 //
@@ -63,6 +68,7 @@ export class Input {
     this.canvas = game.renderer.domElement;
     this.move = { x: 0, y: 0 };
     this.look = { x: 0, y: 0 };
+    this.lookDelta = { x: 0, y: 0 };
     this.padType = null;
     this.padIndex = -1;
     this.padConnected = false;
@@ -76,6 +82,12 @@ export class Input {
     this._buffer = {};        // action -> sim time of last press (not consumed)
     this._mouse = { dx: 0, dy: 0 };
     this._stanceFlick = null;
+    this._stanceHeld = false; // stance button state last poll (down edge seeds _lastQuad)
+    this._lastQuad = null;
+    this._qStick = null;      // right-stick / move-stick (WASD) quadrants and how many polls each has held
+    this._qStickAge = 0;
+    this._qMove = null;
+    this._qMoveAge = 0;
     this._virtual = {};       // action -> bool (tests / touch)
     this._vPrev = {};
     this._vMove = { x: 0, y: 0 };
@@ -127,7 +139,9 @@ export class Input {
     try { return navigator.getGamepads() || []; }
     catch (e) {
       this.gamepadBlocked = true; // keyboard + mouse still work; UI can explain why the pad is ignored
+      this.padType = null;        // no pad can be read: show keyboard glyphs
       this.game.events.emit('gamepad', { connected: false, blocked: true });
+      this.game.events.emit('gamepadBlocked', { reason: (e && e.name) || 'SecurityError' });
       return [];
     }
   }
@@ -149,7 +163,9 @@ export class Input {
     const any = this._padNow.some(Boolean) || pad.axes.some((a) => Math.abs(a) > 0.4);
     if (any) {
       const id = (pad.id || '').toLowerCase();
-      this.padType = /054c|playstation|dualsense|dualshock|wireless controller/.test(id) ? 'ps' : /xbox|045e|xinput/.test(id) ? 'xbox' : 'generic';
+      // Xbox first: a Bluetooth Xbox pad reports 'Xbox Wireless Controller (... Vendor: 045e ...)'. Every Sony id carries
+      // vendor 054c or a Sony product name, so the bare 'wireless controller' substring is not a PlayStation marker.
+      this.padType = /xbox|045e|xinput/.test(id) ? 'xbox' : /054c|playstation|dualsense|dualshock/.test(id) ? 'ps' : 'generic';
     }
     return pad;
   }
@@ -175,10 +191,12 @@ export class Input {
     const mm = Math.hypot(mx, my);
     if (mm > 1) { mx /= mm; my /= mm; }
     this.move.x = blocked ? 0 : mx; this.move.y = blocked ? 0 : my;
-    // mouse look converted to stick-like rate (scaled by frame)
-    const ms = 0.06 * this.mouseSensitivity;
-    this.look.x = blocked ? 0 : lx + this._mouse.dx * ms;
-    this.look.y = blocked ? 0 : ly - this._mouse.dy * ms;
+    // look: stick + virtual look as a rate; the mouse as a per-frame angle (60 Hz stick-seconds: the old 60 Hz feel)
+    this.look.x = blocked ? 0 : lx;
+    this.look.y = blocked ? 0 : ly;
+    const ms = 0.06 * this.mouseSensitivity / 60;
+    this.lookDelta.x = blocked ? 0 : this._mouse.dx * ms;
+    this.lookDelta.y = blocked ? 0 : -this._mouse.dy * ms;
     this._mouse.dx = this._mouse.dy = 0;
 
     // actions
@@ -193,17 +211,27 @@ export class Input {
       this._pressedFrame[action] = p;
       if (p && !blocked) this._buffer[action] = now;
     }
-    // stance flick: stance held + right stick quadrant (or WASD while R held), or number keys
+    // stance flick: stance held + right stick quadrant (or WASD while R held), or number keys.
+    // The source quadrant is tracked every poll; when the stance button goes down, a deflection that has already held
+    // for 2+ polls (e.g. steering the camera) only seeds _lastQuad, so it is not a flick. A deflection that arrived
+    // with the press (same or previous poll) still counts as a simultaneous chord.
     this._stanceFlick = null;
+    const qStick = quadrantOf(lx, ly), qMove = quadrantOf(mx, my);
+    if (qStick !== this._qStick) { this._qStick = qStick; this._qStickAge = 0; } else if (this._qStickAge < 1e6) this._qStickAge++;
+    if (qMove !== this._qMove) { this._qMove = qMove; this._qMoveAge = 0; } else if (this._qMoveAge < 1e6) this._qMoveAge++;
+    const q = qStick || (this._keys.has('KeyR') ? qMove : null);
+    const qAge = qStick ? this._qStickAge : this._qMoveAge;
+    const held = !!this._down.stance;
     if (!blocked) {
       for (const [code, st] of Object.entries(STANCE_KEYS)) if (this._keyPressedFrame.has(code)) this._stanceFlick = st;
       if (this._vStance) { this._stanceFlick = this._vStance; this._vStance = null; }
-      if (this._down.stance) {
-        const q = quadrantOf(lx || (this._keys.has('KeyR') ? mx : 0), ly || (this._keys.has('KeyR') ? my : 0));
+      if (held) {
+        if (!this._stanceHeld) this._lastQuad = q && qAge >= 2 ? q : null;
         if (q && q !== this._lastQuad) this._stanceFlick = q;
         this._lastQuad = q;
       } else this._lastQuad = null;
-    }
+    } else this._lastQuad = held ? q : null;   // never fire on the first unblocked poll
+    this._stanceHeld = held;
     this._keyPressedFrame.clear();
   }
 

@@ -6,7 +6,7 @@ import { CHAPTERS, GAME_TITLE } from '../data/chapters.js';
 import { STYLES } from '../data/stances.js';
 import { STYLE_COPY, CREDITS } from '../game/story.js';
 import { unlockedChapters } from '../game/progress.js';
-import { splitBossName } from './hud.js';
+import { splitBossName, PAD_BLOCKED_TEXT } from './hud.js';
 
 /** Jade seal: four stance diamonds in a square frame. */
 export const SEAL = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="1.5" y="1.5" width="45" height="45" fill="none" stroke="currentColor" stroke-width="1.6"/>
@@ -46,11 +46,13 @@ export class TitleScreen extends Screen {
         <div class="ls-menu ls-hidden"></div>
       </div>
       <div class="ls-hintbar left ls-hidden">${hint('confirm', 'Select')}${hint('back', 'Back')}</div>
-      <div class="ls-version">v1.0 · ${esc(this.game.input && this.game.input.padType ? 'Controller' : 'Keyboard & mouse')}</div>`;
+      <div class="ls-version">v1.0 · ${esc(this.game.input && this.game.input.padType ? 'Controller' : 'Keyboard & mouse')}</div>
+      <div class="ls-padblocked ls-hidden">${esc(PAD_BLOCKED_TEXT.join(' '))}</div>`;
     this.$press = el.querySelector('.ls-press');
     this.$menu = el.querySelector('.ls-menu');
     this.$hints = el.querySelector('.ls-hintbar');
     this.$ver = el.querySelector('.ls-version');
+    this.$padBlocked = el.querySelector('.ls-padblocked');
     return el;
   }
 
@@ -99,6 +101,7 @@ export class TitleScreen extends Screen {
 
   showPress() {
     this.phase = 'press';
+    this._t = 0;   // the 0.4 s guard in update() swallows the B press that brought us back here
     this.$press.classList.remove('ls-hidden');
     this.$menu.classList.add('ls-hidden');
     this.$hints.classList.add('ls-hidden');
@@ -130,6 +133,13 @@ export class TitleScreen extends Screen {
     if (this.phase === 'press' && this._t > 0.4 && this.menus.anyPressed) this.showMenu();
     const dev = this.game.input && this.game.input.padType ? 'Controller' : 'Keyboard & mouse';
     if (this._dev !== dev) { this._dev = dev; this.$ver.textContent = `v1.0 · ${dev}`; }
+    // the embedding page forbids the Gamepad API: explain why a pad does nothing
+    const blocked = !!(this.game.input && this.game.input.gamepadBlocked);
+    if (blocked !== this._padBlocked) {
+      this._padBlocked = blocked;
+      this.$padBlocked.classList.toggle('ls-hidden', !blocked);
+      if (this.el) this.el.classList.toggle('padblocked', blocked);   // the version label moves up to make room
+    }
   }
 }
 

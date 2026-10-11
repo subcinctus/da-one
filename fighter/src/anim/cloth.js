@@ -35,7 +35,8 @@ export class ClothSim {
       const g = groups[key];
       if (!g.b1) continue;
       const kind = KINDS[g.kind] ? g.kind : 'sash';
-      this.chains.push({ key, kind, K: KINDS[kind], flap: kind === 'flapF' ? 1 : kind === 'flapB' ? 2 : 0, b1: g.b1, b2: g.b2, p1: 0.1, r1: 0.1, vp1: 0.1, vr1: 0.1, p2: 0.1, r2: 0.1, vp2: 0.1, vr2: 0.1, side: key === 'sashB' ? 1 : 0 });
+      this.chains.push({ key, kind, K: KINDS[kind], flap: kind === 'flapF' ? 1 : kind === 'flapB' ? 2 : 0, b1: g.b1, b2: g.b2, p1: 0.1, r1: 0.1, vp1: 0.1, vr1: 0.1, p2: 0.1, r2: 0.1, vp2: 0.1, vr2: 0.1,
+        pp1: 0.1, pr1: 0.1, pp2: 0.1, pr2: 0.1, side: key === 'sashB' ? 1 : 0 });
     }
     this.fresh = true;
   }
@@ -63,6 +64,7 @@ export class ClothSim {
       tp = tp < K.pMin ? K.pMin : tp > K.pMax ? K.pMax : tp;
       tr = tr < -K.rollMax ? -K.rollMax : tr > K.rollMax ? K.rollMax : tr;
       if (this.fresh) { c.p1 = tp; c.r1 = tr; c.p2 = 0; c.r2 = 0; c.vp1 = c.vr1 = c.vp2 = c.vr2 = 0; }
+      c.pp1 = c.p1; c.pr1 = c.r1; c.pp2 = c.p2; c.pr2 = c.r2;   // previous step (render interpolation)
       c.vp1 += ((tp - c.p1) * K.k1 - c.vp1 * K.c1) * dt; c.p1 += c.vp1 * dt;
       c.vr1 += ((tr - c.r1) * K.k1 - c.vr1 * K.c1) * dt; c.r1 += c.vr1 * dt;
       c.b1.rotation.set(c.p1, 0, c.r1);
@@ -76,6 +78,16 @@ export class ClothSim {
       }
     }
     this.fresh = false;
+  }
+
+  /** Render-rate cloth: lerp each bone between the previous and the current sim step (alpha in [0, 1]). */
+  render(a) {
+    const chains = this.chains;
+    for (let ci = 0; ci < chains.length; ci++) {
+      const c = chains[ci];
+      c.b1.rotation.set(c.pp1 + (c.p1 - c.pp1) * a, 0, c.pr1 + (c.r1 - c.pr1) * a);
+      if (c.b2) c.b2.rotation.set(c.pp2 + (c.p2 - c.pp2) * a, 0, c.pr2 + (c.r2 - c.pr2) * a);
+    }
   }
 
   /** Snap springs to rest on the next update (spawn / teleport). */

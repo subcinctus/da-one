@@ -25,3 +25,16 @@ export const by = (yaw, x, y, z) => rotY(yaw, [x, y, z]);
 
 /** Key spec helper: neutral torso + overrides. */
 export const K = (...parts) => spec(N, ...parts);
+
+/**
+ * TRAILING foot of a stance switch (the foot that ends up on the other side of the body without stepping), planted at
+ * fraction `f` of a steady slide + pivot from its `from`-stance spot to its `to`-stance spot. Moves give f = t / (time
+ * of the hold key), so the foot slides at a constant rate (the lunge carries the body over it in the world) and stands
+ * in the END stance in the frozen chain form. `pitch` is a minimum heel raise while it slides.
+ */
+export function trailFoot(from, to, side, f, pitch = 0) {
+  const a = STANCE_SPECS[from]['foot' + side], b = STANCE_SPECS[to]['foot' + side];
+  const k = Math.min(1, Math.max(0, f));
+  const L = (x, y) => Math.round((x + (y - x) * k) * 1000) / 1000;
+  return { at: [L(a.at[0], b.at[0]), 0, L(a.at[2], b.at[2])], yaw: L(a.yaw || 0, b.yaw || 0), pitch: Math.max(L(a.pitch || 0, b.pitch || 0), pitch) };
+}

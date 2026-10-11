@@ -49,7 +49,8 @@ export class Menus {
     ev.on('dialogue', (e) => this.dialogue.push(e));
     ev.on('bossIntro', () => this.dialogue.markIntro());
     // a controller unplugged mid-fight pauses (console etiquette)
-    ev.on('gamepad', (e) => { if (e && e.connected === false && this._canPause()) this.openPause(); });
+    // (a 'blocked' notice is not an unplug: the title and HUD explain it instead)
+    ev.on('gamepad', (e) => { if (e && e.connected === false && !e.blocked && this._canPause()) this.openPause(); });
     // mouse players: losing pointer lock (Esc in the browser) pauses rather than leaving the fight running
     ev.on('pointerLockChange', (e) => {
       if (e && e.locked === false && !g.input.padType && !g.uiOpen && this._canPause()) this.openPause();
@@ -116,10 +117,11 @@ export class Menus {
   /** True while an opaque screen (card, deck editor, menu page) covers the game view. */
   covered() { for (const s of this.stack) if (s.opaque) return true; return false; }
 
-  /** The HUD hides under opaque screens and blocking dialogue. */
+  /** The HUD (and its contextual prompts) hides under opaque screens, blocking dialogue and camera cinematics. */
   hudHidden() {
     for (const s of this.stack) if (s.hidesHud) return true;
-    return !!(this.dialogue && this.dialogue.blocking);
+    if (this.dialogue && this.dialogue.blocking) return true;
+    return !!(this.game.cameraRig && this.game.cameraRig.inCinematic);
   }
 
   // ---------------------------------------------------------------------------------------------- API

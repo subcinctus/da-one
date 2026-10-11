@@ -10,7 +10,9 @@
 // AUTOMATIC SOUNDS from combat events: whooshes timed so their peak lands on the strike (polled at sim rate from
 // attackStart, so charge holds / hitstop / slow motion stay in sync), hits by weight / height / limb, blocks, guard
 // breaks, parries, absorbs, avoids, stance switches, feints, knockdowns (on the body landing), deaths, focus in/out,
-// footsteps from fighter movement (cadence by speed, surface per chapter). MUSIC: see music.js; intensity follows
+// footsteps from fighter movement (cadence by speed, surface per chapter), enemy telegraphs ('tell' / 'tell_heavy' for
+// guard breakers, knockdowns and signatures; one cue per fighter per 0.3 s), charge holds (a rising strain cue from
+// chargeStart to chargeRelease / chargeCancel, a tick on chargeFull). MUSIC: see music.js; intensity follows
 // encounter events with a polling fallback (enemies near the player / a boss alive), ducks during dialogue.
 import { SFX, renderSfx, WHOOSH_PEAK, CONTRACT_SOUNDS } from './sfx.js';
 import { Music } from './music.js';
@@ -22,8 +24,8 @@ const NO_OPTS = Object.freeze({});
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 const KICK = /^(foot|knee)/;
 /** Background render order: combat first (short), long one-shots last. */
-const GEN_FIRST = ['hit_light', 'hit_body', 'hit_face', 'hit_heavy', 'whoosh_light', 'whoosh_heavy', 'block', 'step_stone',
-  'step_tile', 'step_mat', 'step_wet', 'dodge', 'parry', 'guard_break', 'absorb', 'avoid', 'stance', 'land', 'knockdown',
+const GEN_FIRST = ['hit_light', 'hit_body', 'hit_face', 'hit_heavy', 'whoosh_light', 'whoosh_heavy', 'tell', 'tell_heavy', 'block', 'step_stone',
+  'step_tile', 'step_mat', 'step_wet', 'dodge', 'parry', 'guard_break', 'absorb', 'avoid', 'stance', 'charge', 'charge_full', 'land', 'knockdown',
   'feint', 'ui_move', 'ui_select', 'ui_back', 'death', 'focus_in', 'focus_out', 'heal', 'gate', 'learned', 'victory',
   'boss_sting', 'age_up'];
 
@@ -48,6 +50,7 @@ export class AudioSystem {
     this._fs = new Map();         // fighter -> per-fighter state (footsteps, whoosh timing, landing fallback)
     this._pan = 0;
     this._po = { position: null, volume: 1, pitch: 1, delay: 0 };   // reusable opts for sim-rate plays
+    this._lastGain = null;        // gain node of the latest play() (sustained cues fade it out on stop)
     this._hp = null;              // scratch Vector3 (cloned lazily from a fighter position)
     this._genQueue = [];
     this._genIdx = 0;
@@ -224,6 +227,7 @@ export class AudioSystem {
       s.connect(this.revIn);
     }
     this.voices++;
+    this._lastGain = g;
     src.onended = this._ended;
     src.start(now + Math.max(0, +o.delay || 0));
     this.counts[key] = (this.counts[key] || 0) + 1;
@@ -288,6 +292,11 @@ export class AudioSystem {
     on('avoided', (e) => this.play('avoid', { position: e.defender?.position, volume: e.kind === 'dodge' ? 0.45 : 1, pitch: e.kind === 'dodge' ? 1.15 : 1 }));
     on('stanceChanged', (e) => { if (!e.byMove && e.fighter) this.play('stance', { position: e.fighter.position, volume: e.fighter === this.game.player ? 1 : 0.7 }); });
     on('feint', (e) => this.play('feint', { position: e.fighter?.position }));
+    on('enemyTelegraph', (e) => this._onTelegraph(e));
+    on('chargeStart', (e) => this._onChargeStart(e));
+    on('chargeFull', (e) => { const f = e.fighter; if (f && f.position) this.play('charge_full', this._o(f.position, f === this.game.player ? 0.9 : 0.75, 1)); });
+    on('chargeRelease', (e) => { const st = e.fighter && this._fs.get(e.fighter); if (st) this._stopCharge(st, 0.02); });
+    on('chargeCancel', (e) => { const st = e.fighter && this._fs.get(e.fighter); if (st) this._stopCharge(st, 0.03); });
     on('defend', (e) => { if (e.kind === 'avoid_jump') this.play('land', { position: e.fighter?.position, volume: 0.5, delay: 0.38 }); });
     // landing sound: FX reports the body reaching the floor ('bodyLanded'); a timer is the fallback without FX
     on('knockdown', (e) => { const st = e.fighter && this._state(e.fighter); if (st) { st.landAt = this.game.time + 0.95; st.landKind = 'knockdown'; } });
@@ -336,7 +345,8 @@ export class AudioSystem {
     let st = this._fs.get(f);
     if (!st) {
       st = { x: f.position ? f.position.x : 0, z: f.position ? f.position.z : 0, dist: 0.4, speed: 0, wMove: null, wHits: null,
-        wT: 0.2, wIdx: 0, wName: 'whoosh_light', wRate: 1, wVol: 1, wLead: 0.08, landAt: 0, landKind: 'knockdown', landedT: -1e9 };
+        wT: 0.2, wIdx: 0, wName: 'whoosh_light', wRate: 1, wVol: 1, wLead: 0.08, landAt: 0, landKind: 'knockdown', landedT: -1e9,
+        tellT: -1e9, chSrc: null, chGain: null };
       this._fs.set(f, st);
     }
     return st;
@@ -361,6 +371,45 @@ export class AudioSystem {
     if (f !== this.game.player) vol *= 0.85;
     st.wName = name; st.wRate = rate; st.wVol = vol;
     st.wLead = (WHOOSH_PEAK[name] || 0.08) / rate;
+  }
+
+  /**
+   * Enemy telegraph (the guard drops into a wind-up): one cue per fighter per 0.3 s. Guard breakers, knockdowns, heavy
+   * and signature moves get the heavier cue (an inhale + the weight dropping); counter telegraphs stay very quiet.
+   */
+  _onTelegraph(e) {
+    const f = e.fighter;
+    if (!f || !f.position) return;
+    const st = this._state(f);
+    const now = this.game.time;
+    if (now - st.tellT < 0.3) return;
+    st.tellT = now;
+    const pr = e.move && e.move.props;
+    const big = !!(e.heavy || e.signature || (pr && (pr.break || pr.knockdown)));
+    if (e.counter) this.play('tell', this._o(f.position, 0.12, 1.08));
+    else if (big) this.play('tell_heavy', this._o(f.position, 0.5, 1));
+    else this.play('tell', this._o(f.position, 0.35, 1));
+  }
+
+  /** Charge hold: a rising strain cue on the charging fighter, faded out on release / cancel. */
+  _onChargeStart(e) {
+    const f = e.fighter;
+    if (!f || !f.position) return;
+    const st = this._state(f);
+    this._stopCharge(st, 0.02);
+    const src = this.play('charge', this._o(f.position, f === this.game.player ? 0.85 : 0.7, 1));
+    if (src) { st.chSrc = src; st.chGain = this._lastGain; }
+  }
+
+  _stopCharge(st, tau) {
+    const src = st.chSrc, g = st.chGain;
+    st.chSrc = null; st.chGain = null;
+    if (!src || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      if (g) { g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(0, t, tau); }
+      src.stop(t + tau * 6);
+    } catch (err) { /* already stopped */ }
   }
 
   /** Fill the reusable opts bag (sim-rate / event plays without allocating). */
@@ -407,6 +456,8 @@ export class AudioSystem {
       if (!f || !f.position) continue;
       const st = this._state(f);
       if (st.wMove) this._whoosh(f, st);
+      // charge cue failsafe: the fighter left the hold without a release / cancel event (died, removed, reset)
+      if (st.chSrc && !(f.alive && f.state === 'attack' && f.atk && f.atk.charging)) this._stopCharge(st, 0.03);
       this._footsteps(f, st, dt);
       if (st.landAt > 0 && now >= st.landAt) { st.landAt = 0; st.landedT = now; this._landSound(f, st.landKind, null); }
     }
