@@ -1,6 +1,8 @@
 // Combat system (game.combat): owns the fighters, steps them at 120 Hz (player controller / dummy brains -> fighter
-// state machines -> hit resolution -> collisions + world bounds -> animators) and renders them interpolated (root
-// position / yaw lerped here, joint poses via animator.render(alpha) every display frame).
+// state machines -> hit detection -> collisions + world bounds -> hit resolution -> animators) and renders them
+// interpolated (root position / yaw lerped here, joint poses via animator.render(alpha) every display frame). During
+// hitstop the frozen frames show the step that connected itself (alpha 1), held until the next sim step so the exit
+// never steps back.
 // See FIGHTER.md §7 (rules), §6b (combo flow) and §8 (events). Fighter logic: fighter.js, contacts: hits.js.
 import * as THREE from 'three';
 import { lerpAngle, angleDiff, yawTo } from '../core/math.js';
@@ -9,7 +11,7 @@ import { Animator } from '../anim/animator.js';
 import { STANCES, STYLES } from '../data/stances.js';
 import { T } from './constants.js';
 import { Fighter } from './fighter.js';
-import { resolveHits } from './hits.js';
+import { detectHits, resolveHits } from './hits.js';
 import { PlayerController } from './player.js';
 import { DummyBrain } from './dummy.js';
 import { movesTable, starterDeck, enemyDeck, moveInfo, getMove } from './movedata.js';
@@ -25,6 +27,14 @@ export class Combat {
     this.controller = new PlayerController(this);
     /** Remove dead enemies CORPSE_TIME s after death (they sink into the floor first). */
     this.corpseCleanup = true;
+    /** Sim step counter (fighters animated early this step by resolveHits carry it in `_animStep`). */
+    this._stepId = 0;
+    /** Pending contacts of this step (hits.js detectHits -> resolveHits). */
+    this._contacts = [];
+    /** Hitstop display hold: the sim step whose pose is held (alpha 1) until the next step runs, or -1. */
+    this._hsHold = -1;
+    /** Interpolation factor the fighters were last rendered at (tests / tools). */
+    this._renderAlpha = 1;
   }
 
   /** The move library (re-export of moves/index.js MOVES). */
@@ -194,6 +204,7 @@ export class Combat {
   fixedUpdate(dt) {
     const fs = this.fighters;
     this._stepFrame = this.game.frame;   // the controller read this frame's input (see update())
+    const step = ++this._stepId;
     if (!fs.length) return;
     const p = this.player;
     // 1. intents
@@ -206,8 +217,8 @@ export class Combat {
       f.prevYaw = f.yaw;
       f.step(dt);
     }
-    // 3. contacts
-    resolveHits(this);
+    // 3. contacts: strike windows touching opponents, judged on the stepped positions
+    detectHits(this);
     // 4. body collisions (circle push-out) + world bounds
     this._collide();
     const w = this.game.world;
@@ -222,9 +233,12 @@ export class Combat {
       }
       f.position.y = 0;
     }
-    // 5. animation at sim rate
-    for (let i = 0; i < fs.length; i++) fs[i].animate(dt);
-    // 6. corpses sink away after a while
+    // 5. contact resolution: each connecting attacker is animated to this step first (impact point / FX from the pose
+    //    that connected), then reactions start this same step
+    resolveHits(this, dt);
+    // 6. animation at sim rate (attackers already posed by resolveHits are skipped)
+    for (let i = 0; i < fs.length; i++) { const f = fs[i]; if (f._animStep !== step) f.animate(dt); }
+    // 7. corpses sink away after a while
     for (let i = fs.length - 1; i >= 0; i--) {
       const f = fs[i];
       if (f.alive || f.team === 'player' || !this.corpseCleanup) continue;
@@ -263,7 +277,13 @@ export class Combat {
       const fl = inp.stanceFlick();
       if (fl && this._stepFrame !== this.game.frame) this.controller.pendingStance = fl;
     }
-    const a = alpha === undefined ? 1 : Math.max(0, Math.min(1, alpha));
+    let a = alpha === undefined ? 1 : Math.max(0, Math.min(1, alpha));
+    // Hitstop: the sim froze right after the step that connected, so the frozen frames show that step itself (alpha 1)
+    // instead of a blend up to a step short of contact. The hold lasts until the next sim step after the stop: the
+    // leftover interpolation fraction would otherwise step the strike back toward the pre-contact pose first.
+    if (this.game._hitstopT > 0) this._hsHold = this._stepId;
+    if (this._hsHold >= 0) { if (this._hsHold === this._stepId) a = 1; else this._hsHold = -1; }
+    this._renderAlpha = a;
     const fs = this.fighters;
     for (let i = 0; i < fs.length; i++) {
       const f = fs[i];

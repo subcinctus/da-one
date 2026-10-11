@@ -16,28 +16,28 @@ export const PRESETS = {
     flaps: { front: [0.27], back: [0.29], width: 0.2 }, tails: [0.2, 0.19],
   },
   thug: {
-    pal: { skin: 0xb88a68, top: 0x6f6252, top2: 0x5d5245, trim: 0x433b33, trousers: 0x3b3a38, sash: 0x8c3f32, wrap: 0xb7ad99, shoe: 0x262626, hair: 0x221e1b, mask: 0xa79a84, maskDark: 0x1d1d1f, accent: 0xb5503c },
+    pal: { skin: 0xb88a68, top: 0x55657e, top2: 0x4a5870, trim: 0x635b52, trousers: 0x696865, sash: 0x8c3f32, wrap: 0xb7ad99, shoe: 0x262626, hair: 0x221e1b, mask: 0xa79a84, maskDark: 0x1d1d1f, accent: 0xb5503c },
     shape: { scale: 1, girth: 1.04, shoulder: 1.02, belly: 1.05, arm: 1.02, leg: 1, head: 1, hand: 1 },
     top: 'tunic', sleeves: 'short', hair: 'short',
     mask: { kind: 'cloth', stripe: 'seam', slant: 0, brow: 0.004, ridge: 0.006 },
     flaps: { front: [0.22], back: [0.24], width: 0.2 }, tails: [0.16, 0.14],
   },
   brawler: {
-    pal: { skin: 0xb98563, top: 0x4b3d33, top2: 0x3e332b, trim: 0x2c2520, trousers: 0x4a4b3e, sash: 0x9e3a2c, wrap: 0xcfc4ae, shoe: 0x272522, hair: 0x1b1816, mask: 0x4c4f55, maskDark: 0x121315, accent: 0xc0432f },
+    pal: { skin: 0xb98563, top: 0x7a3b36, top2: 0x69332f, trim: 0x655b53, trousers: 0x686a5d, sash: 0x9e3a2c, wrap: 0xcfc4ae, shoe: 0x272522, hair: 0x1b1816, mask: 0x4c4f55, maskDark: 0x121315, accent: 0xc0432f },
     shape: { scale: 1.05, girth: 1.14, shoulder: 1.22, belly: 1.1, arm: 1.4, leg: 1.1, head: 0.98, hand: 1.2 },
     top: 'vest', sleeves: 'none', hair: 'short',
     mask: { kind: 'half', stripe: 'center', slant: 12, brow: 0.018, ridge: 0.01 },
     flaps: { front: [0.2], back: [0.24], width: 0.22 }, tails: [0.18, 0.16],
   },
   swift: {
-    pal: { skin: 0xc49a78, top: 0x3f5459, top2: 0x34474b, trim: 0xb6893f, trousers: 0x2d3236, sash: 0xc58c3b, wrap: 0xd6cfbf, shoe: 0x232528, hair: 0x2c3a3e, mask: 0xd9d4ca, maskDark: 0x15171a, accent: 0xe0a347 },
+    pal: { skin: 0xc49a78, top: 0x5f7f86, top2: 0x536f75, trim: 0xb6893f, trousers: 0x62696f, sash: 0xc58c3b, wrap: 0xd6cfbf, shoe: 0x232528, hair: 0x505f64, mask: 0xd9d4ca, maskDark: 0x15171a, accent: 0xe0a347 },
     shape: { scale: 0.98, girth: 0.88, shoulder: 0.94, belly: 0.92, arm: 0.88, leg: 0.92, head: 0.98, hand: 0.95 },
     top: 'tunic', sleeves: 'short', hair: 'hood',
     mask: { kind: 'narrow', stripe: 'diagonal', slant: 16, brow: 0.01, ridge: 0.016 },
     flaps: { front: [0.3], back: [0.2, 0.18], width: 0.18 }, tails: [0.26, 0.25],
   },
   heavy: {
-    pal: { skin: 0xa97c5e, top: 0x7a6650, top2: 0x5f4f3e, trim: 0x3e3329, trousers: 0x3e3f43, sash: 0x6b2f2a, wrap: 0xbcb19b, shoe: 0x232323, hair: 0x1a1817, mask: 0xd8cdb6, maskDark: 0x1b1a19, accent: 0xa8432f },
+    pal: { skin: 0xa97c5e, top: 0x5c6449, top2: 0x4f5640, trim: 0x66574b, trousers: 0x626469, sash: 0x6b2f2a, wrap: 0xbcb19b, shoe: 0x232323, hair: 0x1a1817, mask: 0xd8cdb6, maskDark: 0x1b1a19, accent: 0xa8432f },
     shape: { scale: 1.06, girth: 1.32, shoulder: 1.25, belly: 1.4, arm: 1.3, leg: 1.22, head: 1.03, hand: 1.15 },
     top: 'padded', sleeves: 'short', hair: 'bald',
     mask: { kind: 'stout', stripe: 'brow', slant: 0, brow: 0.02, ridge: 0.008 },
@@ -73,8 +73,9 @@ export const PRESETS = {
   },
 };
 
-const THUG_TOPS = [0x6f6252, 0x56656a, 0x7d5546, 0x646a4f, 0x4f5468, 0x6b5a6b, 0x7a6f5c];
-const THUG_TROUSERS = [0x3b3a38, 0x2f3338, 0x45403a, 0x343a33];
+// mid-dark tops in hues clearly apart from skin, so costumes never read as bare skin (and never as black silhouettes)
+const THUG_TOPS = [0x55657e, 0x6b6f45, 0x7a3b36, 0x3f6f6c, 0x8a6a2e, 0x664a66, 0x4a5260];
+const THUG_TROUSERS = [0x696865, 0x63686f, 0x6d6861, 0x636a62];
 const THUG_MASKS = [0xa79a84, 0x8c8172, 0x6e7378, 0xb9b09f, 0x7e6d5d];
 const THUG_ACCENTS = [0xb5503c, 0xc9973c, 0x4b8fae, 0x8b9f4a, 0xa64a6a];
 const THUG_HAIR = ['short', 'bald', 'cap', 'short', 'headband'];

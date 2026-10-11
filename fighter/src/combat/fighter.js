@@ -106,6 +106,7 @@ export class Fighter {
     // rendering / brain
     this.model = null;
     this.animator = null;
+    this._animStep = -1;   // Combat sim step this fighter was last animated in early (hits.js resolveHits)
     this.ai = null;
     this.dummy = null;
 

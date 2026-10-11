@@ -13,6 +13,7 @@
 //   telegraph        [min, max] the readable beat (stop, square up) before every attack
 //   reaction         [min, max] delay before reacting to anything the player does (never frame-perfect)
 //   block, ability, dodge   chance to block / use its style ability / dodge an incoming strike
+//   readBlock        extra block chance against a read opener only (one the player keeps repeating; th.read)
 //   timing           0..1 how well its parries / avoids are timed (1 = rarely early)
 //   smart            0..1 reads attack properties (no blocking break moves, no absorbing them)
 //   punish           chance to punish a whiffed player attack; counter = after its own successful defence
@@ -30,7 +31,7 @@ export const ARCHETYPES = {
     speed: 0.82, circle: 0.42, ring: [3.1, 4.4],
     aggression: 0.5, cooldown: [1.0, 1.9], tokenStrings: [1, 2], tokenRest: 1.6,
     strings: [0.55, 0.4, 0.05], telegraph: [0.24, 0.34], reaction: [0.27, 0.35],
-    block: 0.24, ability: 0.03, dodge: 0.04, timing: 0.35, smart: 0.1,
+    block: 0.24, ability: 0.03, dodge: 0.04, timing: 0.35, smart: 0.1, readBlock: 0.05,
     punish: 0.3, counter: 0.35, feint: 0, guardUp: 0.1, heavyBias: -0.1, switch: 0,
     staminaFloor: 24, staminaResume: 55, charge: [0, 0.2], taunt: 1, bark: 1, backoff: [0.5, 1.0],
   },
@@ -108,15 +109,16 @@ export const BOSSES = {
   },
   mr_golden: {
     base: 'swift', style: 'forsaken', health: 340, damage: 1.05, name: 'Mr. Golden', look: 'mr_golden',
-    // Fights in every stance, reads everything, feints like a contract clause.
+    // Fights in every stance, reads everything, feints like a contract clause. Parries rather than blocks: his style
+    // (forsaken) should show a couple of times a fight even against varied play, so ability takes part of the block share.
     allStances: true,
     phases: [
       { speed: 0.92, ring: [2.8, 3.6], aggression: 0.85, cooldown: [0.55, 1.0], strings: [0.2, 0.5, 0.3],
-        telegraph: [0.18, 0.27], reaction: [0.18, 0.27], block: 0.24, ability: 0.3, dodge: 0.12, timing: 0.7, smart: 0.85,
+        telegraph: [0.18, 0.27], reaction: [0.18, 0.27], block: 0.2, ability: 0.34, dodge: 0.12, timing: 0.7, smart: 0.85,
         punish: 0.8, counter: 0.85, feint: 0.18, guardUp: 0.25, heavyBias: 0.1, switch: 0.55, sigBias: 2,
         staminaFloor: 20, staminaResume: 48, charge: [0.2, 0.5], backoff: [0.3, 0.6] },
       { aggression: 1, cooldown: [0.35, 0.75], strings: [0.05, 0.4, 0.55], telegraph: [0.15, 0.23], reaction: [0.15, 0.24],
-        ability: 0.42, block: 0.2, dodge: 0.14, feint: 0.32, switch: 0.7, sigBias: 4 },
+        ability: 0.46, block: 0.16, dodge: 0.14, feint: 0.32, switch: 0.7, sigBias: 4 },
     ],
   },
 };
@@ -142,7 +144,7 @@ const lerpPair = (p, d) => [Math.max(0.15, p[0] + d), Math.max(0.18, p[1] + d)];
 export function resolveProfile(id, phase = 0, chapter = 1) {
   const boss = BOSSES[id] || null;
   const baseId = boss ? boss.base : (ARCHETYPES[id] ? id : 'thug');
-  const p = { ...ARCHETYPES[baseId], id: boss ? id : baseId, base: baseId, boss: !!boss, sigBias: 0, allStances: false };
+  const p = { readBlock: 0, ...ARCHETYPES[baseId], id: boss ? id : baseId, base: baseId, boss: !!boss, sigBias: 0, allStances: false };
   if (boss) {
     p.style = boss.style; p.health = boss.health; p.damage = boss.damage; p.allStances = !!boss.allStances;
     p.taunt = 0; p.bark = 0;
@@ -155,6 +157,7 @@ export function resolveProfile(id, phase = 0, chapter = 1) {
   // bosses are tuned per fight; regular enemies get the chapter's defence / aggression bump
   if (!boss) {
     p.block = Math.min(0.7, p.block * s.defense);
+    p.readBlock = Math.min(0.15, p.readBlock * s.defense);
     p.ability = Math.min(0.6, p.ability * s.defense);
     p.dodge = Math.min(0.5, p.dodge * s.defense);
     p.aggression = Math.min(1, p.aggression * s.aggression);

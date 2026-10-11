@@ -6,7 +6,8 @@
 //   look   L = P + fwd(psi)·aF + right(psi)·aR + up·aY
 // Unlocked: Sifu-like orbit on the right stick (sensitivity / invert settings; the mouse as a per-frame angle from
 //   input.lookDelta), gentle drift behind the run, and combat framing: with an enemy within 6 m the arm backs off and
-//   rises, and an idle stick lets the yaw drift so the nearest enemy is never hidden behind the player's body.
+//   rises, and an idle stick lets the yaw drift so the nearest enemy is never hidden behind the player's body (the
+//   clearance widens as a wall squeezes the arm in, and a squeezed arm lifts the pitch a little).
 //   After an RT + stick stance flick, stick look stays off until the stick re-centres.
 // Locked (Absolver): camera swung behind the player's right shoulder by BETA, looking ~60% of the way to the
 //   target, so the player sits left of centre and the target centre-right. Closer target = higher, tighter.
@@ -23,7 +24,12 @@ const FOLLOW = { D: 3.75, side: 0.42, aF: 2.2, aR: 0.42, aY: -0.12, height: 1.45
 // Unlocked combat framing (Sifu): while a living enemy is within `range`, the arm backs off, rises and moves a little
 // further over the shoulder; with the right stick idle for `idle` s the yaw also drifts (< 1 rad/s) so the nearest
 // enemy is not hidden behind the player's body (enemy right of centre, player on the left third).
-const FRAME = { range: 6, D: 4.3, side: 0.6, aR: 0.6, phi: 0.3, sep: 0.2, gain: 3, maxRate: 0.9, idle: 0.25 };
+// The clearance needed grows as the camera comes closer to the player (a squeezed arm against a wall or stall): the
+// player's half-width (~0.55 m with arms) subtends atan(0.55 / camDist), so `sep` is only the open-room floor and
+// `sepMax` caps it. With the arm squeezed below `sqArm` the pitch also lifts toward `phiSq` (transient, reversible) so
+// the enemy clears over the player's shoulder.
+const FRAME = { range: 6, D: 4.3, side: 0.6, aR: 0.6, phi: 0.3, sep: 0.2, sepMax: 0.7, halfW: 0.55, gain: 3, maxRate: 0.9, idle: 0.25,
+  sqArm: 0.75, phiSq: 0.4 };
 const LOCK = { beta: 0.52, Dmin: 3.7, Dmax: 5.2, toward: 0.6, height: 1.4 };
 const YAW_RATE = 2.7;     // rad/s at full stick, sensitivity 1
 const PITCH_RATE = 1.7;
@@ -55,6 +61,7 @@ export class CameraRig {
     this._arm = 1;
     this._idle = 0;
     this._fight = 0;          // 0..1 eased "enemy within FRAME.range" (unlocked combat framing)
+    this._lift = 0;           // 0..1 eased "arm squeezed in a fight" (pitch lift toward FRAME.phiSq)
     this._stancePrev = false; // stance button state last frame
     this._lookGate = false;   // stick look ignored after a stance release until the stick re-centres
     this._target = null;
@@ -385,9 +392,15 @@ export class CameraRig {
       }
       // combat framing (stick idle only, so it never fights the player): orbit until the nearest enemy clears the
       // player's silhouette, and keep the pitch at FRAME.phi or above.
-      if (E && this._idle > FRAME.idle && this._gpValid) this._frameEnemy(E, px, pz, dt);
+      const framing = !!E && this._idle > FRAME.idle && this._gpValid;
+      if (framing) this._frameEnemy(E, px, pz, dt);
+      // squeezed arm in a fight: lift the pitch a little (a transient floor on the desired pitch, never written into the
+      // user's pitch) so the enemy shows over the player's shoulder; eases out once the arm opens up again
+      const sq = framing ? clamp((FRAME.sqArm - this._arm) / 0.2, 0, 1) * f : 0;
+      if (this._snap) this._lift = sq; else this._lift += (sq - this._lift) * damp(3, dt);
       this._target = null;
       psi = this._userYaw; phi = this._userPitch;
+      if (this._lift > 1e-3 && phi < FRAME.phiSq) phi += (FRAME.phiSq - phi) * this._lift;
       D = lerp(FOLLOW.D, FRAME.D, f) + clamp((sp - 2.8) / 1.4, 0, 1) * 0.35;
       side = lerp(FOLLOW.side, FRAME.side, f); aR = lerp(FOLLOW.aR, FRAME.aR, f);
       aF = FOLLOW.aF; aY = FOLLOW.aY;
@@ -438,11 +451,14 @@ export class CameraRig {
     if (ed2 > pd2) {
       const b = wrapAngle(Math.atan2(edx, edz) - Math.atan2(pdx, pdz));
       const ab = Math.abs(b);
-      if (ab < FRAME.sep) {
+      // distance-aware clearance: a camera squeezed in to 2.2-2.7 m needs ~0.25 rad, not the open-room 0.2
+      const pd = Math.sqrt(pd2);
+      const sep = clamp(Math.atan2(FRAME.halfW, pd) + 0.03, FRAME.sep, FRAME.sepMax);
+      if (ab < sep) {
         // orbit needed per radian of b grows as the enemy gets closer behind the player: (camDist + r) / r
-        const pd = Math.sqrt(pd2), r = Math.max(0.5, Math.sqrt(ed2) - pd);
+        const r = Math.max(0.5, Math.sqrt(ed2) - pd);
         const geo = clamp((pd + r) / r, 1, 3);
-        const step = Math.min((FRAME.sep - ab) * damp(FRAME.gain, dt) * geo, FRAME.maxRate * dt);
+        const step = Math.min((sep - ab) * damp(FRAME.gain, dt) * geo, FRAME.maxRate * dt);
         let dir = b > 0.06 ? -1 : b < -0.06 ? 1 : 0;
         if (dir === 0) {
           // dead behind the player: orbit right (enemy right of centre) unless a wall is closer on that side

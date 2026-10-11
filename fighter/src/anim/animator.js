@@ -10,7 +10,8 @@
 // COMBO FLOW (FIGHTER.md §6b): playAction ALWAYS cross-fades from the exact pose displayed last step (snapshot of the
 // blended output, even when the previous action is frozen or mid-fade), can start a track part-way (startAt = chainIn)
 // and blends root offsets / yaw (shortest arc) like the joints, so a chain is one continuous motion. freezeAction()
-// holds the current pose (strike hold) without advancing time. Allocation-free per step.
+// holds the current pose (strike hold) without advancing time. While a cross-fade turns the body, the displayed facing
+// turns at most YAW_STEP per step (the excess is a lag closed over the next steps). Allocation-free per step.
 import * as THREE from 'three';
 import { PoseBuffer, sampleTrack, trackDuration, strikePointWorld, JOINT_INDEX } from './rig.js';
 import { damp, smoothstep, wrapAngle, EASE } from '../core/math.js';
@@ -39,12 +40,23 @@ const FOOT_PLANT_H = 0.13;  // ball height (m): limited below (the play-test's '
 const FOOT_CATCH = 5;       // above it, a lifted foot's lag decays per step by this much per metre of ball height
 const FOOT_STEP = 0.027;    // max planted ball travel per 1/120 s step (m)
 const FOOT_FAST_BODY = 0.036; // body travel per step (m) above which planted feet simply move with it (dodges, knockbacks)
-const FOOT_LAG = 0.22;      // max distance between the displayed and the sampled ball (m)
+const FOOT_LAG = 0.22;      // planted lag (m) at which the foot re-plants with a quick step instead of sliding further
 const FOOT_FLOOR = -0.008;  // lowest ball / heel height (m) during actions (visible penetration only)
 const FOOT_MIN_FIX = 0.002; // corrections smaller than this are skipped (2-bone IK is touchy near a straight leg)
 const HEEL_DROP = 0.06;     // heel bottom below the ankle (m, unscaled)
+// Re-plant step: a planted foot that has fallen FOOT_LAG behind its sampled spot (the body chasing / turning on a
+// support foot faster than FOOT_STEP) is not dragged along the floor: it rises by STEP_H (STEP_UP per step), travels
+// at up to STEP_SPEED only while clear of the floor, and sets down vertically on the sampled spot.
+const STEP_H = 0.15;
+const STEP_UP = 0.06;
+const STEP_SPEED = 0.09;
+const FOOT_LAG_MAX = 0.4;   // hard cap on the displayed / sampled ball distance (m), even mid-step
 const SIDES = ['L', 'R'];
 const _ft = new THREE.Vector3();
+
+// Displayed facing (sim yaw + root yaw) may turn at most YAW_STEP per 1/120 s step while an action cross-fades (a chain
+// into a turning move): the excess is carried over the next steps as a small decaying lag (planted feet stay put).
+const YAW_STEP = 14 * Math.PI / 180;
 
 // Foot-space interpolation (feet on or leaving / reaching the floor). Slerping joints between two poses whose root
 // yaw differs (a turning key pair, or a chain cross-fade out of a held strike) swings a planted foot along an arc:
@@ -54,8 +66,16 @@ const _ft = new THREE.Vector3();
 // lifted in both keys keep the joint arcs; in a cross-fade (chains, clip changes) every foot below FOOT_LINE_MAX_H
 // takes the straight line, so a foot folding into the next move never dips through the floor. Kicks keep their arcs.
 const FOOT_LINE_MAX_H = 0.45; // above this ball height (either pose) a cross-fading foot keeps the joint-space arc
+// Landing / lift-off in a cross-fade (a foot lifted in one pose and planted in the other: chains, clip changes): the
+// foot never skims the floor away from its spot. On the straight line it travels BEFORE it comes down (landing: XZ
+// ease-out cubic, height ease-in; lift-off is the mirror); a kick's joint arc has its XZ drawn onto the spot as the
+// blend nears it (weight k). On either path the ball stays at least FOOT_LAND_K x its horizontal distance from the
+// planted spot above it (capped at the lifted end's height), so it reaches the floor already over its spot and sets
+// down vertically instead of sweeping the last 20 cm along it.
+const FOOT_LAND_K = 4;
+const FOOT_LAND_MAX = 0.16;
 const _kA = new PoseBuffer(), _kB = new PoseBuffer(), _bf = new PoseBuffer();
-const _ba = new THREE.Vector3(), _bb = new THREE.Vector3(), _bo = new THREE.Vector3();
+const _ba = new THREE.Vector3(), _bb = new THREE.Vector3(), _bo = new THREE.Vector3(), _bl = new THREE.Vector3();
 const _fqa = new THREE.Quaternion(), _fqb = new THREE.Quaternion();
 /** dst (already = blend(A, B, k) in joint space): feet re-placed in foot space (all = lifted ones too). s = scale. */
 function plantBlend(dst, A, B, k, s, all = false) {
@@ -67,14 +87,52 @@ function plantBlend(dst, A, B, k, s, all = false) {
     _ba.copy(F.B); _fqa.copy(F.qA);
     F = legFK(B, side, s);
     const pb = F.B.y < FOOT_PLANT_H;
-    // feet lifted in both (track keys) and high feet (kicks) keep their joint arcs: a straight line through the hip
-    // region would fold the leg violently
-    if ((!all && !pa && !pb) || ((!pa || !pb) && Math.max(_ba.y, F.B.y) > FOOT_LINE_MAX_H)) continue;
+    if (!all && !pa && !pb) continue;
     _bb.copy(F.B); _fqb.copy(F.qA);
-    _ba.lerp(_bb, k); _fqa.slerp(_fqb, k);
+    const land = all && pa !== pb;
+    let arc = false;
+    if ((!pa || !pb) && Math.max(_ba.y, _bb.y) > FOOT_LINE_MAX_H) {
+      // high feet (kicks) keep their joint arcs: a straight line through the hip region would fold the leg violently
+      if (!land) continue;
+      arc = true;
+      F = legFK(dst, side, s);
+      _bl.copy(F.B); _fqa.copy(F.qA);
+    } else {
+      // straight line in foot space: planted feet slide / pivot exactly as authored
+      let wxz = k, wy = k;
+      if (land) {
+        const j = 1 - k;
+        if (pb) { wxz = 1 - j * j * j; wy = k * k; } else { wxz = k * k * k; wy = 1 - j * j; }
+      }
+      _bl.set(_ba.x + (_bb.x - _ba.x) * wxz, _ba.y + (_bb.y - _ba.y) * wy, _ba.z + (_bb.z - _ba.z) * wxz);
+      _fqa.slerp(_fqb, k);
+    }
+    if (land) {
+      const P = pb ? _bb : _ba, Q = pb ? _ba : _bb;   // planted end, lifted end
+      if (arc) {
+        // the arc's XZ converges on the planted spot as the blend nears it (landing; lift-off: leaves it late)
+        const w = pb ? k : 1 - k;
+        _bl.x += (P.x - _bl.x) * w; _bl.z += (P.z - _bl.z) * w;
+      }
+      const floor = Math.min(P.y + Math.min(FOOT_LAND_MAX, FOOT_LAND_K * Math.hypot(_bl.x - P.x, _bl.z - P.z)), Q.y);
+      if (_bl.y < floor) _bl.y = floor;
+    }
     // ankle = ball - footRotation * ballOffset
     _bo.fromArray(FOOT_BALL).multiplyScalar(s).applyQuaternion(_fqa);
-    _ft.copy(_ba).sub(_bo);
+    _ft.copy(_bl).sub(_bo);
+    legFK(dst, side, s);
+    legIK(dst, side, s, _ft, _fqa);
+  }
+}
+
+/** Re-place dst's planted feet (ball below FOOT_PLANT_H in src) exactly where src has them (after a root yaw change). */
+function keepFeet(dst, src, s) {
+  for (let i = 0; i < 2; i++) {
+    const side = SIDES[i];
+    const F = legFK(src, side, s);
+    if (F.B.y >= FOOT_PLANT_H) continue;
+    _fqa.copy(F.qA);
+    _ft.copy(F.A);
     legFK(dst, side, s);
     legIK(dst, side, s, _ft, _fqa);
   }
@@ -161,9 +219,12 @@ export class Animator {
     this.cloth = new ClothSim(model);
     this.prevRoot = new Float32Array(4);
     // planted-foot pass state: displayed ball XZ per foot (world when hasSim, else fighter space)
-    this.feet = { L: { x: 0, z: 0, sx: 0, sz: 0 }, R: { x: 0, z: 0, sx: 0, sz: 0 }, init: false, px: 0, pz: 0, yaw: 0, sim: false };
+    const foot = () => ({ x: 0, z: 0, sx: 0, sz: 0, lift: 0, py: 0, step: false, land: false });
+    this.feet = { L: foot(), R: foot(), init: false, px: 0, pz: 0, yaw: 0, sim: false };
     this.footPass = true;
     this._lastYaw = null;
+    this._dYaw = 0;           // sim yaw change this step (rad)
+    this._yawLag = false;     // displayed root yaw is behind the action (rate limit, see YAW_STEP)
     this.yawRate = 0;
     this.vel = new THREE.Vector3();
     if (this.skel) this.out.applyTo(this.skel);
@@ -364,11 +425,13 @@ export class Animator {
     const st = this.stance;
     // turning in place: a small in-stance shuffle instead of sliding feet (sim yaw when Combat provides it)
     const root = this.model && this.model.root;
+    this._dYaw = 0;
     if (L.hasSim || root) {
       const ry = L.hasSim ? L.yaw : root.rotation.y;
       let d = this._lastYaw === null ? 0 : wrapAngle(ry - this._lastYaw);
       if (d > 0.5 || d < -0.5) d = 0; // teleports / spawns
       this._lastYaw = ry;
+      this._dYaw = d;
       this.yawRate += (d / dt - this.yawRate) * damp(10, dt);
     }
     let sp = L.speed, vx = L.vx, vz = L.vz;
@@ -425,7 +488,24 @@ export class Animator {
     }
   }
 
+  /**
+   * Cross-fade turn rate limit (YAW_STEP): clamp this step's change of the displayed facing (sim yaw step + root yaw
+   * step) and keep the excess as a lag for the next steps. Never forces a counter-rotation. True when it clamped.
+   */
+  _limitYaw() {
+    const prev = this.prevOut.root[3], ds = this._dYaw || 0;
+    const d = wrapAngle(this.mix.root[3] - prev);
+    let lo = -YAW_STEP - ds, hi = YAW_STEP - ds;
+    if (lo > 0) lo = 0;
+    if (hi < 0) hi = 0;
+    const c = d < lo ? lo : d > hi ? hi : d;
+    this._yawLag = c !== d;
+    if (this._yawLag) this.mix.root[3] = prev + c;
+    return this._yawLag;
+  }
+
   _updateAction(dt) {
+    if (this.layer !== 'action') this._yawLag = false;
     if (this.layer === 'base') { this.mix.copy(this.base); return; }
     if (this.layer === 'exit') {
       this.fadeT += dt;
@@ -456,10 +536,16 @@ export class Animator {
       this.act.root[0] += a.ax * w; this.act.root[1] += a.ar * w; this.act.root[3] += a.ay * w;
     }
     const k = this.fadeDur > 0 ? ease(this.fadeT / this.fadeDur) : 1;
+    const feet = this.skel && this.footPass;
     if (k < 1) {
       blendWrap(this.mix, this.from, this.act, k);
-      if (this.skel && this.footPass) plantBlend(this.mix, this.from, this.act, k, this.skel.body.scale.x || 1, true);
-    } else this.mix.copy(this.act);
+      this._limitYaw();
+      if (feet) plantBlend(this.mix, this.from, this.act, k, this.skel.body.scale.x || 1, true);
+    } else {
+      this.mix.copy(this.act);
+      // the rest of a rate-limited cross-fade turn: a small lag that closes over the next steps, feet where authored
+      if (this._yawLag && this._limitYaw() && feet) keepFeet(this.mix, this.act, this.skel.body.scale.x || 1);
+    }
     if (ended) {
       const cb = a.onEnd;
       if (!a.hold) this.stopAction(a.exitFade);
@@ -549,29 +635,43 @@ export class Animator {
       // sampled ball in world (sim) space: model root rotation y = yaw, fighter x = own left
       const bx = px + fk.B.x * c + fk.B.z * sn, bz = pz - fk.B.x * sn + fk.B.z * c;
       const h = fk.B.y;
-      if (reset || (free && free.indexOf(side === 'L' ? 'footL' : 'footR') >= 0)) { st.x = bx; st.z = bz; }
+      if (reset || (free && free.indexOf(side === 'L' ? 'footL' : 'footR') >= 0)) { st.x = bx; st.z = bz; st.lift = 0; st.step = false; }
       else if (!limit) {
         // locomotion: no limit, the lag behind the sampled foot (if any) fades out
         st.x = bx + (st.x - st.sx) * 0.6; st.z = bz + (st.z - st.sz) * 0.6;
+        st.step = false; st.lift = st.lift > STEP_UP ? st.lift - STEP_UP : 0;
       } else if (h > FOOT_PLANT_H) {
         // lifted: the lag behind the sampled foot decays (faster the higher the foot is), never a one-step snap
         const keep = Math.max(0, Math.min(0.85, 1 - (h - FOOT_PLANT_H) * FOOT_CATCH));
         st.x = bx + (st.x - st.sx) * keep; st.z = bz + (st.z - st.sz) * keep;
+        st.step = false; st.lift = st.lift > STEP_UP ? st.lift - STEP_UP : 0;
       } else {
         // planted: travels at most `step` toward the sampled foot
         let dx = bx - st.x, dz = bz - st.z;
         const d = Math.hypot(dx, dz);
-        if (d > step) { st.x += dx * (step / d); st.z += dz * (step / d); } else { st.x = bx; st.z = bz; }
+        // a planted foot about to fall FOOT_LAG behind re-plants with a quick step instead of sliding further
+        if (!st.step && d - step > FOOT_LAG) { st.step = true; st.land = false; }
+        if (st.step) {
+          // rise, travel only while clear of the floor (this step or the last), set down vertically on the spot
+          const wasUp = st.py >= FOOT_PLANT_H;
+          if (wasUp && d <= STEP_SPEED) st.land = true;
+          const want = st.land ? 0 : STEP_H;
+          st.lift += want > st.lift ? Math.min(STEP_UP, want - st.lift) : -Math.min(STEP_UP, st.lift - want);
+          const sp = wasUp || h + st.lift >= FOOT_PLANT_H ? STEP_SPEED : step;
+          if (d > sp) { st.x += dx * (sp / d); st.z += dz * (sp / d); } else { st.x = bx; st.z = bz; }
+          if (st.land && st.lift <= 0) { st.lift = 0; st.step = false; }
+        } else if (d > step) { st.x += dx * (step / d); st.z += dz * (step / d); } else { st.x = bx; st.z = bz; }
         dx = st.x - bx; dz = st.z - bz;
         const lag = Math.hypot(dx, dz);
-        if (lag > FOOT_LAG) { st.x = bx + dx * (FOOT_LAG / lag); st.z = bz + dz * (FOOT_LAG / lag); }
+        if (lag > FOOT_LAG_MAX) { st.x = bx + dx * (FOOT_LAG_MAX / lag); st.z = bz + dz * (FOOT_LAG_MAX / lag); }
       }
       st.sx = bx; st.sz = bz;
       // correction back in fighter space
       const wx = st.x - bx, wz = st.z - bz;
       const fx = wx * c - wz * sn, fz = wx * sn + wz * c;
       const low = Math.min(h, fk.A.y - HEEL_DROP * s);
-      const lift = limit && low < FOOT_FLOOR ? FOOT_FLOOR - low : 0;
+      const lift = (limit && low < FOOT_FLOOR ? FOOT_FLOOR - low : 0) + st.lift;
+      st.py = h + lift;
       if (fx * fx + fz * fz < FOOT_MIN_FIX * FOOT_MIN_FIX && lift < FOOT_MIN_FIX) continue;
       _ft.set(fk.A.x + fx, fk.A.y + lift, fk.A.z + fz);
       legIK(this.out, side, s, _ft);

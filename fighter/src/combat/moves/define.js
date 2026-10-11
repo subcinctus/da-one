@@ -11,6 +11,18 @@ const HITSTOP = { light: 0.045, medium: 0.06, heavy: 0.085 };
 
 const rt = (v) => Math.round(v * 1000) / 1000;
 
+// SIM-STEP GRID (120 Hz). The move clock advances in whole 1/120 s steps from 0 (standalone) or from chainIn (chained),
+// so hit times, the end of the active window and chainIn are snapped to that grid: the step that detects contact ends
+// exactly on the 'hit' key (the limb is at full speed INTO contact on that step, never half inside the slow
+// follow-through) and the step that starts a chain hold ends exactly on the 'hold' key (the frozen form is the authored
+// strike form, not a sliver of the recovery). Window times sit GRID_EPS before their step boundary and chainIn exactly
+// on one, so float accumulation in moveTime can never push a detection a whole step late.
+const SIM_HZ = 120;
+const GRID_EPS = 1e-7;
+const CHAIN_MIN_LEAD = 0.06;   // combat/constants.js T.CHAIN_MIN_LEAD: moveInfo clamps chainIn to firstHit - this
+const onGrid = (t) => Math.max(1, Math.round(t * SIM_HZ)) / SIM_HZ;
+const gridT = (t) => onGrid(t) - GRID_EPS;
+
 /**
  * Key time shorthand: number = seconds; 'hit' = startup; 'hold' = end of the active window;
  * 'w0.55' = 55% of startup (wind-up); 'r0.4' = 40% into the recovery; 'h0.5' = 50% into the active window.
@@ -64,19 +76,37 @@ function bakeKey(spec, m, t) {
 export function defineMove(def) {
   const m = { ...def };
   m.props = { ...(def.props || {}) };
+  // authored (raw) window times -> sim-step grid; numeric keys / hits written at a raw window time follow it
+  const raw = { startup: def.startup, active: def.active };
+  const snap = new Map();
+  const mapT = (t) => { for (const [a, b] of snap) if (Math.abs(t - a) < 1e-4) return b; return null; };
+  m.startup = gridT(raw.startup);
+  m.active = gridT(raw.startup + raw.active) - m.startup;
+  snap.set(raw.startup, m.startup);
+  snap.set(raw.startup + raw.active, m.startup + m.active);
+  const rawHits = def.hits || [{ t: 'hit', dur: raw.active }];
+  for (const h of rawHits) {
+    const t0 = keyTime(h.t, raw);
+    if (mapT(t0) === null) snap.set(t0, gridT(t0));
+    if (mapT(t0 + h.dur) === null) snap.set(t0 + h.dur, gridT(t0 + h.dur));
+  }
   m.duration = rt(m.startup + m.active + m.recovery);
-  m.cancel = rt(def.cancel ?? (m.startup + m.active + 0.04));
-  m.chainIn = rt(def.chainIn ?? m.startup * 0.4);
+  m.cancel = Math.max(rt(def.cancel ?? (m.startup + m.active + 0.04)), m.startup + m.active);
   m.holdOut = def.holdOut ?? HOLD_OUT[m.weight] ?? 0.05;
   m.guardDamage = def.guardDamage ?? Math.round(m.damage * (m.props.break ? 1.8 : 1.35));
   m.hitstop = def.hitstop ?? HITSTOP[m.weight];
   m.learn = def.boss ? 0 : (def.learn ?? LEARN[m.weight]);
   m.boss = !!def.boss;
-  m.hits = (def.hits || [{ t: m.startup, dur: m.active, limb: m.limb, damage: m.damage }])
-    .map((h) => ({ t: rt(keyTime(h.t, m)), dur: rt(h.dur), limb: h.limb || m.limb, damage: h.damage ?? m.damage, ...(h.height ? { height: h.height } : {}) }));
+  m.hits = rawHits.map((h) => {
+    const t0 = keyTime(h.t, raw), t = mapT(t0);
+    return { t, dur: mapT(t0 + h.dur) - t, limb: h.limb || m.limb, damage: h.damage ?? m.damage, ...(h.height ? { height: h.height } : {}) };
+  });
+  // chainIn exactly on the grid, and always >= CHAIN_MIN_LEAD of wind-up before the first hit (moveInfo never re-clamps)
+  const lead = Math.floor((m.hits[0].t - CHAIN_MIN_LEAD) * SIM_HZ + 1e-6);
+  m.chainIn = Math.max(1, Math.min(Math.round((def.chainIn ?? raw.startup * 0.4) * SIM_HZ), lead)) / SIM_HZ;
   const keys = [{ t: 0, pose: 'stance:' + m.start }];
   for (const k of def.keys) {
-    const t = rt(keyTime(k[0], m));
+    const t = typeof k[0] === 'number' ? (mapT(k[0]) ?? rt(k[0])) : k[0] === 'hit' || k[0] === 'hold' ? keyTime(k[0], m) : rt(keyTime(k[0], m));
     keys.push({ t, pose: bakeKey(k[1], m, t), ease: k[2] || defaultEase(t, m) });
   }
   keys.push({ t: m.duration, pose: 'stance:' + m.end, ease: def.endEase || 'inOut' });

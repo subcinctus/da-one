@@ -1,6 +1,9 @@
 // Hit resolution: strike-zone geometry (reach + target radius, arc), evasion by height / path (duck, jump, side
 // avoid, attack properties during startup), dodge i-frames, parry / absorb / guard, and the consequences of a clean hit
 // (damage with age + charge + counter, hitstun with combo scaling, stop, knockdown, push, focus, hit feel, events).
+// Two passes per sim step (Combat.fixedUpdate): detectHits() on the stepped positions, then (after body collisions)
+// resolveHits(), which animates each connecting attacker to this step first so impact points / FX come from the pose
+// that connected, the pose hitstop holds on screen.
 import * as THREE from 'three';
 import { angleDiff, yawTo } from '../core/math.js';
 import { strikePointWorld } from '../anim/rig.js';
@@ -9,14 +12,21 @@ import { activeWindow } from './movedata.js';
 import { addLearn } from './learning.js';
 
 const _p = new THREE.Vector3();
+const SIM_DT = 1 / 120;
 const PLAYER_RUMBLE = {
   dealt: { light: [0.1, 0.3, 45], medium: [0.25, 0.45, 70], heavy: [0.5, 0.6, 110] },
   taken: { light: [0.35, 0.5, 90], medium: [0.55, 0.6, 120], heavy: [0.85, 0.8, 170] },
 };
 
-/** Check every active hit window against every opponent. Called once per sim step by Combat. */
-export function resolveHits(combat) {
+/**
+ * Pass 1, right after the fighters stepped (before body collisions): every active strike window touching an opponent
+ * becomes a pending contact on combat._contacts (flat [attacker, defender, window, info] quads). Reach and arc are
+ * judged on the stepped positions (FIGHTER.md §7 Hits). Returns the number of pending contacts.
+ */
+export function detectHits(combat) {
   const fs = combat.fighters;
+  const c = combat._contacts || (combat._contacts = []);
+  c.length = 0;
   for (let i = 0; i < fs.length; i++) {
     const a = fs[i];
     const atk = a.atk;
@@ -31,10 +41,39 @@ export function resolveHits(combat) {
       if (atk.hitIds.includes(d.id)) continue;
       if (!inStrikeZone(a, d, info)) continue;
       atk.hitIds.push(d.id);
-      contact(combat, a, d, info, info.hits[w]);
-      if (a.state !== 'attack' || !a.alive) break;   // parried / killed mid-check
+      c.push(a, d, w, info);
     }
   }
+  return c.length >> 2;
+}
+
+/**
+ * Pass 2, after collisions and world bounds: resolve the pending contacts in order. Each attacker is first animated to
+ * this sim step (Combat skips it in its own animation pass), so the impact point is read from the pose that connected,
+ * the same pose the hitstop then holds on screen (Combat.update). Contacts of an attacker that an earlier contact this
+ * step parried, stunned or killed, or on a defender already dead, are dropped (as the old single-pass loop did).
+ * Called once per sim step by Combat, after detectHits().
+ */
+export function resolveHits(combat, dt = SIM_DT) {
+  const c = combat._contacts;
+  if (!c || !c.length) return;
+  for (let k = 0; k < c.length; k += 4) {
+    const a = c[k], d = c[k + 1], w = c[k + 2], info = c[k + 3];
+    const atk = a.atk;
+    if (a.state !== 'attack' || !a.alive || a.removed || atk.info !== info || atk.phase !== 'run') continue;
+    if (!d.alive || d.removed) continue;
+    poseNow(combat, a, dt);
+    contact(combat, a, d, info, info.hits[w]);
+  }
+  c.length = 0;
+}
+
+/** Animate `f` to the current sim step now (once per step; Combat's animation pass then skips it). */
+function poseNow(combat, f, dt) {
+  const id = combat._stepId;
+  if (typeof id !== 'number' || f._animStep === id || typeof f.animate !== 'function') return;
+  f._animStep = id;
+  f.animate(dt);
 }
 
 /** Reach + target radius, inside the arc of the attacker's facing (FIGHTER.md §7 Hits). */
@@ -88,12 +127,35 @@ export function hitPoint(a, d, info, limb, out = new THREE.Vector3()) {
   const len = Math.hypot(dx, dz) || 1;
   const y = (T.HIT_POINT_Y[info.height] || 1.1) * (d.height / 1.8);
   out.set(d.position.x - (dx / len) * d.radius * 0.8, y, d.position.z - (dz / len) * d.radius * 0.8);
-  const sk = a.model && a.model.skeleton;
-  if (sk) {
+  if (a.model && a.model.skeleton) {
     try {
-      strikePointWorld(sk, limb || info.limb, _p);
+      simStrikePoint(a, limb || info.limb, _p);
       if (isFinite(_p.x) && _p.distanceTo(out) < 0.7) out.lerp(_p, 0.6);
     } catch (e) { /* model without that joint: keep the surface point */ }
+  }
+  return out;
+}
+
+const _rp = new THREE.Vector3();
+/**
+ * Strike point of `a` in its SIM pose (animator.out: this step's pose once resolveHits has posed the attacker) at its
+ * SIM root transform. The skeleton and model.root otherwise hold the last displayed frame (render-interpolated, up to a
+ * sim step short of contact), so the sim pose is applied and the root swapped for the sim transform while the point is
+ * read; the root is then restored (Combat.update re-renders both before the next draw). Allocation-free.
+ */
+function simStrikePoint(a, name, out) {
+  const m = a.model, sk = m.skeleton, root = m.root, an = a.animator;
+  if (an && an.out && typeof an.out.applyTo === 'function') an.out.applyTo(sk);
+  if (!root) return strikePointWorld(sk, name, out);
+  _rp.copy(root.position);
+  const ry = root.rotation.y;
+  root.position.x = a.position.x; root.position.z = a.position.z;
+  root.rotation.y = a.yaw;
+  try { strikePointWorld(sk, name, out); }
+  finally {
+    root.position.copy(_rp);
+    root.rotation.y = ry;
+    root.updateMatrixWorld(true);
   }
   return out;
 }

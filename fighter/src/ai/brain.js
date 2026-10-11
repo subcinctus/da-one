@@ -715,7 +715,7 @@ export class Brain {
       // only when that still leaves time before the hit.
       const inTime = th.reactAt <= th.hitAt - REACT_LATE;
       // how sticky the guard is follows the archetype's taste for blocking (thugs block a little, brawlers turtle)
-      let c = this.rng() < Math.min(0.9, 0.5 + pr.block) ? 'block' : null;
+      let c = this.rng() < Math.min(0.9, 0.5 + pr.block + (th.read ? pr.readBlock || 0 : 0)) ? 'block' : null;
       const pAbKeep = pr.ability + (th.read ? (pr.block + pr.dodge) * pr.smart * READ_SHIFT : 0);
       if (canMove && inTime && !inf.brk && !(inf.focus && ab !== 'avoid') && f.stamina >= 10 && this.rng() < pAbKeep) c = ab;
       if (inf.brk && this.rng() < pr.smart) {
@@ -738,6 +738,8 @@ export class Brain {
     if (th.read && !inf.brk && !(inf.focus && ab !== 'avoid')) {
       const k = pr.smart * READ_SHIFT;
       pAb += (pBl + pDo) * k; pBl *= 1 - k; pDo *= 1 - k;
+      // some (thugs) also learn to just put the guard up against the opener they keep eating (read only)
+      if (pBl > 0) pBl += pr.readBlock || 0;
     }
     if (f.stamina < 10) { pAb = 0; pDo = 0; }
     const r = this.rng();
