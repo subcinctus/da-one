@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """HTML for ONE college as its own Google Doc: one or more programmes (section files) plus notes.
-Usage: python3 -I gdoc_college_html.py <out.html> <college name> <notes.md> <date line> <section.md> [section.md ...]
+Usage: python3 -I gdoc_college_html.py <out.html> <college name> <notes.md> <date line> <section.md> [section.md ...] [--intake="February 2027"]
 One section: laid out exactly like gdoc_app_html.py (programme as the subtitle).
 Several sections: the college is the subtitle, and each programme gets a large heading and its deadline."""
 import re, sys, html
 
-OUT, COLLEGE, NOTES, DATE = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-SECS = sys.argv[5:]
+ARGS = [a for a in sys.argv[1:] if not a.startswith('--intake=')]
+INTAKE = next((a.split('=', 1)[1] for a in sys.argv[1:] if a.startswith('--intake=')), 'Fall 2027')
+OUT, COLLEGE, NOTES, DATE = ARGS[0], ARGS[1], ARGS[2], ARGS[3]
+SECS = ARGS[4:]
 CSS = ("p{margin:0 0 8pt 0;line-height:1.15}ul{margin:0 0 8pt 0}h1{margin:28pt 0 4pt 0}h2{margin:18pt 0 4pt 0}"
        ".q{color:#555555}.m{font-size:9pt;color:#888888;margin:0 0 4pt 0}"
        ".t{font-size:26pt;font-weight:bold;margin:0}.st{font-size:14pt;color:#444444;margin:0}"
@@ -123,7 +125,7 @@ note = ("Words in square brackets are details still to be added or confirmed. " 
 out = [f'<html><head><meta charset="utf-8"><style>{CSS}</style></head><body>', '<p class="t">Karan Chaudhary</p>']
 if len(infos) == 1:
     L, programme, deadline = infos[0]
-    out += [f'<p class="st">{il(programme)}, Fall 2027</p>', f'<p class="da">{il(DATE)}</p>']
+    out += [f'<p class="st">{il(programme)}, {INTAKE}</p>', f'<p class="da">{il(DATE)}</p>']
     if deadline:
         out.append(f'<p class="dl">{il(deadline)}</p>')
     out.append("<p>These are the draft answers for this application. Each question is followed by the answer and its length against the limit. " + note + "Notes on eligibility are at the end.</p>")
@@ -133,7 +135,7 @@ else:
     for L, programme, deadline in infos:
         short = programme[len(COLLEGE):].lstrip(' ,') if programme.startswith(COLLEGE) else programme
         names.append(short)
-    out += [f'<p class="st">{il(COLLEGE)}, Fall 2027</p>', f'<p class="da">{il(DATE)}</p>']
+    out += [f'<p class="st">{il(COLLEGE)}, {INTAKE}</p>', f'<p class="da">{il(DATE)}</p>']
     sep = '; ' if any(' and ' in x for x in names) else ', '
     listing = sep.join(names[:-1]) + (sep.rstrip() + ' and ' if sep == '; ' else ' and ') + names[-1] if len(names) > 1 else names[0]
     out.append(f"<p>This document holds the draft answers for {({2: "two", 3: "three", 4: "four"}).get(len(infos), len(infos))} programmes: {il(listing)}. Each programme starts on its own heading with its deadline. Each question is followed by the answer and its length against the limit. " + note + "Notes on eligibility are at the end.</p>")

@@ -124,7 +124,7 @@ Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
 FILM CREDITS
 Assistant cinematographer, five short films, 2021 to 2024
 Lead or assistant cinematographer, independent films, 2021 to 2024
-Behind-the-scenes photographer (stills and video), student productions, Whistling Woods International: asked by more sets than one person could cover; shoots committed in advance
+Behind-the-scenes photographer (stills and video), student sets, Whistling Woods International, 2021 to 2025: in demand on more sets than could be covered, so shoots were committed in advance
 Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), made with friends while at Suncity School: found places to shoot, scheduled shoots around exams, kept classmates involved
 COMMUNITY AND LEADERSHIP
 Media manager, Mitti to Matka (support for Gurugram potters during COVID), 2020 to 2021: graphics, stills, video, website, administration
@@ -133,7 +133,7 @@ SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: English, Hindi.
 AWARDS
 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
-*265 words*
+*270 words*
 
 # **2. University of North Carolina School of the Arts (UNCSA), MFA in Filmmaking, Creative Producing concentration**
 **Early deadline: 2 November 2026 (non-binding). Final deadline: 20 January 2027.** The credential evaluation must arrive by the chosen deadline, which makes 2 November tight.
@@ -188,7 +188,7 @@ Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
 FILM CREDITS
 Assistant cinematographer, five short films, 2021 to 2024
 Lead or assistant cinematographer, independent films, 2021 to 2024
-Behind-the-scenes photographer (stills and video), Whistling Woods International, 2021 to 2025: the go-to BTS photographer for student sets, in demand beyond what one photographer could cover, so shoots were agreed in advance
+Behind-the-scenes photographer (stills and video), student sets, Whistling Woods International, 2021 to 2025: in demand on more sets than could be covered, so shoots were committed in advance
 Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), made with friends while at Suncity School: found places to shoot, scheduled shoots around exams, kept classmates involved
 COMMUNITY AND LEADERSHIP
 Media manager, Mitti to Matka (support for Gurugram potters during COVID), 2020 to 2021: graphics, stills, video, website, administration
@@ -198,7 +198,7 @@ Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pr
 AWARDS
 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
 
-*306 words*
+*302 words*
 ## **4. Video essay**
 *Limit: up to 3 minutes (about 400 spoken words); 2 recording attempts*
 *Question: What do you believe is unique about you that contributes to your storytelling ability? (Give talking points / a loose spoken script, not a stiff essay.)*
@@ -1856,7 +1856,7 @@ Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
 FILM AND SET CREDITS
 Assistant cinematographer, five short films, 2021 to 2024
 Lead or assistant cinematographer, independent films, 2021 to 2024
-Behind-the-scenes photographer (stills and video), student film sets, Whistling Woods International, during the B.Sc.: requested by more sets than could be covered; committed to shoots in advance
+Behind-the-scenes photographer (stills and video), student sets, Whistling Woods International, 2021 to 2025: in demand on more sets than could be covered, so shoots were committed in advance
 Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), made with friends while at Suncity School: found places to shoot, scheduled shoots around exams, kept classmates involved; when an actor dropped out on a shoot day, rewrote the lines remotely with the scriptwriter and played a new character, a sports teacher
 DEVELOPMENT AND WRITING
 REGISTERED POST, original feature treatment (dramedy, Haridwar and Ohio), 2026
@@ -1867,7 +1867,7 @@ SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: English, Hindi.
 AWARDS
 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
-*306 words*
+*307 words*
 ## **3. Why you would make a good producer**
 *Limit: 200 words*
 *Question: A brief explanation of why you think you will make a good producer.*
@@ -1944,7 +1944,7 @@ Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
 FILM CREDITS
 Assistant cinematographer, five short films, 2021 to 2024
 Lead or assistant cinematographer, independent films, 2021 to 2024
-Behind-the-scenes photographer, stills and video, for student film sets at Whistling Woods International during the B.Sc.: asked for by more sets than could be covered, with shoots committed in advance
+Behind-the-scenes photographer (stills and video), student sets, Whistling Woods International, 2021 to 2025: in demand on more sets than could be covered, so shoots were committed in advance
 Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), made with friends while at Suncity School: found places to shoot, scheduled shoots around exams, kept classmates involved
 DEVELOPMENT
 BORROWED SKY, original period drama series treatment (eight episodes, Orissa, 1975), 2026
@@ -1955,19 +1955,7 @@ SKILLS
 Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: English, Hindi.
 AWARDS
 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
-*284 words*
-## **6. References**
-*Limit: two referees*
-*Question: One academic reference and one character reference.*
-Academic reference: a member of the faculty from the B.Sc. in Filmmaking, Cinematography and Direction at Whistling Woods International, who can speak to my training as a cinematographer and to my work on student sets, including the behind-the-scenes photography.
-Character reference: someone who has seen my working habits over time outside the classroom, such as a senior member of a camera team I have assisted on, or a colleague from Mitti to Matka who can speak to how I handled its money and administration.
-Both referees should be asked well before the January 2028 round opens, and told that NFTS is looking for evidence of commitment to producing.
-*108 words*
-## **7. English language evidence**
-*Limit: CEFR B2 minimum (SELT)*
-*Question: Applicants from non-English-speaking countries must pass a Secure English Language Test (SELT) from an approved provider at a minimum of CEFR level B2, for example IELTS for UKVI (Academic) with 6.5 overall and 6.5 in each component; English is also assessed at interview.*
-To submit: an IELTS for UKVI (Academic) result of at least 6.5 overall and at least 6.5 in each of listening, reading, writing and speaking, taken with an approved provider and booked early enough for the certificate to arrive before the January 2028 deadline. English is also assessed at the NFTS interview.
-*52 words*
+*282 words*
 
 # Deadlines and open points
 Programme details in the answers (course names, thesis formats, internships) were checked against each school's official pages on 7 October 2026.
