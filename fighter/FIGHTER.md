@@ -251,7 +251,8 @@ Chained attacks must feel **quick and fluid**, never like animations playing bac
 - `fighters` (array).
 - `spawnFighter({ team: 'player' | 'enemy', look, deck, style, position: {x, z}, yaw, health, ai?: string, boss?: bossId, name })` returns a Fighter. It creates the model with `createFighterModel` plus an `Animator`. For team `'player'` it sets `game.player`.
 - `removeFighter(f)`, `clear()`.
-- `enemiesAlive()`.
+- `enemiesAlive()` returns a **number** (count).
+- `revive(fighter)`: getup in place, full health with the age multiplier. Flow's `revivePlayer()` calls `game.combat.revive(game.player)`.
 - `nearestEnemy(f, maxDist)`.
 - `MOVES` (re-export).
 - `focus` handling.
@@ -369,7 +370,12 @@ intent = { moveX, moveZ,            // desired world-space move direction * magn
 | `chapterStart`, `chapterComplete` | `{ chapterId }` | flow |
 | `playerAged` | `{ age, deaths, counter }` | flow |
 | `gameOver` | `{ chapterId }` | flow |
-| `dialogue` | `{ speaker, text, mood }` | encounters / flow → menus show it |
+| `dialogue` | `{ speaker, text, mood, block }` (`block`: true = modal dialogue box that pauses the sim) | encounters / flow → menus show it |
+| `enemyTelegraph` | `{ fighter, move }` (an AI is about to attack: brief readable wind-up) | ai |
+| `aiFeint` | `{ fighter }` | ai |
+| `enemyArrived` | `{ fighter }` (reinforcement wave entered) | encounters |
+| `restPoint` | `{ room }` (deck editor offered) | encounters |
+| `bossFightStart` | `{ bossId }` | encounters |
 
 ## 9. Flow & progress (UI agent: `src/game/flow.js`)
 
