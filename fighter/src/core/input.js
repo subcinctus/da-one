@@ -66,6 +66,7 @@ export class Input {
     this.padType = null;
     this.padIndex = -1;
     this.padConnected = false;
+    this.gamepadBlocked = false; // true when the embedding page forbids the Gamepad API
     this._keys = new Set();
     this._keyPressedFrame = new Set();
     this._padPrev = [];
@@ -120,8 +121,19 @@ export class Input {
 
   exitLock() { if (document.pointerLockElement) document.exitPointerLock(); }
 
+  /** navigator.getGamepads() can throw (SecurityError) inside iframes whose permissions policy blocks 'gamepad'. */
+  _pads() {
+    if (this.gamepadBlocked || !navigator.getGamepads) return [];
+    try { return navigator.getGamepads() || []; }
+    catch (e) {
+      this.gamepadBlocked = true; // keyboard + mouse still work; UI can explain why the pad is ignored
+      this.game.events.emit('gamepad', { connected: false, blocked: true });
+      return [];
+    }
+  }
+
   _pollPad() {
-    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    const pads = this._pads();
     let pad = null;
     for (const p of pads) { if (p && p.connected && p.mapping === 'standard') { pad = p; break; } }
     if (!pad) for (const p of pads) { if (p && p.connected) { pad = p; break; } }
@@ -228,7 +240,7 @@ export class Input {
   /** Controller vibration (no-op without support). strong/weak 0..1, ms duration. */
   rumble(strong = 0.5, weak = 0.5, ms = 80) {
     if (this.game.settings && this.game.settings.rumble === false) return;
-    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    const pads = this._pads();
     const pad = pads && this.padIndex >= 0 ? pads[this.padIndex] : null;
     const act = pad && pad.vibrationActuator;
     if (act && act.playEffect) {
