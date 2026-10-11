@@ -53,23 +53,28 @@ export const STRIKE_POINTS = {
 
 // ------------------------------------------------------------------------------------------------ skeleton
 
-/** Build the joint hierarchy. Returns { root, body, joints: {name: Object3D} }. Meshes are attached by the ANIM agent. */
+/**
+ * Build the joint hierarchy. Returns { root, body, joints: {name: THREE.Bone}, bones: [body, ...JOINTS order] }.
+ * Meshes are attached by the ANIM agent (recommended: one rigid-skinned SkinnedMesh bound to `bones`).
+ */
 export function createSkeleton() {
   const root = new THREE.Group();
   root.name = 'fighter';
-  const body = new THREE.Group();
+  // joints are THREE.Bone so a single rigid-skinned SkinnedMesh can render a whole fighter in one draw call
+  const body = new THREE.Bone();
   body.name = 'body';
   root.add(body);
   const joints = { body };
   for (const name of JOINTS) {
-    const j = new THREE.Group();
+    const j = new THREE.Bone();
     j.name = name;
     j.position.fromArray(OFFSET[name]);
     j.rotation.order = 'XYZ';
     joints[name] = j;
   }
   for (const name of JOINTS) joints[PARENT[name]].add(joints[name]);
-  return { root, body, joints };
+  const bones = [body, ...JOINTS.map((n) => joints[n])];
+  return { root, body, joints, bones };
 }
 
 const _v = new THREE.Vector3();
