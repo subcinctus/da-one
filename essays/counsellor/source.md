@@ -139,196 +139,230 @@ AWARDS
 *Question: A two-page single-spaced statement expressing your creative and professional interests, goals and other information providing insight into your work. Include a statement about your goals as they relate to UNCSA and why you believe this university's graduate program is the right place for you to further those goals. May be used for scholarship consideration.*
 Karan Chaudhary
 Letter of Intent, MFA in Filmmaking (Creative Producing), Fall 2027
-Nobody in my family works in film or photography, so I learned filmmaking from teachers and on sets, not from relatives in the business. As a cinematographer I saw many problems reach the camera that had started earlier, in planning. \[One example from a set.\] By then, all the camera team could do was adjust. I want to be responsible for those earlier decisions. That is why I am applying to the Creative Producing concentration at UNCSA.
+On most sets I worked on as a cinematographer, the problems that reached the camera had started earlier, in planning, often with a cost no one was in charge of. By then, all the camera team could do was adjust. I want to be responsible for those earlier decisions. That is why I am applying to the Creative Producing concentration at UNCSA.
 **Where I come from**
-At Suncity School I studied commerce: economics, business studies and accountancy. Outside class I learned studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography, and later worked as the International Press Photographer for Suncity MUN. At the time the accountancy and the photography felt unrelated. As a producer I will need both.
-At school a group of us made The Classroom, a five-part web series we released on YouTube. I co-directed, shot and edited it. Without realising it, I also produced it: I found places to shoot, scheduled shoots around exams and kept my classmates involved. \[One problem I solved on the series.\]
+Nobody in my family works in film or photography. At Suncity School I studied commerce: economics, business studies and accountancy. Outside class I learned studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography, and was the International Press Photographer for Suncity MUN. At the time the accountancy and the photography felt unrelated. As a producer I will need both.
+At school a group of us made The Classroom, a five-part web series we released on YouTube. I co-directed, shot and edited it. Without realising it, I also produced it: I found places to shoot, scheduled shoots around exams and kept my classmates involved.
+One shoot day, an actor dropped out at the last second. Instead of calling off the shoot, we made up a new character on the spot, a funny sports teacher, and I played him. Our scriptwriter was at home, so we worked together remotely to rewrite the lines for the new role. I got hold of a standard tracksuit for the costume without spending anything, and the episode's story still held together.
 While I was still in school, during COVID, I was media manager for Mitti to Matka, an initiative supporting Gurugram's potters; I describe it on the second page of my resume. The potters' families depended on us, and I learned to tell people honestly what we could and could not deliver. I mean to work the same way with writers, crews and investors.
 **What my work has taught me**
-At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films, and handled DIT and colour. Camera work taught me what an image costs in time and money.
-Over the same years I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. Since October 2025 I have held the same role on \[title\], a project under Boney Kapoor. \[What this job has taught me.\] On a Finolex commercial for Early Man Productions I was on the direction team: I prepared the production sheets, cast references and PPM deck, and ran costume trials. For Growth Jockey in Gurugram I planned the Sleepyhead Mattresses shoot: the equipment, the script, and the offer and audience the film was aimed at.
+In 2025 I completed a B.Sc. in Filmmaking, Cinematography and Direction at Whistling Woods International in Mumbai, a degree awarded by the Tata Institute of Social Sciences. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films, and handled DIT and colour. Camera work taught me what an image costs in time and money.
+Over the same years I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. Since October 2025 I have held the same role at Bayview Projects, on a project under producer Boney Kapoor. From the camera department I see how a project runs once it reaches the set, and how much of it was settled earlier, in the schedule, the budget, the locations and the cast. On a Finolex commercial for Early Man Productions I was on the direction team: I prepared the production sheets, cast references and PPM deck, and ran costume trials. For Growth Jockey in Gurugram I planned the Sleepyhead Mattresses shoot: the equipment, the script, and the offer and audience the film was aimed at.
 I have not yet worked in a production office, developed material with a writer, put financing together, drawn up a film's budget, or taken a film to distributors. That is what I am applying to learn.
 **My creative interests**
-I want to produce grounded drama with humour in it, specific to India and made on budgets where the money ends up on screen. The stories I have in mind include a young woman keeping a family workshop alive, a crew holding a production together, and a girls' football team fighting for the last open ground in a Gurugram urban village. They come from places I know: potters' workshops during COVID, film sets in Mumbai and the city I grew up in.
+I want to produce grounded drama with humour in it, specific to India and made on budgets where the money ends up on screen. I am drawn to ordinary people who run into something far bigger than they are, such as a border or a government programme, and find their own way through it. Two treatments I have written follow that pattern: a comic drama about a young man in Ladakh who must help his grandmother bring back their village's stream with ice from across the Line of Control, and a period series about a young technician keeping Orissa's first village televisions running in 1975.
 **My goals and why UNCSA**
 After the MFA I plan to work in development and production for a few years, then build a creative studio in India of 8 to 30 people that develops its own slate of films and series. I want it to give talented people with no contacts in film a way in, since I started without any. To run it I need to understand development, financing, intellectual property, marketing and distribution well enough to make decisions, and to learn them while producing real work.
-In the first year at UNCSA I would share classes with the MFA screenwriters. That is how I want to learn development: alongside the writers whose projects I may one day produce. The Development Process and The Business of Producing courses cover the foundations I do not have yet. The thesis, a three-project slate presented to industry leaders with financing, production, marketing and distribution plans, is close to the work I will need to do for the studio's first slate. The weekly meetings with a faculty mentor matter to me as well, because I have learned most from people willing to explain how the work is done.
+In the first year at UNCSA I would share classes with the MFA screenwriters. That is how I want to learn development: alongside the writers whose projects I may one day produce. I would have something to offer them as well: a camera department's sense of what each scene will take to shoot. The Development Process and The Business of Producing courses cover the foundations I do not have yet. The thesis, a three-project slate presented to industry leaders with financing, production, marketing and distribution plans, is close to the work I will need to do for the studio's first slate. The weekly meetings with a faculty mentor matter to me as well, because I have learned most from people willing to explain how the work is done.
 My aim is to leave UNCSA with the training and the working relationships to start building the studio.
-*728 words (excluding \[bracket\] notes)*
+*889 words*
 ## **2. Resume, page 2 essay**
 *Limit: one page (about 450 words)*
 *Question: The second page of the resume should consist of an essay in which you describe how you have integrated your extra-curricular activities and/or community service into our world artistically as well as personally.*
-I was part of football teams that finished first in Gurugram in 2019 and fourth in Haryana in 2020. \[My position and what it required.\] Everyone had to know the plan, and we had to adjust it once the match started. I work the same way on every set: on a good shoot day nobody is waiting to be told what to do, and when something breaks the team sorts it out together.
-I also studied studio fashion photography under Nitin Rai, which taught me to look closely at light and at faces. As the International Press Photographer for Suncity MUN from 2020 to 2022, I learned to work quickly in crowded rooms and to keep asking what the viewer needed to see, and who might otherwise go unnoticed.
-With friends I made The Classroom, a five-part web series we produced ourselves and put on YouTube. I co-directed, shot and edited it. It was the first time I organised the people, places and time a film needs.
-During COVID I was media manager for Mitti to Matka, a Gurugram initiative supporting local potters whose sales had collapsed. We bought and auctioned their pots at fair prices, helped improve designs, and supplied food and sanitary supplies to their families. I made the graphics, stills and videos that showed buyers who these potters were, ran the website and handled the administration.
-Artistically, Mitti to Matka gave my images a job to do. Buyers judged the pots by my photographs, so a picture could decide what a family earned that week. I made a point of photographing the potters with dignity rather than pity. \[One image and what happened next.\]
-Personally, it changed how I handle money. What we spent was meant for the potters' families, so I kept careful records and could show where every rupee went. I felt responsible for those families. We could sell pots and deliver supplies, but a few young volunteers could not fix what the lockdown had done to that community.
-I want to bring both habits into producing: keeping track of where the money goes, and paying attention to how people are shown.
-*345 words (excluding \[bracket\] notes)*
+Almost everything I did outside class involved a camera, and I used it differently in each activity.
+I studied studio fashion photography under Nitin Rai, which taught me to look closely at light and at faces. As the International Press Photographer for Suncity MUN, I learned to work quickly in crowded rooms and to keep asking what the viewer needed to see.
+With friends I made The Classroom, a five-part web series we produced ourselves and put on YouTube. Besides co-directing, shooting and editing it, I looked for locations and planned our shoot days around the exam timetable. It was the first time I organised the people, places and time a film needs.
+During COVID I was media manager for Mitti to Matka, a Gurugram initiative supporting local potters whose sales had collapsed. We bought and auctioned their pots at fair prices, helped improve designs, and delivered food and sanitary supplies to their families. I made the graphics, stills and videos that showed buyers who these potters were, ran the website and handled the administration.
+Artistically, Mitti to Matka gave my images a job to do. Buyers judged the pots by my photographs, so a picture could decide what a family earned that week. It made me think hard about how a photograph shows the people in it.
+Personally, it made me careful with money. The money we handled was meant for the potters' families, so anything we spent badly was money a family did not receive. I felt responsible for those families. We could sell pots and deliver supplies, but a few young volunteers could not undo what the lockdown had done to that community.
+I want to bring both into producing: care with money that belongs to other people, and attention to how people are shown on screen.
+*300 words*
 ## **3. Resume, page 1**
 *Limit: one page*
 *Question: The first page should list your educational objectives, work experiences, and extra-curricular activities and/or community service.*
-Same CV as UCLA, question 12, including the Community and Leadership section and football, with this line added at the top:
-EDUCATIONAL OBJECTIVE: An MFA in Creative Producing, to learn development, financing, production and distribution, and then to build a creative studio in India of 8 to 30 people that develops its own slate of films and series.
-*58 words (excluding \[bracket\] notes)*
+KARAN CHAUDHARY
+Gurugram, India | thekaranchaudhary3208@gmail.com | +91 8750800000
+EDUCATIONAL OBJECTIVE: An MFA in Filmmaking (Creative Producing) at UNCSA, to learn development, financing, production and distribution, and then to build a creative studio in India of 8 to 30 people that develops its own slate of films and series.
+EDUCATION
+B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS), completed 2025
+Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram, 2021
+Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, 2019 to 2020
+EXPERIENCE
+Camera assistant, Bayview Projects (producer Boney Kapoor), Oct 2025 to present
+Shoot planning, Sleepyhead Mattresses campaign, Growth Jockey, Gurugram, Apr 2024: equipment, script, and the film's offer and audience
+Direction team, Finolex commercial, Early Man Productions, 2024: production sheets, cast references, PPM deck, costume trials
+Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
+FILM CREDITS
+Assistant cinematographer, five short films, 2021 to 2024
+Lead or assistant cinematographer, independent films, 2021 to 2024
+Co-director, cinematographer, editor and organiser, The Classroom (five-part web series, YouTube), made with friends while at Suncity School: found places to shoot, scheduled shoots around exams, kept classmates involved
+COMMUNITY AND LEADERSHIP
+Media manager, Mitti to Matka (support for Gurugram potters during COVID), 2020 to 2021: graphics, stills, video, website, administration
+International press photographer, Suncity MUN
+SKILLS
+Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour. Direction-team paperwork: production sheets, cast references, PPM decks. Languages: English, Hindi.
+AWARDS
+3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram
+
+*274 words*
 ## **4. Video essay**
 *Limit: up to 3 minutes (about 400 spoken words); 2 recording attempts*
 *Question: What do you believe is unique about you that contributes to your storytelling ability? (Give talking points / a loose spoken script, not a stiff essay.)*
 Talking points:
 1\. Opening: "I'm Karan Chaudhary, from Gurugram. I've been behind a camera since school, and these days I work as a camera assistant."
-2\. My answer in one line: "I see a story from both sides of the camera: what the audience will see, and what it takes to put it on screen." As a cinematographer I saw that most problems on set started earlier, in a schedule or a budget, so when I read a script I also picture what it will take to shoot it. \[One quick example from a set.\]
+2\. My answer in one line: "I see a story from both sides of the camera: what the audience will see, and what it takes to put it on screen." As a cinematographer I saw that most problems on set started earlier, in a schedule or a budget, so when I read a script I also picture what it will take to shoot it.
 3\. Commerce before film: "I can read a balance sheet and a lighting plan." I think about what each creative choice costs, and I like finding the version of a story that can actually be made well.
-4\. I learned on the job, taking every set I could get, and it made me notice the people who get overlooked, on a set and in a story. Those are the people I want to make stories about, like a girls' football team fighting for the last open ground in an urban village.
+4\. Learning on set: I learned on the job, taking every set I could get, and on my early jobs I was usually the newest person there. It made me notice who gets let in on a set and who does not. In stories I am drawn to ordinary people up against something much bigger than them: one series I have written follows a young technician keeping village televisions running in Orissa in 1975.
 5\. Mitti to Matka. During COVID I made the photos and videos buyers saw before buying a potter's work, so a family's income that week depended partly on my pictures. It's why I think carefully about how a story shows the people in it.
-6\. The work and the plan: "The work I want to produce is grounded drama with some humour, from places I know. After UNCSA I'll spend a few years in development and production, then start a studio in India that makes that kind of work."
-*269 words (excluding \[bracket\] notes)*
+6\. The work and the plan: "The work I want to produce is grounded drama with some humour, set in India. After UNCSA I'll spend a few years in development and production, then start a studio in India that makes that kind of work."
+*288 words*
+
 # **3. University of Southern California (USC), Peter Stark Producing Program (MFA)**
 **Deadline: 15 November 2026.** These prompts come from the official site; confirm them in SlideRoom once you are logged in.
 ## **1. Why a producing program**
 *Limit: 2,000 characters*
 *Question: Why do you want to attend a producing program?*
-As a cinematographer I kept meeting problems on set that had started well before the shoot, often with a cost no one was in charge of. \[One example from a set.\] By the time they reached the camera, I could only work around them. I want to learn to solve them where they start.
-My jobs have mostly been in the camera department. On Khauf, at Matchbox Studios, I was a camera assistant, and I have held the same role since October 2025, now on a project under producer Boney Kapoor. On a Finolex commercial for Early Man Productions I was in the direction team, and my part was the PPM deck, the production sheets and the cast references. At Growth Jockey I planned a shoot for Sleepyhead Mattresses: the equipment, the script, the offer the film would make and the audience it was for.
-I have not yet worked on the producing side of a professional film, and none of my jobs has involved developing a script with a writer, raising money for a film or selling one. Those, along with budgets and schedules, are what I want a producing program to teach me. At Stark the whole cohort takes script analysis and development, scheduling and budgeting, and finance and marketing together, while the internships put that training to work inside companies. I would be learning next to classmates who may become my collaborators. The thesis, a full plan for a project defended in front of industry professionals, is the test I want to pass before I build a studio of my own in India.
-*1444 characters (excluding \[bracket\] notes)*
+As a cinematographer I kept meeting problems on set that had started well before the shoot, often with a cost no one was in charge of. By the time they reached the camera, I could only work around them. I want to learn to solve them where they start.
+My jobs have mostly been in the camera department. On Khauf, at Matchbox Studios, I was a camera assistant, and I have held the same role since October 2025, now on a project under producer Boney Kapoor. On a Finolex commercial for Early Man Productions I was in the direction team: I prepared the PPM deck, the production sheets and the cast references, and I ran costume trials. At Growth Jockey I planned a shoot for Sleepyhead Mattresses, working out the equipment, the script, what the film would offer and who it was meant to reach.
+I have not yet worked on the producing side of a professional film, and none of my jobs has involved developing a script with a writer, raising money for a film or selling one. Those, along with budgets and schedules, are what I want a producing program to teach me. At Stark the whole cohort takes script analysis and development, scheduling and budgeting, and finance and marketing together, while the internships put that training to work inside companies. I would be learning next to classmates who may become my collaborators. The thesis, a full plan for a project presented to industry professionals, is the test I want to pass before I build a studio of my own in India.
+*1465 characters*
 ## **2. Unique individual**
 *Limit: 2,000 characters*
 *Question: Tell us about yourself as a unique individual and how your distinctive experiences, identities, values, and/or views of the world have shaped who you are.*
-When I look at a creative idea, I ask what it needs, what it will cost and who carries the risk. The habit is older than my film training. At Suncity School in Gurugram I studied economics, business studies and accountancy, and outside class I learned studio photography under Nitin Rai, shot press photographs for Suncity MUN, and co-directed, shot, edited and organised a five-part web series with friends. At the time these felt like separate interests. Producing, the work I now want to do, needs all of them.
-I grew up in Gurugram while it was being built, and the old villages stayed on between the new towers. \[One image of that change.\] It made me notice who gains when a place changes and who pays for it. Many of the stories I want to produce start from that question.
-Football taught me how a team works. We finished first in Gurugram in 2019 and fourth in Haryana in 2020. \[My position and what it required.\] Each of us had to trust the others to cover their part, and we changed the plan as the match went on.
-On a set I notice the newest person in the room, because on my early jobs that was me. As a camera assistant on Khauf I learned more from being let into the camera team's routines than from any class. When I produce, I want the newest person on my crew to be let in the same way.
-*1238 characters (excluding \[bracket\] notes)*
+When I look at a creative idea, I ask what it needs, what it will cost and who carries the risk. The habit is older than my film training. My subjects at Suncity School in Gurugram were economics, business studies and accountancy. Alongside them I studied photography at the Raghu Rai Center for Photography, shot press photographs for Suncity MUN, and co-directed, shot, edited and organised a five-part web series with friends. At the time these felt like separate interests. Producing, the work I now want to do, needs all of them.
+I trained in cinematography and direction at Whistling Woods International, Mumbai, and most of my work has been on camera crews. On my early jobs, as an assistant cinematographer on short films and a camera assistant on Khauf, I was the newest person on set. I still notice who that is on every set I work on. When I produce, I want the newest person on my crew to be taught the work and given a share of it.
+*944 characters*
 ## **3. An insurmountable challenge**
 *Limit: 2,000 characters*
 *Question: Tell us about a time when you faced an insurmountable challenge and the problem solving you employed in response.*
-When I decided to work in film, I had no clear way in. I was a commerce student in Gurugram, nobody in my family knew anyone in film or photography, and in Indian film many first jobs come through family. \[How people around me reacted.\]
-I split the problem into parts I could work on, starting with skills I could show. At the Raghu Rai Center for Photography I learned studio photography from Nitin Rai, and I became the International Press Photographer for Suncity MUN. I also needed work people could watch, so with friends I made a five-part web series, The Classroom, which we produced ourselves and put on YouTube. I was its co-director, cinematographer and editor, and I did the organising: finding places to shoot, fitting shoots in between exams and keeping classmates involved. For proper training I went to Whistling Woods International in Mumbai for a B.Sc. in Filmmaking, Cinematography and Direction. The last part was getting people in the industry to trust me, so I took every job I could reach: assistant cinematographer on five short films, camera assistant at Matchbox Studios on Khauf under Pankaj Kumar, the direction team on a Finolex commercial, and the Sleepyhead Mattresses shoot I planned at Growth Jockey. \[The first real chance I got.\]
-Today, as a camera assistant, I work on a project under producer Boney Kapoor. The problem is smaller now, and I still handle it the same way: I work out what I am missing and go after it. What I am missing now is development, financing, and the budgeting and scheduling of a professional production, and that is what I am applying to Stark to learn.
-*1551 characters (excluding \[bracket\] notes)*
+When I decided to work in film, I had no clear way in. I was a commerce student in Gurugram, nobody in my family worked in film or photography, and in Indian film many first jobs come through family.
+I split the problem into parts I could work on, starting with skills I could show. I trained in studio fashion photography under Nitin Rai, and I became the International Press Photographer for Suncity MUN. I also needed work people could watch, so with friends I made a five-part web series, The Classroom, which we produced ourselves and put on YouTube. I was its co-director, cinematographer and editor, and I did the organising: finding places to shoot, fitting shoots in between exams and keeping classmates involved.
+For proper training I took a B.Sc. in Filmmaking, Cinematography and Direction at Whistling Woods, which I completed in 2025. The last part was getting people in the industry to trust me, so during the course I took every job within reach: five short films as assistant cinematographer, Khauf as a camera assistant under Pankaj Kumar, a place on the direction team of a Finolex commercial, and the planning of a Sleepyhead Mattresses shoot for Growth Jockey.
+Today I am a camera assistant on producer Boney Kapoor's current project. The problem is smaller now, and I still handle it the same way: I work out what I am missing and go after it. What I am missing now is development, financing, and the budgeting and scheduling of a professional production, and that is what I am applying to Stark to learn.
+*1532 characters*
 ## **4. Prior media degree or work**
 *Limit: 500 characters*
 *Question: If you already have a prior degree in media or already work in media, why do you want to pursue this particular graduate degree?*
 I want this degree for the parts of producing my training has not covered. My B.Sc. was in cinematography and direction, and I now work as a camera assistant. I have not yet learned how a production is budgeted and scheduled, or studied development, financing, distribution or marketing, which decide whether a project gets made and who sees it. Stark teaches these, and I need them for the studio I plan to build in India.
-*423 characters (excluding \[bracket\] notes)*
+*423 characters*
 ## **5. Plan if not accepted**
 *Limit: 1,000 characters*
 *Question: What is your plan for the next year if you are not accepted into the Peter Stark Producing Program?*
-I will keep working as a camera assistant on the project under Boney Kapoor. \[I will also look for a first job in a production office.\] Alongside that, I will develop two original projects, a feature and a series drawn from places I know in Gurugram and Mumbai, to the point where I can pitch them. I will study the business side on my own through \[a specific course or books\]. I will also produce at least one short project myself, from the script to its release, so the work I can show covers more than the shoot. Then I will apply again.
-*453 characters (excluding \[bracket\] notes)*
+I will keep working as a camera assistant on the project under Boney Kapoor. Alongside that, I will develop two original projects, a feature and a series, to the point where I can pitch them, and I will study the business side of producing on my own. I will also produce at least one short project myself, from the script to its release, so the work I can show covers more than the shoot. Then I will apply again.
+*413 characters*
 ## **6. Ultimate career goal**
 *Limit: 1,000 characters*
 *Question: Do you have an ultimate career goal? If so, what is it?*
 Yes. I plan to build a creative studio in India of 8 to 30 people that develops and produces its own slate of films and series. I want it to stay small enough that every project gets real attention, and to run as a sound business: careful development, clear budgets and fair contracts. It should also give talented people without film-family connections paid work and training on the job. To get there, I plan to work in development and production for a few years after the degree, at a company that makes work for both Indian and international audiences, in a role where I learn how projects are chosen, financed, packaged and sold.
-*633 characters (excluding \[bracket\] notes)*
+*633 characters*
 ## **7. Something you are trying to improve**
 *Limit: 1,000 characters*
 *Question: Tell us something about yourself that you are trying to improve and how you are going about it.*
-I am trying to stop solving every problem with my own hands. I came up through camera work, so when something goes wrong my instinct is to fix it myself: adjust the light or sort the cards. On a small shoot that helps. As a producer it would mean losing track of the rest of the day while fixing one thing. \[One moment when this happened.\] I am working on it in two ways. When a technical problem comes up, I leave it to the person whose job it is and ask them for an update instead. I also keep a running list of the day's decisions, so I can see which ones are mine to make.
-*543 characters (excluding \[bracket\] notes)*
+I am trying to understand the work that happens before a shoot. I trained as a cinematographer and work as a camera assistant, so most of what I know about schedules, budgets and development I have seen from the camera department rather than done myself. I am building on what I have done: organising The Classroom around our exams, planning the Sleepyhead Mattresses shoot (the equipment, the script, and the offer and audience the film was aimed at), and preparing the production sheets, cast references and PPM deck on the Finolex direction team. I have not yet worked in a production office, and the next step is formal training in development, financing, budgeting and scheduling, which is why I am applying to Stark.
+*722 characters*
 ## **8. An emotionally significant experience**
 *Limit: 2,000 characters*
 *Question: Describe an emotionally significant experience in your life and how it affected you.*
-The first time I photographed a potter's work for Mitti to Matka, I thought I was making product photos. This was during COVID, while I was still in school, and I was media manager for the initiative, which helped Gurugram's potters sell their work after the markets closed. \[The workshop and who I met.\] \[Then one day I realised\] buyers saw the pots through my photographs, so the quality of my pictures could change what a family earned that week.
-After that I took more care, with the photographs and with the money. Whatever we spent on the campaign came out of money meant for the families, so I kept our costs as low as I could. I also started to feel responsible for the families themselves.
-What affected me most was seeing how much we could not do. \[One moment I saw the limit.\] Selling pots and delivering supplies helped, but it could not make up for what a whole community had lost in the lockdown. That was hard to accept, and we kept going.
+During COVID, while I was still in school, I was media manager for Mitti to Matka, an initiative that helped Gurugram's potters after the markets closed: we bought and auctioned their pots at fair prices and took food and sanitary supplies to their families. Buyers saw the pots only through my photographs, so the quality of a picture could change what a family earned that week.
+That made me careful, with the photographs and with the money: every rupee we spent badly was a rupee a family did not receive. Over those months I also started to feel responsible for the families themselves.
+What affected me most was seeing how much we could not do. Selling pots and delivering supplies helped, but it could not make up for what a whole community had lost in the lockdown. That was hard to accept. We kept doing the part we could do.
 That year still shapes how I work. I am careful with other people's money, and I try to say early what a project can and cannot do for the people it touches.
-*1026 characters (excluding \[bracket\] notes)*
+*991 characters*
 ## **9. Favourite existing work**
 *Limit: 1,000 characters*
 *Question: Do you have a favorite existing film, TV show, web series, book, or play? Explain why it's a favorite.*
-The Lunchbox (2013). A lunch delivered to the wrong office in Mumbai starts an exchange of letters between two lonely strangers, and the film never raises its voice. As a viewer I love its restraint: the sounds of a kitchen, the train commute, a letter read in silence. As someone who wants to produce, I admire how it was put together. It was an international co-production, launched at a major festival and released around the world, so a very local Mumbai story reached audiences far outside India. That is the kind of film I want my studio to make: a specific Indian story, made with care and financed well enough to find an audience abroad. \[One scene I love.\]
-*645 characters (excluding \[bracket\] notes)*
+My favourite is The Lunchbox (2013). A lunch delivered to the wrong office in Mumbai starts an exchange of letters between two lonely strangers, and the film never raises its voice. As a viewer I love its restraint: the sounds of a kitchen, the train commute, a letter read in silence. As someone who wants to produce, I admire how it was put together. It was an international co-production, launched at a major festival and released around the world, so a very local Mumbai story reached audiences far outside India. That is the kind of film I want my studio to make: a specific Indian story, made with care and financed well enough to find an audience abroad.
+*661 characters*
 ## **10. Other art forms**
 *Limit: 500 characters*
 *Question: Do you have interest in other art forms (literature, opera, sculpture, theatre, painting, dance, etc.)?*
-Yes, photography most of all. At the Raghu Rai Center for Photography, Nitin Rai taught me studio fashion photography, and from 2020 to 2022 I was the International Press Photographer for Suncity MUN. \[Another art form I follow.\]
-*200 characters (excluding \[bracket\] notes)*
+Yes, photography, which is where I started. I won 3rd place in the Clic(k)hé photography competition at Cyber Buzz 2018–19, Amity International School, Gurugram. From 2019 to 2020 I studied studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography, and I covered Suncity MUN as its International Press Photographer.
+*340 characters*
 ## **11. Experience entries (USC application)**
 *Limit: 700 characters per entry. Optional.*
-*Question: Description / Key Responsibilities (one entry each for: Boney Kapoor project; Growth Jockey / Sleepyhead; Early Man / Finolex; Matchbox / Khauf; independent and short films as cinematographer; Mitti to Matka).*
-1\. Project under producer Boney Kapoor, \[company\], Oct 2025 to present. Camera assistant on \[title\]: \[two or three duties\].
-2\. Growth Jockey, Gurugram, Apr 2024. \[Job title.\] Planned the Sleepyhead Mattresses shoot: equipment, script, offer and audience.
-3\. Early Man Productions, 2024. Direction team on a Finolex commercial: prepared production sheets, cast references and the PPM deck, and ran costume trials.
-4\. Matchbox Studios, Apr 2023. Camera assistant on Khauf under Pankaj Kumar: \[two or three duties\].
-5\. Freelance cinematographer, 2021 to 2024. Assistant cinematographer on five short films; lead or assistant cinematographer on independent films. Cameras: RED, Sony Venice, Sony FX and Alpha. DIT and colour in DaVinci Resolve. \[Titles.\]
+*Question: Description / Key Responsibilities.*
+1\. Bayview Projects, October 2025 to present. Camera assistant on a project under producer Boney Kapoor.
+2\. Growth Jockey, Gurugram, April 2024. Planned the shoot for the Sleepyhead Mattresses campaign: equipment, script, and the offer and audience the film was aimed at.
+3\. Early Man Productions, 2024. Direction team, Finolex commercial. Prepared production sheets, cast references and the PPM deck, and ran costume trials.
+4\. Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar.
+5\. Freelance cinematographer, 2021 to 2024. Assistant cinematographer on five short films; lead or assistant cinematographer on independent films. Cameras: RED, Sony Venice, Sony FX and Alpha; also DIT and colour.
 6\. Mitti to Matka, Gurugram, 2020 to 2021. Media manager for an initiative that supported local potters during COVID through fair-price purchases, auctions, and food and sanitary supplies for their families. Shot photographs and videos, made graphics, and ran the website and the administration.
-*Longest entry: 292 characters (excluding \[bracket\] notes)*
+*Longest entry: 292 characters*
 ## **12. Achievement entries**
 *Limit: 600 characters per entry. Optional.*
-*Question: Brief Description (football city and state results; The Classroom; Suncity MUN press photographer).*
-1\. Football: 1st place, Gurugram city, 2019; 4th place, Haryana state, 2020. \[Tournament names and my position.\] Competed with my team at city and state level while studying commerce at Suncity School.
-2\. The Classroom (2020 to 2022): self-produced five-part web series released on YouTube; co-director, cinematographer, editor and organiser (found locations, scheduled shoots around exams, kept classmates involved). \[Views or response.\]
-3\. International Press Photographer, Suncity MUN, 2020 to 2022: documented the conference. \[What the role involved.\]
-*Longest entry: 212 characters (excluding \[bracket\] notes)*
+*Question: Brief Description.*
+1\. 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram.
+2\. The Classroom: five-part web series made with friends while at Suncity School and released on YouTube. Co-director, cinematographer, editor and organiser: found places to shoot, scheduled shoots around exams, kept classmates involved.
+3\. International Press Photographer, Suncity MUN: documented the conference.
+*Longest entry: 234 characters*
 ## **13. Conferences attended**
 *Limit: 1,500 characters per entry. Optional.*
 *Question: Description.*
 None.
-*Longest entry: 5 characters (excluding \[bracket\] notes)*
+*Longest entry: 5 characters*
 ## **14. Memberships**
 *Limit: 4,000 characters per entry. Optional.*
 *Question: Briefly describe your role or contribution to the group.*
 None.
-*Longest entry: 5 characters (excluding \[bracket\] notes)*
+*Longest entry: 5 characters*
+
 # **4. University of Southern California (USC), MFA in Film and Television Production**
 **Deadline: 15 November 2026.**
 ## **1. Cinematic Arts Personal Statement**
 *Limit: 500 words*
 *Question: The committee seeks creativity, self-awareness, and vision. Focus on your unique individuality, distinctive experiences, identities, values, and worldview as a filmmaker. Describe the stories you want to tell.*
-For most of my training I stood behind a camera, watching. I learned to look for a pause before an answer, and to notice who on a set is keeping things running.
-I grew up in Gurugram and studied commerce at Suncity School: economics, business studies and accountancy. I also learned studio photography at the Raghu Rai Center for Photography, under Nitin Rai. My friends and I produced our own five-part web series, The Classroom, for YouTube. I co-directed, shot and edited it, found our locations and fitted the shoots around exams. Nobody showed us how, so we did it badly at first, then less badly.
-During COVID I joined Mitti to Matka, which supported Gurugram potters who lost their income when the markets closed. We bought and auctioned their pots at fair prices and provided food and sanitary supplies to their families. I made the photographs, videos and graphics and ran the website. When my pictures were good, the pots fetched more at auction, and the families ate better.
-At Whistling Woods International in Mumbai I studied cinematography and direction, worked as an assistant cinematographer on five short films and shot independent films as lead or assistant cinematographer. I have been a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar and, since October 2025, on a Boney Kapoor project \[title\]. On the direction team of a Finolex commercial I prepared the production sheets, cast references and PPM deck, and for Growth Jockey I planned a Sleepyhead Mattresses shoot: the equipment, the script, the offer and the audience. On most of these sets, the people who kept the shoot going were not the people on screen.
-I want to make films about people like them, who hold things together for others with little power of their own: a teenage girl who keeps her family workshop's accounts and secretly fires one last kiln before it is demolished; a background extra who finally gets one line in a superstar's film, and the daughter on the crew who has to decide whether to fight for it; a girls' football team defending the last open ground in an urban village. They are funny and hard at the same time, and they are about work, family and who gets to be seen.
-Working on camera, I saw how much of each day had already been decided by the schedule, budget, locations and cast. I have not worked in a production department or taken a project from an idea to the point where it is financed and ready to shoot, and that is the part I want to learn properly. At SCA I would train in the other roles on a crew first, then concentrate on producing, and make films with classmates I expect to keep working with. After graduating I plan to work for a few years in development and production, then set up a studio in India that makes films like these, with a staff of 8 to 30.
-*497 words (excluding \[bracket\] notes)*
+For most of my training I stood behind a camera, watching. It is a good place to learn who on a set is actually keeping things running.
+I grew up in Gurugram and studied commerce at Suncity School: economics, business studies and accountancy. Outside school, the Raghu Rai Center for Photography taught me studio photography, with Nitin Rai among my teachers. At school I made a five-part YouTube web series, The Classroom, with friends. Besides co-directing, shooting and editing it, I found our locations, fitted the shoots around exams and kept my classmates turning up.
+During COVID I joined Mitti to Matka, which supported Gurugram potters who lost their income when the markets closed. We paid the potters fair prices for their pots, auctioned them, and sent food and sanitary supplies to the families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration.
+My B.Sc., taken at Whistling Woods International in Mumbai, was in filmmaking, cinematography and direction. I assisted the cinematographer on five short films and shot independent films as lead or assistant cinematographer. At Matchbox Studios I worked under Pankaj Kumar as a camera assistant on Khauf, and since October 2025 I have done the same job on a project Boney Kapoor is producing. For a Finolex commercial I worked in the direction team, preparing the production sheets, cast references and PPM deck, and for Growth Jockey I planned a Sleepyhead Mattresses shoot: the equipment, the script, the offer and the audience. On most of these sets, the people who kept the shoot going were not the people on screen.
+I want to make films about people like them, who keep things working inside rules they did not write: an ISRO technician in 1975 Orissa keeping forty village televisions alive, until Emergency officials turn the evening viewings into round-ups; a Balti homestay hustler who has to help his grandmother marry two glaciers, one on each side of the Line of Control; an incorruptible prohibition constable at a Bihar border check post who has to get one quarter-bottle of liquor across. These stories are often funny, and they are about work, family and the systems people live inside.
+Working on camera crews, I saw how much of each day had already been decided by the schedule, budget, locations and cast. I want to be one of the people making those decisions. I have not worked in a production department or taken a project from an idea to the point where it is financed and ready to shoot, and that is what I want to learn properly. At SCA I would train in the other roles on a crew first, then concentrate on producing, and make films with classmates I expect to keep working with. After graduating I plan to work for a few years in development and production, then set up a studio in India that makes films like these, with a staff of 8 to 30.
+*496 words*
 ## **2. Writing sample (choose one)**
 *Limit: 400 words*
 *Question: Either a four-minute film description with no dialogue (fiction or non-fiction, visual storytelling), OR a dialogue scene between two people in screenplay format.*
-Gurugram, 11:40 p.m. A thirty-two-storey tower, every window lit. Then, floor by floor from the top, it goes dark.
-In the lobby, RAMESH (50s), the night guard, sits under one emergency bulb with a register, a flask and a phone replaying an old cricket match. Outside, the backup generator coughs twice and dies.
-The lift display above the steel doors reads 14. Then nothing.
-Ramesh stands. A faint metal knock comes down the shaft. Then another.
-He takes the stairs with a torch, the beam swinging across exit signs and stacked delivery boxes. Floor 9. Floor 12. He is breathing hard. At 14 he presses his ear to the lift doors: a small, steady knocking, and a child's breath catching.
-He prises the doors an inch with his baton. Through the gap: the lift car, stuck between floors, its floor level with his chest. MIRA (8) sits inside with a school bag, a tuition-centre ID on a lanyard and a dead phone in her hand. She looks at the gap and sees an eye and a torch.
-He can't reach her. The intercom is dead. The maintenance number rings and rings.
-Mira starts to cry without sound.
-Ramesh looks at the torch. He steps back, aims it through the gap onto the back wall of the lift, and raises his other hand into the beam. A dog appears on the steel. It opens its mouth. Mira stops crying.
-The dog becomes a bird. The bird flies the length of the wall and lands on the shadow of her school bag. She laughs, a short surprised sound. She lifts her own hand into the light and makes something that is almost a rabbit. Ramesh's bird pecks it. Her rabbit bites back.
-Close on the steel wall: two shadows, one large and practised, one small and new, playing.
-The lights come on. The display blinks 14. The car hums level, the doors slide fully open, and the shadows are gone. Mira and Ramesh look at each other, smaller and stranger in the brightness.
-The next evening. Mira crosses the bright lobby with her bag and steps into the lift. As the doors close, she raises her hand and makes the rabbit. There is no shadow. Behind his desk, Ramesh raises the bird.
-*380 words (excluding \[bracket\] notes)*
+Karmanasa bridge, Bihar-Uttar Pradesh border, 5:40 a.m. Liquor shops line the Uttar Pradesh bank. A kilometre of trucks idles on the Grand Trunk Road, waiting to enter Bihar, dry since 2016. Below runs the Karmanasa, the river nobody touches. A boat of pilgrims crosses it with their feet drawn up off the wet boards.
+At the barrier, BHOLA (52), prohibition constable, hands back a driver's licence with the hundred-rupee note still inside. RANI, his black Labrador, sits beside a truck of onions, chest out. A constable digs. Under the onions: whisky. On a check-post shelf labelled MUSEUM, old seizures: a hollowed coconut, a fake pregnancy belly, a sealed can of Ganga water. On the duty board, someone has chalked a halo over his name.
+At home that night, his FATHER (84), a retired GT Road trucker, lies beside an oxygen cylinder. He points at a photo: himself at thirty, a quarter-bottle of rum raised, one foot on a truck bumper painted RANI. Then he lays two fingers against his steel tumbler.
+Next morning Bhola buys a quarter on the Uttar Pradesh bank, funnels it into the museum's coconut and walks back. Rani sits at his feet, chest out. The constables lower their tea. Bhola throws her ball and chalks TRAINING DRILL beside the halo.
+At dusk he tries again, seven months pregnant. Rani abandons a half-searched truck to sit at his feet. Phones come up along the queue. He retreats, one hand on his bump.
+Next day he joins the pilgrims crossing into Bihar, the Ganga water can on his shoulder like theirs. Rani sits at his feet, tail sweeping the road. Fifty pilgrims step back from him as if he were the river.
+Night, a kilometre downstream. Bhola takes off his boots and socks and lifts the quarter over his head. His big toe hovers above the black water. And hovers. He puts his socks back on.
+Morning. Bhola wheels his father and his oxygen cylinder through his own barrier and across the bridge. Outside the first liquor shop he unclips Rani's working harness and sits in full uniform with a glass of tea. His father pours two fingers of rum into his steel tumbler and raises it to Bihar. Bhola raises his tea.
+Rani sniffs the tumbler, looks at Bhola and lies down across both their feet. Over the water, small, the barrier lifts for the next truck.
+*400 words*
 ## **3. Creative portfolio list**
 *Limit: not stated*
 *Question: Document your creative projects with concise descriptions, completion dates, your role, and purpose. Include awards, publications, and exhibitions.*
-Same list as Chapman MFA, question 2, with one line on the purpose of each project.
-*16 words (excluding \[bracket\] notes)*
+Karan Chaudhary: Creative Portfolio
+ORIGINAL WORK
+• The Classroom. Five-part web series released on YouTube, made with friends while at Suncity School, Gurugram. Role: co-director, cinematographer, editor and organiser (found places to shoot, scheduled shoots around exams, kept classmates involved); also played the sports teacher on screen. Purpose: our own series, made and released by us.
+• KARMANASA. A four-minute film described without dialogue, written for this application, 2026. Role: writer. Purpose: a visual story told without words.
+• SUN PATCH. An original two-minute film on "We are running out of time", planned for this application, 2026. Roles: director, producer, cinematographer and editor.
+INDUSTRY WORK
+• Bayview Projects (producer Boney Kapoor). October 2025 to present. Camera assistant.
+• Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. Planned the shoot: equipment, script, and the offer and audience the film was aimed at. Purpose: an advertising film for Sleepyhead Mattresses.
+• Finolex commercial, Early Man Productions. 2024. Direction team: production sheets, cast references, PPM deck, costume trials. Purpose: a commercial for Finolex.
+• Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar.
+CINEMATOGRAPHY
+• Five short films, 2021 to 2024. Assistant cinematographer.
+• Independent films, 2021 to 2024. Lead or assistant cinematographer.
+PHOTOGRAPHY AND MEDIA
+• Mitti to Matka, Gurugram, 2020 to 2021. Media manager: graphics, stills, video, website and administration. Purpose: supporting local potters and their families during COVID.
+• Suncity MUN. International press photographer.
+AWARDS
+• 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram.
+*251 words*
 ## **4. Creative team question**
 *Limit: 500 words*
 *Question: Describe a difficult situation that you have faced with other people in your creative life and how you handled it.*
-From 2020 to 2022 my friends and I made The Classroom, a five-part web series for YouTube. Along with co-directing, shooting and editing, I did the organising: finding locations, working the shoots around our exams and keeping a group of classmates involved for two years. \[What went wrong, and with whom.\] \[What each person needed.\]
-\[What I did.\]
-\[What was decided, and by whom.\]
-\[How it turned out.\] We finished all five episodes and released them on YouTube.
-*55 words (excluding \[bracket\] notes)*
+The Classroom was a web series my friends and I made at Suncity School, in five parts, for YouTube. I co-directed, shot and edited it, and I also organised it, which meant fitting every shoot day around our exams.
+On one shoot day an actor pulled out at the very last moment. We did not want to lose the day, so we made up a new character there and then, a funny sports teacher, and I took the part.
+That turned the day into a writing problem as well. Our scriptwriter was at home, and the lines we had were written for a character who was no longer in the episode. The two of us worked on them remotely and rewrote them for the sports teacher.
+The new character also had to look the part. I found him a standard tracksuit, which cost us nothing.
+We kept the shoot day, and the episode's story still held together. We finished all five episodes and released them on YouTube.
+*167 words*
 ## **5. Video introduction**
 *Limit: 30 to 60 seconds, single take, no edits*
 *Question: Introduce yourself and explain how attending SCA will create success for you and others.*
-• "I'm Karan Chaudhary, from Gurugram. I trained as a cinematographer, and I'm becoming a producer."
-• How I got here: commerce at school, a web series with friends, then Whistling Woods and sets in Mumbai.
-• What SCA gives me: learning every role on a crew, then specialising in producing.
-• What I give others now: I've worked on camera crews, as an assistant cinematographer and a camera assistant, so I can help on classmates' films from the start.
-• Later: the studio of 8 to 30 people I plan to build in India with what SCA teaches me, and the people I'll hire for it.
-*107 words (excluding \[bracket\] notes)*
+"I'm Karan Chaudhary, from Gurugram. I trained as a cinematographer, and now I want to produce. I studied commerce at school, made a web series with friends, then trained at Whistling Woods and worked on sets in Mumbai. At SCA I want to learn every role on a crew, then specialise in producing. I've worked on camera crews as an assistant cinematographer and a camera assistant, so I can help on my classmates' films from the start. Later, I plan to use what SCA teaches me to set up a studio of 8 to 30 people in India, and to hire people for it."
+*104 words*
 ## **6. Media sample: 2-minute film on "We are running out of time"**
 *Limit: 2-minute film; 150-word critique; crew list*
-*Question: Make an original 2-minute film on the prompt "We are running out of time" (perform at least 3 of: director, producer, writer, editor, sound, cinematography/production design). Provide the film concept and shot plan now; write the 150-word objective critique after the shoot.*
+*Question: Make an original 2-minute film on the prompt "We are running out of time" (perform at least 3 of: director, producer, writer, editor, sound, cinematography/production design). Include a 150-word objective critique of the film and a crew list.*
 **Title:** SUN PATCH
 **Logline:** On a rooftop in a Gurugram urban village, a student cramming for tomorrow's exam chases a shrinking patch of sunlight as a glass tower's shadow swallows his roof.
-**Shot plan** (phone on a tripod, one rooftop facing the towers \[exact location\], shot across one afternoon):
+**Shot plan** (phone on a tripod, one rooftop facing the towers, shot across one afternoon):
 1\. Wide: 4 p.m., charpai in full sun, tower behind. The student reads.
 2\. Close: textbook page in sunlight, a highlighter moving.
 3\. Time-lapse: the tower's shadow crosses the parapet.
@@ -344,556 +378,885 @@ From 2020 to 2022 my friends and I made The Classroom, a five-part web series fo
 **Crew:** me plus two friends, one acting, one on reflector and sound.
 **My roles:** director (performance and pacing), producer (rooftop permission, schedule built around the sun's path), cinematographer (framing, time-lapses, exposure as the light falls) and editor (cut and colour in DaVinci Resolve).
 **Note:** The 150-word critique will be written after the shoot.
-*243 words (excluding \[bracket\] notes)*
+*242 words*
+
 # **5. University of Southern California (USC), MFA in Writing for Screen and Television**
 **Deadline: 15 November 2026.**
 ## **1. Autobiographical character sketch**
 *Limit: 1 to 2 pages*
 *Question: Write a creative essay or short story that evokes an understanding of how you became who you are.*
 **The Ledger**
-The boy keeps two notebooks. One is for accountancy class at Suncity School, where the teacher insists that every rupee has to land somewhere: debit on one side, credit on the other, nothing left over. The other notebook has no columns. It is full of sketches of light: where the sun hits the classroom window at four in the afternoon, how a face changes when you move the lamp.
-He is from Gurugram. \[One image of the city changing.\] \[What his family does.\] When he says he wants to work with cameras, his family \[reacts how\].
-On weekends he goes to the Raghu Rai Center for Photography, where Nitin Rai teaches him studio photography. Light follows rules as strict as a balance sheet. He learns to wait for it, and to leave things out of the frame.
-At school, he and his friends decide to make a web series. They call it The Classroom. He co-directs it, shoots it and edits it. They have no producer, so he does that work too, though nobody calls it producing: he finds the places to shoot, plans the shoot days around exams and keeps his classmates on board. \[One moment from the shoot.\] Five episodes go up on YouTube. \[How people responded online.\]
-In 2020 the city shuts. The markets close, and the potters have nowhere to sell. He joins an initiative called Mitti to Matka as its media manager and photographs their pots. He learns that a good photograph can sell a pot, and a sold pot can pay for a week of groceries. He writes every sale into a ledger, because the money is for the potters' families. \[One memory from that year.\]
-At film school in Mumbai he stands behind cameras for three years, and he gets good at it. Over the same years he works on Khauf, at Matchbox Studios, as a camera assistant. He also keeps looking past the frame, at the schedule taped to the wall and the producer on the phone. He starts carrying the first notebook again. On a Finolex commercial he joins the direction team and prepares the cast references, the production sheets and the PPM deck. In 2024 he plans a shoot for Sleepyhead Mattresses, working out the equipment, the script, and the offer and audience the film is aimed at.
-Now he is a camera assistant on a project under Boney Kapoor. He has not yet worked where the money and the schedule behind a call sheet are decided. He plans to build a studio in India, with a team of 8 to 30.
-*409 words (excluding \[bracket\] notes)*
+In accountancy class at Suncity School in Gurugram, every rupee has to land somewhere: debit on one side, credit on the other, nothing left over. The boy studies commerce there, economics, business studies and accountancy, and he also carries a camera. He does not yet see what one has to do with the other.
+He takes a course in studio fashion photography at the Raghu Rai Center, where Nitin Rai is one of his teachers. Light, he finds, follows rules as strict as a balance sheet.
+At school, he and his friends decide to make a web series. They call it The Classroom. He co-directs it, shoots it and edits it. They have no producer, so he does that work too, though nobody calls it producing: he finds somewhere to shoot each episode, fits the shoot days between exams and keeps his classmates coming back. Five episodes go up on YouTube.
+In 2020 COVID shuts the city. The markets close, and the city's potters have nowhere to sell. He joins an initiative called Mitti to Matka as its media manager. It pays the potters a fair price for each pot, auctions the pots, and delivers food and sanitary supplies as well. He photographs the pots and keeps the administration in order. It is the first time other people's income depends on work he does.
+In Mumbai he enrols at Whistling Woods International to train as a cinematographer and director, and is assistant cinematographer on five short films. While still a student, he is a camera assistant on Khauf, at Matchbox Studios, under Pankaj Kumar. From behind the camera he starts to notice that what happens on set is shaped by decisions made long before the shoot day. The accountancy student in him comes back. On a Finolex commercial he joins the direction team, prepares the cast references, the production sheets and the PPM deck, and runs costume trials. In 2024, for Growth Jockey, he plans a Sleepyhead Mattresses shoot, from the kit and the script to what the film offers and who it is for.
+Now he is a camera assistant again, on a project for producer Boney Kapoor. He has not yet worked where the money and the schedule behind a call sheet are decided. The part he most wants to learn comes even earlier: the script, while the story is still being written and the budget and the audience are open questions. He plans to build a studio in India, with a team of 8 to 30, that develops its own films and series.
+*428 words*
 ## **2. Creative challenge, Scene A**
 *Limit: 2 to 5 pages, screenplay format*
 *Question: Two very different kinds of people stuck in an elevator on New Year's Eve.*
-Title: SERVICE LIFT
-**INT. SERVICE LIFT, OFFICE TOWER, CYBER CITY, GURUGRAM - NIGHT**
-A steel box hung with grey quilted blankets. A laminated sign: SERVICE LIFT. STAFF AND VENDORS ONLY.
-DEEPAK (22), delivery jacket zipped to the chin, helmet on one elbow, guards four sacks of ice. They sweat onto the floor.
-The doors begin to close. A hand stops them.
-ARVIND SABHARWAL (57), velvet dinner jacket, silk pocket square, a whisky gift bag. He reads the sign. Reads Deepak. Presses 42. It's already lit.
-ARVIND
-Twenty-minute queue for the main lifts. On New Year's Eve. At my own party.
-The doors close. The display ticks up: 16, 17, 18.
-A shudder. A clank. Darkness, then a weak yellow emergency bulb.
-Arvind jabs the alarm. A bell rings far below. He jabs it again.
-DEEPAK
-It rings in the guard room. Guard's on the roof.
-ARVIND
-Doing what?
-DEEPAK
-Watching your fireworks.
-Arvind holds his phone up to the ceiling and turns in a slow circle, as though signal were a smell.
-DEEPAK (CONT'D)
-No network. Steel box.
-Deepak sits on a sack of ice. Meltwater creeps across the floor toward Arvind's suede shoes. Arvind steps back. It follows.
-ARVIND
-How long does this usually take?
-DEEPAK
-Ten minutes. But the man who fixes it is also on the roof.
-Arvind checks his watch. 11:49.
-ARVIND
-I'm supposed to give a speech at midnight.
-DEEPAK
-Is it good?
-ARVIND
-It's mostly about growth.
-Deepak nods slowly, as if Arvind has described a medical condition.
-Arvind looks at the puddle. Then he pulls a blanket off its hook, folds it, and sits on the floor, knees up, velvet on grey.
-ARVIND (CONT'D)
-(reading the jacket)
-Deepak. Where are you from, Deepak?
-Deepak points at the floor.
-DEEPAK
-Here.
-ARVIND
-Gurgaon.
-DEEPAK
-Here. My dada's field. Mustard in winter, so tonight it would be yellow. This shaft is about where the tube well was.
-Arvind looks at the floor as if it might open.
-ARVIND
-Your family sold to the builder.
-DEEPAK
-Eleven acres.
-Arvind does the sum. His eyebrows rise. Deepak watches them rise.
-DEEPAK (CONT'D)
-My chacha bought two Fortuners. My father bought a hotel in Kasauli. Nobody has ever stayed in it. Not even us.
-Arvind laughs, then catches himself. Deepak laughs harder.
-ARVIND
-And you?
-DEEPAK
-A bike.
-He lifts the helmet an inch, as evidence.
-ARVIND
-You come here a lot?
-DEEPAK
-Six, seven times a night. Ice, mostly. You people drink a lot of ice.
-ARVIND
-So you've seen the roof.
-DEEPAK
-I've seen the door. Someone takes the bag at the door.
-A hum. Full light. A jolt, and the lift rises: 19, 20.
-Arvind gets up. Looks at the dripping sacks. Then at Deepak.
-ARVIND
-Give me those.
-DEEPAK
-Sir, the customer has to sign...
-ARVIND
-I am the customer.
-He hands Deepak the gift bag.
-ARVIND (CONT'D)
-Japanese. Don't drop it.
-He gathers all four sacks against his chest. Meltwater runs down his velvet sleeves.
-DEEPAK
-Sir, they won't let me in.
-ARVIND
-Nobody stops the man carrying the bottle.
-The display: 40, 41, 42.
-The doors open on the party: bass, smoke machine, gold balloons. An EVENT MANAGER in a headset sees the delivery jacket and lifts an arm to steer Deepak toward the back. Then she sees the bottle. Then Arvind, wet to the elbows, hugging ice.
-Her arm comes down.
-EVENT MANAGER
-Sir?
-ARVIND
-Ice.
-He walks into his own party like a waiter. Deepak follows, holding the bottle in both hands.
-**EXT. ROOFTOP - CONTINUOUS**
-The countdown starts. TEN. NINE. Deepak slips between the guests to the glass railing and looks down.
-Below, beyond the highway: low roofs, water tanks, a bonfire in a lane, one house strung with wedding lights.
-Arvind arrives beside him, still hugging the ice.
-EVENT MANAGER (O.S.)
-Sir\! Your speech\!
-Arvind doesn't turn.
-DEEPAK
-There. The blue tank. That's ours.
-Arvind looks. There are a hundred blue tanks.
-He keeps looking until he finds one.
-Above them, the first rocket bursts.
-*677 words, about 3.8 screenplay pages*
+Title: TAKE IN
+**INT. GOODS LIFT, KAILASH GUPTA & SONS CLOTH STORE, SHAHJAHANPUR, UTTAR PRADESH - NIGHT**
+An iron cage the width of a wardrobe. Above the lever, a brass plate polished to gold: KAILASH GUPTA & SONS. LIFT NUMBER ONE. 1962. GOODS ONLY.
+Through the mesh, New Year's rockets burst green over Chowk. In the lane, a cane truck grinds past.
+BASHIR AHMAD (71), tailor. Woollen cap, half-moon spectacles, a yellow tape round his neck, chalk in his breast pocket. Over one forearm, a black wool suit in a dry-cleaner's sheet.
+Beside him, SUKHDEV VERMA (49), cane commission agent. Camel overcoat, two gold rings, tinted glasses at night. A ten-day beard where a famous moustache used to be.
+SUKHDEV
+(in Hindi, a borrowed Lucknow softness)
+You do understand? I am the cousin. From Lucknow.
+BASHIR
+So you said at the door. For the suit and the old measurements.
+SUKHDEV
+For the family's records. Usha bhabhi wants every number.
+BASHIR
+The registers are upstairs.
+He pulls the lever. The cage groans and climbs.
+BASHIR (CONT'D)
+Seth Gupta says there is no other lift between Bareilly and Lucknow.
+The cage jolts and stops between floors. The bulb dies. The lane goes dark under the rockets.
+SUKHDEV
+Overloaded. Everybody has fairy lights tonight and one wire.
+His phone torch snaps on.
+BASHIR
+Hold the light up, cousin. Level with your ear.
+SUKHDEV
+Why?
+BASHIR
+So I can see. Stand straight.
+Sukhdev lifts the light and rises onto the balls of his feet.
+BASHIR (CONT'D)
+Heels down. Shoulders down. Left arm out.
+SUKHDEV
+I am the cousin. Cousins are not measured.
+BASHIR
+Everybody is measured by somebody. Arm.
+Sukhdev edges toward the gate instead. Bashir reads him anyway, one palm on the point of the shoulder.
+BASHIR (CONT'D)
+Chest, forty. Sleeve, twenty-five. Left shoulder low. A scooter, every day, to the cane centres.
+SUKHDEV
+All of us Vermas have that shoulder.
+BASHIR
+Then I am sorry for your loss. Sukhdev was a good customer. Half in advance, every time.
+SUKHDEV
+That was Sukhdev. Always the advance.
+BASHIR
+In November he ordered this suit. Make it for my funeral, he said, so the mourners see I had taste.
+SUKHDEV
+(too loudly)
+Sounds like him.
+BASHIR
+Yesterday the police released the body. Usha's brother came to my shop crying, with this.
+He draws out a length of white string, knotted at intervals.
+BASHIR (CONT'D)
+From the mortuary. Knotted where the body ends. Shorten everything six inches, he said. Take in the chest.
+SUKHDEV
+Burned men shrink.
+BASHIR
+Fire takes skin. It curls the arms like a boxer's. It does not take six inches of bone out of a man's legs. Sukhdev was five feet eight his whole life. This boy was five feet two.
+SUKHDEV
+You said that in the shop?
+BASHIR
+Out loud. To the brother.
+The torch drops an inch. So does the Lucknow.
+SUKHDEV
+The claim is lodged. The certificate comes after tomorrow's cremation, then forty lakh rupees for my children. Give me the book, Bashir sahib. Tonight. I am on the morning bus.
+BASHIR
+For the family's records.
+SUKHDEV
+It was a body on the Bareilly highway. Burned. Nobody is going to miss it.
+Bashir lifts the string into the torchlight.
+BASHIR
+Whose boy?
+Sukhdev opens his mouth. Shuts it. The torch shakes.
+The bulb flickers and holds. The cage climbs the last flight.
+**INT. CLOTH STORE, THIRD FLOOR, KAILASH GUPTA & SONS - CONTINUOUS**
+Bolts of suiting to the ceiling.
+A green steel almirah of registers, 1974 to this year.
+Bashir opens one on the cutting table at VERMA, S. Pencil, one line per fitting, from a wedding coat to November.
+BASHIR
+Chest, forty. Sleeve, twenty-five. Height, five feet eight. Never a quarter-inch either way.
+He slides the suit out of its sheet and lays it over Sukhdev's shoulders. It sits perfectly.
+BASHIR (CONT'D)
+Nothing to take in.
+CROWD (O.S.)
+Paanch! Chaar! Teen! Do! Ek! Happy New Year!
+Bashir closes the register and holds it out.
+BASHIR
+Take it. Paper burns. You know about fire.
+Sukhdev takes it. He does not open it.
+BASHIR (CONT'D)
+I don't need it. I know your numbers.
+SUKHDEV
+And the string?
+Bashir winds it round two fingers and pockets it beside the chalk.
+BASHIR
+That one is not yours.
+Rockets through the window. Sukhdev stands in his own funeral suit, holding his life in pencil.
+*731 words, about 4.1 screenplay pages*
 ## **3. Creative challenge, Scene B**
 *Limit: 2 to 5 pages, screenplay format*
 *Question: Two people cohabiting, one of whom wants out of the relationship and one of whom wants them to stay. Emphasize visual elements as well as dialogue.*
-Title: FOIL
-**INT. ONE-ROOM FLAT, VERSOVA, MUMBAI - DAWN**
-One room. A double mattress on the floor fills half of it. A kitchen counter: two burners, a pressure cooker, two steel glasses upside down on a cloth.
-A clothesline runs corner to corner. On it hang black crew T-shirts, PRODUCTION printed across their backs, and between each one an empty wooden peg.
-The only window is sealed with kitchen foil, taped at the edges. On the sill in front of it, three plants in old Amul ghee tins: tulsi, chilli, curry leaf. They are pale and leggy. All three lean toward the same pinhole in the foil.
-MEHER (28), ironed office kurta, ID card on a lanyard, sits on the edge of the mattress. Beside her, a trolley bag, zipped. In her lap, a key ring with a brass Ganpati. She turns it over and over.
-A key in the lock. NIKHIL (29) comes in: black crew T-shirt, a roll of gaffer tape worn on his wrist like a bangle, a paper bag spotted with oil.
-NIKHIL
-Vada pav from the guy outside Aram Nagar. He was just opening. He said I'm his first customer, so I bring luck.
-He sees the clothesline. The empty pegs. He slows.
-Then he sees the bag.
-He holds the paper bag a moment too long. Then he takes down two steel plates and lays one vada pav on each, as carefully as a set dresser.
-MEHER
-I waited. I wanted to say it to your face.
-NIKHIL
-Eat first.
-MEHER
-Nikhil.
-NIKHIL
-It's hot now. In five minutes it's not.
-He puts a plate on the mattress beside her. She doesn't touch it.
-His phone buzzes in his pocket. Then again. He silences it without looking.
-NIKHIL (CONT'D)
-We wrap on the twentieth. After that I'm free till March. I'll be home so much you'll throw me out.
-MEHER
-You said the twentieth in October too.
-He looks at her. Then he crosses to the window, works a thumbnail under the tape, and rips a whole sheet of foil away.
-Light slams into the room. The plants stand stunned in it. Meher shields her eyes.
-NIKHIL
-There. You wanted light.
-He tears down another sheet.
-NIKHIL (CONT'D)
-I'll sleep at Rohan's in the day. I'll sleep in the van. I'll...
-MEHER
-Put it back.
-NIKHIL
-No.
-MEHER
-You have a seven o'clock call. You haven't slept since Tuesday.
-He pulls out his phone and checks. She's right. A strip of foil hangs from his other hand.
-NIKHIL
-Then tell me what to do.
-She doesn't.
-He sits beside her on the mattress, in the bar of light, and takes the key ring out of her hands. Holds it.
-NIKHIL (CONT'D)
-After the twentieth, Alibaug. You kept saying Alibaug. We'll take the early ferry, the six o'clock, and eat at that place with the blue...
-His voice slows. His head tips. The key ring slides out of his fingers onto the mattress.
-He's asleep. Sitting up.
-Meher watches him. Then she eases him down onto the pillow. Unlaces his shoes. Slides the roll of gaffer tape off his wrist. Takes his phone, sets an alarm for 5:30 P.M., and lays it by his ear.
-She puts the Ganpati key ring on the counter, beside the vada pav nobody ate.
-She tears a strip of gaffer tape with her teeth and pats the foil back over the window. Then another strip. The light narrows to a bar, to a line, to nothing.
-In the dark, she lifts the tulsi off the sill. Holds it. Puts it back.
-She wheels the bag to the door and opens it. Light from the stairwell falls across the mattress, across his face. He frowns in his sleep.
-She steps out and closes the door slowly, until the light is gone from him.
-On the mattress, his phone glows. SHOOT GROUP: CALL TIME 7 PM. It buzzes. He doesn't wake.
-On the sill, the three plants lean toward the pinhole.
-*670 words, about 3.7 screenplay pages*
+Title: SIGNAL DELAY
+**INT. HABITAT DOME, TSO KAR SALT FLAT, LADAKH - DAWN**
+A white dome on a frozen salt lake. Everything inside is bolted down, labelled or both.
+By the airlock hatch, two orange mock suits hang so close that one glove rests in the other. Name tapes: S. KAMATH, COMMANDER. G. KAMATH, MEDICAL OFFICER.
+A wall screen: MISSION CONTROL, BENGALURU. Under it, a delay clock stopped at 20:00.
+A whiteboard: SOL 19 OF 30. TODAY: CREW LOSS DRILL.
+A red lever marked ABORT, under a paper seal: BREAKING THIS SEAL ENDS THE MISSION FOR BOTH CREW.
+A poster: a cartoon goat in a red circle, struck through. THERE ARE NO GOATS ON MARS.
+One porthole. Overnight, frost ferns have grown in from the rim, leaving a clear circle the size of a face.
+SHALINI KAMATH (34), thermals and fleece, has her face in it.
+GIRISH KAMATH (36) snips open two pouches of MASALA CHAI with surgical scissors and fills each with hot water exactly to the line. Their breath shows.
+Outside, pashmina goats drift into the clear circle, licking the salt crust. Behind them, a CHANGPA GIRL (10) in a maroon goncha, a dented flask slung across her back. She looks straight at the porthole and waves.
+Shalini's hand lifts an inch. Stops.
+GIRISH
+(not looking up)
+There are no goats on Mars.
+SHALINI
+She has a new hat.
+GIRISH
+There are no hats on Mars.
+The girl waits, then follows her goats into the frost.
+Shalini crosses to the console and presses TRANSMIT.
+SHALINI
+Control, Habitat. Commander Kamath. I want to go home.
+(beat)
+Alone.
+MESSAGE SENT. The delay clock starts: 19:59.
+Girish stops, a pouch in each hand.
+GIRISH
+Say again?
+SHALINI
+You heard.
+GIRISH
+Signal's bad.
+SHALINI
+We're three metres apart.
+GIRISH
+Copy.
+SHALINI
+Nineteen days. Copy. Copy. Copy.
+GIRISH
+Nineteen days. Not one fight.
+A goat's face fills the porthole. It licks the glass, slowly. Neither mentions it.
+GIRISH (CONT'D)
+You filled in my form. "Calm in confined spaces." I'm a dentist, Shalu.
+SHALINI
+You are calm in confined spaces.
+GIRISH
+I came for you.
+(beat)
+And it turns out I'm good at this.
+SHALINI
+Better than me.
+GIRISH
+So stay. Eleven sols.
+They drink their chai standing up, not looking at each other.
+The delay clock: 11:40.
+SHALINI
+(at the porthole)
+She waves every morning. She must think we're very rude.
+GIRISH
+She isn't there.
+Shalini lays two fingers on the ABORT seal.
+Girish goes still, his breath in small, quick clouds.
+SHALINI
+If I break this, you fail selection.
+GIRISH
+We fail. We're a pair crew.
+She takes her hand off the seal.
+SHALINI
+What's step one of a crew loss?
+GIRISH
+(automatic)
+Confirm the loss. Log the time. Secure the casualty's suit. Surviving crew completes the mission. Why?
+Shalini looks from the ABORT seal to the whiteboard. She does not answer.
+The girl is back at the porthole, the flask in her mittens. She waves.
+Shalini waves back.
+Girish turns his back on the porthole.
+A long time. Neither moves.
+The delay clock: 03:02.
+Shalini laces her boots. She does not touch her suit.
+GIRISH (CONT'D)
+(to the wall)
+It's minus twenty-five out there.
+SHALINI
+Out where?
+At the suits, she lifts her glove out of his and lets it drop.
+SHALINI (CONT'D)
+Log the time.
+The hatch seals behind her. A panel flashes: WARNING: CREW UNSUITED. The airlock plays its recorded hiss anyway.
+Girish puts his face to the clear circle.
+White light. Salt. Goats. Shalini walks into view. Her breath leaves in one enormous cloud. She stands in it, face up.
+The girl unscrews her flask, pours butter tea into the cap and holds it out. Shalini takes it in both bare hands. Steam rises between them.
+The delay clock reaches 00:00. On the wall screen: DELIVERED. A chime: INCOMING, SENT 07:11.
+CONTROL (V.O.)
+(delighted)
+Habitat, Control! Fantastic work on Sol 18, you two. Reminder: Sol 20 is pizza night! Control out.
+Silence.
+Girish watches his wife drink. He nods, once.
+He uncaps the marker. Under CREW LOSS DRILL he writes: 0731 HRS.
+He goes to the suits, lifts her empty glove and lays it back in his.
+*699 words, about 3.9 screenplay pages*
 ## **4. Most challenging moment**
 *Limit: 1 to 2 pages*
 *Question: Convey in writing the greatest challenge you have faced and how you responded to it.*
-The biggest challenge I have faced so far came in 2020, while I was still in school. When COVID closed Gurugram's markets, the local potters had pots to sell and no one to buy them. \[When I first saw their situation.\] I joined Mitti to Matka, a volunteer initiative set up to help them, as its media manager. \[Our team, funds and experience.\]
-We bought pots directly from the families at fair prices, so the money reached them straight away, and then sold the pots at auction. An auction only works if buyers can see what they are bidding on, and that was my job. I made the stills, videos and graphics, ran the website and took care of the administration. \[What the administration involved.\] We also worked with the potters on design changes that city buyers wanted, and spent what we could spare on food and sanitary supplies for their families.
-I had not known these families long, and they were counting on us. So I wrote down where every rupee went, whether to a family or on supplies. \[One moment I felt the pressure.\]
-Our help also had a limit. \[The moment I saw the limit.\] We could sell pots and deliver supplies, but we could not reopen the markets. \[How I felt and responded.\]
-We kept the auctions and deliveries going, without pretending they solved everything. When someone asked for something we could not provide, I told them the truth rather than make a promise we would not keep.
-Mitti to Matka was my first experience of handling money and promises that other people relied on. That was before I had worked on a film set, and it is part of why I want to produce.
-*257 words (excluding \[bracket\] notes)*
+In 2020, before I had finished school, COVID closed Gurugram's markets. The local potters had pots ready to sell and nobody to sell them to. I joined Mitti to Matka, a volunteer initiative set up to help them, as its media manager.
+The problem was practical: how do you sell a clay pot to someone who cannot pick it up and turn it over? We started by buying the pots from the families ourselves, at fair prices, so they were paid before any sale had happened. Then we sold the pots at auction.
+My part was making that work without a market. I photographed and filmed the pots, made the graphics, ran the website and kept the administration in order. The team also worked with the potters on improving their designs, and spent what it could spare on food and sanitary supplies for the families.
+We kept the auctions and the deliveries going, and I stayed on as media manager into 2021. That year made me careful with other people's money, and it taught me to say early what a project can and cannot do for the people it touches.
+*190 words*
 ## **5. Writing sample**
 *Limit: maximum 10 pages*
 *Question: One sample of your creative writing. May be an excerpt with a note explaining the context.*
-Same screenplay as Columbia, question 2 (SECONDS, 10 pages), with this one-line note at the top: "Original short screenplay, written for this application."
-*23 words (excluding \[bracket\] notes)*
+Original short screenplay.
+Title: ROLL CALL
+Log line: Rajasthan, 1951: a bellowing school drill master has until sunset to get twenty women behind a purdah screen to say their own names for India's first electoral roll, but the eldest has forgotten hers, so the women begin choosing new ones.
+FADE IN:
+**EXT. SARAF HAVELI, SHEKHAWATI - AFTERNOON**
+SUPER: Rajasthan, 1951.
+A merchant's mansion in a village of sand, its outer walls painted from plinth to parapet with elephants, gods and Englishmen. The men who paid for the paint live in Calcutta.
+Two bicycles creak up the lane. The TEHSIL PEON (60s), a brass badge on his belt, unstraps a cloth-bound register from his carrier and hands it to BHANWAR LAL (40s), drill master at the government school: khaki shorts, white shirt, canvas shoes, waxed moustache, a whistle on a cord.
+TEHSIL PEON
+Last house, last day. Twenty women, no men. I'm back at sunset, Masterji. Names or no names.
+Bhanwar Lal squints at the sun, measuring what is left of the day. He bangs the iron knocker.
+BHANWAR LAL
+(parade-ground voice)
+Ram Ram sa! Enumerator, Election Commission of India!
+The great door opens a crack. Nobody behind it.
+VOICE (O.S.)
+Shoes.
+He unlaces his canvas shoes. One sock is darned at the heel in a different colour.
+**INT. SARAF HAVELI, BAITHAK - CONTINUOUS**
+The men's sitting room: white floor mattresses, bolsters, and more paint. One wall is painted in three bands: Krishna and his cows at the bottom, a motorcar with a turbaned chauffeur in the middle, and along the top a steam train full of Englishmen. The wall opposite is a single screen of carved sandstone, a lattice of eight-pointed stars. Behind it, the rustle of a great many people keeping quiet.
+Bhanwar Lal turns his back on the screen. He sits cross-legged at a low desk, facing the painted wall, and lays out the register, an ink bottle, a nib pen and a booklet: INSTRUCTIONS TO ENUMERATORS.
+Behind him, the afternoon sun pours through the jaali and lays a carpet of star-shaped light across the floor. The stars stop a yard behind him.
+INSERT - REGISTER
+ELECTORAL ROLL, 1951. HOUSE 14, SARAF HAVELI. Twenty printed lines: w/o Murlidhar Saraf. w/o Gopal Saraf. w/o late Shivratan Saraf. And on the last line, m/o Murlidhar Saraf. Every line is struck through in red. A red stamp in the margin: OWN NAME NOT GIVEN. TO BE DELETED.
+At the foot, in pencil: 0/20.
+BACK TO SCENE
+He puts the whistle to his lips and blows. Pigeons burst off the roof.
+BHANWAR LAL
+Saavdhaan! Roll call! I read the line, you answer with your name. Serial one, wife of Murlidhar Saraf!
+Silence.
+BHANWAR LAL (CONT'D)
+I can't hear you!
+A giggle behind the stone. Another. Then the whole screen shakes with laughter.
+VOICE (O.S.)
+Murlidhar is in Calcutta.
+SECOND VOICE (O.S.)
+So is Gopal.
+Then an old voice, used to being obeyed.
+DADI-SA (O.S.)
+Everybody in your book is in Calcutta.
+**INT. SARAF HAVELI, ZENANA GALLERY - CONTINUOUS**
+What he can't see, we can. A dozen women in view on the steps and mats, more on the stair behind, and one girl, veils thrown back because no man can see them. They have a perfect view of him: the bald patch, the darned sock.
+DADI-SA (80s) has the only cushion, a ring of keys at her waist and prayer beads moving through her fingers. BADI BAHU (50s) cracks betel nut with a brass cutter. Snick. The YOUNGEST BRIDE (21), henna still on her palms, has her nose to the stone. A WIDOW (30s) in a dark odhni, wrists bare, is the only one not laughing. DHAPU (40s) laughs hardest. CHHOTI (16) kneels at the very front, as if she were on the roll.
+**INT. SARAF HAVELI, BAITHAK / ZENANA GALLERY - LATER**
+The stars have reached him.
+BHANWAR LAL
+No name, no vote.
+BADI BAHU
+We've never had a vote.
+BHANWAR LAL
+That's why I'm here.
+Snick.
+BADI BAHU
+What does it do?
+BHANWAR LAL
+It chooses who governs.
+DHAPU
+We govern.
+Dhapu hoots at her own joke.
+CHHOTI
+Masterji, I'm twenty-one.
+BHANWAR LAL
+You sound fifteen.
+CHHOTI
+Sixteen!
+She claps a hand over her mouth. Too late.
+BHANWAR LAL
+Twenty-one is the law. Come back next election.
+Chhoti sits back on her heels, furious, and does not give up her place at the front.
+The stars climb his back.
+DADI-SA
+No woman's name has passed this jaali in a hundred years. Who's asking?
+BHANWAR LAL
+The Election Commission of India.
+DADI-SA
+Is he married? Let him send his wife's name first.
+Snick. Bhanwar Lal searches the booklet for the page about this. There isn't one.
+BADI BAHU
+He's in Delhi, Masterji. You're here. What's your wife's name?
+His pen stops in the air.
+BHANWAR LAL
+That is not the procedure.
+BADI BAHU
+What do you call her?
+A long pause.
+BHANWAR LAL
+Munna's mother.
+Dhapu shrieks. Even the widow smiles.
+BADI BAHU
+So she's a "mother of" too. Say hers, and we'll say ours.
+He looks to the painted Krishna for help. Krishna goes on playing his flute.
+BHANWAR LAL
+(barely)
+Kesar.
+BADI BAHU
+I can't hear you.
+He gets to his feet, fills his chest and faces the wall like a parade ground.
+BHANWAR LAL
+KESAR!
+The pigeons go up again. Somewhere in the village a dog starts barking and won't stop.
+Behind the jaali, nobody laughs.
+Badi Bahu puts down her cutter.
+BADI BAHU
+Champa.
+He sits, dips and writes.
+INSERT - REGISTER
+Above the red line through w/o Murlidhar Saraf, in a careful schoolteacher's hand: Champa. At the foot: 1/20.
+BACK TO SCENE
+Then they all come at once.
+VOICES
+Gomti! Sarbati! Phooli! Kamla!
+BHANWAR LAL
+Line mein! One at a time!
+DHAPU
+Dhapu.
+His nib hesitates over that one, then writes it.
+INSERT - REGISTER
+Names climb the page, one above each red line, faster than he can blot. At the foot: 15/20.
+BACK TO SCENE
+BHANWAR LAL
+Five left.
+BADI BAHU
+The rest wait for Ma-sa.
+He turns to the last line.
+BHANWAR LAL
+Mother of Murlidhar Saraf.
+Behind the jaali, every head turns to Dadi-sa. Her beads stop. She opens her mouth. Nothing comes.
+DADI-SA
+Wait.
+They wait. Somewhere the dog is still barking.
+DADI-SA (CONT'D)
+It was short. My mother called it from the roof at dusk.
+She frowns, the way she frowns at a key that won't turn.
+DADI-SA (CONT'D)
+Gone.
+Bhanwar Lal puts down his pen.
+BHANWAR LAL
+Somebody must know it.
+BADI BAHU
+Thirty years I've called her Ma-sa.
+YOUNGEST BRIDE
+Dadi-sa.
+DHAPU
+Sethani-ji.
+DADI-SA
+Ask my mother. She's been dead fifty years.
+The stars reach the back of his neck.
+YOUNGEST BRIDE
+Choose one, Dadi-sa. A pretty one.
+DADI-SA
+Koni. At eighty? Like a calf?
+YOUNGEST BRIDE
+Then I'll go first. Bijli.
+BHANWAR LAL
+That's not a name. That's lightning.
+YOUNGEST BRIDE
+It's mine now.
+BHANWAR LAL
+A false entry is an offence.
+BADI BAHU
+Is it false?
+He opens the booklet and runs a finger down the page. Turns it. Turns back.
+INSERT - BOOKLET
+"Enter the name of the elector." His finger stops under "name".
+BACK TO SCENE
+He looks at the whistle in his hand. Then he puts it to his lips, gives one short blast and bellows.
+BHANWAR LAL
+Bijli!
+BIJLI
+Haazir!
+He writes it. Then, in the margin of the government's instructions, he pencils a rule of his own: NAME: WHAT SHE ANSWERS TO.
+The widow leans to the stone.
+WIDOW
+Azadi.
+The gallery goes still.
+BHANWAR LAL
+Azadi!
+AZADI
+Haazir.
+He writes it. Now the rest want new ones.
+VOICE
+Calcutta!
+BHANWAR LAL
+That's a city.
+VOICE
+He's had it eleven years. My turn.
+He writes it.
+SECOND VOICE
+Bhanwari. After you, Masterji.
+The gallery howls. He goes red to the ears and writes it.
+DHAPU
+Strike mine.
+BHANWAR LAL
+Dhapu is written.
+DHAPU
+So strike it. You've had practice.
+BHANWAR LAL
+And write?
+DHAPU
+My father named me Enough. Write Maharani.
+He takes out a ruler, draws one neat line through Dhapu and writes Maharani above it.
+INSERT - REGISTER
+Bijli. Azadi. Calcutta. Bhanwari. Maharani. At the foot: 19/20. On the last line, m/o Murlidhar Saraf, the red line has nothing above it.
+BACK TO SCENE
+BIJLI
+Take Kesar, Dadi-sa. It's pretty.
+DADI-SA
+It's his wife's.
+**EXT. SARAF HAVELI, GATE - SUNSET**
+The peon leans his bicycle against a painted elephant and lights a lantern.
+TEHSIL PEON
+Masterji! Suraj dhal raha hai! Tehsildar sahib won't wait!
+**INT. SARAF HAVELI, BAITHAK / ZENANA GALLERY - CONTINUOUS**
+The stars have left him. They climb the painted wall, past the cows, past the motorcar, into the train.
+Bhanwar Lal stands the way he stands every school morning: heels together, register open on his forearm.
+BHANWAR LAL
+Roll call.
+He doesn't blow the whistle.
+BHANWAR LAL (CONT'D)
+Champa.
+CHAMPA
+Haazir.
+Down the page. Bijli. Haazir. Azadi. Haazir. Calcutta. Haazir. Bhanwari. Haazir. Maharani. Haazir. Nineteen names, nineteen answers through the stone, and with each one the stars climb higher up the train. At the front of the gallery, Chhoti mouths every Haazir.
+Line twenty. The print says m/o Murlidhar Saraf. He doesn't read it out. He waits.
+The stars reach the top of the wall.
+Far off across the rooftops, a woman calls a child in for the night, too far away to make out the name.
+Dadi-sa lifts her head.
+DADI-SA
+Gaura.
+He doesn't turn round.
+BHANWAR LAL
+Gaura.
+GAURA
+Haazir.
+He writes it.
+INSERT - REGISTER
+Gaura, above the last red line. At the foot: 20/20.
+BACK TO SCENE
+The light slides off the top of the wall. The room goes blue.
+He blots the page, closes the register and ties its string.
+**EXT. SARAF HAVELI, GATE - DUSK**
+He hands the register to the peon, who straps it to his carrier and rides off, lantern swinging. Bhanwar Lal sits on the step and laces his canvas shoes.
+**EXT. SARAF HAVELI, ROOF - CONTINUOUS**
+Along the parapet stand the women of the house, faces bare to the last of the sky, watching the lantern wobble away down the sand road with their names.
+Below, Bhanwar Lal wheels his bicycle out of the lane. He doesn't look up.
+Gaura watches the lantern until it is gone.
+SUPER: Nearly 2.8 million women were struck off India's first electoral rolls because they would not give their own names.
+CUT TO BLACK.
+*1742 words, about 9.7 screenplay pages*
 ## **6. Creative portfolio list**
 *Limit: not stated*
 *Question: A list of all significant creative projects in which you have participated, noting the role you played.*
-Same list as Chapman MFA, question 2, noting my role on each project.
-*13 words (excluding \[bracket\] notes)*
+Karan Chaudhary: Creative Projects
+WRITING
+• ROLL CALL. Original short screenplay, 2026. Writer. (Writing sample in this application.)
+• TAKE IN and SIGNAL DELAY. Original scenes written for this application's creative challenge, 2026. Writer.
+• The Classroom. Five-part web series released on YouTube, made with friends while at Suncity School, Gurugram. Co-director, cinematographer, editor and organiser; worked with our scriptwriter to rewrite an episode's lines on the day of a shoot; also played the sports teacher on screen.
+FILM AND TELEVISION
+• Project under producer Boney Kapoor, Bayview Projects. October 2025 to present. Camera assistant.
+• Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. Planned the shoot: equipment, script, offer and audience.
+• Finolex commercial, Early Man Productions. 2024. Direction team.
+• Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar.
+• Five short films, 2021 to 2024. Assistant cinematographer.
+• Independent films, 2021 to 2024. Lead or assistant cinematographer.
+PHOTOGRAPHY AND MEDIA
+• Mitti to Matka, Gurugram, 2020 to 2021. Media manager.
+• Suncity MUN. International press photographer.
+• 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram.
+*183 words*
+
 # **6. Chapman University, Dodge College of Film and Media Arts, MFA in Film and Television Producing**
 **Priority deadline: 15 November 2026 (fellowship preference).** The online portal does not yet offer this application; contact is through Chapman Graduate Admission.
 ## **1. Statement of Intent**
 *Limit: 1 to 2 pages, double-spaced, 12pt (about 400 to 550 words)*
 *Question: Express your reasons for wanting to join the program. What are your personal and career goals, and how will this particular degree from Chapman University help you reach those goals?*
 My family has no connection to film, so I started with what I had: a camera and the habits of a commerce student. At Suncity School in Gurugram I studied economics, business studies and accountancy, and outside school I learned studio photography under Nitin Rai at the Raghu Rai Center for Photography. With friends I made The Classroom, a five-part web series we produced ourselves and put on YouTube. I co-directed, shot and edited it, and because nobody else was going to, I also organised it, finding places to shoot, fitting the shoot days around our exams and keeping classmates involved.
-At Whistling Woods International in Mumbai I earned a B.Sc. in Filmmaking, Cinematography and Direction, and worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. On those sets I kept running into problems that had started before the shoot, in a schedule or a budget. \[One example from a set.\] I wanted to work on the schedule and the budget myself.
-At Matchbox Studios I was a camera assistant on Khauf, under Pankaj Kumar, and since October 2025 I have held the same job on a project under Boney Kapoor \[title\]. On a Finolex commercial for Early Man Productions I was part of the direction team and built the PPM deck, the production sheets and the cast references. On a Sleepyhead Mattresses shoot for Growth Jockey I did the planning: equipment, script, the offer the film would make and the audience it was for.
-I have not had a job in a production office yet, and I have not developed a project with a writer, raised the money to make it or worked out how it would be distributed. Chapman's MFA teaches that work in sequence: story development, financing, entertainment law, and marketing and distribution. The thesis asks producers to produce advanced films with the production students while developing an industry-ready project. I want that practice, because the studio I plan to build will have to make one project while it develops the next. Producing in Marion Knott Studios, and the required internship, would let me do this work in conditions close to the industry's. I would bring set experience and a cinematographer's eye to the films we produce there, and a commerce background to the financing.
+My B.Sc. in Filmmaking, Cinematography and Direction is from Whistling Woods International in Mumbai. During those years I was an assistant cinematographer on five short films, and lead or assistant cinematographer on independent films. On those sets I kept running into problems that had started before the shoot, in a schedule or a budget, and that nobody holding a camera could fix. I wanted to work on the schedule and the budget myself.
+I was a camera assistant on Khauf at Matchbox Studios, under Pankaj Kumar, and since October 2025 I have held the same role on a project produced by Boney Kapoor. On a Finolex commercial for Early Man Productions I was on the direction team. I prepared the PPM deck, the production sheets and the cast references, and I ran the costume trials. My work for Growth Jockey was planning a Sleepyhead Mattresses shoot, from the equipment and the script to the offer the film would make and the audience it was for.
+I have not had a job in a production office yet, and I have not developed a project with a writer, raised the money to make it or worked out how it would be distributed. Chapman's MFA teaches that work in sequence: story development, financing, entertainment law, and marketing and distribution. The thesis asks producers to make advanced films with Dodge's film production students while developing an industry-ready project. I want that practice, because the studio I plan to build will have to make one project while it develops the next. Producing in Marion Knott Studios, and the required internship, would let me do this work in conditions close to the industry's.
 My personal goal is to be a producer people trust with their money and their work. As media manager for Mitti to Matka, a COVID initiative for Gurugram's potters, I learned what that involves: being careful with money and honest about what a small team can deliver. My career goal is a creative studio in India of 8 to 30 people. It would develop its own slate, and give paid roles and training to talented people who have no contacts in the industry. After the degree I plan to spend a few years in development and production, and then start it.
-*483 words (excluding \[bracket\] notes)*
+*479 words*
 ## **2. Creative portfolio list**
 *Limit: 1 to 2 pages*
 *Question: A list of activities that demonstrate your potential in production, focusing on creative accomplishments.*
 Karan Chaudhary: Creative Portfolio
 INDUSTRY WORK
-• \[Project title\], under producer Boney Kapoor, \[company\]. October 2025 to present. Camera assistant. \[Scope of the project.\]
-• Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. \[Job title.\] Planned the shoot: equipment, script, offer and audience.
+• Bayview Projects (producer Boney Kapoor). October 2025 to present. Camera assistant.
+• Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. Planned the shoot: equipment, script, and the offer and audience the film was aimed at.
 • Finolex commercial, Early Man Productions. 2024. Direction team: production sheets, cast references, PPM deck, costume trials.
-• Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar: \[two or three duties\].
+• Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar.
 CINEMATOGRAPHY
-• Five short films, 2021 to 2024. Assistant cinematographer. \[Titles, years, loglines.\]
-• Independent films, 2021 to 2024. Lead or assistant cinematographer. \[Titles, years, loglines.\]
+• Five short films, 2021 to 2024. Assistant cinematographer.
+• Independent films, 2021 to 2024. Lead or assistant cinematographer.
+• Cameras: RED, Sony Venice, Sony FX and Alpha. Post: DaVinci Resolve, Premiere Pro, Final Cut Pro; DIT and colour.
 ORIGINAL WORK
-• The Classroom, five-part web series, YouTube, 2020 to 2022. Self-produced with classmates. Co-director, cinematographer, editor and organiser: found places to shoot, scheduled shoots around exams, kept classmates involved. \[Logline and link.\]
+• The Classroom, five-part web series, YouTube. Made with friends while at Suncity School. Co-director, cinematographer, editor and organiser: found places to shoot, scheduled shoots around exams, kept classmates involved. Also played the sports teacher on screen.
 MEDIA AND COMMUNITY
-• Mitti to Matka, Gurugram, 2020 to 2021. Media manager: graphics, stills, videos, website and administration for an initiative supporting local potters during COVID.
-• Suncity MUN, International Press Photographer, 2020 to 2022.
+• Mitti to Matka, Gurugram, 2020 to 2021. Media manager: graphics, stills, video, website and administration for an initiative supporting local potters during COVID.
+• Suncity MUN. International press photographer.
 TRAINING
-• B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by \[RGNIYD or TISS\]), 2022 to 2025.
-• Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, \[2018 or 2019\] to 2020.
+• B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS). Completed 2025.
+• Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, 2019 to 2020.
 ACHIEVEMENTS
-• Football: 1st place, Gurugram city (2019); 4th place, Haryana state (2020).
-*197 words (excluding \[bracket\] notes)*
+• 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram.
+*236 words*
 ## **3. Project description essay**
 *Limit: 2 pages, single-spaced, 12pt Times New Roman (about 900 words)*
 *Question: Describe a large project or event that you planned where you were required to work within a team. Explain some of the challenges you faced, how you handled them, and how the project ultimately turned out.*
-From 2020 to 2022 a group of classmates and I made The Classroom, a five-episode web series for YouTube that we produced ourselves. Besides co-directing, shooting and editing it, I did the organising.
-**The plan.** \[What the series was about.\] Before anything could be shot, we needed places to film and shoot dates that did not clash with exams, and finding both was my part. \[How I made the plan.\]
-**The team.** \[Who was in the team.\] The series took two years, and keeping classmates involved for all of it was my job as well. \[How I kept them involved.\]
-**The challenges.** \[A planning problem and my response.\] \[A shoot problem and my response.\]
-**What I would do differently.** \[One thing I would change.\]
-**How it turned out.** We completed the five episodes and put them on YouTube. \[How people responded.\]
-In 2024 I planned the Sleepyhead Mattresses shoot for Growth Jockey, but I have not yet built a budget or a schedule for a professional production. At Chapman I want to learn that, and how a project is developed and financed before anyone plans its shoot.
-*147 words (excluding \[bracket\] notes)*
+The largest project I have planned is The Classroom, a five-part web series that a group of friends and I made while we were at Suncity School in Gurugram, and released on YouTube. We produced it ourselves. Besides co-directing, shooting and editing the series, I took on the planning.
+Every episode needed somewhere to shoot, and finding those places was my part. We were all in school, so exams came first, and I set the shoot days in the gaps between them. A shoot could only go ahead when a place, the cast and a free day lined up, and lining them up was my job.
+The team was our classmates, including the actors and a scriptwriter. They were giving their own time to the series, and five episodes is a long commitment for students. Alongside the scheduling, I kept them involved from one episode to the next, so that the series got finished.
+With shoots fitted between exams, every shoot day mattered. On one shoot day, an actor pulled out at the last minute. We did not want to lose the day. Instead of stopping, we made up a new character there and then, a funny sports teacher, and wrote him in where the missing role had been. I played him myself.
+That left two more problems. The dialogue had been written for the character who was no longer there, and our scriptwriter was at home, not with us. I worked with the scriptwriter remotely to rewrite the lines for a sports teacher. The new character also needed a costume, and I found a standard tracksuit that cost us nothing. With the sports teacher written in, the episode's story still held together.
+We completed all five episodes and released them on YouTube. It was the first project I organised from start to finish.
+Since then I have planned a commercial shoot, the Sleepyhead Mattresses campaign for Growth Jockey in April 2024. What I have not yet done is build the budget and the schedule for a professional production. At Chapman I want to learn that, and how a project is developed and financed before anyone plans its shoot.
+*359 words*
 ## **4. Transformational moment video essay**
 *Limit: 2 to 5 minutes*
 *Question: A short video essay describing a transformational moment in your life that fundamentally changed you as a person. (Give a narration script and a visual plan.)*
-Narration script (about 2.5 minutes with pauses and visuals):
-\[Open on my hands, or stills I shot for Mitti to Matka.\]
-"In 2020 I was still in school, and I thought of myself as a photographer. That year my photographs had to do a job for other people."
-\[My photos of the workshops, the pots, the website.\]
-"When COVID closed Gurugram's markets, local potters had pots and no one to buy them. I joined Mitti to Matka, an initiative set up to help them. We bought their pots at fair prices, auctioned them, helped with designs, and took food and sanitary supplies to their families. I was the media manager, so I made the photographs, the videos, the graphics and the website."
-\[Close-up: one pot, one photograph.\]
-"The moment that changed me was \[one moment from that year\]. Buyers were choosing pots from my photographs, so how well I shot a pot could change a family's income that week."
-\[Present day: me on set with the camera team.\]
-"It changed how I handle money, too. Anything we spent badly was money a family didn't get, so I kept track of what we spent, down to the rupee. The families were relying on us, and we couldn't fix everything the lockdown had done to their work. I kept doing the part we could, and I didn't promise anyone more than that."
-\[Montage: Whistling Woods, sets, call sheets.\]
-"Since then I've studied cinematography and direction and worked on sets in Mumbai, most recently as a camera assistant. Now I want to produce, and as a producer I'll be looking after other people's money and time every day. Mitti to Matka is where I first had to do that."
-\[Closing image: back to the workshop, or me at work today.\]
-"Later I plan to start a studio in India, and I want to run it the way we ran Mitti to Matka."
-Visual plan: \[my Mitti to Matka photographs and footage\], new inserts of hands, clay and the city, clean narration and minimal music.
-*279 words (excluding \[bracket\] notes)*
+Narration script (about 1:45 of speech; hold each visual for a few seconds between lines so the finished video runs at least 2 minutes):
+Visual: my hands, then stills I shot for Mitti to Matka.
+"In 2020 I was still in school, and I had just finished a studio photography course at the Raghu Rai Center for Photography. That year my photographs had to do a job for other people."
+Visual: my photographs of the pots and the website.
+"During COVID, the sales of Gurugram's local potters collapsed. I joined Mitti to Matka, an initiative set up to help them. We bought their pots at fair prices, auctioned them, helped with designs, and took food and sanitary supplies to their families. I was the media manager, so I made the photographs, the videos, the graphics and the website, and handled the administration."
+Visual: close-up of one pot, then one photograph of it.
+"What changed me was realising that buyers were choosing pots from my photographs. How well I shot a pot could change what a family earned that week."
+Visual: the graphics and videos we made that year.
+"It changed how I think about money, too. Anything we spent badly was money a family didn't get. The families were relying on us, and we couldn't undo what the lockdown had done to their work. We kept doing the part we could."
+Visual: Whistling Woods, then the sets I've worked on.
+"Since then I've studied cinematography and direction and worked on film sets, most recently as a camera assistant. Now I want to produce, and a producer looks after other people's money and time every day. Mitti to Matka is where I first had to do that."
+Visual: back to the potters' work, then me at work today.
+"When I start my own studio in India, I want to run it the way we ran Mitti to Matka."
+Visual plan: my photographs and videos from Mitti to Matka, new inserts of hands, clay and the city, footage from sets, clean narration and minimal music.
+*343 words*
+
 # **7. Chapman University, Dodge College and Argyros College, joint MBA/MFA in Film and Television Producing**
 **Priority deadline: 15 November 2026.** Needs the GMAT or GRE.
 ## **1. Statement of Intent (MBA/MFA)**
 *Limit: 1 to 2 pages, double-spaced, 12pt (about 400 to 550 words)*
 *Question: Express your reasons for wanting to join the joint MBA/MFA. Cover personal and career goals and how this particular dual degree from Chapman will help you achieve them.*
-Before I picked up a cinema camera, I studied economics, business studies and accountancy at Suncity School in Gurugram. For years those subjects felt separate from the photography I was learning outside school. On film sets I found I needed both. Now, when I hear an idea for a film, I also ask what it will cost and who is paying for it.
-I trained as a cinematographer at Whistling Woods International in Mumbai. I was assistant cinematographer on five short films and lead or assistant cinematographer on independent films. Since October 2025 I have been a camera assistant on a project under Boney Kapoor \[title\], as I was earlier on Khauf at Matchbox Studios. Behind the camera I saw that many problems on set began as business problems, such as a location that was never confirmed. \[One example from a set.\] Away from the camera, I have worked on the planning that comes before a shoot. I was on the direction team for a Finolex commercial, where I prepared the PPM deck along with the production sheets and cast references. For Growth Jockey I planned a shoot for Sleepyhead Mattresses, from the equipment and script to the offer the film was selling and who it was aimed at.
-My goal is a creative studio in India, with a team of 8 to 30 people, that develops its own slate of films and series. I want the studio to take on people at the start of their careers, pay them fairly and train them while they work. Running it will take financing, a sound company structure, contracts, a slate strategy and distribution relationships, and enough cash in hand to get through the gaps between projects. It will also take producers who can work with writers and directors as creative partners. I have worked on sets, but not in a production department, and I have not been trained to run a company. I want to learn the business and the creative work together rather than one after the other.
-That is why I am applying to Chapman's joint MBA/MFA. In the Argyros MBA I would study strategy and financial management, so that I can run the company as well as choose its projects. In the Dodge MFA I would learn story development, financing, entertainment law and distribution, and produce films with directors and writers in Marion Knott Studios. The thesis combines the two in one project, covering rights, pitching, budgeting, packaging, marketing and distribution.
-My personal goal is to become a producer who reads a budget as closely as a script. Once I graduate, I plan to work in development and production for a few years and then build the studio.
-*445 words (excluding \[bracket\] notes)*
+Before I picked up a cinema camera, my subjects at Suncity School in Gurugram were economics, business studies and accountancy. At the time those subjects seemed to have little to do with the photography I was learning outside school. On film sets I found I needed both.
+I trained as a cinematographer at Whistling Woods International in Mumbai, and in 2025 completed the B.Sc. in Filmmaking, Cinematography and Direction there, a degree awarded by the Tata Institute of Social Sciences. As a student I assisted the cinematographer on five short films and shot independent films as lead or assistant cinematographer. I have also worked as a camera assistant, first on Khauf at Matchbox Studios, and since October 2025 with Bayview Projects, producer Boney Kapoor's company.
+In the camera department I could see how much of each shoot day had been settled before we arrived, in the schedule, the budget, the locations and the cast. When one of those decisions was weak, its cost landed on the set, and the camera team could only work around it.
+I have done some of that planning myself, though not as a producer. I joined the direction team of a Finolex commercial for Early Man Productions, where I prepared the production sheets, cast references and PPM deck and ran the costume trials. For Growth Jockey I planned a Sleepyhead Mattresses shoot. Besides the equipment and the script, that meant working out what the film was offering and which customers it had to reach.
+I plan to build a creative studio in India of between 8 and 30 people that develops its own films and series and pays its people fairly. A company like that needs financing, contracts, a sound structure, distribution partners and enough cash to last from one project to the next. It also needs producers who can work with writers and directors as creative partners. I have no training in running a company, and I have not yet worked in a production department. I would rather learn the business and the creative work side by side than one after the other.
+That is why I am applying to Chapman's joint MBA/MFA. At Argyros I would study strategy and financial management, so that I can run the company as well as choose its projects. At Dodge I would take the producing courses, from entertainment law to financing, and produce films with student directors and writers. The joint thesis puts both into one project: rights, pitching, budgeting, packaging, marketing and distribution.
+My personal goal is to become a producer who reads a budget as closely as a script. I plan to work in development and production for a few years after Chapman, and then start the studio.
+*453 words*
 ## **2. Argyros Statement of Intent**
 *Limit: 250 words*
 *Question: Discuss how Chapman University and the Argyros College will help you achieve your career and personal goals.*
-I plan to start a creative studio in India, with 8 to 30 people, that develops and produces its own films and series. I have trained for the creative side, with a B.Sc. in Filmmaking, Cinematography and Direction from Whistling Woods International, and I am now a camera assistant, working on a project under producer Boney Kapoor. I have not yet worked on the producing side, and I have no training in how to build a company that lasts.
-At school I studied economics, business studies and accountancy. For Mitti to Matka, which supported Gurugram's potters during COVID, I ran the administration as well as the media, and I kept our spending down because the money was meant for the potters' families. The Argyros MBA would give me formal training in strategy, financial management and leadership, so I can structure a slate, manage cash across long projects and build a team. Taking it alongside the Dodge MFA means the business and creative training would happen at the same time, and come together in the thesis. Personally, I want the people who put money into my projects, and the people who work on them, to be able to rely on me. The MBA is where I would train for that.
-*209 words (excluding \[bracket\] notes)*
+The studio I plan to start in India will need someone to run its business side, and I want that to be me. My creative training is in place: a filmmaking degree from Whistling Woods International, awarded by TISS, and my current job as a camera assistant for Bayview Projects. My business training stopped at school, where I took economics, business studies and accountancy. I have not run a company.
+The nearest I have come is Mitti to Matka, which supported Gurugram's potters during COVID. Alongside the graphics, stills, video and website, I handled its administration. The pots were the families' income, and the work made me careful with money.
+Argyros would give me formal training in strategy, financial management and leadership, so that I can structure a slate, manage cash across long projects and build a team. Studying it alongside the Dodge MFA means the two kinds of training happen at the same time and meet in the thesis. Personally, I want to read my studio's accounts and make its business decisions myself, and the MBA is where I would learn to do that.
+*185 words*
 ## **3. Project description essay**
 *Limit: *
 *Question: Describe a large project or event that you planned where you were required to work within a team. Explain some of the challenges you faced, how you handled them, and how the project ultimately turned out.*
-Same essay as Chapman MFA, question 3 (Project description essay), since the prompt is the same.
-*16 words (excluding \[bracket\] notes)*
+The prompt is the same as question 3 of the MFA application above, so the same essay is used: the project description essay about The Classroom.
+*26 words*
 ## **4. Transformational moment video essay**
 *Limit: *
 *Question: A short video essay describing a transformational moment in your life that fundamentally changed you as a person. (Give a narration script and a visual plan.)*
-Same video essay as Chapman MFA, question 4 (Transformational moment video essay), since the prompt is the same.
-*18 words (excluding \[bracket\] notes)*
+The prompt is the same as question 4 of the MFA application above, so the same video essay is used, with its narration script and visual plan.
+*27 words*
+
 # **8. Loyola Marymount University (LMU), School of Film and Television, MFA in Film and Television Production (Creative Producing)**
 **Deadline: 15 November 2026.** LMU lets you apply to only one graduate programme per year, so choose this MFA or MELM, not both.
 ## **1. Personal Statement**
 *Limit: fewer than 1,200 words (one essay)*
 *Question: Tell us your story. How have your life experiences, choices, and values shaped you? Is there a unique challenge in your life that you overcame? What are the unique stories you want to tell as a filmmaker? Tell us about artists (filmmakers or otherwise) and creative influences that have inspired you. Why do you want to attend a film program, and why specifically the Film and Television Production program at LMU? What specialization (directing, producing, cinematography, editing, or documentary) are you most interested in, and why?*
-**My story.** I grew up in Gurugram, and nobody in my family works in film or photography. \[How my family saw my choice.\] At Suncity School I studied commerce: economics, business studies and accountancy. My first camera training happened outside the classroom, in a studio fashion photography course under Nitin Rai at the Raghu Rai Center for Photography. I liked both: the balance sheets in class and the lighting in the studio.
-With a group of friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it. I was also producing it, though I would not have called it that: I found the places we shot in, fitted the shoots around our exams and kept classmates involved for two years. We finished all five episodes, and people watched them.
-**A challenge I overcame.** During COVID, while I was still in school, Gurugram's local potters lost their markets. I joined Mitti to Matka, an initiative set up to help them. We bought and auctioned their pots at fair prices, worked with them on design improvements, and supplied food and sanitary supplies to their families. I was the media manager: I made the photographs, videos and graphics, ran the website and handled the administration. \[One moment from that year.\]
-We were young volunteers with little money, working through a lockdown that slowed everything down. That money was meant for the families, so I was careful with every expense. There was also a limit to what we could do. We could sell pots and deliver supplies, but the lockdown had cost the potters far more than we could make up. I accepted that and kept at the part we could do.
-**The stories I want to tell.** Most of them come from places I know: potters' workshops in Gurugram and film sets in Mumbai. Seconds, the short film I outline in this application, is one. On the day a potters' workshop is to be bulldozed for a road, a sixteen-year-old who has only ever kept its accounts and sold its pots fires one last kiln to prove something to her grandfather. I also want to tell a story about a crew trying to save a shoot day that is going wrong, which I have watched happen from behind the camera. I rarely see people like these on screen. I want to tell their stories with humour and without pity, as grounded drama set in India.
-**Influences.** Raghu Rai's photographs of India, which I came to know at the centre that carries his name, showed me that one frame can hold a whole street. The Lunchbox showed me what good producing can do for a quiet story. It is a Mumbai film about a lunch delivered to the wrong office, and it was built as an international co-production and released around the world. One of its producers, Guneet Monga, came into Indian cinema without a film family and built a company that takes Indian stories to audiences abroad. Hers is the career I study most closely.
-**Why a film programme, and why LMU.** At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. Most of my industry work has been in the camera department too. I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar, and since October 2025 I have done the same job on \[title\], a project under Boney Kapoor. On a Finolex commercial for Early Man Productions, working on the direction team, I prepared the production sheets, the cast references and the PPM deck. For Growth Jockey I planned a Sleepyhead Mattresses shoot: the equipment, the script, the offer the film would make and the audience it was for.
+I grew up in Gurugram, and nobody in my family works in film or photography. At Suncity School I studied commerce: economics, business studies and accountancy. My first camera training happened outside the classroom, in a studio fashion photography course under Nitin Rai at the Raghu Rai Center for Photography. I liked both: the balance sheets in class and the lighting in the studio.
+With a group of friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it. I was also producing it, though I would not have called it that: I found the places we shot in, fitted the shoots around our exams and kept classmates involved until all five episodes were done.
+In 2020, when I was still in school, the COVID lockdown cost Gurugram's local potters their markets. I joined Mitti to Matka, an initiative set up to help them. We bought and auctioned their pots at fair prices, worked with them on design improvements, and supplied food and sanitary supplies to their families. I was the media manager: I made the photographs, videos and graphics, ran the website and handled the administration.
+We were young volunteers with little money of our own, working through a lockdown that slowed everything down. The money we raised was meant for the families, so I was careful with every expense. There was also a limit to what we could do. We could sell pots and deliver supplies, but the lockdown had cost the potters far more than we could make up. I accepted that, kept at the part we could do, and stayed with it until 2021.
+The short film I outline in this application, ROLL CALL, comes from the same interest. It is set in a Rajasthan village in 1951, on the day the women behind a purdah screen are meant to give their own names for India's first electoral roll, and a drill master has until sunset to make it happen. I am drawn to moments when something as large as an election comes down to a few people in one place on one day. I want to tell stories like that from India, past and present, with humour and without pity. I rarely see the people in them on screen.
+Raghu Rai's photographs of India, which I came to know at the centre that carries his name, showed me that one frame can hold a whole street. The Lunchbox showed me what good producing can do for a quiet story. It is a Mumbai film about a lunch delivered to the wrong office, and it was built as an international co-production and released around the world. One of its producers, Guneet Monga, came into Indian cinema without a film family and built a company that takes Indian stories to audiences abroad. Hers is a career I study.
+At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. Most of my industry work has been in the camera department too. I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar, and since October 2025 I have done the same job on a project under producer Boney Kapoor. On a Finolex commercial for Early Man Productions, working on the direction team, I prepared the production sheets, the cast references and the PPM deck, and ran the costume trials. For Growth Jockey I planned a Sleepyhead Mattresses shoot: the equipment, the script, the offer the film would make and the audience it was for.
 None of these jobs was in a production department. I have not yet worked on a professional project while it was being developed and financed, or seen one through packaging and release. That is what I want a film programme for: to learn development, financing, budgeting, scheduling and distribution while making films with directors, writers and cinematographers I hope to keep working with after the degree.
-At LMU the programme starts with a common core in which everyone learns every role, and only then do producers specialise, which suits me, because I am coming to producing from the camera. In Creative Producing I would work with both directing and screenwriting students, learn to develop, sell and monetise digital content, and finish with a thesis that combines produced work with a series bible, pitch materials and a business and marketing strategy. I will need to put that kind of package together for every project I take on as a producer. The required internship and professional mentor would connect the training to the industry in Los Angeles. I also like that LMU asks filmmakers to think about the people their work affects. I first had to do that at Mitti to Matka, where my photographs helped decide what a family earned.
-**My specialization.** I want to specialise in producing. My training is in cinematography and direction, and I value both, but on most sets I have worked on, the important decisions were made before the camera rolled. A producer decides which stories get made, who makes them and how the money is spent, and I want to make those decisions well. My camera training will help: I know what a scene takes to shoot, and I know how to talk to the people behind the camera. After the degree I plan to spend a few years in development and production, then build a creative studio in India of 8 to 30 people that develops its own slate. I want it to hire people for their talent rather than their connections, pay them fairly and train them on the job.
-*982 words (excluding \[bracket\] notes)*
+At LMU everyone first takes a common core and learns every role, and only then do producers specialise. That suits me, because I am coming to producing from the camera. In Creative Producing I would work with both directing and screenwriting students, learn to develop, sell and monetise digital content, and finish with a thesis that combines produced work with a series bible, pitch materials and a business and marketing strategy. I will need to put that kind of package together for every project I take on as a producer. The required internship and professional mentor would connect the training to the industry in Los Angeles. I also like that LMU asks filmmakers to think about the people their work affects. I first had to do that at Mitti to Matka, where my photographs helped decide what a family earned.
+I want to specialise in producing. My training is in cinematography and direction, and I value both, but on most sets I have worked on, the important decisions were made before the camera rolled. A producer decides which stories get made, who makes them and how the money is spent, and I want to make those decisions well. My camera training will help: I know what a scene takes to shoot, and I know how to talk to the people behind the camera. After the degree I plan to spend a few years in development and production, then build a creative studio in India of 8 to 30 people that develops its own slate. I want it to pay people fairly and train them on the job.
+*946 words*
 ## **2. Short-format film outline**
 *Limit: half to one page, treatment form (not script)*
 *Question: An outline of a short-format film project you would like to create. It should give a sense of the stories you want to tell and the genres you want to work in.*
-**Title:** Seconds
-**Genre:** Drama, 12 to 15 minutes
-**Logline:** On the last day before a Gurugram potters' workshop is bulldozed for a road, a teenage girl who has always been told she has no talent at the wheel fires one final kiln, to prove something to her grandfather before the machines arrive.
-**Outline:** Dawn. The workshop is almost empty; families have already moved their wheels and clay to a rented room across the city. Only Nanaji, seventy, refuses to leave until the bulldozers come at noon. His granddaughter Pooja, sixteen, is sent to bring him away.
-Pooja has always been the one who keeps the accounts and sells the pots, never the one who makes them. Nanaji calls her pieces "seconds", the flawed pots sold cheap at the roadside. Today she finds the last kiln still warm, and a stack of her own failed pots behind it. She decides to fire them.
-The film is a race against noon. She has to find fuel, load the kiln, and keep the fire alive while the demolition crew arrives early and the site supervisor, a young man not much older than her, keeps telling her to leave. Nanaji watches without helping. The supervisor, who grew up in a village of potters himself, quietly delays his crew.
-At noon the kiln is opened. Most of her pots have cracked. One has not. Nanaji turns it in his hands for a long time and says nothing. Then he carries it to the truck himself.
-**Tone and look:** Handheld, natural light, the dust and orange of a brick kiln against the grey of new construction. Very little dialogue; most of the film is Pooja at the kiln as noon gets closer. It is the kind of story I want to make: small, specific to India, about inheritance and who gets to claim it.
-*308 words (excluding \[bracket\] notes)*
+**Title:** ROLL CALL
+**Genre:** Comedy-drama, 12 minutes, in Hindi and Rajasthani
+**Logline:** Rajasthan, 1951: a bellowing school drill master has until sunset to get twenty women behind a purdah screen to say their own names for India's first electoral roll, but the eldest has forgotten hers, so the women begin choosing new ones.
+**Outline:** The Saraf men trade in Calcutta; their women run the painted Shekhawati haveli. Bhanwar Lal, drill master, whistle and all, must enrol twenty by sunset on the last day. His register lists only "wife of" and "mother of", every line struck through in red. He sits with his back to a carved stone jaali.
+His roll call gets laughter. Then Badi Bahu sets terms: his wife's name first. He has only ever called her Munna's mother. He bellows "Kesar!" at the wall. Nobody laughs. Badi Bahu gives hers, Champa, and fourteen more follow. Dadi-sa, eighty, has forgotten hers, so the youngest bride goes first: Bijli, lightning. He writes it and pencils his own rule in the margin: a name is what she answers to. A widow chooses Azadi, freedom. The last two choose Calcutta and Bhanwari (after him); Dhapu, whose name means Enough, trades hers for Maharani.
+At sunset, as the tehsil peon shouts from the gate, he calls the roll without the whistle. Nineteen voices answer "Haazir" through the stone. On line twenty he waits. Far off, a woman calls a child in, and Dadi-sa remembers the name her mother called at dusk: Gaura. Faces bare on the roof, the women watch the peon's lantern carry their names away. Closing card: nearly 2.8 million women were struck off India's first electoral rolls because they would not give their own names.
+**Tone and look:** One room, one afternoon. The clock is the jaali's star-shaped light, climbing the painted wall past a motorcar into a train of Englishmen. The camera sees the women; he never does. This is the kind of story I want to make: a comedy about who gets counted.
+*335 words*
 ## **3. The Unforgettable Moment**
 *Limit: one single-spaced page (about 500 words)*
 *Question: Describe a truly unforgettable moment you either experienced or witnessed.*
-The workshop was \[how the place looked\]. It was \[month\] 2020, and the city outside was quiet with the lockdown. I had come to photograph pots for our website. \[How long I had been involved.\] I still thought my job was to make the work look good.
-\[The potter I was photographing.\] \[What the potter said or did.\]
-\[How I framed the shot.\] While I was framing that shot, I realised that buyers would see this family's pots through my photographs. A poor picture meant a lower price. A good one could mean the family ate better that week.
-\[What happened next.\]
-I had picked up a camera because I liked how images looked. After that day I also thought about what a picture had to do for the people in it. I became more careful about what I promised, too. The families had started to depend on a group of young volunteers, and I did not want to tell them anything we could not deliver.
-That day also showed me the limit of what we could do. \[A detail that showed the limit.\] It is one of the reasons I want to produce: to plan work carefully enough that the people who depend on it are not let down.
-*175 words (excluding \[bracket\] notes)*
+The moment I come back to most happened on a shoot day for The Classroom, our school web series. I organised it, so the shoot days were mine to arrange in the gaps between our exams.
+On one of those days an actor dropped out at the last second. We did not want to give the day up, so we changed the episode instead. There and then we came up with a new character to fill the missing role: a funny sports teacher. Someone had to play him, and I did.
+The scene had not been written for him. Every line belonged to the character we had lost, and our scriptwriter was at home, not with us. I worked with the scriptwriter remotely to rewrite the lines for the new role. A sports teacher also has to look like one, and I got a standard tracksuit that cost us nothing.
+We kept the shoot day, and the episode's story still held together. Changing the plan, rewriting the scene and costuming the new role for nothing was producer's work, and it is what I want to train for at LMU.
+*189 words*
 ## **4. Two-minute video**
 *Limit: 2 minutes, unscripted*
 *Question: Tell us who you are and what inspires you. Do not script it and do not perform. (Give talking points only.)*
 • Who I am: Karan, from Gurugram. Studied commerce, trained as a cinematographer, now a camera assistant who wants to produce.
-• What inspires me: light and people. It started in Nitin Rai's studio photography course.
+• What inspires me: light and people. Studio photography under Nitin Rai at the Raghu Rai Center for Photography.
 • Mitti to Matka: photographing potters' work during COVID, for families who depended on the sales.
-• Crews: watching a crew get a bad shoot day back on track. \[One moment from a set.\]
+• From the camera team: on set I see problems that began earlier, in the schedule or the budget. I want to work on those decisions.
+• Stories: India, with humour. ROLL CALL, my outline: Rajasthan, 1951, women behind a purdah screen giving their own names for the first electoral roll.
 • Where I'm going: work in development and production first, then my own studio in India with a team of 8 to 30.
-*88 words (excluding \[bracket\] notes)*
+*130 words*
 ## **5. Portfolio list**
 *Limit: not stated*
 *Question: Title and logline, year of completion, and your creative role for your creative material; note awards, publications, jobs and exhibitions; name the institution for class work.*
-Same list as Chapman MFA, question 2 (Creative portfolio list), with the year, a one-line logline and my creative role for each title, and Whistling Woods International named for class films.
-*31 words (excluding \[bracket\] notes)*
+Karan Chaudhary: Portfolio List
+ORIGINAL WORK
+• The Classroom. Five-part web series, released on YouTube. Made with friends while at Suncity School, Gurugram. Role: co-director, cinematographer, editor and organiser (found places to shoot, scheduled shoots around exams, kept classmates involved); also played the sports teacher on screen.
+• ROLL CALL. Short film outline, written for this application as my short-format film outline, 2026. Rajasthan, 1951: a school drill master has one afternoon to enrol twenty women, hidden behind a purdah screen, under their own names on India's first electoral roll. Role: writer.
+CINEMATOGRAPHY
+• Five short films, 2021 to 2024. Assistant cinematographer.
+• Independent films, 2021 to 2024. Lead or assistant cinematographer.
+JOBS
+• Bayview Projects (producer Boney Kapoor), October 2025 to present. Camera assistant.
+• Growth Jockey, Gurugram, April 2024. Planned the Sleepyhead Mattresses shoot: equipment, script, and the offer and audience the film was aimed at.
+• Early Man Productions, 2024. Direction team, Finolex commercial: production sheets, cast references, PPM deck, costume trials.
+• Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar.
+PHOTOGRAPHY AND MEDIA
+• Mitti to Matka, Gurugram, 2020 to 2021. Media manager: graphics, stills, video, website and administration for an initiative supporting local potters during COVID.
+• Suncity MUN. International press photographer.
+AWARDS
+• 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram.
+TRAINING
+• B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, Mumbai (degree awarded by the Tata Institute of Social Sciences, TISS). Completed 2025.
+• Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, 2019 to 2020.
+*264 words*
+
 # **9. Loyola Marymount University (LMU), College of Business Administration, Master in Entertainment Leadership and Management (MELM)**
 **Early admission: 15 November 2026. Round 1: 10 January 2027.** An alternative to the LMU MFA; LMU accepts one graduate application per year.
 ## **1. Personal Statement**
 *Limit: 2 pages maximum, 12pt, double-spaced (about 550 words)*
 *Question: Why you are pursuing a Master in Entertainment Leadership and Management, the reasons you are applying to LMU, and the unique strengths you will bring. Also describe how you have approached diversity, equity and inclusion in your professional and/or personal life.*
-I am a filmmaker who plans to run a company. On every set I have been part of, what reached the screen depended on business decisions made before the shoot, and I am applying to the Master in Entertainment Leadership and Management to learn how to make them.
-I trained in cinematography and direction at Whistling Woods International in Mumbai. Matchbox Studios took me on as a camera assistant for Khauf, and that is still the work I do: since October 2025 I have been on the camera team of a project under producer Boney Kapoor \[title\]. On a Finolex commercial I worked in the direction team, preparing the PPM deck, production sheets and cast references. I planned the equipment and the script for a Sleepyhead Mattresses shoot at Growth Jockey, along with the offer and the audience the film was aimed at. At school I organised The Classroom, a five-part web series made with friends: I found places to shoot, planned shoot days that did not clash with exams and kept our classmates involved. I have not yet worked in a production office or decided how a project is funded and budgeted, and I have not managed a company's finances.
-My plan is to work in development and production for a few years and then start a studio in India: a creative company of 8 to 30 people with its own slate of films and series. Running it will take leadership, finance, strategy and management skills that my film training did not cover. MELM is run jointly by the College of Business Administration and the School of Film and Television, so the business teaching stays close to the creative work. Entertainment accounting and finance, the producing master class and the new-venture courses cover what I am missing. The Entrepreneurial Producer capstone would let me pitch and launch a venture of my own before I graduate. I would bring set experience, a cinematographer's sense of what things cost on screen, and the economics, business studies and accountancy I studied at Suncity School.
-My approach to diversity, equity and inclusion comes from how I started. I had no relatives in the industry, and on my early jobs I was usually the newest person on set. That made me pay attention to how people get their first chance on a set. \[A time I included a newcomer.\] During COVID I was media manager for Mitti to Matka, which supported Gurugram's local potters after they lost their markets. We paid the potters fair prices, auctioned their pots, worked with them on their designs and delivered food and sanitary supplies to the families. That work taught me to listen to the people a project is meant to serve, and to be clear with them about what we could and could not do.
-I want to lead the same way: keep the numbers honest, hire on ability, and make sure the newest person on a team is let in and taught the work. MELM would give me the management training to do that across a whole company.
-*506 words (excluding \[bracket\] notes)*
+I am a filmmaker who plans to run a company. As a camera assistant I have seen how much of what happens on a set is settled earlier, in the budget, the schedule and the casting. I am applying to the Master in Entertainment Leadership and Management to learn how to make those decisions, and how to run the kind of company that makes them.
+I trained in cinematography and direction at Whistling Woods International, Mumbai, and completed my degree in 2025. While I was still a student, I was a camera assistant on Khauf at Matchbox Studios, and I still work as a camera assistant: since October 2025 I have been on the camera team of a project under producer Boney Kapoor. For Early Man Productions I was on the direction team of a Finolex commercial, where the pre-production meeting deck, production sheets and cast references were mine to prepare and I ran the costume trials. Planning a Sleepyhead Mattresses shoot for Growth Jockey meant thinking about what the brand was selling and who it was selling to, as well as the script and the kit. At school I organised The Classroom, a five-episode web series made with friends and put on YouTube. Organising it meant finding locations, fitting shoot days between exams and keeping classmates on board. What I have not done is work in a production office, set a budget or decide how a project is financed.
+After some years working in development and production, I plan to found a studio in India: a company of 8 to 30 people developing films and series of its own. Running it will take leadership, finance, strategy and management skills that my film training did not cover. MELM is run jointly by the College of Business Administration and the School of Film and Television, so the business teaching stays close to the creative work. Entertainment accounting and finance, the producing master class and the new-venture courses cover what I am missing. The Entrepreneurial Producer capstone would let me pitch and launch a venture of my own before I graduate. I would bring set experience, a cinematographer's sense of what things cost on screen, and a commerce background from school, accountancy included.
+My approach to diversity, equity and inclusion comes partly from how I got in: without connections, taking whatever jobs I could reach, usually as the newest person on set. That made me pay attention to how people get their first chance in the industry.
+The rest comes from Mitti to Matka, a Gurugram initiative for local potters who lost their markets during COVID. I joined it as media manager while I was still at school. We bought their work at fair prices and auctioned it, worked with them on designs and supplied food and sanitary supplies to their families. I looked after the website, the administration and the stills, videos and graphics. I also saw where our help stopped: we could sell pots and deliver supplies, but we could not undo what the lockdown had done to the potters.
+I want to run my studio the same way: honest numbers, clear terms for everyone who works on a project, hiring on ability, and time set aside to teach the newest person on the team.
+*545 words*
 ## **2. Video, prompt 1 of 2: a business problem**
 *Limit: both prompts together 2 minutes*
 *Question: Describe a business problem in the entertainment industry that you intend to solve during your career and why it is important to you. What outcomes do you intend to achieve, and how will your leadership and management skills contribute?*
 Talking points:
 • The problem: in India, getting into film and television often depends on family and personal networks. Talented people without connections struggle to get a first job, and their stories don't get made.
 • Why it matters to me: I'm one of those people. I got in by taking every job I could reach.
-• The outcome I want: my own studio, 8 to 30 people, hiring and training on talent: paid roles, responsibility early, a clear path up.
-• How leadership and management help: a fair studio has to be a sound business first. Budgets, contracts, schedules and honest communication keep it running. Mitti to Matka: I handled the administration for a volunteer group with very little money, and kept costs low.
-*125 words (excluding \[bracket\] notes)*
+• The outcome I want: a studio, 8 to 30 people, that hires on talent and trains people: paid roles, responsibility early, a clear path up.
+• How leadership and management help: a fair studio has to be a sound business first. Budgets, contracts, schedules and honest communication keep it running.
+• Where I've started: I ran the administration for Mitti to Matka while still at school, and every rupee was meant for the potters' families.
+*132 words*
 ## **3. Video, prompt 2 of 2: creative or business**
 *Limit: both prompts together 2 minutes*
 *Question: Do you identify more with the creative side of the entertainment industry or the business side? Have you created or curated content in the past? How do you see yourself incorporating creativity into your future career path?*
 Talking points:
-• Both. I trained as a cinematographer and director, and studied commerce before that. Producing uses the two together.
-• Yes, I've made content: The Classroom, a five-part web series I co-directed, shot and edited; graphics, stills and videos for Mitti to Matka; camera work on short and independent films.
-• Creativity goes into planning too. For Growth Jockey's Sleepyhead Mattresses shoot I planned the script and the kit, plus the offer and the audience. \[One example from that planning.\]
+• Both. I trained as a cinematographer and director, and studied commerce at school before that. Producing uses the two together.
+• Yes, I've made content: The Classroom, our school web series on YouTube, five episodes that I co-directed, shot, edited and organised; graphics, stills and videos for Mitti to Matka; camera work on short and independent films.
+• Creativity goes into planning too. For Growth Jockey's Sleepyhead Mattresses shoot I planned the script and the kit, and worked out what the film was offering and who it was meant to reach.
 • In my career: I want to choose which projects get made and put together the teams that make them.
-*97 words (excluding \[bracket\] notes)*
+*114 words*
+
 # **10. New York Film Academy (NYFA), Los Angeles, MFA in Producing**
 **Early action: 21 November 2026 (non-binding). International deadline: 12 February 2027.**
 ## **1. Narrative statement**
 *Limit: 3 typed pages maximum (about 800 words double-spaced, up to 1,500 single-spaced)*
 *Question: A self-reflective essay on your reasons for pursuing an MFA and why NYFA is right for you, taking into account your history, formative creative experiences, contemporary influences and inspirations, and personal artistic dreams.*
-For several years I worked behind a camera, watching decisions about the schedule and the budget shape the films I was helping to shoot. Those decisions were not mine to make. I am applying for an MFA in Producing to learn to make them myself.
-**My history.** I grew up in Gurugram in a family with no connection to film. \[One line about my family.\] I studied commerce at Suncity School: economics, business studies and accountancy. Alongside it I learned studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography and worked as the International Press Photographer for Suncity MUN. With friends who were willing to give up their weekends, I also made The Classroom, a five-part web series that we produced ourselves and released on YouTube. I co-directed, shot and edited it.
-**Formative creative experiences.** Making The Classroom showed me how much of a film is organisation. Someone had to take charge of that work, and I did: I found places to shoot, scheduled the shoots around our exams and kept classmates involved. During COVID, while I was still in school, I was media manager for Mitti to Matka, a Gurugram initiative supporting local potters whose sales had collapsed. We bought and auctioned their pots at fair prices and delivered food and sanitary supplies to their families. I made the photographs, videos and graphics, ran the website and handled the administration. My images had a job: to sell a family's pots. Every rupee we raised was for those families, so I kept our costs as low as I could.
-At Whistling Woods International in Mumbai I then completed a B.Sc. in Filmmaking, Cinematography and Direction. From 2021 to 2024 I also worked as an assistant cinematographer on five short films and shot independent films as lead or assistant cinematographer. In 2023 I was a camera assistant on Khauf, at Matchbox Studios under Pankaj Kumar. On a Finolex commercial for Early Man Productions I was on the direction team and prepared the production sheets, cast references and PPM deck. In April 2024 I planned a Sleepyhead Mattresses shoot for Growth Jockey: the equipment, the script, and the offer and audience the film was aimed at. Since October 2025 I have been a camera assistant on \[title\], a project under Boney Kapoor.
-**Why an MFA, and why NYFA.** From these jobs I know how a set works from the camera side, and I have prepared a direction team's paperwork for one shoot and planned another. I have not yet worked in a production office. I have not developed a project with a writer, budgeted and scheduled it from the script, financed it, set up its legal structure, or marketed and distributed it. I learn best by doing the work, and NYFA's hands-on approach would let me learn producing that way, with the structure of an MFA around it. In the first year I would study budgeting, entertainment law and business planning, and write a feature treatment and a series proposal. For the thesis I would develop one project with a business plan, budget, schedule and pitch, and possibly shoot a proof of concept with filmmaking students. Studying in Burbank, close to the studios, would let me pitch to people in the industry I want to work with.
-**Contemporary influences and inspirations.** The producers I follow most closely take a local story and find the partners and money to show it outside India. Guneet Monga is the clearest example for me. She produced The Lunchbox as an international co-production and later won an Academy Award for The Elephant Whisperers. All We Imagine as Light, made across India and France and recognised at Cannes, is a more recent example. These are the careers and films I study, and this is the kind of work I want to produce.
-**Personal artistic dreams.** After the MFA I plan to work in development and production for a few years, then build a creative studio in India of 8 to 30 people that develops its own slate of films and series. It would make grounded, funny stories like BACKGROUND, the treatment in my portfolio, about a Mumbai film extra and his daughter, an assistant director. It would also give people with no family or contacts in the industry a first job, with training and fair pay. I know how much one early chance can matter. From NYFA I want the producing skills I do not have yet, and the start of a network to build the studio with.
-*749 words (excluding \[bracket\] notes)*
+For several years I have worked behind a camera, watching decisions about the schedule and the budget shape the films I was helping to shoot. Those decisions were not mine to make. I am applying for an MFA in Producing to learn to make them myself.
+**My history.** I grew up in Gurugram in a family with no connection to film. I studied commerce at Suncity School: economics, business studies and accountancy. Alongside it I learned studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography and worked as the International Press Photographer for Suncity MUN. With friends who were willing to give up their weekends, I also made The Classroom, a five-part web series that we produced ourselves and released on YouTube. I co-directed, shot and edited it.
+**Formative creative experiences.** Making The Classroom showed me how much of a film is organisation. Someone had to take charge of that work, and I did: I found places to shoot, scheduled the shoots around our exams and kept classmates involved. During COVID, while I was still in school, I was media manager for Mitti to Matka, a Gurugram initiative supporting local potters whose sales had collapsed. We bought and auctioned their pots at fair prices and delivered food and sanitary supplies to their families. I made the photographs, videos and graphics, ran the website and handled the administration. My images had a job: to sell a family's pots. The work also made me careful with money, because what we raised was meant for those families.
+At Whistling Woods International in Mumbai I then completed a B.Sc. in Filmmaking, Cinematography and Direction in 2025, with the degree awarded by the Tata Institute of Social Sciences. From 2021 to 2024 I also worked as an assistant cinematographer on five short films and shot independent films as lead or assistant cinematographer. In 2023 I was a camera assistant on Khauf, at Matchbox Studios under Pankaj Kumar. In 2024, on a Finolex commercial for Early Man Productions, I was on the direction team: I prepared the production sheets, cast references and PPM deck and ran costume trials. That April I planned a Sleepyhead Mattresses shoot for Growth Jockey in Gurugram: the equipment, the script, and the offer and audience the film was aimed at. Since October 2025 I have been a camera assistant on a project under producer Boney Kapoor.
+**Why an MFA, and why NYFA.** From these jobs I know how a set works from the camera side, and I have prepared a direction team's paperwork for one shoot and planned another. What I have not yet done is work in a production office: develop a project with a writer, budget and schedule it from the script, finance it, set up its legal structure, or market and distribute it. I learn best by doing the work, and NYFA's hands-on approach would let me learn producing that way, with the structure of an MFA around it. In the first year I would study budgeting, entertainment law and business planning, and write a feature treatment and a series proposal. For the thesis I would develop one project with a business plan, budget, schedule and pitch, and possibly shoot a proof of concept with filmmaking students, giving them a producer who already knows what a camera crew needs. Studying in Burbank, close to the studios, would give me the chance to pitch to industry people I want to work with.
+**Contemporary influences and inspirations.** The producing I want to learn takes a local story and finds the partners and money to show it outside India. Guneet Monga's work is one example: she produced The Lunchbox as an international co-production and later won an Academy Award for The Elephant Whisperers. All We Imagine as Light, made across India and France and recognised at Cannes, is a more recent one. This is the kind of work I want to produce.
+**Personal artistic dreams.** After the MFA I plan to work in development and production for a few years, then build a creative studio in India of 8 to 30 people that develops its own slate of films and series. It would make grounded stories about work and money, like SLACK WATER, the treatment in my portfolio. It follows a chief engineer from Kerala and her crew, abandoned unpaid at anchor off Alang, who get one spring tide to take their wages from their own ship's bronze propeller. It would also give people with no family or contacts in the industry a first job, with training and fair pay. I know how much one early chance can matter. From NYFA I want the producing skills I do not have yet, and the start of a network to build the studio with.
+*795 words*
 ## **2. Portfolio (choose one option)**
-*Limit: (a) screenplay or prose fiction excerpt, 5 to 10 pages; (b) short story, article or critical essay on a literary or cinematic work, 3 to 7 pages; (c) treatment or outline of a film, webisode or TV series concept, 3 to 7 pages*
+*Limit: one of three options; the treatment or outline option is 3 to 7 pages*
 *Question: Submit one of the three options.*
 Option chosen: (c) Treatment, 3 to 7 pages.
-**Title:** BACKGROUND (working title)
-**Logline:** After thirty silent years as a film extra in Mumbai, a man is handed one line on a superstar's set, and when it becomes the best moment in the film, his daughter, the assistant director running that set, must choose between fighting the star's people to keep it and protecting the career her father's silence paid for.
-**Genre:** Comedy-drama. Feature, Hindi and Marathi, about 110 minutes.
-**Main characters:** Kishore Pawar (52), a background artist with more than six hundred films and no lines: funny, exact and proud of a craft nobody credits. Rhea Pawar (26), his daughter, a second assistant director who learned to move crowds from him and has spent her career hiding it. Aryaman Sehgal (38), a superstar from a third-generation film family; not a villain, just a man who has never had to ask for anything. Around them: Sunita, Kishore's wife, who stitches blouses at home; Sunny (19), a new junior artist from Gorakhpur; Ganesh Pillai, the director; Bunty, Aryaman's manager; Mehul, the first AD; Kunal, the producer's nephew and third AD; Pappu Bhai, the junior artist coordinator.
-Act One
-**The gate.** Five in the morning outside Film City in Goregaon. Pappu Bhai sorts two hundred people with a loudhailer: "Rich people this side. Villagers that side. Police uniforms are finished." Kishore walks to the rich side without being told. His two safari suits have made him a guest at four hundred weddings. Sunny, just off the train from Gorakhpur, asks how to get noticed. Kishore gives him the only rule he has: stand near the tea trolley, because the camera always ends up there.
-**The office.** Rhea, second AD on AAKHRI STATION, Aryaman Sehgal's comeback film, builds the background breakdown for a three-night railway platform sequence: porters, families, a wedding party, a sleeping child. Mehul says nobody runs crowds like Rhea. Kunal, the producer's nephew, arrives at eleven with coffee for himself. On her way out Rhea reminds Pappu Bhai, for the fifth time this month, that her father is not to be booked on her films. She will not be the girl who hired family. In this industry, everyone else does.
-**Home.** One room in a Goregaon chawl: Sunita's sewing machine, a fan with one slow blade, and under the bed a biscuit tin of payment slips, one for every film, each labelled in Kishore's handwriting with the star's name and whether he ate with the crew. At dinner Kishore reviews his day like a critic. Rhea asks him again never to turn up on her set. "Who has time," he says. "My dates are full."
-**The platform.** Night one. Pappu is forty extras short and Kishore is on the list. Rhea finds him at the tea trolley in his good safari suit. She needs the numbers, so she can't send him home. She places him at the far end, behind a pillar. Within an hour he has fixed Sunny's walk, corrected the timing of a porter's cross and moved himself into every frame without missing a mark. The cinematographer asks who the uncle is. Rhea says she doesn't know.
-**The line.** Aryaman's character returns to the station where his mother left him as a boy, and the scene is dead: fourteen takes, each more beautiful and emptier than the last. Bunty holds the star's umbrella, phone and water at once. Between takes Ganesh watches Kishore fold a newspaper and slide it under the head of a junior artist's daughter, asleep on a bench. Ganesh walks over and asks him to say something to the hero as he passes. Anything. Take fifteen: Kishore looks up at the departure board and says, "Gaadi late hai, saab. Sabki hoti hai." The train's late, sir. Everyone's is. Aryaman laughs, surprised, and then the laugh leaves him and he simply stands there. It is the first true moment of the night. Ganesh prints. The floor applauds a junior artist. On the radio, Rhea can't speak.
-Act One ends in the accounts van at four in the morning, where there is no form for an extra who talks. Rhea writes "JA (with dialogue)" by hand on her father's voucher and signs it.
-Act Two
-**Silence at home.** Kishore tells no one. Thirty years have taught him that scenes get cut. Sunita knows anyway; he has ironed the same shirt twice.
-**The screening.** In the edit, the line holds. At the studio's internal screening the room laughs at "Sabki hoti hai" and then goes still, and the head of marketing writes "TRAILER" on her pad.
-**Midpoint.** The trailer drops on a Friday. By Sunday the six words are everywhere: over clips of stalled local trains, board results, a groom stuck in traffic, a batting collapse. A YouTuber tracks Kishore to the chawl. Neighbours string marigolds along the corridor. Sunny asks for an autograph and Kishore signs a payment slip. A news channel seats him on a debate panel between two shouting experts, where he says nothing for eleven minutes, and the anchor calls it the most dignified segment of the year. Sunita, who has heard "my scene got cut" for thirty years, watches the trailer eleven times on a neighbour's phone. Rhea watches from the production office, proud and afraid. For one week, Kishore is seen.
-**Too visible.** On Thursday Kishore is booked on a television serial in Naigaon. Within an hour the assistant director there moves him behind a wall, then out of the scene altogether: three extras have asked for selfies and he is pulling attention from the lead. He is paid for the full shift and sent home early, the first time in thirty years. On the train back he takes off his safari jacket so nobody will know him.
-**The call.** The following Monday, Bunty calls. Every comment under the trailer is about the uncle. Aryaman has approval over promotional material, and he does not approve. The line comes out of the trailer and the film. Then the second demand: a one-night reshoot in which Aryaman says the line himself, and because the passenger appears in eleven setups, the same passenger must stand beside him, silent. The studio agrees; its release depends on the star's promotional tour. Ganesh, two flops from unemployable, says nothing.
-**The assignment.** Mehul gives Rhea the reshoot: rebuild a section of the platform on a stage, book two hundred junior artists, and Kishore Pawar, no dialogue. The first AD job on the studio's next film comes up, lightly, twice. Kunal is also in line for it.
-**The fight.** Rhea can't bring herself to tell her father. She doesn't have to; Pappu Bhai already has. At home Kishore is ironing. He has returned the news channel's five thousand rupees, because they paid for a line that is no longer his, and accepted the booking: eighteen hundred for the night. When Rhea says he doesn't have to go, they have the fight they have avoided for two years. She says he has made a religion out of being invisible. He says invisible paid for her college. Sunita turns up the radio.
-**The system.** Rhea tries the proper channels. Ganesh, in his car, tells her he needs this film to release. The producer laughs and says a smooth reshoot will be remembered.
-Act Three
-**The reshoot.** Rhea runs the best set of her life. She uses everything she learned from watching her father: where to put people so a platform breathes, when to rest a crowd, how to walk a wedding party across frame to hide a light stand. Kishore stands on his mark, silent, with Sunny beside him. Aryaman says "Sabki hoti hai" nineteen times, and it is dead every time. Bunty, at the monitors, says it's working. Everyone knows it isn't, including Aryaman.
-**The tea trolley.** During a lighting change Rhea goes where her father said the camera always ends up. Aryaman is alone at the tea trolley; Bunty is on a call. Second ADs do not approach stars. She says almost nothing. She plays him the original take on her phone: his own face, the one time in the film he looks surprised. He watches it twice. He asks the passenger's name. She tells him, and does not tell him the man is her father.
-**Take twenty.** Aryaman hands back the phone and walks to set. He asks Ganesh for one more, and before Bunty reaches the monitors he says, "Kishore-ji, you say it." Kishore says it. It is quieter than the first time. Ganesh prints both takes. The editor uses the original.
-**The cost.** Bunty finds out who showed the star the clip. The first AD job goes to Kunal. Rhea is told she will be remembered for the next film, and she is not hired for it. Mehul, embarrassed, slips her the number of an independent producer who needs a first AD and can't pay much.
-**Release day.** A single-screen cinema in Goregaon, third row: Kishore, Sunita, Rhea and Sunny. When the line comes, the whole hall says it with him. Kishore doesn't; he is watching his own face. He stays through the end credits, which list no junior artists, and reads every name anyway.
-**Ending image.** Three months later, a small independent film shoots at a bus depot in Thane, and Rhea is first AD. The call sheet she prints lists every background performer by name instead of "JA x 40." Sunny is on it. So is Kishore: "Kishore Pawar, Man at bus stop, 1 line." That night he folds the call sheet, opens the biscuit tin, lays it on top of thirty years of slips and closes the lid.
-Character arcs
-Kishore moves from treating invisibility as his dignity to letting himself want to be seen, without bitterness when the system refuses him. Rhea moves from hiding where she comes from to building it into how she works, and from protecting her own place to making places for others, at a real cost. Aryaman, briefly, moves from relying on his family name to one honest choice. The film does not pretend the industry changes. One call sheet does.
-*1692 words (excluding \[bracket\] notes)*
+**Title:** SLACK WATER
+**Logline:** Abandoned at anchor off Alang and unpaid for fourteen months, a Kerala chief engineer and her stranded crew get one spring tide to take their wages in bronze: their own tanker's forty-tonne propeller, which belongs to the scrapyard the moment the hull touches the beach.
+**Genre:** Heist thriller. Feature, Malayalam, Hindi, Gujarati and English, about 115 minutes.
+**Main characters:** Mercy Chacko (52), chief engineer from Alappuzha and the senior officer left aboard. Agnelo Fernandes (58), the Goan bosun, who does his engineering on cigarette cartons. Jithin Thomas (20), her engine cadet, whose first ship has never moved. Captain Usman Bhadala (67), the beaching captain who runs ships ashore for the yards and reads the tide better than the tables. Hasmukh Vora (61), owner of Plot 79. Nirmala Rathod (54), the customs superintendent. Bhagaban Sahu (49), leader of sixty idle cutters from Odisha. Neil Shah (39), a Gujarati-American dealmaker for Carroway Tonnage, the Baltimore cash buyer that bought the ASTREA for scrap and sold her on to Hasmukh. Around them: Oleh, the Ukrainian electrician; Zaw and Min, Burmese seamen; Naran, a fisherman with a dhow.
+**Act One**
+**The anchorage.** December, four miles off Alang in the Gulf of Khambhat. The ASTREA, a thirty-year-old tanker flagged in Palau, waits at anchor for her tide. Nine of her twenty-two crew are left, unpaid for fourteen months. They eat what Zaw catches and trade cigarettes to Naran for water. Jithin's discharge book shows fourteen months of sea time and no miles. On her Sunday calls to Alappuzha, Mercy describes ports the ship has not reached. Every day Mercy turns the main engine over so nothing seizes, and logs it, with a line for the wages still unpaid. The owner exists only as a PDF taped up in the control room, where someone has drawn him a face.
+**The order.** Hasmukh comes out on a launch with sweets and the paperwork. His plot has had no ship for five months; Alang once broke four hundred ships a year and now breaks about a hundred. Carroway Tonnage has sold him the ASTREA for beaching on the spring tide in eleven days. Wages are a matter for the owner. Once her hull touches the beach, she and everything on her belong to the yard. Refuse to sail her in, and the yard brings tugs, police and a replacement crew. A court case would take two years, by which time she will be reinforcing bar.
+**The bronze.** Mercy takes out the propeller drawing: forty tonnes of nickel-aluminium bronze, held on the shaft by a hydraulic nut whose hand pump she has serviced every six months for nine years. The rudder hangs right behind it, so it must be left hard over or the propeller cannot come off. The nine are owed $290,000, about what the bronze will fetch in Bhavnagar. The yard would need days to cut it; the pump can drop it in one low tide. Agnelo does the buoyancy on a carton: two lifeboats, ninety sealed drums and the rising tide. At slack water, the still turn of the tide, Naran's dhow will tow it to a buyer.
+**The vote.** In the mess Mercy lays out the risks: prison, the end of every certificate in the room, and deportation for Oleh to Kherson and for Zaw and Min to Myanmar's conscription. She will drop the propeller herself, with her name in the log, and each will take exactly what the owner owes, no more. Every hand goes up, Jithin's last, once he has set his back pay against his mother's loan.
+**Act Two**
+**Bonded cargo.** Nirmala boards and counts the ship down to the spoons. She seals the bonded store and the engine store, where the pump is kept, and logs a hundred and twelve oil drums. Agnelo has already emptied forty of the ninety he needs. One rings hollow under her pen. "We pumped it to the tank," says Mercy, "so it won't leak on your beach." Nirmala writes "contents variable." That night Mercy leaves the seal on the engine store and takes the door off its hinges.
+**The beaching captain.** Usman comes aboard two days before the tide. Crews have held his beachings to ransom before, so he checks the engine himself for sabotage and finds it spotless. In three hundred ships he has never asked whether a crew was paid. He sees the drums lined up aft and says nothing. When Mercy asks him to leave the rudder hard over after the grounding, he says nobody tells him where to leave his rudder.
+**Full ahead.** Dawn, the highest water of the month. Below, Mercy holds an engine older than her cadet at full ahead for twenty-five minutes, by hand, just short of a turbocharger surge. The beach comes up at eleven knots: grey mud, half-cut ships, empty plots, and Bhagaban's idle men watching from the tideline. In the last minute Usman orders hard to port. The hull meets the mud with a long groan, and everything not welded slides forward. The telegraph rings FINISHED WITH ENGINES, and Mercy stops the engine for the last time. The rudder stays where Usman left it.
+**Propeller first.** By noon the sea has gone out two kilometres and the ASTREA stands on the mud like a building. The spring tide gives the crew three nights of low water. By the afternoon they are down to one. Bhagaban and his cutters block the gate of Plot 79 over six weeks' unpaid wages. Hasmukh, whose bank also wants cash this week, promises them the bronze: they start on the stern tomorrow afternoon. That night Bhagaban posts men on the bow to guard the ship. Later, as if making conversation, Usman tells Mercy this north wind will bring the morning slack at 6.12, forty minutes ahead of the tables.
+**Baltimore.** That evening Neil climbs aboard, jet-lagged from Baltimore. Hasmukh owes Carroway its last ten per cent, payable once the crew is off the ship. Neil's offer: the four months' wages the abandonment insurance will pay, tickets home, and a waiver of everything else, signed by noon tomorrow. For Oleh, Zaw and Min the tickets are the worst part. Mercy says they will sign. As Neil's launch pulls away, Agnelo starts lowering the lifeboats.
+**Act Three**
+**Black mud.** On the falling tide Agnelo grounds both lifeboats either side of the propeller. Low water, 12.40 a.m. The crew climbs down twenty metres of pilot ladder onto black mud that takes their boots, so they work barefoot. Mercy unbolts the fairing cone and slacks the nut three turns; Jithin pumps oil into the hub until the bronze jumps the taper with a crack like a rifle, and every dog in Alang starts barking. Then the nut comes off, and forty tonnes slides past the turned rudder into the mud. Agnelo chains it between the lifeboats and lashes the drums to its blades.
+**The cutters.** The dogs wake the watchmen on the bow, and torches come down the hull. Bhagaban and forty cutters find the bronze that was going to pay them chained between two orange lifeboats. Then the flood starts across the flats, faster than a man can walk, and Agnelo sees what his sums left out: the mud has the blades to the hub. Bhagaban laughs. Every plate on this beach sticks, and his men pull them free daily with the plot's winch.
+**Two kinds of wages.** Ankle deep in the first of the flood, Mercy and Bhagaban bargain in Hindi, which neither speaks at home. If Hasmukh sells the bronze, she says, his bank gets paid before his cutters do. Bhagaban works out that one month of her wages is more than two years of his. Mercy, who has spent fourteen months counting what she is owed, does a different sum: the cutters' six weeks come off the top, and her own share, the largest, comes last. Bhagaban adds a condition: she will teach his men to drop a propeller in three hours instead of three days. From the stern rail, Usman, who has stayed aboard to see what his rudder is for, calls down the minutes to slack.
+**Slack water.** While the water is still shallow, the cutters dig around the blades by hand and run out the plot's winch wire. The flood rises, the lifeboats lift, the winch takes the strain, and the mud lets go with a sound like a boot pulled free. Headlights come down the beach road: Hasmukh, with Neil asleep in the back. Hasmukh wades out and finds his own cutters standing with the crew; Neil, awake now, wades out after him. Mercy hands Neil his waivers, unsigned, and her engine log: fourteen months of unpaid wages, logged daily. Carroway sold the yard a ship free of claims, and the claim is still aboard. Neil can spend three years in the Gujarat High Court against nine seafarers and his own buyer, or lose forty tonnes of bronze tonight. He lets the bronze go: Carroway knocks its scrap value off the ten per cent Hasmukh owes, and the bronze goes to the people it is owed to. Hasmukh, who now owes his cutters nothing and Carroway less, shakes on it. At 6.12, as Usman said, the water stops moving, and Naran's dhow takes the tow out on the first of the ebb.
+**Bhavnagar.** At Bhavnagar's old port, Nirmala is waiting on the quay. The bronze weighs forty tonnes and one hundred and eighty kilos, and she charges duty on every kilo. In the buyer's office Mercy reads out the payments: Bhagaban's men first, name by name, then her crew from the cadet up, and herself last. Her share comes up short. She signs for it. Usman signs Jithin's discharge book as master: fourteen months and nineteen days, four nautical miles.
+**Final image.** A month later, the ASTREA is the newest name chalked on the wall of Bhagaban's shed, under every ship his gang has cut. Beneath it, on a nail, hangs the hand pump, cleaned and greased, with a cardboard tag in Mercy's handwriting: "Service every six months."
+**Character arcs**
+Mercy moves from keeping machines alive for owners who left to taking what she is owed and paying others first. Usman moves from reading the tide for whoever pays him to reading it for the people standing in it. Bhagaban moves from guarding a broke man's ship to bargaining for his men as an equal. Nobody on the beach is a villain, and by the turn of one tide most of them have been paid.
+*1771 words*
+
 # **11. American Film Institute (AFI) Conservatory, MFA in Producing**
 **Deadline: 1 December 2026, 8:59 pm PT.**
 ## **1. Narrative Statement**
 *Limit: 3 pages, double-spaced, 12pt (about 800 words). Name, discipline and "Fall 2027" at the top of each page.*
 *Question: One statement covering: (1) Personal story, the majority: your unique story and what shaped you; what stories you want to tell and why; how your life informed those choices; who you are outside your resume. (2) Discipline of interest: why producing, and the people, movies or art that inspire you in that field. (3) Collaboration experience. (4) Long-term goals and how AFI benefits them.*
-Every film I have worked on began, for me, with a list. As a teenager in Gurugram studying commerce, I kept ledgers for accountancy class. Later, on sets, I kept shot lists and equipment checklists.
-No one in my family works in film. \[One line about my family.\] I started with stills. I learned studio photography from Nitin Rai at the Raghu Rai Center for Photography and shot as the International Press Photographer for Suncity MUN. With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it, and I also found places to shoot, scheduled the shoots around our exams and kept my classmates involved. None of us called that producing at the time.
-In 2020, when COVID closed Gurugram's markets, the local potters lost their income. I joined Mitti to Matka, an initiative that bought and auctioned their pots at fair prices and supplied food and sanitary supplies to their families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration. \[One moment from Mitti to Matka.\] The potters' families were counting on the money we handled, so I kept careful records of where it went. I also learned to be honest with them about what a small team could not fix.
-Most of the stories I want to produce start in Gurugram or on a film set. HOME GROUND, the feature I pitch in this application, follows a girls' football team in a Gurugram village fighting for a place to play after their ground, the village's last open space, is sold to a developer. I grew up in Gurugram and played competitive football there. I am also drawn to the story of a young woman keeping her family's workshop open, which comes from my time with the potters, and of a crew getting through a shoot day that keeps going wrong. I rarely see people like them on screen, and I want to tell their stories with humour and without pity, for audiences in India and outside it.
-**Why producing.** At Whistling Woods International in Mumbai I studied cinematography and direction, and worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. Behind the camera I kept noticing that the problems reaching the lens had started elsewhere, in a schedule, a budget or a handoff between departments. I wanted to be where those decisions are made. The producers I admire do most of their work before the shoot and after it, and I usually notice their names only once I learn how hard their films were to make. \[A producer or film I admire.\]
-**Collaboration.** On set I work in the camera department: as a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar and, since October 2025, on a project under Boney Kapoor \[title\]. I have also worked on the planning before a shoot. On the direction team of a Finolex commercial for Early Man Productions I prepared the production sheets, cast references and PPM deck. For Growth Jockey I planned a Sleepyhead Mattresses shoot: the equipment, the script, and the offer and audience the film was aimed at. \[One moment working with others.\] My camera training helps when I work across departments. I can talk to a cinematographer about what a choice means for the image, and to a line producer about what it means for the camera budget.
-**Long-term goals.** After AFI I plan to work in development and production for a few years, then build a creative studio of 8 to 30 people in India that develops its own slate. I want it to hire talented people from outside film families, and to give them paid roles and someone who explains how the work is done. I have not yet worked in a production office. To build the studio I need what my current work does not teach me: how to develop a project with writers and directors, how to budget and schedule it, and how to finance and sell it. At AFI I would learn these while producing films with Fellows across every discipline. In the first year I would produce cycle films, each with a different group of Fellows. I learn best by building something with a director from the first conversation. In the second year I would carry a thesis film from pre-production through post, and leave with a slate of projects I can keep developing.
-*731 words (excluding \[bracket\] notes)*
+No one in my family works in film. I grew up in Gurugram and studied commerce at Suncity School: economics, business studies and accountancy. I came to film through a camera. I learned studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography and shot as the International Press Photographer for Suncity MUN.
+With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it. Because nobody else was going to, I also found places to shoot, scheduled the shoots around our exams and kept my classmates involved. None of us called that producing at the time.
+During COVID, while I was still at school, Gurugram's potters saw their sales collapse. I joined Mitti to Matka, an initiative that bought and auctioned their pots at fair prices, worked with them on designs and supplied food and sanitary supplies to their families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration. Buyers saw the pots through my pictures, so my work had a direct effect on what a family earned. It made me careful with money that families were relying on, and honest with them about what a small team could and could not do.
+The stories I want to produce are about work, money and family, and many of them cross between India and the United States. REGISTERED POST, the project I pitch in this application, is set in Haridwar. A young priest who is saving to emigrate immerses ashes mailed from America into the Ganga on WhatsApp video, until an urn arrives from Ohio asking him to write the man inside it back into the family register his grandfather struck him from. I rarely see people like him on screen, and I want to tell their stories with humour and without pity, for audiences in India and outside it.
+**Why producing.** At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction in 2025, a degree awarded by the Tata Institute of Social Sciences. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. Behind the camera I kept noticing that the problems reaching the lens had started elsewhere, in a schedule, a budget or a handoff between departments. I wanted to be where those decisions are made. The producers I admire do most of their work before the shoot and after it. The producer I admire most is Guneet Monga, who produced The Lunchbox and Masaan.
+**Collaboration.** On set I work in the camera department: as a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar and, since October 2025, on a project under producer Boney Kapoor. I have also worked before the shoot. On the direction team of a Finolex commercial for Early Man Productions I prepared the production sheets, cast references and PPM deck and ran costume trials. For Growth Jockey I planned a Sleepyhead Mattresses shoot: the equipment, the script, and the offer and audience the film was aimed at.
+One day on The Classroom shows how we worked together. An actor dropped out at the last second. We made up a new role then and there, a funny sports teacher, and I played him. Our scriptwriter was at home, so we rewrote the lines for the new role together, remotely. I found a standard tracksuit that cost us nothing, and the episode's story still held together.
+**Long-term goals.** After AFI I plan to work in development and production for a few years, then build a creative studio of 8 to 30 people in India that develops its own slate. I want it to hire talented people from outside film families, and to give them paid roles and someone who explains how the work is done. I have not yet worked in a production office. To build the studio I need what my current work does not teach me: how to develop a project with writers and directors, how to budget and schedule it, and how to finance and sell it. At AFI I would learn these while producing films with Fellows across every discipline. In the first year I would produce cycle films, each with a different group of Fellows. In the second year I would carry a thesis film from pre-production through post, and leave with a slate of projects I can keep developing.
+*747 words*
 ## **2. Project Pitch**
 *Limit: 2 pages*
 *Question: A project you would like to produce as a feature or TV series (original or adapted from a novel, play, news article, current or historical event): 1) concise plot overview with main character arcs; 2) central themes and visual tone; 3) why the story matters to you and why it will connect with an audience.*
-**HOME GROUND**: an original feature film (sports drama, Hindi and Haryanvi)
-1\) Plot overview with main character arcs
-Mauli Kalan was farmland twenty years ago; now it is four-storey houses, hostels and tyre shops pressed between glass towers, and its last open space is the village common: a dusty ground where buffaloes graze in the morning and, in the evening, fourteen girls in borrowed boots play between two iron goals with no nets.
-Their coach, Deepak Yadav (34), was the best striker in the district until a torn ligament a week before state trials. Now he drives Rakesh Dahiya, a broker who buys village land for developers, and coaches the girls for free because it is the only hour of the day that belongs to him.
-The panchayat sells the ground to Skyline Infra. Deepak has driven Dahiya to every meeting, for a promised commission. Feeling guilty, he pitches Skyline's chief executive, Nikhil Bhasin, from the front seat of the broker's car: a village girls' team on the brochure is worth more than a fountain. Bhasin, who owes the authorities an open-space amenity anyway, agrees. Win the district final in eleven weeks, and Skyline builds them a pitch.
-Training becomes a race against the boundary wall, which eats another strip of ground each week, until the girls practise in a basement car park under headlights. Komal (16), the captain, holds the team together against her own father, the sarpanch who signed the sale. Tamanna (14), a domestic worker's daughter from Malda, is the fastest player Deepak has coached, and the ground is the first place in Gurugram where she has belonged.
-At the midpoint the girls win their semi-final and Skyline puts their faces on a billboard over the expressway. The same week, Komal finds Deepak's signature as a witness on the sale deed. The team walks out on him.
-Deepak's arc turns on what he gives up. He refuses the commission and loses his job. He tells the girls everything, including that the promised pitch is listed in the brochure as members-only. Komal brings the team back on her terms and writes one clause into the deal with Bhasin: free evenings for the village team, permanently, with their old iron goals installed. With the billboard already up, Bhasin signs.
-The final is against a private academy with a foreign coach and real turf. The village girls have learned on ground that bounces wrong. They win 2 to 1, Tamanna scoring off a bobbling ball no academy defender has learned to read.
-The last image: a green rooftop pitch above the mall at night, one shining new goal and one rusted iron one, and below it the water tanks and lit roofs of the village.
-2\) Central themes and visual tone
-HOME GROUND is about who gets open space in an Indian city, and how quietly it disappears: through arithmetic, signatures and the promise of a better life rather than through villains. It is about girls taking up room in a culture that tells them to stay indoors, and about inheritance: what fathers sell, and what daughters would have played on. Deepak's story asks whether a man who helped take something can help give it back.
-Visually, the film is dust against glass: ochre ground, blue-grey towers. At sunset the towers throw reflected light onto the pitch, so the ground gets a second, borrowed sunset. The camera stays at the girls' height, handheld and inside the play, never in the stands. The boundary wall is our clock; each act, it takes more of the frame. The rooftop pitch is flat, clean LED light, less beautiful than the dust, on purpose.
-3\) Why the story matters to me and why it will connect with an audience
-I grew up in Gurugram while the city was being built. \[A local ground, then and now.\] \[Football was where the city still felt like ours.\] I played competitively: we finished first in Gurugram in 2019 and fourth in the Haryana state championship in 2020. \[My training ground today.\] \[I know the feel of a dusty pitch, goalposts without nets, and glass behind the goal.\]
-The story is also close to the studio I plan to build. The girls have talent and nowhere to play, and many people in India who want to make films have talent and no clear way in. \[A football memory linking the two.\]
-As a cinematographer I know how this film should look. I can also see how to make it: first-time actors from local villages, two main locations and a schedule built around the light.
-It will connect because every Indian city has a ground like this, and many people can name one that has been built over. Dangal and Chak De\! India showed that audiences will fill cinemas for girls who play. HOME GROUND adds the question of land: who keeps a place to play when a city grows. Cities everywhere face that question, so the film can find an audience outside India too.
-*795 words (excluding \[bracket\] notes)*
+**REGISTERED POST**: an original feature film (dramedy, Hindi, Punjabi and English)
+**1\) Plot overview with main character arcs**
+Haridwar, 4 a.m. Vasu Kaushik (26) stands knee-deep in the Ganga at Har Ki Pauri, a stranger's ashes in one hand and a selfie stick in the other, so a family in New Jersey can watch on WhatsApp from their sofa, where it is still yesterday.
+For seven generations his family has kept handwritten registers for villages in Punjab's Doaba belt: births, marriages and deaths, filed by district and village in steel trunks. The villages have emptied into Brampton, Southall and California; the dead now come home by post. Vasu digitises the registers at night and is saving for a master's in America; if he goes, no one is left to carry the trunks.
+A brass urn arrives from Dayton, Ohio, by Priority Mail Express International, customs form CREMATED REMAINS, with one instruction in a shaky hand: don't put me in the river until you write me back into the ledger your grandfather struck me from. In the Hoshiarpur trunk Vasu finds the 1974 entry: Darshan Lal Saini, struck through in his grandfather's hand, and in the margin, "Gone to America with the American."
+The American is Gene Becker (80), Darshan's widower, a retired machinist who made the urn himself. He came to the Doaba with the Peace Corps in 1972, still speaks the village Punjabi of 1974, and waits on WhatsApp, politely.
+Vasu, who has not told his father about America, stalls. Darshan's nephews are the firm's best-paying clients, and in ten days they arrive from Brampton with their father's ashes, to sign the same page. Vasu's father, Pandit Ramesh Kaushik (58), says the ledger is not theirs to edit. He does not mention that in 1974, aged six, he held the blotting paper.
+To protect the firm, Ramesh tells the nephews what the urn asks. Surinder (54) is selling the family land; a new name in a register that courts have accepted as evidence could hold up the sale, and he assumes the American wants a share. His brother Bunty (48), who knew their father wrote to Darshan every month and never said so, backs him. Gene hears this on a call and stops being polite, in a village Punjabi so old the nephews need Vasu to translate the insults. He signs away any claim before a notary and holds the deed up to the camera.
+When the nephews sit down to sign, Vasu props his phone on the Hoshiarpur trunk, against his father's word, and calls Ohio. Neither nephew reads Gurmukhi well; Gene does, and reads from fifty years of their father's letters to Darshan, every one addressed to both men. Bunty breaks first and admits he knew. Surinder, out of reasons, declares the entry as head of the family. Vasu writes it: Darshan Lal Saini, and beside him Gene Becker of Dayton, Ohio, jeevan saathi, life companion. Ramesh tells his son he held the blotter in 1974, then blots this line himself.
+At 4 a.m. the nephews immerse their uncle beside their father while Gene watches at dusk in Dayton, where it is still yesterday. Vasu leaves for his master's with the registers on a hard drive. His father writes "Gone to America" beside his son's name and does not strike it. On a snowy doorstep in Dayton, Vasu gives Gene the blotter from the signing, both names on it backwards. In the hall mirror they read the right way round.
+**2\) Central themes and visual tone**
+REGISTERED POST is about who a family allows to count. A register keeps and erases at once: a struck line leaves the name legible and removes the person. The film changes a tradition from inside, by its own rules, and turns the homecoming film around: Darshan comes home as a parcel, asking for belonging, not property.
+The two worlds meet on a six-inch screen until the last scene. Haridwar fills the wide frame: aarti flames, and the river and steel trunks lit by phone glow at 4 a.m. Ohio's winter exists only as vertical video: snow on a bird feeder, a kitchen at dusk. Handwriting is the recurring image: a grandfather's strike, a brother's letters, a blotter's mirror. The comedy is in the logistics, never the grief.
+**3\) Why the story matters to me and why it will connect with an audience**
+Haridwar's priests call their registers bahis, the word for an account book. I studied accountancy at Suncity School, and it has a rule this film keeps: you never rub out an entry; you correct it with a new one. At Mitti to Matka, a lockdown initiative for potters, I handled money their families were counting on. The studio of eight to thirty people I plan to build in India is meant to let people in rather than leave them out, and this film is about the same thing.
+It is a festival dramedy for families on both ends of these calls, in the United States, Canada, the United Kingdom and India. The closest comparison is The Farewell, a bilingual family film that went from Sundance to wide release. The budget is low: Haridwar locations, a small cast and a few days in Ohio. Gene is an American co-lead in his eighties, built for an India-US co-production.
+*887 words*
 ## **3. Short answer 1**
 *Limit: all short answers share 3 pages*
 *Question: What is a film or TV series you wish you could have produced and why?*
-The Lunchbox (2013). It is a quiet Mumbai story about a lunch delivered to the wrong office, and it reached audiences around the world because of how it was set up: as a co-production across several countries, with a festival launch and distribution that took a very local film abroad. I wish I had produced it because I want to make films like it: specific Indian stories, made with care, with the financing and partners in place for them to be seen outside India. \[One scene I love.\]
-*84 words (excluding \[bracket\] notes)*
+The Lunchbox (2013). It is a quiet Mumbai story about a lunch delivered to the wrong office, and I love its restraint: the sounds of a kitchen, the train commute, a letter read in silence. It reached audiences around the world because of how it was set up: as a co-production across several countries, with a festival launch and distribution that took a very local film abroad. I wish I had produced it because I want to make films like it: specific Indian stories, made with care, with the financing and partners in place for them to be seen outside India.
+*101 words*
 ## **4. Short answer 2**
 *Limit: *
 *Question: What is an area of producing you feel you need more support to learn and grow into the role?*
-Development and financing. My experience so far is in the camera department, plus planning work on a Finolex commercial's direction team and for a Sleepyhead Mattresses shoot. What I have not done is work in a production department or take a project from an idea to a fully financed production.
+Development and financing. My experience so far is in the camera department, plus direction-team work on a Finolex commercial and the planning of a Sleepyhead Mattresses shoot. What I have not done is work in a production office or take a project from an idea to a fully financed production.
 In development, I want to learn to work with a writer from the earliest treatment: diagnosing what a draft needs, guiding it through many revisions, and knowing when a script is ready, without taking over the writer's voice. In financing, I need to learn how money for a whole film is put together: equity, pre-sales, co-productions between countries, and how a sales agent and a distributor fit in. These are the skills I need before I can run a studio, and the hardest to learn alone.
-*136 words (excluding \[bracket\] notes)*
+*136 words*
 ## **5. Short answer 3**
 *Limit: *
 *Question: Is there a producer whose career you admire or aspire to emulate?*
-Guneet Monga. She came into Indian cinema from Delhi without a film family and built Sikhya Entertainment on her own taste and persistence. She produced films such as The Lunchbox and Masaan that reached international audiences, and later won an Academy Award as producer of The Elephant Whisperers. What I admire most is that she connects Indian stories with audiences abroad, and new filmmakers with the industry. \[One thing she said or did.\]
-*67 words (excluding \[bracket\] notes)*
+Guneet Monga. She came into Indian cinema without a film family and built Sikhya Entertainment. She produced films such as The Lunchbox and Masaan that reached international audiences, and later won an Academy Award as producer of The Elephant Whisperers. What I admire most is that she connects Indian stories with audiences abroad, and new filmmakers with the industry. That is the kind of producer I want to become, and Sikhya is the kind of studio I plan to build in India.
+*82 words*
 ## **6. Short answer 4**
 *Limit: *
 *Question: Aside from watching films, how do you spend your free time?*
-Football has been part of my life since school, and I played competitively at city and state level. \[Whether I still play, and where.\] \[Any photography I still do.\] \[One other pastime.\]
-*18 words (excluding \[bracket\] notes)*
+Most of my free time goes into making things. Photography came first, in a studio course and at Suncity MUN. At school, friends and I spent our weekends making The Classroom, and during COVID I gave my time to Mitti to Matka, photographing the pots that Gurugram's potters needed to sell.
+*51 words*
 ## **7. Short answer 5 (optional)**
 *Limit: *
 *Question: Is there something we should know about you that hasn't already been stated in your application?*
-Same essay as CMU, question 4 (Optional essay, on my three-year degree), adapted for AFI.
-*15 words (excluding \[bracket\] notes)*
+My undergraduate degree is a B.Sc. in Filmmaking, Cinematography and Direction from Whistling Woods International in Mumbai, awarded by the Tata Institute of Social Sciences (TISS), which I completed in 2025. It is a three-year programme, the standard length for this degree in India. The programme was practical and built around making films, and alongside it I worked on sets: as an assistant cinematographer on short and independent films, and as a camera assistant on Khauf at Matchbox Studios. I would be glad to discuss any part of my record.
+*90 words*
 ## **8. Video introduction**
 *Limit: 90 seconds, one take, conversational*
 *Question: Introduce yourself by explaining what you hope to gain by attending the AFI Conservatory as a Producing Fellow. (Talking points.)*
-• Name, Gurugram, a cinematographer moving into producing.
+• Karan Chaudhary, from Gurugram, a cinematographer moving into producing.
 • How I got here: commerce at Suncity, a web series with friends, Whistling Woods, then work as a camera assistant.
-• What I hope to gain at AFI: development and financing, which my sets haven't taught me, and producing real films with a cohort of directors, writers and cinematographers.
+• What I hope to gain at AFI: development and financing, which the camera department hasn't taught me, and two years of producing with Fellows from the other disciplines: cycle films in the first year, a thesis film in the second.
 • Why it matters: the studio of 8 to 30 people I plan to build in India, open to people without film connections.
-*81 words (excluding \[bracket\] notes)*
+*95 words*
 ## **9. Role in the supplemental film**
 *Limit: 200 characters. Optional.*
 *Question: Please list your role/involvement in the supplemental film.*
-The Classroom (2020 to 2022): co-director, cinematographer and editor; also found locations, scheduled shoots around exams and kept classmates involved.
-*152 characters (excluding \[bracket\] notes)*
+The Classroom (five-part web series): co-director, cinematographer, editor; found locations, scheduled shoots around exams, kept classmates involved.
+*149 characters*
 ## **10. Message to recommender**
 *Limit: 500 characters*
 *Question: Personal message sent with the recommendation request.*
-Dear \[Name\], thank you for agreeing to recommend me for AFI's MFA in Producing. It would help most if you could speak to \[one or two strengths of my work\]. I've attached my CV and a short summary of the projects we worked on together. The deadline is \[date\]. Thank you again for your time. Karan
-*250 characters (excluding \[bracket\] notes)*
+Thank you for agreeing to recommend me for AFI's MFA in Producing. It would help most if you could speak to the work you have seen me do and how I work with others. I've attached my CV and a short summary of the projects we worked on together. The application deadline is 1 December 2026. Thank you again for your time. Karan
+*325 characters*
+
 # **12. Carnegie Mellon University (CMU), Heinz College, Master of Entertainment Industry Management (MEIM)**
 **Round 1 deadline: 1 December 2026.** The essays unlock once you enter your address, phone number and citizenship. Confirm the prompts after that.
 ## **1. Career goals**
 *Limit: 150 to 300 words*
 *Question: What are your career goals after completing graduate school?*
-After graduating I plan to work in development and production at a company that makes films and series for Indian and international audiences, in a role where I learn how projects are chosen, financed, packaged and sold. \[My target company or role.\] My experience so far is mostly in the camera department, as a camera assistant on Khauf at Matchbox Studios and now on a project under Boney Kapoor. From there I have seen how much of a shoot is settled before anyone reaches the set. I now want to learn the business that decides which shoots happen.
+After graduating I plan to work in development and production at a company that makes films and series for Indian and international audiences, in a role where I learn how projects are chosen, financed, packaged and sold. My experience so far is mostly in the camera department, as a camera assistant on Khauf at Matchbox Studios and now on a project under producer Boney Kapoor. That work has shown me how much of a shoot is settled before anyone reaches the set. I now want to learn the business that decides which shoots happen.
 After a few years in that work, I plan to build a creative studio in India of 8 to 30 people that develops its own slate of films and series, including projects that can travel between India and the United States. It would be small enough for every project to get real attention, and run as a sound business: clear budgets, fair contracts and a slate strategy that survives the years between hits. The studio would also give paid roles to talented people with no family in the industry, train them on the job and trust them with responsibility. I came in without those connections myself, and I want the next person to have an easier way in.
-*211 words (excluding \[bracket\] notes)*
+*212 words*
 ## **2. Prior experience**
 *Limit: 400 to 500 words*
 *Question: How have your prior experiences (professional, academic, and/or personal) prepared you for graduate study and informed your career goals?*
-I studied commerce before I studied film. At Suncity School in Gurugram I took economics, business studies and accountancy, and outside class I learned studio photography under Nitin Rai at the Raghu Rai Center for Photography. With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it, and I also did the work I would now call producing: I found places to shoot, scheduled the shoots around our exams and kept classmates involved. I did not connect the commerce and the camera at the time. I do now: when I look at a creative idea, I ask what it will cost, who will pay for it and who carries the risk.
-During COVID, while I was still at school, I was media manager for Mitti to Matka, which supported Gurugram's local potters after their sales collapsed. We bought and auctioned their pots at fair prices, worked with them on designs, and delivered food and sanitary supplies to their families. I made the graphics, stills and videos, ran the website and handled the administration. The families were relying on us, so I kept a record of where every rupee went, and I told them plainly when something was beyond us.
-At Whistling Woods International in Mumbai I earned a B.Sc. in Filmmaking, Cinematography and Direction. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films, using RED, Sony Venice and Sony FX and Alpha cameras and handling DIT and colour. I was also a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. Behind the camera I kept seeing problems on set that had started earlier, in the schedule or the budget. \[One example from a set.\]
-That is why, over the same years, I also took on work that comes before a shoot. On a Finolex commercial for Early Man Productions I was on the direction team: I prepared the production sheets, cast references and PPM deck and ran the costume trials. In April 2024 I planned a Sleepyhead Mattresses shoot for Growth Jockey in Gurugram: the equipment, the script, and the offer and audience the film was aimed at. \[One decision from that planning.\]
-Since October 2025 I have been a camera assistant on a project under Boney Kapoor \[title\]. I have not yet worked in a production office, and none of this work has shown me how the entertainment business is structured: how content is developed, financed, budgeted, scheduled, valued, distributed and marketed, and how a production company is run over many years. I need to learn that before I start the studio I plan to build in India.
-*443 words (excluding \[bracket\] notes)*
+I studied commerce before I studied film. At Suncity School in Gurugram I took economics, business studies and accountancy, and outside class I learned studio photography under Nitin Rai at the Raghu Rai Center for Photography. I did not connect the commerce and the camera at the time.
+
+With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it, and I also did the work I would now call producing: I found places to shoot, scheduled the shoots around our exams and kept classmates involved. When an actor dropped out at the last second on a shoot day, we invented a new character, a funny sports teacher, and I played him. Our scriptwriter was at home, so we rewrote the lines together remotely, and I found a tracksuit costume at no cost. The episode's story still held together.
+During COVID, while I was still at school, I was media manager for Mitti to Matka, which supported Gurugram's local potters after their sales collapsed. We bought and auctioned their pots at fair prices, worked with them on designs, and delivered food and sanitary supplies to their families. I made the graphics, stills and videos, ran the website and handled the administration. I learned to treat shared money as a trust, because families depended on us.
+At Whistling Woods International in Mumbai I earned a B.Sc. in Filmmaking, Cinematography and Direction. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films, and I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. Behind the camera I kept seeing problems on set that had started earlier, in the schedule or the budget, and I could only work around them.
+Over the same years I also took on work that comes before a shoot. On a Finolex commercial for Early Man Productions I was on the direction team: I prepared the production sheets, cast references and pre-production meeting deck, and ran the costume trials. In April 2024 I planned a Sleepyhead Mattresses shoot for Growth Jockey in Gurugram: the equipment, the script, and the offer and audience the film was aimed at.
+Since October 2025 I have been a camera assistant on a project under producer Boney Kapoor. I have not yet worked in a production office, and that is the side I am applying to learn: how content is developed, financed, budgeted, scheduled, valued, distributed and marketed, and how a production company is run over many years. I bring a commerce background, a camera department's view of how plans hold up on set, and care with money that belongs to other people. I need the rest before I start the studio I plan to build in India.
+*468 words*
 ## **3. Why Heinz College**
 *Limit: 150 to 300 words*
 *Question: How will attending this degree program at Heinz College help you achieve your career goals?*
 The studio I plan to build will need financing, contracts and a slate strategy as much as it needs good projects, and MEIM would teach me that side of the work. In Pittsburgh I would build the foundations I lack: production finance, script and story analysis, and negotiation. In Los Angeles I would apply them in production management, film economics, business development and intellectual property, while interning in the industry alongside classes. The Los Angeles year would also let me meet people and companies who could later partner with a studio in India. In the capstone, a team project for a real industry client, I would work on that client's business problem before I run a company of my own.
-My film training did not teach me to use data and financial analysis in creative decisions. At Heinz I would learn to use both when choosing a slate, pricing a project and understanding an audience. I would bring set experience in India and a cinematographer's sense of what things cost on screen.
-*172 words (excluding \[bracket\] notes)*
+Film school taught me how a film is made, not how to use data and financial analysis to decide which one to make. At Heinz I would learn to use both when choosing a slate, pricing a project and understanding an audience. I would bring set experience in India and a cinematographer's sense of what things cost on screen.
+*179 words*
 ## **4. Optional essay**
 *Limit: 250 words*
 *Question: Address gaps in professional experience or application weaknesses.*
-My undergraduate degree is a B.Sc. in Filmmaking, Cinematography and Direction from Whistling Woods International in Mumbai, awarded by \[awarding university\]. It is a three-year programme, the standard length for this degree in India, and I completed it between July 2022 and June 2025.
-The programme was practical and intensive, built around making films. \[One fact about the workload.\] From 2021 to 2024 I also worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. During the degree I was a camera assistant on Khauf at Matchbox Studios, worked on the direction team for a Finolex commercial for Early Man Productions, and planned a Sleepyhead Mattresses shoot for Growth Jockey.
-Since October 2025 I have been a camera assistant on a project under producer Boney Kapoor \[title\]. \[What I did June to October.\]
+My undergraduate degree is a B.Sc. in Filmmaking, Cinematography and Direction from Whistling Woods International in Mumbai, awarded by the Tata Institute of Social Sciences (TISS). It is a three-year programme, the standard length for this degree in India. I completed it in 2025.
+Alongside my studies I worked on short films and independent films, was a camera assistant on Khauf and worked on two commercials, all described in my answer on prior experience.
+My professional experience since then has also been on set, so the production office is still new to me. That is the side of the work I am applying to MEIM to learn.
 I would be glad to discuss any part of my record.
-*140 words (excluding \[bracket\] notes)*
+*118 words*
 ## **5. Video essay**
 *Limit: about 1 minute*
 *Question: Who you are, what you do well, and what you are looking to achieve in your graduate study at Heinz College. (Talking points.)*
-• Who I am: Karan, from Gurugram; studied commerce, trained as a cinematographer, now a camera assistant who wants to move into producing.
-• What I do well: planning. I planned the Sleepyhead shoot's equipment and script, and the offer and audience it was aimed at. \[One example from that planning.\]
+• Who I am: Karan, from Gurugram. Nobody in my family works in film. I studied commerce, trained as a cinematographer, and I am now a camera assistant who wants to move into producing.
+• What I do well: planning. I planned the Sleepyhead shoot's equipment and script, and the offer and audience it was aimed at. At school I organised our web series, The Classroom: I found places to shoot, scheduled shoots around exams and kept classmates involved.
 • Why Heinz: I've worked on sets, not yet in a production office or on the business side. I want the business training (finance, analytics, strategy) to build a studio in India, and the Los Angeles year to learn inside the industry.
 • My goal: a few years in development and production, then a studio in India of 8 to 30 people.
-*108 words (excluding \[bracket\] notes)*
+*141 words*
+
 # **13. New York University (NYU), Tisch School of the Arts, Graduate Film (MFA), with the NYU Stern MBA for the dual degree**
 **Tisch deadline: 1 December 2026. Stern dual-degree deadline: 15 December 2026.** Stern considers dual-degree applicants only after a Tisch interview invitation, and requires the GMAT or GRE.
 ## **1. Tisch Statement of Purpose**
 *Limit: 3 pages, double-spaced, 12pt (about 800 words)*
 *Question: Who you are and why you're applying. In what ways do you plan to contribute to the program and beyond? What are your academic and professional goals? How have your experiences, successes, and failures shaped how you see the world? What kinds of stories do you hope to tell?*
-I came to film from commerce, with a camera I had learned to use outside class. I am Karan Chaudhary, from Gurugram, a cinematographer by training who now works as a camera assistant. I am applying to Tisch Graduate Film, and to the dual degree with Stern, because I want to become a producer who can take a story from its first idea to its audience, and later build a studio in India.
-Nobody in my family works in film. \[One line about my family.\] At Suncity School I studied economics, business studies and accountancy. In the same years I learned studio photography under Nitin Rai at the Raghu Rai Center for Photography, and later shot as the International Press Photographer for Suncity MUN. With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it, and I organised it too: I found places to shoot, scheduled shoots around exams and kept classmates involved. We counted it a success because we finished it and people watched it.
-**Successes and failures.** At Whistling Woods International in Mumbai I studied cinematography and direction, and worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. While still there I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. I am proud of that work. The lessons I use most, though, came from things that went wrong. On set after set, the problems I saw at the camera had started earlier, for example with a location nobody had confirmed. \[One failure of my own.\] Those moments moved me toward producing. On a Finolex commercial for Early Man Productions I worked on the direction team, preparing production sheets, cast references and the PPM deck. In April 2024, for Growth Jockey, I planned a Sleepyhead Mattresses shoot: the equipment, the script, and the offer and audience the film was made for. I still work in the camera department: since October 2025 I have been a camera assistant on a project under Boney Kapoor \[title\]. I have not yet worked in a production office or taken a story from an idea through development and financing.
-**How I see the world.** During COVID, while I was still at school, I joined Mitti to Matka, a Gurugram initiative supporting potters whose sales had collapsed. We bought and auctioned their pots at fair prices, worked with them on designs, and supplied food and sanitary supplies to their families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration. Buyers saw the pots through my photographs, so a picture could decide a family's income for the week. Now, with any story or production, I ask what the project can and cannot do for the people it touches.
-**The stories I want to tell.** I want to produce stories like these: a teenager keeping a family workshop alive, a crew of outsiders running a production company from a rented flat in Mumbai, a girls' football team defending the last open ground in an urban village. They come from worlds I know in Gurugram and Mumbai, and they are funny as often as they are hard. I want to keep them specific to those places and make them well enough to find audiences in India and the United States.
-**How I will contribute.** At Tisch I would bring a cinematographer's eye: I can talk with a director about what a shot needs and with a line producer about what it costs. I would also bring experience of Indian sets to a cohort drawn from many countries. In Introduction to Producing I would produce a classmate's film, which is where the organising I did on The Classroom and the planning for Sleepyhead would be most useful. I would especially like to study producing at a school whose head of producing, Shrihari Sathe, is an Indian-born independent producer whose work has travelled. His path is close to the one I want to take.
-**Goals.** Academically, I want to learn how a film is developed, budgeted, scheduled, financed, distributed and marketed, alongside directing and writing. In the dual degree, Stern would add finance, strategy and management, and later courses at Tisch would teach me how an independent film company is structured and run. After the degree I plan to spend a few years in development and production, then build a creative studio in India with a team of 8 to 30 people that develops and produces its own films and series.
-*754 words (excluding \[bracket\] notes)*
+I came to film from commerce, with a camera I had learned to use outside class. I grew up in Gurugram, trained as a cinematographer, and work as a camera assistant. I am applying to Tisch Graduate Film, and to the dual degree with Stern, because I want to become a producer who can take a story from its first idea to its audience, and later build a studio in India.
+Nobody in my family works in film. At Suncity School I studied economics, business studies and accountancy. In the same years I learned studio photography under Nitin Rai at the Raghu Rai Center for Photography, and I was the International Press Photographer for Suncity MUN. With friends I made The Classroom, a five-part web series we produced ourselves and released on YouTube. I co-directed, shot and edited it, and I organised it too: I found our locations, fitted the shoots around exams and kept classmates involved.
+On one shoot day an actor dropped out at the last second. We invented a new character on the spot, a funny sports teacher, and I played him. Our scriptwriter was at home, so we rewrote the lines together, remotely, and I found a standard tracksuit that cost us nothing. The story of the episode still held together.
+At Whistling Woods International in Mumbai I studied cinematography and direction, and completed my degree in 2025. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films. While still a student I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. The lessons I use most came from things that went wrong. On set after set, the problems I saw at the camera had started earlier, in decisions about the schedule, the budget, the locations or the cast. By then the camera team could only work around them. Those moments moved me toward producing.
+After Khauf I took on more of the work that happens before a shoot. On a Finolex commercial for Early Man Productions I was on the direction team: I prepared the production sheets, cast references and PPM deck, and ran costume trials. In April 2024, for Growth Jockey, I planned a Sleepyhead Mattresses shoot: the equipment, the script, and the offer and audience the film was made for. Since October 2025 I have been a camera assistant again, on a project under producer Boney Kapoor. I have not yet worked in a production office or taken a story from an idea through development and financing.
+During COVID, while I was still at school, I joined Mitti to Matka, a Gurugram initiative supporting potters whose sales had collapsed. We bought and auctioned their pots at fair prices and supplied food and sanitary supplies to their families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration. Buyers saw the pots through my photographs, so a picture could decide a family's income for the week. Now, with any story, I ask what a project can and cannot do for the people it touches.
+The pieces in this application show what I want to produce: a studio photographer in Rohtak who apologises to his son without saying sorry, a crop-insurance verifier in drought-hit Beed who finds a farmer of seventy-two holding an umbrella over the rain gauge, and the army mechanic who keeps India's first Antarctic station warm through the winter of 1984 while the others hide the Delhi massacre of Sikhs from him. All three follow people at work when something larger reaches them. I want to keep each one specific to its place and make it well enough to find audiences in India and the United States.
+At Tisch I would bring a cinematographer's eye: I can talk with a director about what a shot needs. I would also bring experience of Indian sets to an international cohort. In Introduction to Producing I would produce a classmate's film, which is where the organising I did on The Classroom and the planning for Sleepyhead would be most useful. Tisch's head of producing, Shrihari Sathe, is an Indian-born independent producer whose work has travelled, and his path is close to the one I want to take.
+Academically, I want to learn how a film is developed, budgeted, scheduled, financed, distributed and marketed, alongside directing and writing. In the dual degree, Stern would add finance, strategy and management to what I learn at Tisch. After the degree I plan to spend a few years in development and production, then start a studio in India of 8 to 30 people that makes its own films and series.
+*780 words*
 ## **2. Dramatic Story**
 *Limit: 2 pages, double-spaced, prose (about 550 words)*
 *Question: A two-page story using one theme: (a) two characters, one cannot hear the other; (b) survival depends on an unlikely skill; (c) an intruder saves a delicate situation; (d) your older sibling wakes you in the middle of the night and suggests something marginally illegal; (e) at exactly the wrong moment, a character says out loud what they were thinking; (f) a mother makes amends with her child through humor; (g) an apology is made without ever saying sorry.*
@@ -915,493 +1278,497 @@ Amit lays the baby on the counter, on the soft envelope. She grabs a photograph 
 "How much?" Amit asks, about the passport prints.
 "Sit," his father says. "I'll take a bigger one. For the wall."
 He rolls the white paper up, and behind them, Switzerland comes back.
-*530 words (excluding \[bracket\] notes)*
+*530 words*
 ## **3. Short Scene**
 *Limit: 2 pages maximum, screenplay format*
 *Question: A cinematic scene between two people that reveals something about the characters. One-sentence description of each character allowed; essential details only; no backstory but incorporate behavior; no cover page.*
-Title: THREE COATS
-RIYA (24), a line producer with a cash pouch strapped under her jacket and a phone that never stops.
-MR. BHARUCHA (81), who owns the house, wide awake at 2 a.m. in a pressed dressing gown.
-**INT. BHARUCHA BUNGALOW, DADAR PARSI COLONY, MUMBAI - NIGHT**
-The drawing room has been turned into 1976. Walls painted a deep bottle green. A rotary phone. A Murphy radio. Lace on every surface.
-Crew coil cables. The wall clock says 2:05.
-Mr. Bharucha sits in the only chair that is actually his. Riya crouches beside it with a clipboard.
-RIYA
-One more night. Same hours. Same rate.
-BHARUCHA
-No.
-RIYA
-Fifty percent more.
-BHARUCHA
-No.
-RIYA
-Double. And we fix your gate.
-BHARUCHA
-The gate isn't broken. It has opinions.
-Her phone buzzes. She kills it. She counts notes from the pouch onto the lace tablecloth, fast, without looking.
-He isn't watching the money. He's watching the wall. He touches it. Green comes off on his fingertip. Still tacky.
-BHARUCHA (CONT'D)
-When do you paint it back?
-RIYA
-After wrap. White. Two coats. It's in the contract.
-BHARUCHA
-Two.
-RIYA
-Two.
-BHARUCHA
-It took me three. The green kept coming through.
-Riya stops counting. Looks at the wall. At his finger.
-She sweeps the notes back into the pouch.
-BHARUCHA (CONT'D)
-So that's a no.
-RIYA
-Same hours. Same rate. And the walls stay green.
-BHARUCHA
-That's not in the contract.
-RIYA
-I'll write a new one.
-She turns the clipboard to a blank page and writes.
-BHARUCHA
-You could have had it for nothing.
-RIYA
-Free gets cancelled. Paid doesn't.
-She counts out one night's rate onto the lace and slides the clipboard across. He signs, slowly. His signature takes up half the page.
-Her phone buzzes. She answers, standing.
-RIYA (CONT'D)
-(into phone)
-We have the house. No. He drove a hard bargain.
-She hangs up and turns to the crew.
-RIYA (CONT'D)
-Wrap the lights. Nobody touches the walls.
-Mr. Bharucha looks at the green on his fingertip. He doesn't wipe it off.
-*345 words, about 1.9 screenplay pages*
+Title: UMBRELLA DUTY
+SHEVANTABAI (72), a farmer from the village below, with a black umbrella and nowhere else to be.
+SAGAR (24), a crop-insurance verifier from Pune, with a raincoat still in its packet.
+**EXT. WEATHER STATION, DONGARWADI, BEED - AFTERNOON**
+A hilltop. A solar panel. A rain gauge in a padlocked steel-mesh cage.
+Up here the grass is green. Below, brown fields run to the horizon, and a temple loudspeaker prays for rain.
+One cloud.
+Shevantabai sits on a stone, holding her umbrella over the cage.
+Sagar pushes his scooter up the track.
+His tablet: STATION SERVES 23 VILLAGES. RAINFALL SINCE 1 JUNE: 3.5 MM. FLAG: VERIFY BEFORE PAYOUT.
+He looks at the cloud. At the umbrella. At her.
+SAGAR
+Namaskar, Aaji.
+She nods. The umbrella doesn't.
+He takes off his helmet.
+One-handed, she unknots a cloth and holds out a bhakri.
+SHEVANTABAI
+(eyes on the cloud)
+Kha.
+SAGAR
+Duty chalu aahe.
+She keeps holding it out. He takes it.
+The tablet: STEP 4. PHOTOGRAPH FUNNEL. NO OBSTRUCTIONS.
+He glances at the umbrella. She lifts it exactly out of frame.
+On screen: a dry funnel, her bare toes at the edge. He steps left until they're gone, shoots, taps SUBMIT. A green tick: FUNNEL DRY.
+A fat drop lands on the green tick. Then a thousand more.
+She gets wet. The gauge doesn't.
+Sagar rips the packet open with his teeth and holds the raincoat over her.
+They stay like that: the rain on him, the raincoat on her, the umbrella on the gauge.
+The cloud swings out, dragging its tail over the cage. Rain darkens the fields of the village below. The rest stay brown.
+The loudspeaker stops mid-prayer.
+Shevantabai stands, watching her fields. She opens her hand.
+The umbrella cartwheels downhill after the rain.
+She follows it, face up, in no hurry.
+Sagar holds the raincoat over an empty stone.
+The gauge starts to click.
+He checks the green tick. He looks down at the other twenty-two villages, still brown. He moves the raincoat over the cage. The clicking stops.
+Far below, her umbrella lies upside down in a furrow, filling with rain.
+*356 words, about 2.0 screenplay pages*
 ## **4. Concept**
 *Limit: 1 page, double-spaced (about 275 words)*
 *Question: One concept for a feature-length script, narrative film, or documentary you would like to develop. Treatment or prose format.*
-**THE KILN SCHEDULE** (feature drama)
-Pooja Prajapati, 24, keeps the accounts for a cooperative of six potter families on the edge of Gurugram, in a school exercise book. Their kiln is cracked, bound with wire, and fires six hundred pieces every four days if the weather holds.
-Then a luxury hotel on Golf Course Road orders eight thousand kulhads, planters and diyas for its new restaurant: eleven lakh rupees, more than the cooperative earns in two years. The contract has a five-week deadline and an exclusivity clause. For a year they could sell to no one else: not the chai stalls of Sadar Bazaar, not the Diwali traders, not the temple that has bought their lamps for forty years.
-Her brother Sonu wants to sign tonight. Eleven lakh is a new kiln and his way out. Their aunt, Kamla Bua, who has run the firing schedule for thirty years and can read temperature in the colour of smoke, refuses. The kiln can't do it, she says, and a buyer who wants everything for a year will want nothing in the second.
-Pooja does what accountants do. On the courtyard wall, in chalk, she writes every family's numbers: wheels, hands, firings, debts, the weeks their children have exams. For the first time the six families argue with numbers instead of with each other.
-She photographs the wall, walks into the hotel's purchasing office and negotiates a pilot: eight hundred pieces, no exclusivity, half paid in advance, enough to reline the kiln.
-The final image: Kamla Bua, chalk in hand, adds one line to the wall, the date of the next firing.
-*270 words (excluding \[bracket\] notes)*
+**WINTEROVER** (feature drama)
+March 1984. Twelve soldiers and scientists begin India's first Antarctic winter at Dakshin Gangotri, a station built in eight weeks. The radio is their only line home. Everything runs on one diesel generator, kept alive by Havildar Malkiat Singh, 41, an army mechanic who sleeps beside it. If it stops, the station freezes in hours.
+In June, with the sun gone, the radio reports that the army has stormed the Golden Temple and Sikh soldiers have mutinied. The mess goes quiet when Malkiat walks in. Someone padlocks the fuel store. Major Anand Rao, the commander, keeps the key. Malkiat asks him for it every six hours.
+On 31 October Indira Gandhi is shot by two Sikh bodyguards, and Delhi mobs begin hunting Sikhs. The Major announces her death and tells everyone but Malkiat the rest. Malkiat's wife and sons are in east Delhi. The relief ship has not left Goa, and a mechanic thinking about Delhi could freeze them all. The radio operator, Neil Fernandes, edits the bulletins and rations calls home. When Malkiat's turn comes, the Major invents a solar storm.
+That night the Major takes Malkiat his dinner and hears the BBC on a transistor behind the generator. Malkiat has been listening since June. He has kept them warm anyway.
+The sun stops setting. The ship is still three weeks out, and eleven men share one hut with the man they lied to.
+At midnight, in full sun, Malkiat sits alone at the radio, waiting for Delhi to answer. Outside, the other eleven wait on the ice so the hut is his for as long as it takes.
+*273 words*
 ## **5. Video self-portrait**
 *Limit: 1 to 2 minutes*
 *Question: Show and tell us about yourself in your own voice; not a reiteration of why you want to be admitted. Phone footage is fine. (Give a shot plan and talking points.)*
-Shot plan (phone): morning in Gurugram from my window or roof; my hands cleaning a camera lens; the city's towers next to its old neighbourhoods; a football kicked against a wall; a quick shot of a call sheet or notebook; me speaking to camera in one or two places that matter to me.
+Shot plan (phone): morning in Gurugram from my window or roof; my hands cleaning a camera lens; a page of my notebook; me speaking to camera in one or two places that matter to me.
 Talking points:
-• Something in Gurugram I notice that visitors miss.
-• Why I carry a camera.
-• Photographing the potters' work during COVID: \[one real moment\].
-• What makes me laugh on a set.
-• One thing about me people don't expect.
-Final shot: \[closing image\].
-*97 words (excluding \[bracket\] notes)*
+• Gurugram, where I grew up and learned to use a camera.
+• Why I carry a camera: studio photography with Nitin Rai and press photos at Suncity MUN.
+• The Classroom: a web series made with school friends, and the shoot day I ended up playing the sports teacher.
+• Mitti to Matka during COVID: photographing the potters' pots so buyers could see them.
+• Camera assistant now: what I watch on a set from beside the camera.
+Final shot: back on the roof, the city in the evening.
+*127 words*
 ## **6. Visual submission (choose one)**
 *Limit: one film up to 15 minutes, or up to 10 photographs*
 *Question: Choose which existing work to submit and write a short description of it.*
-\[Title, year, my role, running time.\]
-*0 words (excluding \[bracket\] notes)*
+One episode of The Classroom, a five-part web series made with friends while at Suncity School and released on YouTube. We produced it ourselves. Role: co-director, cinematographer, editor and organiser (found places to shoot, scheduled shoots around exams, kept classmates involved).
+*41 words*
 ## **7. Two main reasons for applying to Tisch**
 *Limit: choose two from: reputation of Tisch; experience and reputation of faculty; New York City's importance in arts and culture; current student work; alumni work; prospective network of collaborators; other.*
 1\. Prospective network of collaborators.
 2\. The experience and reputation of Tisch faculty.
-*13 words (excluding \[bracket\] notes)*
+*13 words*
 ## **8. Stern Essay 1: Professional aspirations**
 *Limit: 500 words, double-spaced*
 *Question: What are your short-term career goals? Why is the Stern MBA the necessary next chapter in your professional story? Please be specific.*
-My short-term goal is to work in development and production at a company that makes films and series for Indian and international audiences, in a role where I learn how projects are chosen, financed, packaged and sold. \[My target company or role.\] Within a few years I want to move from working on other people's sets to building projects: choosing material, putting financing together and taking them to market.
-I trained as a cinematographer at Whistling Woods International and work in the camera department. I was a camera assistant on Matchbox Studios' Khauf, and since October 2025 I have held the same role on a project under Boney Kapoor \[title\]. From there I have seen how decisions made before a shoot, about the schedule, budget, locations and cast, shape what happens on set. I have also done planning work before a shoot, outside the camera department. For Early Man Productions I was on the direction team of a Finolex commercial and prepared its PPM deck, production sheets and cast references. At Growth Jockey I planned the equipment and script for a Sleepyhead Mattresses shoot, and the offer and audience it was aimed at. None of this work was in a production department, and none of it taught me how media companies make money, how a project is valued and financed, or how to manage a team and a balance sheet at the same time.
+My short-term goal is to work in development and production at a company that makes films and series for Indian and international audiences, in a role where I learn how projects are chosen, financed, packaged and sold. Within a few years I want to move from working on other people's sets to building projects: choosing material, putting financing together and taking them to market.
+I trained as a cinematographer at Whistling Woods International in Mumbai and work in the camera department. I was a camera assistant on Matchbox Studios' Khauf, and since October 2025 I have held the same role on a project under producer Boney Kapoor. From there I have seen how decisions made before a shoot, about the schedule, budget, locations and cast, shape what happens on set. I have also done planning work before a shoot, outside the camera department. I prepared the PPM deck, production sheets and cast references, and ran the costume trials, as part of the direction team on a Finolex commercial made by Early Man Productions. At Growth Jockey I planned the equipment and script for a Sleepyhead Mattresses shoot, and the offer and audience it was aimed at. None of this work was in a production department, and none of it taught me how media companies make money, how a project is valued and financed, or how to manage a team and a balance sheet at the same time.
 The Stern MBA is the necessary next chapter because my long-term goal is a business. I plan to build a creative studio of 8 to 30 people in India that develops its own slate of films and series, and I want it to hire talented people without film-family connections, train them, pay them fairly and trust them with responsibility early. Running it will mean structuring deals, managing cash across long projects, choosing which projects and markets to pursue, and building a team that stays. I need finance, strategy and leadership training for that, and I want it before other people's jobs and money depend on my decisions. The MBA/MFA is designed for this: the first year is mostly at Stern, followed by producing courses at Tisch that include packaging and the structure and management of an independent film company, and a market course that ends at the Cannes Film Festival.
-My school subjects were economics, business studies and accountancy, and as media manager for Mitti to Matka, a COVID initiative supporting Gurugram's potters, I handled the administration and treated the money as a trust, because it was meant for the potters' families. Stern would turn that groundwork into professional skill, and doing it alongside Tisch means I would learn the business and the craft in the same years.
-*447 words (excluding \[bracket\] notes)*
+My school subjects were economics, business studies and accountancy. As media manager for Mitti to Matka, a COVID initiative supporting Gurugram's potters, I handled the administration and treated the money as a trust, because it was meant for the potters' families. Stern would turn that groundwork into professional skill, and doing it alongside Tisch means I would learn the business and the craft in the same years.
+*454 words*
 ## **9. Stern Essay 2: Pick Six**
 *Limit: intro of up to 3 sentences; six images, each with a one-sentence caption*
 *Question: Six images that illustrate your interests, values, motivations, perspective and personality.*
-Introduction: I grew up in Gurugram, India, and now work as a camera assistant. These images come from my city and from the sets I have worked on.
-1\. \[Photo from my camera work.\] Caption: I have been looking at things through a camera since school, when Nitin Rai taught me studio photography.
-2\. \[Photo from Mitti to Matka.\] Caption: During COVID I photographed potters' work for Mitti to Matka, and how well I shot a pot could change what a family earned.
-3\. \[Football photo.\] Caption: In football we trusted each other to cover our parts, and we finished first in Gurugram in 2019.
-4\. \[Photo from The Classroom.\] Caption: The Classroom was a web series my friends and I made at school, and I produced it before I knew the word.
-5\. \[Photo from a set.\] Caption: On sets in Mumbai I saw from behind the camera that many creative problems begin as planning problems, and that is why I want to produce.
-6\. \[Photo of old and new Gurugram.\] Caption: In Gurugram old villages sit beside new towers, and many of the stories I want to produce come from places like this.
-*169 words (excluding \[bracket\] notes)*
+Introduction: I grew up in Gurugram, India, and now work as a camera assistant. These images come from my city, my school years and the sets I have worked on.
+1\. Image: a studio fashion photograph I shot at the Raghu Rai Center for Photography. Caption: I have been looking at things through a camera since school, when I studied studio fashion photography with Nitin Rai.
+2\. Image: a potter's work photographed for Mitti to Matka. Caption: During COVID I was media manager for Mitti to Matka, which bought and auctioned Gurugram potters' work at fair prices.
+3\. Image: my third-place trophy from Clic(k)hé. Caption: I won third place in Clic(k)hé, a photography competition at Cyber Buzz 2018–19, Amity International School, Sector 43, Gurugram.
+4\. Image: a still from The Classroom. Caption: The Classroom was a web series my friends and I made at school, and I produced it before I knew the word.
+5\. Image: a set I worked on, seen from beside the camera. Caption: On the sets I have worked on, I saw from behind the camera that many creative problems begin as planning problems, and that is why I want to produce.
+6\. Image: an old village beside new towers in Gurugram. Caption: Gurugram is still home, a city where old villages sit beside new towers.
+*220 words*
 ## **10. Stern Essay 3: Additional information (optional)**
 *Limit: 500 words, double-spaced*
 *Question: Anything else the committee should know (hardships, gaps, academic explanations, test plans).*
-\[My GMAT or GRE plan.\]
-*0 words (excluding \[bracket\] notes)*
+No additional information.
+*3 words*
+
 # **14. Columbia University School of the Arts, MFA in Film, Creative Producing concentration**
 **Deadline: 15 December 2026, 11:59 pm ET.** The application is not started yet. These prompts come from the official site.
 ## **1. Autobiographical essay**
 *Limit: 4 to 6 double-spaced pages (about 1,100 to 1,600 words)*
 *Question: Describe your background, artistic experiences, creative influences, and professional objectives.*
-**Background.** I grew up in Gurugram in the years it was being built, with new towers going up around the old villages. \[One childhood image of that change.\] Nobody in my family works in film or photography. \[One line about my family.\]
-At Suncity School I studied commerce: economics, business studies, accountancy, English and physical education. I liked the logic of it, the way a balance sheet shows how a business is really doing. I also played football seriously, in teams that finished first in Gurugram in 2019 and fourth in Haryana in 2020. Football is where I learned to trust other people to cover their part, and to change the plan when the game changed.
-**Artistic experiences.** I came to images through photography. I studied studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography. \[One thing he taught me.\] In the studio every frame was a set of decisions about light, distance and what to leave out, and I learned to take my time over them. From 2020 to 2022 I was the International Press Photographer for Suncity MUN, which asked for the opposite: a few seconds to find a picture in a crowded room.
-My first film work was The Classroom, a five-part web series that a group of us made at school and released on YouTube. Friends who were willing to give up their weekends acted in it. I co-directed, shot and edited it, and because nobody else was going to, I also organised it: I found places to shoot, scheduled shoots around exams and kept classmates involved. \[One moment from The Classroom.\] We finished all five episodes. It was a few years before I learned that this part of the work is called producing.
-In 2020, while I was still in school, COVID closed Gurugram's markets and the local potters lost their income. I joined Mitti to Matka, an initiative set up to help them. We bought and auctioned their pots at fair prices, worked with them on designs that city buyers wanted, and supplied food and sanitary supplies to their families. I was the media manager: I made the photographs, videos and graphics, ran the website and handled the administration. \[The moment I remember most.\]
-I had picked up a camera because I liked how images looked. At Mitti to Matka, buyers saw the pots through my photographs on our website, so how well I shot them affected what a family earned that week. The money we handled was meant for those families, so I treated it as a trust. I also felt responsible to them, because they had started to depend on us. There was a lot we could not fix, and I learned to be honest with the families about that while we kept selling their pots and delivering supplies.
-From 2022 to 2025 I studied at Whistling Woods International in Mumbai and completed a B.Sc. in Filmmaking, Cinematography and Direction. I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films, on RED, Sony Venice and Sony FX and Alpha cameras, and I handled DIT and colour in DaVinci Resolve. Camera work trained my eye, and it let me see, from the camera department, how productions are actually run. Many of the problems on set had started earlier, for example with a location that was never properly confirmed. \[One example from a set.\] As a cinematographer I could only work around them.
-Over the same years, in April 2023, I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. In 2024 I joined the direction team on a Finolex commercial for Early Man Productions, where I built the production sheets, cast references and PPM deck and ran costume trials. In April 2024, for Growth Jockey in Gurugram, I planned a shoot for Sleepyhead Mattresses: the equipment, the script, and the offer and audience the film was aimed at. Since October 2025 I have been a camera assistant on \[title\], a project under producer Boney Kapoor. \[What this job has taught me.\]
-**Creative influences.** Photography came first. At the Raghu Rai Center for Photography I came to know Raghu Rai's pictures of India, which showed me how much of a street one frame can hold. In film, the work that has taught me most about producing is The Lunchbox, a quiet Mumbai story. It showed me how a very local story can reach audiences far beyond India: through a co-production across several countries, a festival launch and a worldwide release. All We Imagine as Light has done the same more recently. I study the producers behind films like these, above all Guneet Monga, who produced The Lunchbox. She came into Indian cinema without a film family and built a company that takes Indian stories abroad. Beyond film, my influences are people I have watched get things done with very little: the potters who kept working through the lockdown, crews who got a bad shoot day back on track, and the friends who acted in our web series because we asked them to. They are the people I want to make stories about.
-**What I want to make.** My feature treatment follows a girls' football team in a Gurugram urban village. When the village's last open ground is sold for a mall, the team plays a district final for a new pitch. SECONDS, my writing sample, follows a sixteen-year-old who fires one last kiln before her family's workshop is demolished. A third story I want to produce would follow four outsiders running a production company from a rented flat in Mumbai. They are specific to India, and they are about work, family, inheritance and who gets to be seen. I want to make them with humour and without pity.
+**Background.** I grew up in Gurugram. Nobody in my family works in film or photography, so when I started making things with a camera, there was no one at home to ask how a set worked.
+At Suncity School I studied commerce: economics, business studies and accountancy. I finished class 12 there in 2021.
+**Artistic experiences.** I came to images through photography. From 2019 to 2020 I studied studio fashion photography under Nitin Rai at the Raghu Rai Center for Photography. I was also the International Press Photographer for Suncity MUN. In 2018–19 I took third place in the Clic(k)hé photography competition at Cyber Buzz, held at Amity International School in Gurugram.
+My first film work was The Classroom, a five-part web series that a group of us made at Suncity School and released on YouTube. Friends acted in it. I co-directed, shot and edited it, and because nobody else was going to, I also organised it: I found places to shoot, scheduled shoots around exams and kept classmates involved.
+On one shoot day an actor dropped out at the last second. Instead of calling the day off, we made up a new character on the spot, a funny sports teacher, and I played him. Our scriptwriter was at home, so we worked together remotely to turn the lines written for the missing role into lines for the new one. For the costume I found a standard tracksuit that cost us nothing, and the episode's story still held together. We finished all five episodes. I did not yet have a word for the organising side of the work.
+In 2020, while I was still in school, COVID made the sales of Gurugram's local potters collapse. I joined Mitti to Matka, a Gurugram initiative supporting them. We bought and auctioned their pots at fair prices, worked with them on designs, and supplied food and sanitary supplies to their families. I was the media manager: I made the photographs, videos and graphics, ran the website and handled the administration.
+At Mitti to Matka, buyers saw the pots through my photographs on our website, so how well I shot them affected what a family earned that week. The money we handled was meant for families who had started to depend on us, and that made me careful with every rupee. We could not undo what the lockdown had done, so we kept doing the part we could: selling their pots and delivering supplies. I stayed on as media manager until 2021.
+At Whistling Woods International in Mumbai I completed a B.Sc. in Filmmaking, Cinematography and Direction in 2025, a degree awarded by the Tata Institute of Social Sciences (TISS). I worked as an assistant cinematographer on five short films and as lead or assistant cinematographer on independent films, and I handled DIT and colour as well. Camera work trained my eye. Many of the problems that reached the camera had started earlier, in decisions about the schedule, the budget, locations or cast. As a cinematographer I could only work around them.
+In April 2023, while still a student, I was a camera assistant on Khauf at Matchbox Studios under Pankaj Kumar. In 2024 I joined the direction team on a Finolex commercial for Early Man Productions, where I prepared the production sheets, cast references and PPM deck and ran costume trials. In April 2024, for Growth Jockey in Gurugram, I planned a shoot for Sleepyhead Mattresses: the equipment, the script, and the offer and audience the film was aimed at. Since October 2025 I have been a camera assistant on a project under producer Boney Kapoor.
+**Creative influences.** Photography came first, at the Raghu Rai Center for Photography. Beyond that, my influences are people I have watched get things done with very little, like the potters we worked with at Mitti to Matka and the friends who acted in our web series because we asked them to.
+**What I want to make.** The three pieces in this application are the kind of stories I want to produce. ROLL CALL, my writing sample, follows a school drill master in Rajasthan in 1951 who must record twenty women's own names for India's first electoral roll, though they will only speak to him from behind a purdah screen. ONLY ONCE, my film prompt scene, leaves a young wife stuck near the top of a ferris wheel at the Gangasagar Mela, facing the mother-in-law she and her husband came to leave behind. My feature treatment is set in Mizoram in 2007, when the bamboo flowers and the rats swarm, and follows a boy who discovers that his grandfather is hoarding rice. Each of them is about who a family or a country counts and who it leaves out, and I want to make them with humour and without pity.
 **Professional objectives.** I want to decide which stories get made and set them up to be made well. So far I have organised a school series, planned one shoot and done direction-team paperwork on another, and I have worked on many more in the camera department. I have not yet worked in a production office. I have not worked with a writer over many drafts until a script is ready, or handled the budgeting, scheduling, financing, distribution and marketing that decide whether a film gets made and reaches an audience. That is what I am applying to Creative Producing to learn.
-In the first year at Columbia, producers write and direct short films alongside the writers and directors, and produce a classmate's film. I want to start from the story that way. Later come feature film development and financing, the business of film, and a thesis film I would produce on my own. One of Columbia's graduates, Apoorva Charan, is an Indian-born producer whose film Joyland won a prize at Cannes, and hers is the kind of career I want.
+In the first year at Columbia, producers write and direct short films alongside the writers and directors, and produce a classmate's film. I want to start from the story that way. Later come feature film development and financing, the business of film, and a thesis film I would produce. One of Columbia's graduates, Apoorva Charan, is an Indian-born producer whose film Joyland won a prize at Cannes, and hers is the kind of career I want.
 After the degree I plan to work in development and production for a few years, then build a creative studio in India of 8 to 30 people. It would develop and produce its own slate of films and series for audiences in India and abroad. I want it to hire for talent rather than connections, and to give newcomers paid roles, responsibility and someone willing to explain how the work is done.
-*1185 words (excluding \[bracket\] notes)*
+*1051 words*
 ## **2. Dramatic writing sample**
 *Limit: 10 pages maximum, screenplay format with dialogue; log line required*
 *Question: Original work (no adaptations). Not prose or a stage play. Must differ from the feature treatment and any video submission.*
-Title: SECONDS
-Log line: On the morning her family's Gurugram pottery is due to be bulldozed, a sixteen-year-old who keeps its accounts, and whose own pots have always sold as cheap "seconds", secretly fires one last kiln of her work before the noon deadline, while her grandfather refuses to help and the demolition supervisor keeps finding reasons to wait.
+Title: ROLL CALL
+Log line: Rajasthan, 1951: a bellowing school drill master has until sunset to get twenty women behind a purdah screen to say their own names for India's first electoral roll, but the eldest has forgotten hers, so the women begin choosing new ones.
 FADE IN:
-**INT. POOJA'S HOUSE, KUMHAR GALI, GURUGRAM - NIGHT**
-A school exercise book, open on a tin trunk. Columns ruled in blue ballpoint: MATKA. SURAHI. DIYA. KULHAD. The last column is headed SECONDS. Every figure in it is 40.
-A sooty thumb turns the page. A fresh heading: LAST FIRING. Under it: 14.
-POOJA (16), school sweater over a salwar kameez, slides a bundle out from under a charpai. It clinks.
-She freezes.
-On the charpai, NANAJI (70) sleeps with his mouth open. Or seems to.
-**EXT. COURTYARD - CONTINUOUS**
-Across the highway, the glass towers of Cyber City glow blue. On this side, a lane of low brick houses, half already rubble. Every wall still standing carries a red painted X and a number.
-In the corner squats a brick kiln, its mouth black, its sides patched with mud.
-Pooja unwraps the bundle. Fourteen tall water jars, narrow at the neck, the walls pared so thin they look weightless. Around each shoulder, a ring of thumbprints pressed into the clay.
-She stacks them in the kiln one by one, testing each footing twice. Packs straw around them. Dung cakes. Strikes a match.
-INSERT - LEDGER
-In pencil: 4:10. LIT.
+**EXT. SARAF HAVELI, SHEKHAWATI - AFTERNOON**
+SUPER: Rajasthan, 1951.
+A merchant's mansion in a village of sand, its outer walls painted from plinth to parapet with elephants, gods and Englishmen. The men who paid for the paint live in Calcutta.
+Two bicycles creak up the lane. The TEHSIL PEON (60s), a brass badge on his belt, unstraps a cloth-bound register from his carrier and hands it to BHANWAR LAL (40s), drill master at the government school: khaki shorts, white shirt, canvas shoes, waxed moustache, a whistle on a cord.
+TEHSIL PEON
+Last house, last day. Twenty women, no men. I'm back at sunset, Masterji. Names or no names.
+Bhanwar Lal squints at the sun, measuring what is left of the day. He bangs the iron knocker.
+BHANWAR LAL
+(parade-ground voice)
+Ram Ram sa! Enumerator, Election Commission of India!
+The great door opens a crack. Nobody behind it.
+VOICE (O.S.)
+Shoes.
+He unlaces his canvas shoes. One sock is darned at the heel in a different colour.
+**INT. SARAF HAVELI, BAITHAK - CONTINUOUS**
+The men's sitting room: white floor mattresses, bolsters, and more paint. One wall is painted in three bands: Krishna and his cows at the bottom, a motorcar with a turbaned chauffeur in the middle, and along the top a steam train full of Englishmen. The wall opposite is a single screen of carved sandstone, a lattice of eight-pointed stars. Behind it, the rustle of a great many people keeping quiet.
+Bhanwar Lal turns his back on the screen. He sits cross-legged at a low desk, facing the painted wall, and lays out the register, an ink bottle, a nib pen and a booklet: INSTRUCTIONS TO ENUMERATORS.
+Behind him, the afternoon sun pours through the jaali and lays a carpet of star-shaped light across the floor. The stars stop a yard behind him.
+INSERT - REGISTER
+ELECTORAL ROLL, 1951. HOUSE 14, SARAF HAVELI. Twenty printed lines: w/o Murlidhar Saraf. w/o Gopal Saraf. w/o late Shivratan Saraf. And on the last line, m/o Murlidhar Saraf. Every line is struck through in red. A red stamp in the margin: OWN NAME NOT GIVEN. TO BE DELETED.
+At the foot, in pencil: 0/20.
 BACK TO SCENE
-Smoke climbs, black, toward the towers.
-**INT. POOJA'S HOUSE - DAWN**
-A shaving mirror hangs on a nail, dead centre of a red X. Nanaji, in his vest, lathers his jaw with a brush worn down to a stub.
-Pooja comes in, black to the wrists.
-POOJA
-Tempo comes at twelve. I've packed the firsts. Your trunk is the only thing left.
-NANAJI
-Then it goes last.
-POOJA
-The fire needs someone at the mouth while I find wood. Ten minutes.
-NANAJI
-I don't work Thursdays.
-POOJA
-Since when?
-NANAJI
-Since today.
-He draws the razor down one cheek. In the mirror, smoke rolls off the kiln. He watches it.
-NANAJI (CONT'D)
-Whose pots?
-POOJA
-Mine.
-NANAJI
-Seconds.
-POOJA
-Mine.
-NANAJI
-Then it's your fire.
-He starts on the other cheek. She goes.
-**EXT. KUMHAR GALI - MORNING**
-A pickup grinds into the lane. Four LABOURERS jump down with crowbars and a ladder. Then AMIT (24): reflective vest over a pressed shirt, three pens in the pocket, a hard hat he carries rather than wears, a phone at his ear.
-AMIT
-(into phone)
-Haan sir. Starting now, sir.
-He points at the electric pole. A labourer climbs the ladder and snips the cable. The last streetlight in the lane goes out.
-Amit sniffs. Smoke.
-**EXT. COURTYARD - CONTINUOUS**
-Pooja feeds dung cakes into the kiln mouth. Amit stops inside the gate.
-AMIT
-You can't have a fire here.
-POOJA
-It's a kiln. It's for fire.
-AMIT
-Everyone else left on Sunday.
-She pulls a folded notice from the ledger and flattens it on her knee.
-POOJA
-"Premises to be vacated by twelve noon." By twelve. It's seven fifteen.
-AMIT
-"By" means before.
-POOJA
-"By" means up to. If a bill is due by the tenth, nobody pays on the third.
-Amit looks at the kiln. He crouches and lays his palm flat on the brick. Holds it there.
-AMIT
-Smoke's still black. Your dung is wet. Lit at four?
-She stares at him.
-POOJA
-Ten past.
-AMIT
-It won't be hot enough till ten. It won't be cool till night.
-POOJA
-It doesn't have to be cool. It has to be done.
-AMIT
-Be gone by eleven. I'm saying that as a favour.
-At the gate, BALLU (40s), the foreman, shoulders his crowbar.
-BALLU
-Shuru karein, sir?
-AMIT
-Other end of the lane.
-BALLU
-Other end is already down.
-AMIT
-So check it's down properly.
-Ballu looks at the rubble at the far end. Looks at Amit. Goes.
-**EXT. KUMHAR GALI - LATER**
-The labourers wrench doors and window frames out of the condemned houses and stack them on the pickup. A blue door still wears a 2017 calendar, the goddess Lakshmi smiling.
-Pooja pulls the blue door off the stack and drags it away.
-BALLU
-Oye\! That's salvage. Contractor's property.
-She keeps dragging. Amit, on the phone, watches her go.
-He strolls to the stack and taps three window frames with his pen.
-AMIT
-(to Ballu)
-These are rotten. Not worth the diesel. Throw them over there.
-"Over there" is Pooja's courtyard wall. Ballu examines the frames. They are not rotten. He heaves them over the wall anyway.
-A crash from the far side. A pause. Then the sound of wood being dragged.
-**EXT. COURTYARD - LATER**
-Nanaji, shaved, in a clean white kurta, sits on his charpai in the shade. A pan of chai boils on a kerosene stove beside him. At his elbow, a tower of kulhads.
-The labourers squat around him, drinking.
-Pooja, a wet dupatta wound over her head, splits a window frame with an axe and feeds it to the kiln.
-POOJA
-You'll make chai for the men breaking your house.
-NANAJI
-A man shouldn't break a house on an empty stomach.
-POOJA
-And you won't hold one stick for me.
-NANAJI
-No.
-POOJA
-If they come out right, you'll say it was your kiln.
-NANAJI
-It is my kiln.
-POOJA
-For three more hours.
-Ballu drains his kulhad and smashes it on the ground. The others do the same. Nanaji nods. Correct.
-Amit takes a kulhad and drinks. He doesn't smash it. He turns it over and flicks the base with his fingernail. It rings.
-Nanaji watches.
-NANAJI
-Which village?
-AMIT
-Farrukhnagar.
-NANAJI
-Kumhar?
-AMIT
-My father. Before the expressway.
-He smashes the kulhad and puts his hard hat on.
-AMIT (CONT'D)
-Babuji, your tempo is waiting.
-NANAJI
-When your machine comes, I'll go. I want to see what it looks like.
-Amit turns to his crew.
-AMIT
-Helmets. Where are your helmets?
-The labourers look at each other. None of them has ever owned a helmet.
-AMIT (CONT'D)
-Nobody touches a wall without a helmet. Ballu, get them from the site office.
-BALLU
-Site office is in Manesar.
-AMIT
-Then take the bike.
-INSERT - LEDGER
-10:05. WHITE SMOKE.
-**EXT. COURTYARD - LATER**
-The smoke has thinned to white. The air above the kiln wobbles. Pooja's eyebrows are singed. The wood is gone.
-She looks around the bare courtyard. Then at the house. She goes inside.
-The fire at the kiln mouth sinks from yellow to orange.
-On his charpai, Nanaji watches it sink. He gets up. Walks to the kiln. Picks up a stick of kindling and holds it over the mouth.
-He sets it down on the brick, within reach, and goes back to his charpai.
-At the gate, Amit has seen all of it.
-Pooja comes out dragging her own charpai, rope and frame. She stamps on one leg until it snaps.
-**EXT. KUMHAR GALI - DAY**
-A yellow JCB noses into the mouth of the lane, horn blaring. Amit's phone rings. He lets it ring twice.
-AMIT
-(into phone)
-Sir, the cables are still live. Bijli people haven't come. No sir, not near a live line.
-Behind him, the cable his own man cut that morning hangs dead from the pole.
-AMIT (CONT'D)
-(into phone)
-Twelve. Twelve sharp.
-He hangs up and waves the JCB back. It reverses, beeping.
-He turns. Pooja is at her gate, sooty, holding a charpai leg.
-AMIT (CONT'D)
-I said eleven.
-POOJA
-You said it as a favour. Favours aren't binding.
-She looks at the dead cable. Then at him.
-POOJA (CONT'D)
-Why?
-AMIT
-What are you firing?
-POOJA
-Seconds.
-AMIT
-Then why fire them?
-POOJA
-Unfired, they're mud. Fired, they're forty each. Fourteen pieces, five hundred and sixty.
-AMIT
-And if they crack?
-POOJA
-Then I'll know.
-He checks his watch.
-AMIT
-Eleven fifty-five. Not one minute after.
-**EXT. COURTYARD - DAY**
-The JCB idles at the gate. Down the lane, the tempo waits, loaded with the family's matkas bedded in straw. Nanaji sits on his tin trunk beside it, hands on his knees, like a man waiting for a bus.
-Ballu putters up the lane on a motorbike with eight yellow helmets strapped to the back. Nobody looks at him.
-Pooja wraps her hands in wet rags and pulls the bricks from the kiln door, one at a time. Heat pours out.
-From inside: a small, clean tink.
-Then another. Tink. Tink. Cold air finding hot clay.
-She reaches in. The first jar: a crack runs from lip to foot. The second comes out in two pieces. The third has lost its ring of thumbprints, the whole shoulder sheared away.
-She lines them up on the ground. Six. Nine. Twelve. Every one cracked.
-The JCB sounds its horn. Amit raises a hand without turning round. The horn stops.
-Thirteen. Cracked.
-She reaches deep for the last one and draws it out in the rags. Turns it. Turns it again.
-Whole.
-On Amit's wrist, a beep. Twelve.
-Pooja sets the jar down among the broken ones. She doesn't look down the lane.
-Down the lane, Nanaji gets up off his trunk.
-He walks into the courtyard, unwinds the gamchha from his shoulder, wraps it around the jar and lifts it. Turns it slowly in the noon light. Flicks it with his fingernail.
-It rings. Long and clear.
-He says nothing. He carries it past the JCB, down the lane to the tempo, clears a space among the firsts, and beds the jar in straw between two big matkas.
-Pooja watches from the gate.
-Amit picks up one of the cracked jars. Turns it. Takes two twenties from his wallet and holds them out.
-POOJA
-It's cracked.
-AMIT
-Forty, you said.
-She takes the notes. Opens the ledger. Under SECONDS she writes: 1 @ 40.
-Amit tucks the jar under his arm, steps out of the gate, and waves the JCB in.
-The JCB lurches forward.
-**EXT. HIGHWAY - DAY (MOVING)**
-The tempo pulls out under the glass towers. In the back, Pooja and Nanaji sit in the straw.
-Behind them, through the dust, the JCB's arm comes down on the kiln.
-Nanaji doesn't look back. His hand rests on the neck of the jar.
-Pooja opens the ledger to a clean page and rules a new column. At the top, in capitals: POOJA. Under it: 1. Her pencil hovers where the price goes.
-She leaves it blank.
-The tempo hits a pothole. Two hands steady the jar. His, then hers.
+He puts the whistle to his lips and blows. Pigeons burst off the roof.
+BHANWAR LAL
+Saavdhaan! Roll call! I read the line, you answer with your name. Serial one, wife of Murlidhar Saraf!
+Silence.
+BHANWAR LAL (CONT'D)
+I can't hear you!
+A giggle behind the stone. Another. Then the whole screen shakes with laughter.
+VOICE (O.S.)
+Murlidhar is in Calcutta.
+SECOND VOICE (O.S.)
+So is Gopal.
+Then an old voice, used to being obeyed.
+DADI-SA (O.S.)
+Everybody in your book is in Calcutta.
+**INT. SARAF HAVELI, ZENANA GALLERY - CONTINUOUS**
+What he can't see, we can. A dozen women in view on the steps and mats, more on the stair behind, and one girl, veils thrown back because no man can see them. They have a perfect view of him: the bald patch, the darned sock.
+DADI-SA (80s) has the only cushion, a ring of keys at her waist and prayer beads moving through her fingers. BADI BAHU (50s) cracks betel nut with a brass cutter. Snick. The YOUNGEST BRIDE (21), henna still on her palms, has her nose to the stone. A WIDOW (30s) in a dark odhni, wrists bare, is the only one not laughing. DHAPU (40s) laughs hardest. CHHOTI (16) kneels at the very front, as if she were on the roll.
+**INT. SARAF HAVELI, BAITHAK / ZENANA GALLERY - LATER**
+The stars have reached him.
+BHANWAR LAL
+No name, no vote.
+BADI BAHU
+We've never had a vote.
+BHANWAR LAL
+That's why I'm here.
+Snick.
+BADI BAHU
+What does it do?
+BHANWAR LAL
+It chooses who governs.
+DHAPU
+We govern.
+Dhapu hoots at her own joke.
+CHHOTI
+Masterji, I'm twenty-one.
+BHANWAR LAL
+You sound fifteen.
+CHHOTI
+Sixteen!
+She claps a hand over her mouth. Too late.
+BHANWAR LAL
+Twenty-one is the law. Come back next election.
+Chhoti sits back on her heels, furious, and does not give up her place at the front.
+The stars climb his back.
+DADI-SA
+No woman's name has passed this jaali in a hundred years. Who's asking?
+BHANWAR LAL
+The Election Commission of India.
+DADI-SA
+Is he married? Let him send his wife's name first.
+Snick. Bhanwar Lal searches the booklet for the page about this. There isn't one.
+BADI BAHU
+He's in Delhi, Masterji. You're here. What's your wife's name?
+His pen stops in the air.
+BHANWAR LAL
+That is not the procedure.
+BADI BAHU
+What do you call her?
+A long pause.
+BHANWAR LAL
+Munna's mother.
+Dhapu shrieks. Even the widow smiles.
+BADI BAHU
+So she's a "mother of" too. Say hers, and we'll say ours.
+He looks to the painted Krishna for help. Krishna goes on playing his flute.
+BHANWAR LAL
+(barely)
+Kesar.
+BADI BAHU
+I can't hear you.
+He gets to his feet, fills his chest and faces the wall like a parade ground.
+BHANWAR LAL
+KESAR!
+The pigeons go up again. Somewhere in the village a dog starts barking and won't stop.
+Behind the jaali, nobody laughs.
+Badi Bahu puts down her cutter.
+BADI BAHU
+Champa.
+He sits, dips and writes.
+INSERT - REGISTER
+Above the red line through w/o Murlidhar Saraf, in a careful schoolteacher's hand: Champa. At the foot: 1/20.
+BACK TO SCENE
+Then they all come at once.
+VOICES
+Gomti! Sarbati! Phooli! Kamla!
+BHANWAR LAL
+Line mein! One at a time!
+DHAPU
+Dhapu.
+His nib hesitates over that one, then writes it.
+INSERT - REGISTER
+Names climb the page, one above each red line, faster than he can blot. At the foot: 15/20.
+BACK TO SCENE
+BHANWAR LAL
+Five left.
+BADI BAHU
+The rest wait for Ma-sa.
+He turns to the last line.
+BHANWAR LAL
+Mother of Murlidhar Saraf.
+Behind the jaali, every head turns to Dadi-sa. Her beads stop. She opens her mouth. Nothing comes.
+DADI-SA
+Wait.
+They wait. Somewhere the dog is still barking.
+DADI-SA (CONT'D)
+It was short. My mother called it from the roof at dusk.
+She frowns, the way she frowns at a key that won't turn.
+DADI-SA (CONT'D)
+Gone.
+Bhanwar Lal puts down his pen.
+BHANWAR LAL
+Somebody must know it.
+BADI BAHU
+Thirty years I've called her Ma-sa.
+YOUNGEST BRIDE
+Dadi-sa.
+DHAPU
+Sethani-ji.
+DADI-SA
+Ask my mother. She's been dead fifty years.
+The stars reach the back of his neck.
+YOUNGEST BRIDE
+Choose one, Dadi-sa. A pretty one.
+DADI-SA
+Koni. At eighty? Like a calf?
+YOUNGEST BRIDE
+Then I'll go first. Bijli.
+BHANWAR LAL
+That's not a name. That's lightning.
+YOUNGEST BRIDE
+It's mine now.
+BHANWAR LAL
+A false entry is an offence.
+BADI BAHU
+Is it false?
+He opens the booklet and runs a finger down the page. Turns it. Turns back.
+INSERT - BOOKLET
+"Enter the name of the elector." His finger stops under "name".
+BACK TO SCENE
+He looks at the whistle in his hand. Then he puts it to his lips, gives one short blast and bellows.
+BHANWAR LAL
+Bijli!
+BIJLI
+Haazir!
+He writes it. Then, in the margin of the government's instructions, he pencils a rule of his own: NAME: WHAT SHE ANSWERS TO.
+The widow leans to the stone.
+WIDOW
+Azadi.
+The gallery goes still.
+BHANWAR LAL
+Azadi!
+AZADI
+Haazir.
+He writes it. Now the rest want new ones.
+VOICE
+Calcutta!
+BHANWAR LAL
+That's a city.
+VOICE
+He's had it eleven years. My turn.
+He writes it.
+SECOND VOICE
+Bhanwari. After you, Masterji.
+The gallery howls. He goes red to the ears and writes it.
+DHAPU
+Strike mine.
+BHANWAR LAL
+Dhapu is written.
+DHAPU
+So strike it. You've had practice.
+BHANWAR LAL
+And write?
+DHAPU
+My father named me Enough. Write Maharani.
+He takes out a ruler, draws one neat line through Dhapu and writes Maharani above it.
+INSERT - REGISTER
+Bijli. Azadi. Calcutta. Bhanwari. Maharani. At the foot: 19/20. On the last line, m/o Murlidhar Saraf, the red line has nothing above it.
+BACK TO SCENE
+BIJLI
+Take Kesar, Dadi-sa. It's pretty.
+DADI-SA
+It's his wife's.
+**EXT. SARAF HAVELI, GATE - SUNSET**
+The peon leans his bicycle against a painted elephant and lights a lantern.
+TEHSIL PEON
+Masterji! Suraj dhal raha hai! Tehsildar sahib won't wait!
+**INT. SARAF HAVELI, BAITHAK / ZENANA GALLERY - CONTINUOUS**
+The stars have left him. They climb the painted wall, past the cows, past the motorcar, into the train.
+Bhanwar Lal stands the way he stands every school morning: heels together, register open on his forearm.
+BHANWAR LAL
+Roll call.
+He doesn't blow the whistle.
+BHANWAR LAL (CONT'D)
+Champa.
+CHAMPA
+Haazir.
+Down the page. Bijli. Haazir. Azadi. Haazir. Calcutta. Haazir. Bhanwari. Haazir. Maharani. Haazir. Nineteen names, nineteen answers through the stone, and with each one the stars climb higher up the train. At the front of the gallery, Chhoti mouths every Haazir.
+Line twenty. The print says m/o Murlidhar Saraf. He doesn't read it out. He waits.
+The stars reach the top of the wall.
+Far off across the rooftops, a woman calls a child in for the night, too far away to make out the name.
+Dadi-sa lifts her head.
+DADI-SA
+Gaura.
+He doesn't turn round.
+BHANWAR LAL
+Gaura.
+GAURA
+Haazir.
+He writes it.
+INSERT - REGISTER
+Gaura, above the last red line. At the foot: 20/20.
+BACK TO SCENE
+The light slides off the top of the wall. The room goes blue.
+He blots the page, closes the register and ties its string.
+**EXT. SARAF HAVELI, GATE - DUSK**
+He hands the register to the peon, who straps it to his carrier and rides off, lantern swinging. Bhanwar Lal sits on the step and laces his canvas shoes.
+**EXT. SARAF HAVELI, ROOF - CONTINUOUS**
+Along the parapet stand the women of the house, faces bare to the last of the sky, watching the lantern wobble away down the sand road with their names.
+Below, Bhanwar Lal wheels his bicycle out of the lane. He doesn't look up.
+Gaura watches the lantern until it is gone.
+SUPER: Nearly 2.8 million women were struck off India's first electoral rolls because they would not give their own names.
 CUT TO BLACK.
-*1794 words, about 10.0 screenplay pages*
+*1739 words, about 9.7 screenplay pages*
 ## **3. Film prompt (choose one of three)**
 *Limit: 2 to 3 pages, screenplay format*
 *Question: (a) INT. APARTMENT BUILDING HALLWAY - NIGHT. Hours after the incident, the Older Woman stands, still shaking her head, at the CRIME SCENE TAPE covering an open door in the hallway of her building. Her best friend clomps up the steps, joins her, and both can't help peering inside. (b) INT. DEPARTMENT STORE - DAY. As the Teenager scans the clothing racks, he's startled to see someone hastily stuffing merchandise into their backpack. He looks for a salesperson or guard, but the person slips away. He follows. (c) EXT. AMUSEMENT PARK - NIGHT. Alone in the open cabin of a ferris wheel, the Young Woman is frightened to hear the ride screech and stop. Voices below shout that it will be fixed in a few minutes, but things get worse when she turns to see the person sitting in the cabin hanging opposite hers.*
-Title: UNDER FIVE HUNDRED
-**INT. DEPARTMENT STORE - DAY**
-A Gurugram mall. Through the glass wall: a crane, a highway, a village's water tanks.
-SUNNY (15), school bag, rubber sandals, works along a rack of women's cardigans, a 500-rupee note folded into a tight little square in his fist. Price tag: 3,499. Back on the rack. Next: 2,999. Back.
-Across the aisle, a WOMAN (60s): cream linen, sunglasses in silver hair, a leather backpack. She snips the security tag off a silk scarf and stuffs it into the backpack. Another. A third. Fast.
-Sunny startles. Stares.
-He looks for help. A SALESMAN is busy with a family. By the entrance, a SECURITY GUARD (40s) leans on a pillar. Sunny steps toward him.
-The guard's eyes find Sunny: the school bag, the sandals, the closed fist. He straightens off the pillar.
-When Sunny looks back, the woman is slipping out of the store.
-Sunny follows her.
-The guard follows Sunny.
-**INT. MALL CONCOURSE - CONTINUOUS**
-Paper lanterns for Diwali. The woman rides the escalator down. Sunny, twenty steps behind. The guard, twenty steps behind him, murmuring into his radio.
-She stops at a fountain and drops in a coin. Sunny stops at a shoe shop window. The guard stops at a phone-cover kiosk.
-She moves. They move.
-**INT. MALL EXIT - CONTINUOUS**
-A security frame. The woman walks through and out the glass doors.
-Sunny follows. The guard grabs his bag strap.
-GUARD
-Bag. Open it.
-SUNNY
-I didn't...
-GUARD
-Open it.
-Sunny unzips it on the podium. The guard pulls everything out: a geometry box, a steel tiffin, a Hindi textbook. He shakes the tiffin. A spoon rattles.
-Shoppers slow to watch.
-Beyond the glass doors, the woman has stopped. She watches too.
-She comes back in, sets her backpack beside Sunny's things, and lays out three silk scarves, one after another.
-WOMAN
-Wrong bag.
-The guard looks at the scarves. At her linen. He calculates.
-GUARD
-Ma'am. Ma'am, you can pay at the counter, ma'am. Sorry, ma'am.
-WOMAN
-Not to me.
-The guard turns to Sunny.
-GUARD
+Title: ONLY ONCE
+**EXT. AMUSEMENT PARK - NIGHT**
+The Gangasagar Mela, Sagar Island, West Bengal, January. Tents all the way to the Bay of Bengal. Loudspeakers on bamboo poles. Above it all, a giant wheel strung with bulbs.
+RINKI (23), glass bangles, rides alone in an open cabin, as far from the loudspeakers as twenty rupees will take her.
+The wheel SCREECHES, jerks and stops, her cabin just past the top.
+The cabin swings. Rinki grabs the bar. A rubber slipper drops off her foot and falls for a long time.
+OPERATOR (O.S.)
+Five minutes! Nobody move!
+The crowd below passes it up, helpfully: five minutes, five minutes.
+Rinki shuts her eyes.
+The loudspeakers crackle, pole after pole.
+ANNOUNCER (O.S.)
+Attention please. Santosh Mandal, thirty-four, of Kusumpur village, Darbhanga district, Bihar, has been separated from his mother since nine this morning.
+Rinki's eyes open.
+ANNOUNCER (O.S.) (CONT'D)
+Blue shirt. Identifying marks: a gold tooth, upper left. He owes eleven thousand rupees to Bhola Sah's shop and four thousand to his cousin Pintu.
+Up here she can hear every pole on the island, each a beat behind the last.
+She turns from the nearest pole to the cabin opposite hers.
+ANNOUNCER (O.S.) (CONT'D)
+His mother is waiting for him at the lost-and-found camp.
+His mother is not at the camp. PHOOLMATI (72), Rinki's mother-in-law, white sari, a cloth bundle on her knees, sits in the cabin opposite, mouthing every word.
+Rinki pulls her sari over her head.
+Phoolmati holds a newspaper cone of jhalmuri out across the gap. It doesn't come close.
+PHOOLMATI
+Has he eaten?
+Rinki reaches for it. Her cabin tips. She sits back fast.
+RINKI
 (barely)
-Sorry.
-He stuffs Sunny's things back into the bag, badly. Sunny takes over.
-**EXT. MALL STEPS - LATER**
-Autos jostle at the kerb. The woman sits on the steps with a store carrier bag. Sunny, two steps above her.
-WOMAN
-What were you buying?
-SUNNY
-Something for my mother. For Diwali.
-WOMAN
-With five hundred?
-SUNNY
-There's nothing in there for five hundred.
-WOMAN
-No. I've checked.
-She takes out one scarf, peacock blue, and holds it out to him.
-He doesn't take it.
-He unfolds his 500-rupee note, square by square, and holds it out to her.
-WOMAN (CONT'D)
-That scarf was three thousand.
-SUNNY
-It's been stolen once. It's second-hand now.
-She laughs, a real laugh, surprised out of her. She takes the note and hands him the scarf.
-He folds it into his school bag, next to the tiffin.
-She folds the note back into a tight little square, the way he had it, and closes her hand around it.
-*512 words, about 2.8 screenplay pages*
+We looked everywhere for you, Amma.
+PHOOLMATI
+In the ferry queue?
+Rinki's fist tightens on the bar. In it, two train tickets to Darbhanga. Not three.
+Phoolmati eats the jhalmuri herself, a pinch at a time, admiring the view.
+PHOOLMATI (CONT'D)
+Seventy-two years I've watched these from the bottom. My last twenty rupees, and it gets stuck.
+OPERATOR (O.S.)
+Five minutes!
+Half the bulbs on the wheel have blown.
+Phoolmati looks past Rinki, out to sea.
+PHOOLMATI
+Every other pilgrimage, again and again. Gangasagar, only once.
+(beat)
+I always thought that was because the boats sank.
+The wheel shudders. The bulbs flare. A cheer goes up below.
+Rinki's cabin drops away. Phoolmati's rises over the top, and for a moment she is the highest thing at the mela, chewing.
+At the bottom, the OPERATOR swings Rinki's gate open. She steps out in one slipper.
+Past the rope, the buses for the ferry are filling. She looks at them.
+She waits at the exit.
+Phoolmati's cabin comes down. Rinki holds out her hand.
+Phoolmati considers it. Then she puts her bundle in it, takes Rinki's arm, and steps down.
+**EXT. AMUSEMENT PARK - LATER**
+The wheel turns. From every pole:
+ANNOUNCER (O.S.)
+...gold tooth, upper left. His mother and his wife are waiting for him at the lost-and-found camp.
+Past the rope, in the queue for the ferry buses, a man in a blue shirt closes his mouth over a gold tooth.
+*519 words, about 2.9 screenplay pages*
 ## **4. Feature film treatment**
 *Limit: 1 double-spaced page (about 275 words); include genre and log line*
 *Question: A complete dramatic story with major characters, plot developments, and clear resolution. Must differ from the writing sample.*
-**Genre:** Sports drama
-**Log line:** When the last open ground in a Gurugram urban village is sold for a mall, a broker's driver who helped sell it bets his girls' football team on a district final: win, and the developer builds them a pitch.
-Deepak Yadav, 34, was once his district's best striker. Now he drives Rakesh Dahiya, a broker who buys village land for developers, and in the evenings coaches fourteen girls on the last stretch of dust between Mauli Kalan's crowded lanes and Gurugram's glass towers.
-When the panchayat sells the ground to Skyline Infra, Deepak, who drove Dahiya to every meeting, makes a deal from the front seat with Skyline's chief executive: if the girls win the district final, the company will build them a pitch in the new complex.
-They train as the boundary wall rises and the ground shrinks week by week. Komal, the captain and daughter of the sarpanch who signed the sale, holds the team together against her own father. Tamanna, a domestic worker's daughter from Malda, becomes their striker. Then Komal finds Deepak's signature on the sale deed as a witness, and learns he was promised a commission. The team walks out.
-Deepak refuses the commission, loses his job and tells the girls everything, including that the promised pitch is members-only. Komal brings the team back on her terms and writes one clause into the deal: free evenings for the village team, forever, with their old iron goalposts. They win the final 2 to 1.
-The last image: a green rooftop pitch above the mall, one new goal and one rusted one, the village lights below.
-*274 words (excluding \[bracket\] notes)*
+**Genre:** Folk-horror drama
+**Log line:** Mizoram, 2007: as rats swarm the flowering bamboo, a boy selling their tails for a guitar finds his grandfather hoarding rice, as the family did in the 1959 famine.
+Around a Mizoram hill village the bamboo flowers for the first time since 1959. The old people say mautam comes to collect a debt. Rats breed on the fruit. Mapuia, 16, needs four thousand rupees for a red guitar, at two rupees a tail from the state. Sangi, 15, next door, brings him tails from other villages at a rupee. He cashes them at two, buys them back from the boy paid to burn them, and cashes them again. Every week the rats are bigger.
+Pu Thanga, his grandfather, never speaks of 1959. Since the flowering he has built two water tanks that hold no water.
+In November the bamboo dies standing. Collecting by torchlight, Mapuia finds rats three deep on the tank lids. By morning every field and granary is stripped. The tanks are full of rice.
+In 1959, Thanga admits, his father sold hoarded rice at ten times the price while the village ate roots. It kept this family alive. He will sell the same way.
+By Christmas Sangi's family is eating banana stems. Mapuia cuts the padlocks and gives the rice to the Young Mizo Association to share: tlawmngaihna, putting others first. He hands Sangi his guitar money: the second rupee on every tail she sold him. Thanga will not eat from the tanks. The last image: a week later, Pu Thanga, hungry for the first time in his life, queuing behind Sangi for his own rice.
+*274 words*
+
 # **15. Boston University (BU), College of Communication, MS in Media Ventures**
 **Priority deadline: 1 February 2027. Final deadline: 1 May 2027.**
 ## **1. Personal statement**
 *Limit: 750 words*
 *Question: Why do you believe the Master's in Media Ventures is the right graduate program for you? What are your goals for the future and what do you hope to accomplish with this degree?*
 I plan to build a media company in India. I have been making films and videos since school, starting with The Classroom, a five-part web series my friends and I produced ourselves and released on YouTube. Besides co-directing, shooting and editing it, I organised it: I found places to shoot, scheduled shoots around exams and kept classmates involved. I am applying to the Master's in Media Ventures to learn how to run a business around that kind of work.
-I trained as a cinematographer at Whistling Woods International in Mumbai, and most of my work has been in the camera department. I was a camera assistant on Khauf at Matchbox Studios, and since October 2025 I have been a camera assistant on \[title\], a project under producer Boney Kapoor. On each job, what reached the screen depended on decisions made far from the camera: how the project was funded, who it was for and how it would reach people. \[One example of such a decision.\] On set I worked within those decisions. Two jobs took me outside the camera department. On the direction team of a Finolex commercial for Early Man Productions I prepared the production sheets, cast references and PPM deck. For Growth Jockey I planned a shoot for Sleepyhead Mattresses: the equipment, the script, and the offer and audience the film was aimed at.
-My first media venture, though I did not call it that, was Mitti to Matka. I joined it during COVID, while I was still at school. Gurugram's potters had lost their markets, and we bought and auctioned their pots at fair prices, worked with them on designs, and supplied food and sanitary supplies to their families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration. Buyers found the pots through those photographs and that website, so each sale meant income for a family that week. The money was meant for the potters' families, so I made sure none of it was wasted, and I did not promise them more than we could deliver.
+I trained as a cinematographer at Whistling Woods International in Mumbai, and most of my work has been in the camera department. I was a camera assistant on Khauf at Matchbox Studios, and since October 2025 I have been a camera assistant on a project under producer Boney Kapoor. On those sets I saw how decisions made earlier, about schedule, budget, locations and cast, shaped what happened in front of the camera. On set I worked within those decisions.
+Two jobs took me outside the camera department. On the direction team of a Finolex commercial for Early Man Productions I prepared the production sheets, cast references and the pre-production meeting deck, and ran costume trials. For Growth Jockey I planned a shoot for Sleepyhead Mattresses: the equipment, the script, and the offer and audience the film was aimed at.
+My first media venture, though I did not call it that, was Mitti to Matka. I joined it during COVID, while I was still at school. Gurugram's potters had lost their markets, and we bought and auctioned their pots at fair prices, worked with them on designs, and supplied food and sanitary supplies to their families. As media manager I made the photographs, videos and graphics, ran the website and handled the administration. Buyers saw the pots through my photographs, so a picture could decide what a family earned that week. The money we raised was meant for those families, and that made me careful with it.
 Before film I studied economics, business studies and accountancy at Suncity School in Gurugram, so I know the basics of how a business works. Media adds questions those subjects did not cover. Audiences in India now watch on phones, on streaming services and on social platforms, and a company has to decide where to release each project and how it will earn back its cost.
-What draws me to the Master's in Media Ventures is how it is structured. In Boston I would learn how money moves through media and how to analyse the market for a creative venture. In Los Angeles I would intern in the industry, develop my own venture as a thesis and pitch it to executives and investors. That is the closest thing to building the first version of my studio while I still have teachers around me. I have not yet worked in a production office, and I have not raised money for a project or worked out a business model for one. By the end of the programme I want to be able to do both, and to judge an opportunity and use data to understand an audience.
+What draws me to the Master's in Media Ventures is how it is structured. In Boston I would learn how money moves through media and how to analyse the market for a creative venture. In Los Angeles I would intern in the industry, develop my own venture as a thesis and pitch it to executives and investors. That is the closest thing to building the first version of my studio while I still have teachers around me. I have not yet raised money for a film or series or worked out a business model for one, and I have not yet worked in a production office. By the end of the programme I want to be able to raise the money and build the model myself, to judge an opportunity and to use data to understand an audience.
 After the degree I plan to spend a few years in development and production, then build a creative studio in India of 8 to 30 people with its own slate of films, series and digital content. It would run as a sound business, with clear budgets and fair contracts, and release some of its work directly to audiences online. Nobody in my family works in film, and I know how much one early chance can matter. The studio would hire talented people who start out the same way, train them, pay them fairly and give them responsibility early.
-*633 words (excluding \[bracket\] notes)*
+*626 words*
 ## **2. Case study**
 *Limit: 1,000 words*
 *Question: A company, brand, or individual making an impact by bringing together content and technology in important ways. What is it doing, how is it using technology and content to lead and serve its audience, how is it innovating, and how does it gain competitive advantage (or, for a non-profit, create community impact)?*
 **Pocket FM: building a content business for the phone**
-In India the phone is the screen that matters most, and many people use it while they are doing something else: commuting, cooking, working. Pocket FM, founded in Bengaluru in 2018, built a business around that habit. It produces and distributes long-running audio series, serialised stories released in short daily episodes, and it has grown from India into other markets, including the United States.
-**What the company does.** Pocket FM publishes stories in episodes of a few minutes each, released every day, in several Indian languages and in English. Listeners can start for free and pay to unlock episodes or subscribe. The genres are ones mass audiences already like, such as romance, thrillers, fantasy and family drama. What is different is the format, which is built for the phone and for daily listening.
+In India the phone is the screen that matters most, and many people use it while they are doing something else: commuting, cooking, working. Pocket FM, founded in Bengaluru in 2018, built a business around that habit. It produces and distributes long-running audio series, and it has grown from India into other markets, including the United States.
+**What the company does.** Pocket FM publishes stories in short episodes released every day, in several Indian languages and in English. Listeners can start for free and pay to unlock episodes or subscribe. The genres are ones mass audiences already like, such as romance, thrillers, fantasy and family drama. What is different is the format, which is built for the phone and for daily listening.
 **How it uses technology.** The company treats content as a product to be tested and improved. It studies how listeners behave: which episodes keep them listening, where they drop off and what makes them pay. That data shapes what gets commissioned and how stories are paced. It has also built up a large pool of writers and voice artists, with tools and processes that let it produce at a scale traditional studios cannot match.
 **How it uses content.** The stories are designed for serial listening. Each episode ends on a hook, characters run for hundreds of episodes, and a successful series can extend into new seasons or formats. Instead of betting on a few expensive titles, the company makes many affordable ones and puts more money into the ones audiences keep coming back to.
 **How it innovates and gains an advantage.** Pocket FM's position is hard to copy because it combines a format matched to Indian listening habits, a monetisation model built on small, frequent payments, and a feedback loop between data and creative decisions. Large streaming platforms compete for attention with expensive video, while Pocket FM competes for the minutes when people cannot watch a screen. That lets it reach audiences outside the big cities and outside English, which many media companies have struggled to serve.
 **Questions and risks.** The model raises real questions. Data-led commissioning can favour formula over originality, and fast growth can put pressure on how writers and voice artists are paid and credited. Pocket FM needs a steady flow of new episodes, so it depends on those writers and voice artists continuing to work with it.
 **What it means for me.** Pocket FM grew by finding a format and audiences that established media companies had overlooked, and that is the kind of opening I would look for. The studio I plan to build would be far smaller, but some of the same methods would still apply: start from how the audience actually watches or listens, test ideas cheaply, and put more money behind what the audience responds to. Audience data would feed into creative decisions, but I would still make those decisions with the writers. In a studio that size the writers and performers are most of what the company has, so I would settle their pay and credit in writing before work starts.
-*531 words (excluding \[bracket\] notes)*
+*520 words*
 ## **3. Professional organizations**
 *Limit: short list, separated by semicolons*
 *Question: List any professional organizations in which you are currently a member.*
 None at present.
-*3 words (excluding \[bracket\] notes)*
+*3 words*
 ## **4. Additional statement (optional)**
 *Limit: keep under 250 words*
 *Question: Anything the committee should know.*
 None.
-*1 words (excluding \[bracket\] notes)*
+*1 words*
 ## **5. Message to recommender (optional)**
 *Limit: about 500 characters*
-Dear \[Name\], thank you for agreeing to recommend me for BU's MS in Media Ventures. It would help most if you could speak to \[one or two examples of my work\]. I've attached my CV and a short summary of our work together. The deadline is \[date\]. Thank you again for your time. Karan
-*236 characters (excluding \[bracket\] notes)*
+Thank you for agreeing to recommend me for BU's MS in Media Ventures. The programme is about the business side of media, so it would help most if you could speak to the work you saw me do, how I handled responsibility and how I worked with others. I've attached my CV. The priority deadline is 1 February 2027. Thank you again for your time. Karan
+*347 characters*
 ## **6. Portfolio or website link**
 *Limit: URL*
-\[portfolio link\]
-*0 words (excluding \[bracket\] notes)*
+https://www.youtube.com/channel/UChzt0eDoWj3OJu6vslhJMTA
+*1 words*
 
 # Deadlines and open points
 Programme details in the answers (course names, thesis formats, internships) were checked against each school's official pages on 7 October 2026.
 ## The degree question
-Several schools will turn on the degree certificate. The degree is awarded by the Tata Institute of Social Sciences (TISS), confirmed on 9 October. The class of degree (first class or not) also matters. The UCLA CV names TISS; the other CVs will be filled in as each application is prepared.
+Several schools will turn on the degree certificate. The degree is awarded by the Tata Institute of Social Sciences (TISS), confirmed on 9 October. The class of degree (first class or not) also matters. Every CV names TISS.
 A WES or ECE credential evaluation is needed for NYU Tisch, LMU, CMU and UNCSA. USC and Chapman do their own evaluation and do not accept WES or ECE.
 ## School by school
 **UCLA, MFA Producers Program.** 1 November 2026, 11:59 pm PST. Likely ineligible as things stand: UCLA TFT says three-year "ordinary pass" degrees are not eligible, and the Graduate Division asks Indian applicants for a master's. Only the department can request an exception. TFT replied on 22 September that a four-year-equivalent degree is required; on 9 October Karan asked whether the department could request an exception, and the fee waits for their answer. The answers are complete in case they say yes.
