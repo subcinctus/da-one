@@ -56,6 +56,7 @@ const state = {
   undo: [],
   focusSentence: -1,
   sentPending: false,
+  mode: 'article',    // the human reference the scores are compared with (professional writing)
 };
 
 // ---------- workers ----------
@@ -134,6 +135,8 @@ async function warmUp() {
   try {
     const r = await modelWorker.call({ type: 'manifest' });
     state.manifest = r.manifest;
+    state.mode = state.manifest.calibration?.default_mode || 'article';
+    renderCalibText();
   } catch (err) {
     for (const k of MODEL_KEYS) { state.ready[k] = 'error'; state.loadError[k] = friendlyLoadError(err); }
     renderPills(); renderLedger();
@@ -162,7 +165,7 @@ function humanPct(q, x) {
   return (100 / n) * (lo + (span > 0 ? (x - q[lo]) / span : 0));
 }
 // Risk scale shown to the user: typical human writing sits low, the 5%-false-positive line sits at 65.
-const RISK_KNOTS = [[0, 0], [50, 15], [80, 35], [90, 48], [95, 65], [99, 85], [100, 100]];
+const RISK_KNOTS = [[0, 0], [50, 15], [80, 30], [90, 40], [95, 65], [99, 85], [100, 100]];
 function riskFromPct(p) {
   for (let i = 1; i < RISK_KNOTS.length; i++) {
     const [x0, y0] = RISK_KNOTS[i - 1], [x1, y1] = RISK_KNOTS[i];
@@ -173,25 +176,31 @@ function riskFromPct(p) {
 const band = (r) => (r === null ? 'none' : r >= 65 ? 'high' : r >= 40 ? 'mid' : 'low');
 const BAND_LABEL = { high: 'High: likely flagged', mid: 'Medium: could be flagged', low: 'Low: reads human', none: 'Not checked yet' };
 
-function checkerPct(key, raw) {
-  const cal = state.manifest?.calibration?.checkers?.[key];
-  return cal ? humanPct(cal.human_q, raw) : null;
+const modeCal = () => state.manifest?.calibration?.modes?.[state.mode] || null;
+
+// A checker's score as a percentile of human writing of the chosen kind (null without calibration).
+function pctOf(key) {
+  const r = state.results[key];
+  const cal = modeCal()?.checkers?.[key];
+  if (!r || r.status !== 'done' || !cal) return null;
+  return humanPct(cal.human_q, r.raw);
 }
 
 function ensemble() {
-  const cal = state.manifest?.calibration?.ensemble;
+  const cal = modeCal()?.ensemble;
   if (!cal) return null;
-  const used = CHECKERS.map((c) => c.key).filter((k) => state.results[k]?.status === 'done' && state.results[k].pct !== null);
+  const used = CHECKERS.map((c) => c.key).filter((k) => pctOf(k) !== null);
   // ZipPy alone is too weak to stand for the overall risk; wait for a trained checker
   if (!used.some((k) => k !== 'zippy')) return null;
   const combo = cal.combos[[...used].sort().join('+')];
   if (!combo) return null;
   let s = 0, w = 0;
-  for (const k of used) { s += cal.weights[k] * state.results[k].pct; w += cal.weights[k]; }
-  const value = s / w;
-  const pct = humanPct(combo.human_q, value);
-  return { used, pct, risk: Math.round(riskFromPct(pct)), flagged: used.filter((k) => Math.round(state.results[k].pct) >= 95) };
+  for (const k of used) { s += cal.weights[k] * pctOf(k); w += cal.weights[k]; }
+  const pct = humanPct(combo.human_q, s / w);
+  return { used, pct, risk: Math.round(riskFromPct(pct)), flagged: used.filter((k) => Math.round(pctOf(k)) >= 95) };
 }
+// Sentence highlights only matter when the answer as a whole looks AI-written.
+const sentencesMatter = () => { const e = ensemble(); return !!e && e.risk >= 40; };
 
 // ---------- text helpers ----------
 const words = (t) => (t.match(/[\p{L}\p{N}][\p{L}\p{N}'’.-]*/gu) || []).length;
@@ -300,8 +309,9 @@ function autosize() { editor.style.height = 'auto'; editor.style.height = editor
 function renderBackdrop() {
   const text = editor.value;
   const marks = [];
+  const show = sentencesMatter();
   state.sentences.forEach((s, i) => {
-    const b = band(s.heat === null ? null : riskFromPct(s.heat));
+    const b = show ? band(s.heat === null ? null : riskFromPct(s.heat)) : 'none';
     if (b === 'high' || b === 'mid' || i === state.focusSentence) marks.push({ start: s.start, end: s.end, cls: `s-${b === 'low' || b === 'none' ? 'plain' : b}${i === state.focusSentence ? ' s-focus' : ''}`, kind: 'mark' });
   });
   const hints = findHints(text).map((h) => ({ ...h, cls: 'hint', kind: 'span' }));
@@ -410,14 +420,15 @@ function renderLedger() {
       val = '<span class="chip none">Loading</span>';
       prog = `<div class="prog">${pr ? (pr.stage === 'download' ? `Downloading <span class="num">${(pr.loaded / 1e6).toFixed(1)}</span> of <span class="num">${(pr.total / 1e6).toFixed(1)}</span> MB (one time)` : pr.stage === 'verify' ? 'Checking the download…' : 'Starting…') : 'Starting…'}</div>`;
     }
+    const pct = pctOf(c.key);
     if (r) {
       if (r.status === 'running') val = '<span class="chip none">Checking…</span>';
       else if (r.status === 'error') { val = '<span class="chip none">Failed</span>'; prog = `<div class="prog">${esc(r.error)}</div>`; }
-      else if (r.status === 'done' && r.pct !== null) {
-        const pr = Math.round(r.pct);
+      else if (r.status === 'done' && pct !== null) {
+        const pr = Math.round(pct);
         const b = pr >= 95 ? 'high' : pr >= 85 ? 'mid' : 'low';
-        val = `<span class="num">${fmtPct(r.pct)}</span> <span class="chip ${b}">${b === 'high' ? 'Flags AI' : b === 'mid' ? 'Borderline' : 'Reads human'}</span>`;
-        bar = `<div class="bar" title="More AI-like than ${Math.round(r.pct)}% of human writing"><i class="${b}" style="width:${Math.max(2, r.pct)}%"></i><b style="left:95%"></b></div>`;
+        val = `<span class="num">${fmtPct(pct)}</span> <span class="chip ${b}">${b === 'high' ? 'Flags AI' : b === 'mid' ? 'Borderline' : 'Reads human'}</span>`;
+        bar = `<div class="bar" title="More AI-like than ${pr}% of the professional human writing it was compared with"><i class="${b}" style="width:${Math.max(2, pct)}%"></i><b style="left:95%"></b></div>`;
       } else if (r.status === 'done') {
         const ai = c.kind === 'zippy' ? r.determination === 'AI' : r.prob >= 0.5;
         val = `<span class="chip none">${ai ? 'Leans AI' : 'Leans human'} (uncalibrated)</span>`;
@@ -427,9 +438,24 @@ function renderLedger() {
     return `<div class="row" data-key="${c.key}">
       <div><div class="name">${esc(c.name)}</div><div class="src">${esc(c.src)}</div></div>
       <div class="val">${val}</div>${bar}${prog}
-      <details><summary>Details</summary><p>${esc(c.about)}</p><p>RAID benchmark: ${esc(c.raid)} (at 5% false positives).${raw ? ' ' + raw + '.' : ''}</p><p>${c.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p></details>
+      <details><summary>Details</summary><p>${esc(c.about)}</p><p>RAID benchmark: ${esc(c.raid)} (at 5% false positives).${raw ? ' ' + raw + '.' : ''}</p>${measuredLine(c.key)}<p>${c.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p></details>
     </div>`;
   }).join('');
+}
+
+function measuredLine(key) {
+  const m = modeCal()?.checkers?.[key]?.measured;
+  if (!m) return '';
+  return `<p>On its own, on held-out test texts: caught ${Math.round(m.tpr * 100)}% of AI texts and flagged ${Math.round(m.fpr * 100)}% of human ones.</p>`;
+}
+
+function renderCalibText() {
+  const a = modeCal();
+  const el = $('calibText');
+  if (!a || !el) return;
+  el.textContent = `Scores are compared with ${a.human_samples} pieces of professional human writing: news, academic abstracts, Wikipedia, posts and stories. `
+    + `On held-out test texts the combined score flagged ${Math.round(a.measured.tpr * 100)}% of AI-written texts (GPT-4, ChatGPT, Llama, Mistral, Cohere and others) and ${Math.round(a.measured.fpr * 100)}% of human ones. `
+    + '"Flags AI" means more AI-like than 95% of that human writing.';
 }
 
 function markStale(stale) {
@@ -458,7 +484,7 @@ function renderVerdict() {
   $('riskDelta').className = `delta ${d < 0 ? 'down' : d > 0 ? 'up' : ''}`;
   const total = CHECKERS.filter((c) => state.results[c.key]?.status === 'done').length;
   const pending = CHECKERS.filter((c) => state.results[c.key]?.status === 'running' || (state.ready[c.key] === 'loading' && state.results[c.key]?.status !== 'done')).length;
-  $('riskSub').textContent = `${e.flagged.length} of ${total} checkers flag this answer as AI-written.${pending ? ' More results are coming.' : ''}`
+  $('riskSub').textContent = `${e.flagged.length} of ${total} checkers flag this answer as AI-written, compared with professional human writing.${pending ? ' More results are coming.' : ''}`
     + (state.lastCheck ? ` ${w.toLocaleString('en-IN')} words.` : '');
 }
 
@@ -467,6 +493,8 @@ function renderSentences() {
   const flagged = state.sentences.map((s, i) => ({ ...s, i })).filter((s) => s.heat !== null && s.heat >= 85).sort((a, b) => b.heat - a.heat);
   if (!state.lastCheck) { el.innerHTML = '<p class="empty">Flagged sentences appear here after a check.</p>'; return; }
   if (!flagged.length && state.sentPending) { el.innerHTML = '<p class="empty">Scoring each sentence…</p>'; return; }
+  const e = ensemble();
+  if (e && e.risk < 40) { el.innerHTML = '<p class="empty">Nothing to rewrite: the answer as a whole reads as human-written.</p>'; return; }
   if (!flagged.length) {
     el.innerHTML = state.sentences.some((s) => s.heat !== null) ? '<p class="empty">No sentence stands out. If the overall risk is still high, try Rephrase all, or edit the opening and closing lines by hand.</p>'
       : '<p class="empty">Sentence scores need e5-small and BERT-tiny. They appear once those checkers have run.</p>';
@@ -519,14 +547,14 @@ function setChecking(on) {
 
 async function runCheckInner(run, text) {
   const live = () => run === state.runId && editor.value === text;
-  const finish = (key, r) => { if (run !== state.runId) return; state.results[key] = r; renderLedger(); renderVerdict(); };
+  const finish = (key, r) => { if (run !== state.runId) return; state.results[key] = r; renderLedger(); renderVerdict(); renderSentences(); renderBackdrop(); };
 
   const zp = (async () => {
     finish('zippy', { status: 'running' });
     try {
       const r = await zippyWorker.call({ type: 'score', text });
       const signed = r.determination === 'AI' ? r.score : -r.score;
-      finish('zippy', { status: 'done', determination: r.determination, score: r.score, prob: null, pct: checkerPct('zippy', signed), ms: r.ms });
+      finish('zippy', { status: 'done', determination: r.determination, score: r.score, prob: null, raw: signed, ms: r.ms });
     } catch (err) { finish('zippy', { status: 'error', error: friendlyLoadError(err) }); }
   })();
 
@@ -534,7 +562,7 @@ async function runCheckInner(run, text) {
     finish(key, { status: 'running' });
     try {
       const r = await modelWorker.call({ type: 'score', key, texts: [text], run });
-      finish(key, { status: 'done', prob: r.probs[0], pct: checkerPct(key, r.probs[0]), ms: r.ms });
+      finish(key, { status: 'done', prob: r.probs[0], raw: r.probs[0], ms: r.ms });
     } catch (err) {
       if (run === state.runId) finish(key, { status: 'error', error: friendlyLoadError(err) });
     }
@@ -684,7 +712,7 @@ function closeOverlay(id) { $(id).hidden = true; }
 async function startRewrite(mode) {
   const text = editor.value;
   if (!text.trim()) { toast('Paste or type an answer first.'); return; }
-  if (mode === 'flagged' && !state.sentences.some((s) => s.heat !== null && s.heat >= 85)) {
+  if (mode === 'flagged' && (!sentencesMatter() || !state.sentences.some((s) => s.heat !== null && s.heat >= 85))) {
     toast(state.lastCheck ? 'No sentences are flagged. Use Rephrase all instead.' : 'Press Check first so the flagged sentences are known.');
     return;
   }

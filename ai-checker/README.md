@@ -42,11 +42,28 @@ GLTR's published GPT-2 outputs exactly, if a "classic detectors" page is wanted 
   probabilities as Python ONNX Runtime to within 1e-5.
 - **ZipPy**: `detectors/zippy.js` is a port of Thinkst's browser build (`nlzmadetect`). With the
   same corpus it returns byte-identical scores to their compiled extension code on 64 test texts.
-- **Calibration** (`tools/calibrate.py`): RAID's own thresholds over-flag human writing outside RAID
-  (for example 97% of human PubMed answers at ModernBERT's news threshold), so each score is shown as
-  a percentile against CALIBRATION_HUMANS human-written samples (RAID, BBC news, WritingPrompts, US
-  student essays). "Flags AI" means above the 95th percentile. Measured on a held-out half:
-  CALIBRATION_TABLE
+- **Calibration** (`tools/calibrate.py`): raw detector probabilities are not comparable across
+  kinds of writing (RAID's own thresholds flagged 97% of human PubMed answers at ModernBERT's news
+  threshold), so each score is shown as a percentile against 299 pieces of professional human
+  writing: RAID's abstracts, news, Wikipedia, Reddit, reviews, books, poetry and recipes, plus BBC
+  news and WritingPrompts stories from Fast-DetectGPT's data. "Flags AI" means above the 95th
+  percentile. Measured on a held-out half (quantiles fitted on the other half):
+
+  | | AI texts caught | Human texts flagged |
+  |---|---|---|
+  | Combined score (weights 3 ModernBERT, 1 e5, ¼ BERT-tiny, ¼ ZipPy) | 99% | 7% |
+  | ModernBERT alone | 99% | 8% |
+  | e5-small LoRA alone | 90% | 7% |
+  | BERT-tiny alone | 69% | 3% |
+  | ZipPy alone | 15% | 8% |
+
+  The 301 AI texts came from GPT-4, ChatGPT, GPT-3, GPT-2, Llama 2 chat, Mistral, MPT and Cohere.
+
+- **Essays are the weak spot.** On 300 human school essays (Kaggle DAIGT, Persuade corpus) ModernBERT
+  scored 72% as AI, and e5 rated many of them highly too. Calibrated against those essays instead,
+  the checkers caught 88% of AI essays but rated a ChatGPT-style business answer as low risk (27
+  instead of 100). The page is meant for professional answers, so it compares with professional
+  writing and tells the user that high scores on school-style essays need care.
 
 ## Build and publish
 

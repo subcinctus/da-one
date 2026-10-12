@@ -230,7 +230,8 @@ a { color: var(--accent); }
         <h2>How this works</h2>
         <p>The checkers run inside this browser. Your text is not sent anywhere when you press Check. Rewrites are written by Claude through your own Claude account.</p>
         <p>Universities mostly use Turnitin, GPTZero and Copyleaks (DrillBit through ShodhShuddhi in India). None of them publish their models, so they cannot run here. These are the strongest open-source detectors on the RAID benchmark (University of Pennsylvania) that fit in a browser.</p>
-        <p>Scores are calibrated on 599 human-written samples (news, essays, Reddit posts, abstracts and more). "Flags AI" means the answer reads as more AI-like than 95% of those samples. To cross-check with a tool universities use, paste the final text into <a href="https://gptzero.me" target="_blank" rel="noopener">GPTZero</a>.</p>
+        <p><span id="calibText">Scores are compared with professional human writing: news, academic abstracts, Wikipedia, posts and stories. "Flags AI" means more AI-like than 95% of that writing.</span></p>
+        <p>School-style essays are the weak spot: these detectors score most human student essays as AI, so treat a high score on that kind of writing with care. No single score here, or in Turnitin, is proof either way. To cross-check with a tool universities use, paste the final text into <a href="https://gptzero.me" target="_blank" rel="noopener">GPTZero</a>.</p>
       </section>
     </aside>
   </div>
