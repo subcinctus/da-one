@@ -1,4 +1,7 @@
-"""Assemble the publishable Answer Rewrite Desk into dist/ (or the folder given as argv[1]).
+"""Assemble the publishable Answer Rewrite Desk into dist/ (or the folder given as the first argument).
+
+    python3 tools/build_artifact.py [OUT]           # for a claude.ai artifact (the host adds the page skeleton)
+    python3 tools/build_artifact.py [OUT] --site    # standalone static site, e.g. GitHub Pages
 
 Inputs: ai-checker/ (page, app, workers, detectors, vendor), the exported models from the
 claude/ai-checker-models branch (MODELS_DIR), the onnxruntime-web and @huggingface/tokenizers
@@ -9,7 +12,9 @@ import hashlib, json, os, shutil, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'ai-checker')
-OUT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'dist'))
+ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
+SITE = '--site' in sys.argv[1:]
+OUT = os.path.abspath(ARGS[0] if ARGS else os.path.join(ROOT, 'dist'))
 MODELS_DIR = os.environ.get('MODELS_DIR', '/home/user/work/models')
 NPM_DIR = os.environ.get('NPM_DIR', '/home/user/work/npm')
 CALIB = os.environ.get('CALIB', os.path.join(SRC, 'calibration.json'))
@@ -28,13 +33,44 @@ def copy(src, rel):
     shutil.copyfile(src, dst)
 
 
+# The artifact host wraps the page in a document with this reset; a standalone site has to supply it.
+SITE_HEAD = """<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Check an answer with four open-source AI-text detectors in your browser and rewrite the sentences they flag, with a fact check before anything changes.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230E5D6B'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+"""
+
+
+def write_site_page():
+    """index.html for a static host: the page's title, fonts and styles go in <head>, the rest in <body>."""
+    page = open(os.path.join(SRC, 'index.html'), encoding='utf-8').read()
+    cut = page.index('</style>') + len('</style>')
+    head, body = page[:cut], page[cut:]
+    assert '<div' not in head and '<script' not in head, 'index.html should start with its title, links and style'
+    with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
+        f.write(SITE_HEAD + head.strip() + '\n</head>\n<body>\n' + body.strip() + '\n</body>\n</html>\n')
+    open(os.path.join(OUT, '.nojekyll'), 'w').close()  # serve files as they are, no Jekyll build
+    copy(os.path.join(SRC, 'site', 'README.md'), 'README.md')
+    copy(os.path.join(SRC, 'site', 'MIT.txt'), 'LICENSES/MIT.txt')
+    copy(os.path.join(NPM_DIR, 'hft/package/LICENSE'), 'LICENSES/Apache-2.0.txt')
+
+
 def main():
     if os.path.exists(OUT):
         shutil.rmtree(OUT)
     os.makedirs(OUT)
-    for rel in ['index.html', 'app.mjs', 'workers/models.mjs', 'workers/zippy.js', 'detectors/zippy.js',
-                'vendor/lzma_worker-min.js', 'vendor/zippy-ai-generated.txt']:
+    for rel in ['app.mjs', 'workers/models.mjs', 'workers/zippy.js', 'detectors/zippy.js',
+                'vendor/lzma_worker-min.js', 'vendor/zippy-ai-generated.txt', 'vendor/NOTICE.md']:
         copy(os.path.join(SRC, rel), rel)
+    if SITE:
+        write_site_page()
+    else:
+        copy(os.path.join(SRC, 'index.html'), 'index.html')
     ort = os.path.join(NPM_DIR, 'ort/package/dist')
     for f in ['ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']:
         copy(os.path.join(ort, f), f'vendor/{f}')

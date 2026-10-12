@@ -53,7 +53,7 @@ GLTR's published GPT-2 outputs exactly, if a "classic detectors" page is wanted 
   |---|---|---|
   | Combined score (weights 3 ModernBERT, 1 e5, ¼ BERT-tiny, ¼ ZipPy) | 99% | 7% |
   | ModernBERT alone | 99% | 8% |
-  | e5-small LoRA alone | 90% | 7% |
+  | e5-small LoRA alone | 91% | 7% |
   | BERT-tiny alone | 69% | 3% |
   | ZipPy alone | 15% | 8% |
 
@@ -68,16 +68,27 @@ GLTR's published GPT-2 outputs exactly, if a "classic detectors" page is wanted 
 ## Build and publish
 
 ```
-python3 tools/build_artifact.py dist     # needs the models branch, onnxruntime-web 1.22.0 and @huggingface/tokenizers 0.1.3
+python3 tools/build_artifact.py dist          # claude.ai artifact
+python3 tools/build_artifact.py site --site   # standalone static site, e.g. GitHub Pages
 ```
 
-`dist/` holds 33 files (about 217 MB). Artifacts cap files at 15 MB, publishes at 64 MB and a version
+Both need the models branch, onnxruntime-web 1.22.0 and @huggingface/tokenizers 0.1.3.
+
+`dist/` holds 34 files (about 217 MB). Artifacts cap files at 15 MB, publishes at 64 MB and a version
 at 256 MB, so model weights are split into 14 MiB parts named `.wasm` (a served binary type; the
 worker only reads the bytes, then checks the SHA-256 of the whole model) and the folder goes up in
 four publishes. The worker keeps downloaded parts in the browser's Cache Storage, so later visits
 start in seconds.
 
 Published at https://claude.ai/artifact/3zpyz9du2icMWjGLF4wPQQ (private to its owner until shared).
+Inside Claude, rewrites happen in one click.
+
+The `--site` build is for a static host. It wraps the page in its own HTML document (the artifact
+host normally supplies one), adds `.nojekyll`, a README and the licence texts, and goes on the
+`gh-pages` branch of a public repository that holds only the built site. A static site has no
+Claude runtime, so rewrites there use the two-step copy-and-paste path. Static hosts such as
+GitHub Pages gzip `.wasm` and `.json`, so the worker checks download length only on uncompressed
+responses; the SHA-256 check still covers every model.
 
 ## Limits
 

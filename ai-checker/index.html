@@ -64,6 +64,8 @@ a { color: var(--accent); }
 .btn.quiet { background: transparent; border-color: transparent; color: var(--muted); }
 .btn.quiet:hover { color: var(--ink); border-color: var(--line); }
 .btn .kbd { font: 11px var(--font-num); opacity: .75; }
+a.btn { color: var(--ink); text-decoration: none; }
+.manual-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .desk { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 22px; align-items: start; }
 @media (max-width: 920px) { .desk { grid-template-columns: minmax(0, 1fr); } }
@@ -247,7 +249,7 @@ a { color: var(--accent); }
       <div class="facts" id="reviewFacts" hidden></div>
       <div id="manualBox" hidden>
         <div class="field"><label for="promptOut">1. Copy this request into Claude</label><textarea id="promptOut" readonly></textarea></div>
-        <button class="btn" id="copyPromptBtn" type="button">Copy request</button>
+        <div class="manual-btns"><button class="btn" id="copyPromptBtn" type="button">Copy request</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude in a new tab</a></div>
         <div class="field" style="margin-top:14px"><label for="pasteBack">2. Paste Claude's rewritten answer here</label><textarea id="pasteBack"></textarea></div>
         <button class="btn" id="usePastedBtn" type="button">Review pasted text</button>
       </div>

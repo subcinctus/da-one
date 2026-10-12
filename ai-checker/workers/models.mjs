@@ -46,7 +46,10 @@ async function fetchFile(rel, onBytes) {
   }
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Could not download ${rel} (HTTP ${res.status}).`);
-  const len = Number(res.headers.get('content-length')) || 0;
+  // A compressed response (some static hosts gzip .wasm and .json) gives the compressed length,
+  // while the body arrives decompressed, so the length check only applies to uncompressed responses.
+  const enc = (res.headers.get('content-encoding') || 'identity').toLowerCase();
+  const len = enc === 'identity' ? Number(res.headers.get('content-length')) || 0 : 0;
   let bytes;
   if (res.body && res.body.getReader) {
     const reader = res.body.getReader();

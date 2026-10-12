@@ -736,7 +736,7 @@ async function startRewrite(mode) {
   $('reviewDiff').hidden = true; $('reviewFacts').hidden = true; $('acceptBtn').disabled = true; $('manualBox').hidden = true;
   const prompt = wholePrompt(mode);
   openOverlay('reviewOverlay');
-  if (!state.sample) { showManual(prompt, 'Claude can only write here when this page is open inside Claude. Use these two steps instead.'); return; }
+  if (!state.sample) { showManual(prompt, 'One-click rewrites work when this page is opened from Claude. Here it takes two steps: copy the request into a Claude chat, then paste the reply back.'); return; }
   $('reviewIntro').textContent = 'Claude is writing a rewrite. Nothing changes in your answer until you press Use rewrite.';
   const stream = $('reviewStream'); stream.hidden = false; stream.textContent = 'Thinking…';
   const ctl = new AbortController(); review.ctl = ctl;
@@ -799,7 +799,7 @@ async function suggestFor(i, box) {
   const s = state.sentences[i];
   if (!s) return;
   if (!state.sample) {
-    box.innerHTML = `<p class="small">Claude can only suggest rewrites when this page is open inside Claude. Select the sentence and edit it by hand, or use Rewrite flagged to copy a request into Claude.</p>`;
+    box.innerHTML = `<p class="small">Sentence options need the page to be opened from Claude. Edit the sentence by hand, or use Rewrite flagged to send the request to Claude in two steps.</p>`;
     return;
   }
   box.innerHTML = '<p class="small">Asking Claude for three options…</p>';
