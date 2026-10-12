@@ -114,7 +114,7 @@ Each line below quotes you, and the bold labels are mine.
 - **UCLA.** UCLA has written that it "won't make an exception for the 4-year degree requirement" (Gmail 1a121b73b209c439, 9 Oct 2026).
 - **A studio in India of 8 to 30 people.** The goal in the essays is a creative studio in India of 8 to 30 people that develops and produces its own slate of films and series (8 Oct essays doc; my notes, 8 Oct). You have not restated it in our messages, and I do not know what kind of studio, which city or when (my notes, 12 Oct).
 - **Work that travels between India and the US.** The 8 Oct doc had you "shaping projects that can travel between India and the United States", and the essays still say it (8 Oct essays doc; my check of the essays, 12 Oct). That line came from that doc, not from your messages, so it needs your yes (my inference).
-- **Who the studio is for.** The 8 Oct doc said the studio would open doors for people who, like you, "start without family connections in film", and the essays still use that idea (8 Oct essays doc; my check of the essays, 12 Oct). I have never checked it with you (my inference).
+- **Who the studio is for.** The 8 Oct doc said the studio would open doors for people who, like you, "start without family connections in film", and the essays still use that idea (8 Oct essays doc; my check of the essays, 12 Oct). You confirmed that nobody in your family works in film or photography: "yep true" (you, 12 Oct 17:49).
 
 ### How you want to be written about
 
@@ -144,17 +144,22 @@ Your instructions, in the order you gave them:
 - **The regions.** After all that, three of my picks were still abroad, VCA, London Film School and the NFTS, and I had already drafted applications for them (my college notes, 11 Oct). You wrote: "only west coast or new york" (you, 11 Oct 17:30). I dropped all three, kept their drafts in reserve and searched the West Coast and New York (my college notes, 11 Oct). Nothing qualified cleanly: Stony Brook's producer track in Manhattan is an add only if it confirms in writing that your degree is eligible (my college notes, 11 Oct).
 - **Smaller ones.** The drafts left a choice between RGNIYD and TISS as your awarding body until you said "tiss is the final one" (you, 9 Oct 12:42). I left placeholder brackets in the drafts and had not looked up Boney Kapoor's production company, and you wrote "leave all brackets out no brackets, couldn't you check what company boney kapoor runs for his own productions?" (you, 9 Oct 12:55). My creative pieces leaned on Mumbai, Film City and film extras until you asked for more imagination (you, 9 Oct 08:07).
 
+### Settled by you on 12 October
+
+- **Bayview Projects.** "bayview just worked as our line production team" (you, 12 Oct 17:49). It was not your employer, so every CV and essay now says "camera assistant on a project under producer Boney Kapoor" and doesn't name Bayview (my edits, 12 Oct).
+- **Your family and film.** Nobody in your family works in film or photography: "yep true" (you, 12 Oct 17:49).
+- **The Lunchbox and Guneet Monga.** "who even said that" (you, 12 Oct 17:49). Neither was your choice; they came from the 8 Oct doc. Both are gone from every essay (my edits, 12 Oct).
+
 ### What I still don't know or haven't confirmed
 
 - **Film titles.** I have no titles for the five short films or the independent films, and none of your CVs gives one (section 4). The only lead is a call sheet in your Drive from November 2024, with characters called Sujata, Brati and Saroj, and a "MOTHER - BREAKDOWNS" file shared with you the same month, which may be one project; your role isn't recorded (Drive "test excel", 9 Nov 2024; Drive "MOTHER - BREAKDOWNS", 5 Nov 2024).
 - **The project under Boney Kapoor.** I don't know its title (my notes, 9 Oct). Your counsellor's brag sheet lists "Mom 2", which you haven't confirmed, so I haven't used it (Drive "Bragsheets - LOR"). The CV you sent Roy Kapur Films on 21 October 2025, "reference through Mr. Rahul Nehra", might name it, but I couldn't open the attachment (Gmail 19a06b49f3b9810d, 21 Oct 2025).
-- **Bayview as your employer.** Bayview Projects LLP is Boney Kapoor's own production house, and the application CV says "Camera assistant, Bayview Projects (producer Boney Kapoor)" (my notes, 9 Oct). That rests on your question about his company, not on a document, and your Gmail and Drive have nothing from Bayview (my notes, 9 Oct; section 4).
 - **Hindi.** The only source is one line in your 2024 draft CV: "Fluent in Hindi and English, provided subtitles for multiple projects" (Drive "Untitled document", 30 Sep 2024).
 - **Which Nitin.** You say you studied under Nitin Rai, both now and in 2020 (you, 11 Oct 12:14; Gmail 1732fd9a8db81c95, 8 Jul 2020). The class schedules show most classes taught by Nitin Choudhary and Kshipra Simon, with Nitin Rai taking the portfolio review and the fashion masterclasses (Gmail 16eef9a4784c119c, 10 Dec 2019; Gmail 17043924c118a85b, 14 Feb 2020). I don't know which Nitin the corner-of-the-shoot story is about (my inference).
 - **Trip dates.** Gmail has no tickets, hotels or visas for Monaco or France (Gmail, my fact check). A Drive video, "Monaco Fish Intro.mp4", was created on 14 October 2018, which suggests Monaco was in or before 2018, and Uber receipts put you in India during the 2019 Grand Prix weekend (Drive "Monaco Fish Intro.mp4"; Gmail, my fact check). The essays date neither trip (my notes, 12 Oct).
 - **SHLAY timing.** You said the SHLAY shoot was the day before you left for Europe (you, 11 Oct 12:14). Your SHLAY edits are dated 29 February and July 2020, but Uber rides in India on 28 February and on 4, 9 and 21 March 2020 argue against your leaving the day after the February edits (Drive SHLAY files; Gmail, my fact check). The Nikon Z6 shipped in November 2018, so the shoot came after that (web, my fact check).
 - **When you first picked up a camera.** One line says 2016, and another says your photography started on the 2017/2018 Dehradun trips (you, 11 Oct 12:14).
-- **Where The Classroom and the musician sit.** The Classroom was running by October 2019 and finished by July 2020, while your CVs say 2020 to 2022, so the essays give no years (Drive "The Classroom"; Gmail 1732fb8de761a858, 8 Jul 2020; my notes, 9 Oct). My chapter list for the essays puts the musician before The Classroom, but your telling seems to put him after it (my notes, 12 Oct; my inference). I also assume the sports-teacher day was on The Classroom (my inference).
+- **Where The Classroom and the musician sit.** The Classroom was running by October 2019 and finished by July 2020, while your CVs say 2020 to 2022, so the essays give no years (Drive "The Classroom"; Gmail 1732fb8de761a858, 8 Jul 2020; my notes, 9 Oct). The essays follow your telling and put The Classroom before the musician (my notes, 12 Oct). I also assume the sports-teacher day was on The Classroom (my inference).
 - **Words I interpreted.** I read the voice-typed "would not want to work" as wanting to be on set, "lost his top" as loving the pictures, "background movies" as "background moves" and "candies" as "candids" (my inference).
 - **"glacier drafting? nasa satellite?"** You wrote this about ten minutes after I saved new UCLA pieces that included a glacier story and a NASA-satellite story (you, 9 Oct 12:26; repo commit 07e88ac, 9 Oct 12:15). I think you meant those two pieces, but I don't know whether it was a question, a doubt or a yes (my inference). The "i did" just before it reads like your yes on the Finolex costume trials (my inference).
 - **Khauf.** You said camera assistant, while your 2025 CV says "Interned" and names Pankaj Kumar, which you haven't restated (you, 8 Oct 23:17; Drive "Karan Chaudhary CV", 2025). I don't know your duties there or on the Boney Kapoor project (my notes, 8 Oct).
@@ -164,8 +169,7 @@ Your instructions, in the order you gave them:
 - **Your degree paperwork.** You told TISS you studied from July 2022 to June 2025, while Whistling Woods' emails show classes from September 2021 and a repeated semester from July 2023 (Gmail 1a0c90701bac2c86, 22 Sep 2026; Gmail 17be02615e5d35bf, 13 Sep 2021; Gmail 1879d83302cbee34, 20 Apr 2023). Two enrolment numbers appear, ME0223/0862/J25 and ME0223/C297/B01/S25 (Gmail 1a0c90c3bdd3947d, 22 Sep 2026; Gmail 1a0c90701bac2c86, 22 Sep 2026). TISS asked for a form, fees and scans before it sends your transcript, and Gmail shows no reply yet (Gmail 1a0c91595f9ed050, 22 Sep 2026; Gmail 1a0d35eec842c2f3, 24 Sep 2026). A Whistling Woods email of 24 February 2026 says your capstone project "has not yet been submitted to the Student Production Department" (Gmail 19c8f04dcb5729ae, 24 Feb 2026). I don't know whether 5.9 out of 10 counts as first class, which WES and several schools care about (my college notes, 12 Oct).
 - **Tests and next steps.** You planned to retake IELTS after your test of 11 October 2024, and I have no new date (Gmail 1a0c8ce87c68b779, 22 Sep 2026). After UCLA's refusal your counsellor, Arjun Seth, suggested calling their office, and I don't know if you will (Gmail 1a1252892a189747, 10 Oct 2026). No email asking Stony Brook about eligibility is on record (my college notes, 11 Oct).
 - **Your sibling and cousins.** Gmail points to your sibling being your sister, Nandini, but you haven't said so, so the essays never name or gender your sibling (Gmail, my fact check; my notes, 12 Oct). I know nothing about your parents' work or your two cousins (section 4).
-- **Your family and film.** The essays say "nobody in my family works in film or photography", and the 8 Oct doc's "without family connections in film" is the only source I can find for it (my check of the essays, 12 Oct; 8 Oct essays doc). You have never told me this yourself (my inference).
-- **The films you love.** The essays call The Lunchbox your favourite film and hold up Guneet Monga's producing (my check of the essays, 12 Oct). Those choices came from the 8 Oct doc, which marked its influences paragraph "Keep only if true" (8 Oct essays doc). I need your yes or no (my inference).
+- **The films and producers you admire.** You haven't named any yet. Stark question 9 asks for a favourite film, show, book or play, and AFI asks for a film you wish you had produced and a producer you admire; those three answers are left open for your own picks (my notes, 12 Oct).
 - **The musician.** I don't know who he is, and February 2020 edits in your Drive named "Krish" and "Doozy" may or may not be him, so the essays never name him (Drive, my fact check).
 - **Work that isn't written up.** The FCB Group / Fuel Content internship of July 2022 is on none of your CVs, and neither it nor the August 2025 corporate video is in any essay (section 4; my check of the essays, 12 Oct).
 - **Your own 2025 CV.** It still uses the production wording you corrected, "Interned at Matchbox Studios" and "Managed and executed an ad campaign", so it may need the same fix before anyone sends it (Drive "Karan Chaudhary CV", 2025; my inference).
@@ -193,7 +197,7 @@ Every fact the drafts rely on, with where it came from. When sources disagree, K
 - **Languages:** English and Hindi. The only source is "one line in a Karan-owned 2024 draft CV" (corrected_facts.md). Karan has not confirmed this in the project. See 2.12.
 - **Where he grew up:** Gurgaon/Gurugram. He went to Suncity School, Sec-54 Gurgaon (corrected_facts.md, Drive "Class 12 Karan.JPG"). His trophy is from an event at Amity International School, Sector-43, Gurgaon (Karan, trophy photo, 9 Oct).
 - **Applicant status:** an international (Indian) applicant. Karan: "obviously international student deadlines" (Karan, 11 Oct 13:17). The notes say UCLA's Graduate Division "asks Indian applicants for a master's" (notes_01.md). Nationality is **not stated outright** anywhere.
-- **Family:** he has parents, one sibling and two cousins. The sibling and the two cousins were at school in Dehradun (Karan, 11 Oct 12:14). Records point to a sister, Nandini, but this is **unconfirmed and held back** (see 2.11). Other family details: "Not found anywhere" (corrected_facts.md).
+- **Family:** he has parents, one sibling and two cousins. The sibling and the two cousins were at school in Dehradun (Karan, 11 Oct 12:14). Records point to a sister, Nandini, but this is **unconfirmed and held back** (see 2.11). Nobody in his family works in film or photography: "yep true" (Karan, 12 Oct 17:49). Other family details: "Not found anywhere" (corrected_facts.md).
 - **What he wants:** "my aim is producing" (Karan, 11 Oct 13:17).
 
 ## 2.2 Education
@@ -232,7 +236,7 @@ Every fact the drafts rely on, with where it came from. When sources disagree, K
 
 - **The ground rule:** "i didn't work production ever, on khauf i was a camera assistant" (Karan, 8 Oct 23:17). Never claim, or imply, a production job or running a shoot (corrected_facts.md).
 - **Khauf, Matchbox Studios, April 2023: camera assistant** (Karan, 8 Oct 23:17). "'under Pankaj Kumar' may stay as in the source" (corrected_facts.md). That detail comes from the original source doc. Karan has not confirmed it. His duties are **not given** (corrected_facts.md).
-- **Project under producer Boney Kapoor, October 2025 to now: camera assistant.** Karan's answer: "Camera assistant" (Karan, plan answer, 8 Oct 23:19). The CV line is "Camera assistant, Bayview Projects (producer Boney Kapoor)". The company is **assumed** (see 2.12). The project title is unknown and left out (corrected_facts.md). Karan asked: "couldn't you check what company boney kapoor runs for his own productions?" (Karan, 9 Oct 12:55).
+- **Project under producer Boney Kapoor, October 2025 to now: camera assistant.** Karan's answer: "Camera assistant" (Karan, plan answer, 8 Oct 23:19). Bayview Projects was the line production team, not his employer: "bayview just worked as our line production team" (Karan, 12 Oct 17:49). The CV line is now "Camera assistant, project under producer Boney Kapoor". The project title is unknown and left out (corrected_facts.md). Karan asked: "couldn't you check what company boney kapoor runs for his own productions?" (Karan, 9 Oct 12:55).
 - **Sleepyhead Mattresses shoot, for Growth Jockey, Gurugram, April 2024: he planned the shoot.** Karan's answer: "shoot planned equipment script and offering audience planning" (Karan, plan answer, 8 Oct 23:19). That means the equipment, the script, and the offer and audience the film was aimed at. He did **not** run the shoot day, manage the campaign, or coordinate the client, agency, crew and cast (corrected_facts.md). His job title is unknown (corrected_facts.md).
 - **Finolex commercial, Early Man Productions, 2024: direction team.** He prepared the production sheets, cast references and PPM deck. Karan's answer: "Yes, all true" (Karan, plan answer, 8 Oct 23:19). He also ran costume trials: "confirmed by Karan on 9 October" (corrected_facts.md). That confirmation is **not** among the verbatim messages in karan_messages.md. Always describe this as direction-team work, never as a production job (corrected_facts.md).
   - An unclear message about this entry: "on the Finolex CV entry, which comes from his old CV but isn't confirmed i did / glacier drafting? nasa satellite?" (Karan, 9 Oct 12:26). No source explains what "glacier drafting" and "nasa satellite" mean. **Meaning unknown.**
@@ -465,7 +469,7 @@ Main source: Karan's own account (Karan, 11 Oct 12:14; the same text as photo_st
 
 ## 2.12 Assumed rather than confirmed
 
-- **Bayview Projects as the employer.** Bayview Projects LLP is Boney Kapoor's own production house (trade press, 2019 to 2024; corrected_facts.md, no URL given). That Karan's current project runs under Bayview is "assumed from the user's request, not from a document" (corrected_facts.md). The request was "couldn't you check what company boney kapoor runs for his own productions?" (Karan, 9 Oct 12:55). The CV still says "Camera assistant, Bayview Projects (producer Boney Kapoor)". Karan has not confirmed this.
+- **Bayview Projects as the employer: wrong, now corrected.** Bayview Projects LLP is Boney Kapoor's own production house (trade press, 2019 to 2024), and the CV had named it as his employer. Karan: "bayview just worked as our line production team" (Karan, 12 Oct 17:49). Bayview is no longer named in any CV or essay.
 - **Mom 2 as an unconfirmed lead.** "A counsellor brag sheet mentions Mom 2, but Karan has not confirmed it" (corrected_facts.md). It is not used. The brag sheet's location is not given in these sources.
 - **Hindi as a language.** The only source is "one line in a Karan-owned 2024 draft CV" (corrected_facts.md). Karan has not said it in this project. Assumed.
 - **"under Nitin Rai".**
@@ -672,6 +676,16 @@ send the stark and chapman links
 ### 2026-10-12 10:04 UTC
 
 create a base document which has entirely everything. i need to see the source of your knowledge
+
+### 2026-10-12 10:06 UTC
+
+i mean your understanding of me
+
+### 2026-10-12 17:49 UTC
+
+yep true
+who even said that
+bayview just worked as our line production team
 
 ### Answers Karan gave through question prompts and plan reviews (verbatim)
 

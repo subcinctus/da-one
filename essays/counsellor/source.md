@@ -101,13 +101,13 @@ None at present.
 ## **11. Pertinent work experience**
 *Limit: not stated; one entry per employer*
 *Question: Describe your employment, occupation or activities pertinent to your graduate goals during or since your collegiate studies.*
-1\. Bayview Projects, October 2025 to present. Camera assistant on a project under producer Boney Kapoor.
+1\. Project under producer Boney Kapoor, October 2025 to present. Camera assistant.
 2\. Growth Jockey, Gurugram, April 2024. Planned the shoot for the Sleepyhead Mattresses campaign: equipment, script, and the offer and audience the film was aimed at.
 3\. Early Man Productions, 2024. Direction team, Finolex commercial. Prepared production sheets, cast references and the PPM deck, and ran costume trials.
 4\. Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar.
 5\. Freelance cinematographer, 2021 to 2024. Assistant cinematographer on five larger-scale short films; lead cinematographer on independent films. Cameras: RED, Sony Venice, Sony FX and Alpha; also DIT and colour.
 6\. Whistling Woods International, Mumbai, while a student. Behind-the-scenes photographer, stills and video, for student productions; asked by more sets than I could cover, so I committed to shoots in advance.
-*137 words*
+*133 words*
 ## **12. Resume / CV**
 *Limit: not stated. Required upload.*
 *Question: Upload a resume/CV. Include any relevant information specific to our program.*
@@ -118,7 +118,7 @@ B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, M
 Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram, 2021
 The Art of Fashion and Advertising (studio fashion photography under Nitin Rai), Raghu Rai Center for Photography, Jul 2019 to Mar 2020
 EXPERIENCE
-Camera assistant, Bayview Projects (producer Boney Kapoor), Oct 2025 to present
+Camera assistant, project under producer Boney Kapoor, Oct 2025 to present
 Shoot planning, Sleepyhead Mattresses campaign, Growth Jockey, Gurugram, Apr 2024: equipment, script, and the film's offer and audience
 Direction team, Finolex commercial, Early Man Productions, 2024: production sheets, cast references, PPM deck, costume trials
 Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
@@ -174,7 +174,7 @@ B.Sc. Filmmaking, Cinematography and Direction, Whistling Woods International, M
 Senior Secondary, Commerce (Economics, Business Studies, Accountancy, English, Physical Education), Suncity School, Gurugram, 2021
 Studio fashion photography under Nitin Rai, Raghu Rai Center for Photography, 2019 to 2020
 EXPERIENCE
-Camera assistant, Bayview Projects (producer Boney Kapoor), Oct 2025 to present
+Camera assistant, project under producer Boney Kapoor, Oct 2025 to present
 Shoot planning, Sleepyhead Mattresses campaign, Growth Jockey, Gurugram, Apr 2024: equipment, script, and the film's offer and audience
 Direction team, Finolex commercial, Early Man Productions, 2024: production sheets, cast references, PPM deck, costume trials
 Camera assistant, Khauf, Matchbox Studios, Apr 2023 (under Pankaj Kumar)
@@ -260,8 +260,7 @@ That is the change I care about most. I used to want my pictures to be looked at
 ## **9. Favourite existing work**
 *Limit: 1,000 characters*
 *Question: Do you have a favorite existing film, TV show, web series, book, or play? Explain why it's a favorite.*
-My favourite is The Lunchbox, released in 2013. A lunch delivered to the wrong office in Mumbai starts an exchange of letters between two lonely strangers, and the film never raises its voice. As a viewer, and as a cinematographer, I love its restraint: the sounds of a kitchen, the train commute, a letter read over lunch. As someone who wants to produce, I admire how it was put together. It was an international co-production, launched at a major festival and released around the world, so a very local Mumbai story reached audiences far outside India. That is the kind of film I want my studio to make: a specific Indian story, made with care and financed well enough to find an audience abroad.
-*699 characters*
+*0 characters*
 ## **10. Other art forms**
 *Limit: 500 characters*
 *Question: Do you have interest in other art forms (literature, opera, sculpture, theatre, painting, dance, etc.)?*
@@ -270,7 +269,7 @@ Yes: photography, which came before film for me. On a family trip to Monaco I ta
 ## **11. Experience entries (USC application)**
 *Limit: 700 characters per entry. Optional.*
 *Question: Description / Key Responsibilities.*
-1\. Bayview Projects, October 2025 to present. Camera assistant on a project under producer Boney Kapoor.
+1\. Project under producer Boney Kapoor, October 2025 to present. Camera assistant.
 2\. Growth Jockey, Gurugram, April 2024. Planned the shoot for the Sleepyhead Mattresses campaign: equipment, script, and the offer and audience the film was aimed at.
 3\. Early Man Productions, 2024. Direction team, Finolex commercial. Prepared production sheets, cast references and the PPM deck, and ran costume trials.
 4\. Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar.
@@ -332,7 +331,7 @@ ORIGINAL WORK
 • KARMANASA. A four-minute film described without dialogue, written for this application, 2026. Role: writer. Purpose: a visual story told without words.
 • SUN PATCH. An original two-minute film on "We are running out of time", planned for this application, 2026. Roles: director, producer, cinematographer and editor.
 INDUSTRY WORK
-• Bayview Projects (producer Boney Kapoor). October 2025 to present. Camera assistant.
+• Project under producer Boney Kapoor. October 2025 to present. Camera assistant.
 • Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. Planned the shoot: equipment, script, and the offer and audience the film was aimed at. Purpose: an advertising film for Sleepyhead Mattresses.
 • Finolex commercial, Early Man Productions. 2024. Direction team: production sheets, cast references, PPM deck, costume trials. Purpose: a commercial for Finolex.
 • Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar.
@@ -872,7 +871,7 @@ WRITING
 • ROLL CALL. Original short screenplay, 2026. Writer; the writing sample in this application.
 • The Classroom. Five-part web series released on YouTube, made with friends while at Suncity School, Gurugram. Co-director, cinematographer, editor and organiser; worked with our scriptwriter to rewrite an episode's lines on the day of a shoot; also played the sports teacher on screen.
 FILM AND TELEVISION
-• Project under producer Boney Kapoor, Bayview Projects. October 2025 to present. Camera assistant.
+• Project under producer Boney Kapoor. October 2025 to present. Camera assistant.
 • Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. Planned the shoot: equipment, script, offer and audience.
 • Finolex commercial, Early Man Productions. 2024. Direction team.
 • Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar.
@@ -883,7 +882,7 @@ PHOTOGRAPHY AND MEDIA
 • Mitti to Matka, Gurugram, 2020 to 2021. Media manager.
 • Suncity MUN. International press photographer.
 • 3rd place, Clic(k)hé photography competition, Cyber Buzz 2018–19, Amity International School, Gurugram.
-*199 words*
+*197 words*
 
 # **6. Chapman University, Dodge College of Film and Media Arts, MFA in Film and Television Producing**
 **Priority deadline: 15 November 2026 (fellowship preference).** The online portal does not yet offer this application; contact is through Chapman Graduate Admission.
@@ -903,7 +902,7 @@ My career goal is a creative studio in India of 8 to 30 people, where talented n
 *Question: A list of activities that demonstrate your potential in production, focusing on creative accomplishments.*
 Karan Chaudhary: Creative Portfolio
 INDUSTRY WORK
-• Bayview Projects (producer Boney Kapoor). October 2025 to present. Camera assistant.
+• Project under producer Boney Kapoor. October 2025 to present. Camera assistant.
 • Sleepyhead Mattresses campaign, Growth Jockey, Gurugram. April 2024. Planned the shoot: equipment, script, and the offer and audience the film was aimed at.
 • Finolex commercial, Early Man Productions. 2024. Direction team: production sheets, cast references, PPM deck, costume trials.
 • Khauf, Matchbox Studios. April 2023. Camera assistant under Pankaj Kumar.
@@ -1004,10 +1003,10 @@ By the time SHLAY, a senior's new boutique clothing brand, asked me for a profes
 The day after the shoot I left for Europe, and in France I reached a point where I could not stop using the camera, not because of the architecture, not because of the camera. I ran on autopilot: motion in long exposures, frozen water, birds, strangers, my own family as if on black-and-white film. I had built colour profiles before travelling and never felt the need to edit a frame. That trip settled, for me, the difference between loving the camera and building a career on it.
 Making that choice was the challenge I had to overcome, a quiet one. My parents did not raise work with us until my last years of school, my own subjects were economics, business studies and accountancy, and nobody at home saw this coming. I found my own way in, and today my family's houses are full of my polished prints.
 At Whistling Woods International, where I trained as a cinematographer, student crews began asking me to photograph and film behind the scenes on their sets, more crews than I could reach, so I gave my word in advance. The camera Nitin had noticed, the one that would not stay still, had found its subject: crews at work, on sets that were not my own. My portfolio list records the films I have shot. As a camera assistant since, I keep seeing problems reach the camera that began with decisions made long before anyone called action, at a desk rather than on the floor, and I have come to want the desk. None of my work has yet been in a production department, which is why I want a film programme: to learn development, financing, budgeting, scheduling and distribution.
-The stories I want to tell look like ROLL CALL, my outline in this application: something as large as India's first electoral roll coming down to one room and one afternoon, told with humour and without pity, about people I rarely see on screen. My influences begin with the late Raghu Rai, whose single frames can hold a whole street. The Lunchbox, a quiet Mumbai story released around the world as an international co-production, showed me what producing can do, and one of its producers, Guneet Monga, who came into Indian cinema without a film family, has the career I study.
+The stories I want to tell look like ROLL CALL, my outline in this application: something as large as India's first electoral roll coming down to one room and one afternoon, told with humour and without pity, about people I rarely see on screen. My first influence was the late Raghu Rai, whose single frames can hold a whole street.
 LMU's common core teaches every role before producers specialise, which is how I came to producing too: for years my camera followed each department on a set. In Creative Producing I would work with directing and screenwriting students, learn to develop, sell and monetise digital content, and finish with a thesis that pairs produced work with a series bible, pitch materials and a business and marketing strategy. The required internship and professional mentor would tie it to the industry in Los Angeles, and Nitin Rai showed me what one experienced eye can see in a student.
 I want to specialise in producing, where the frame is decided: which stories get made, who makes them and how the money is spent. I know what a scene takes to shoot, not yet what it takes to get made. After a few years in development and production, I plan to build a studio in India of 8 to 30 people that develops its own slate, pays people fairly and trains them on the job. My first prints were made to shout. The studio's films should do something harder: hold the people usually left outside the frame. That is the impact frame I have been working towards.
-*1178 words*
+*1137 words*
 ## **2. Short-format film outline**
 *Limit: half to one page, treatment form (not script)*
 *Question: An outline of a short-format film project you would like to create. It should give a sense of the stories you want to tell and the genres you want to work in.*
@@ -1048,7 +1047,7 @@ CINEMATOGRAPHY
 • Five larger-scale short films, 2021 to 2024. Assistant cinematographer.
 • Independent films, 2021 to 2024. Lead cinematographer.
 JOBS
-• Bayview Projects (producer Boney Kapoor), October 2025 to present. Camera assistant.
+• Project under producer Boney Kapoor, October 2025 to present. Camera assistant.
 • Growth Jockey, Gurugram, April 2024. Planned the Sleepyhead Mattresses shoot: equipment, script, and the offer and audience the film was aimed at.
 • Early Man Productions, 2024. Direction team, Finolex commercial: production sheets, cast references, PPM deck, costume trials.
 • Matchbox Studios, April 2023. Camera assistant on Khauf under Pankaj Kumar.
@@ -1110,8 +1109,8 @@ The day before I left for Europe, I shot for SHLAY, a senior's new boutique clot
 At Whistling Woods International, where I trained as a cinematographer, the camera turned round. Student sets asked me for behind-the-scenes stills and video, more than I could cover, and on days without a set of my own I still wanted to be on one, for beautiful sets, people at work and candid moments. A behind-the-scenes camera watches the set, not the frame: every department, who is waiting, and why. My lens was on the people making films.
 I work as a camera assistant, currently under producer Boney Kapoor, and keep watching problems arrive at the camera that began earlier, in decisions about schedule, budget, locations and cast. By then we can only absorb them. I am applying for an MFA in Producing to move to the start of that chain and make those decisions, knowing what they cost on set.
 I have not yet worked in a production office, but most of what I know, from the camera I taught myself to the sets I photographed, I learned by doing. NYFA's hands-on MFA would let me learn producing the same way, through budgeting, entertainment law and a thesis project with its business plan, budget, schedule and pitch. I would make its proof of concept with filmmaking students, who would get a producer who knows what a camera crew needs.
-The producers I admire carry a local story beyond India, as Guneet Monga did with The Lunchbox and The Elephant Whisperers. After a few years in development and production, I plan to build a studio in India of 8 to 30 people making grounded films and series about work and money, such as SLACK WATER, the treatment in my portfolio. The studio would give first jobs, fairly paid, to people who, like me, have no family in the industry. I began with contrast frames, built to stand out. An impact frame, a story that matters to the people in it, is decided long before anyone calls roll. That is the producer's job, and the one I want NYFA to teach me.
-*800 words*
+After a few years in development and production, I plan to build a studio in India of 8 to 30 people making grounded films and series about work and money, such as SLACK WATER, the treatment in my portfolio. The studio would give first jobs, fairly paid, to people who, like me, have no family in the industry. I began with contrast frames, built to stand out. An impact frame, a story that matters to the people in it, is decided long before anyone calls roll. That is the producer's job, and the one I want NYFA to teach me.
+*779 words*
 ## **2. Portfolio (choose one option)**
 *Limit: one of three options; the treatment or outline option is 3 to 7 pages*
 *Question: Submit one of the three options.*
@@ -1151,10 +1150,10 @@ Nobody in my family works in film, and my parents did not talk to us about work 
 A camera taught me balance. On trips to Dehradun I shot with a Canon 600D and its kit lens, then traded it in for a nifty fifty on a 7D Mark II, a pairing that opened possibilities beyond what a better camera could offer. With it I used manual focus creatively for the first time, played with bokeh, and asked why my camera had no in-body stabilisation when Sony offered it for less. On a family trip to Monaco I taught myself macro, manual HDR blending and long exposures of a changing sky. From above, I caught an F1 car flat out on the straight, dead centre in the frame, and at the far end of an 18-135mm, seagulls soaring about fifty metres away. Those were balanced frames, all composition and control.
 The day before I left for Europe, I did a professional shoot for SHLAY, a senior's new boutique clothing brand. I had been sure my Nikon Z6 and its heavy 24-70 were doing the work, until I handed them to someone else and saw that knowledge made the difference. On that shoot balance was no longer enough. I wanted a frame that meant something: an impact frame.
 By then my frames had begun to move. The Classroom, a five-part web series I made with friends at Suncity School, was my first real video work: I co-directed, shot, edited and organised it, fitting shoots around our exams. One shoot day an actor dropped out at the last second. We invented a funny sports teacher on the spot, and I played him myself. Our scriptwriter was at home, so we rewrote the lines together remotely to suit him, and I found a standard tracksuit that cost us nothing. The story of the episode still held together. None of us called it producing.
-At Whistling Woods International, where I trained as a cinematographer, my camera turned round. Student sets kept asking me to shoot their behind-the-scenes stills and video, more of them than I could cover, so I committed to shoots in advance, and on days with no set of my own I still wanted to be on one, for the beautiful sets, the people at work and the candid moments. I was photographing the people making films, not the films, and watching every department at work. That is what turned me towards producing. My CV lists the sets I have worked on, and as a camera assistant I keep seeing problems reach the camera that began earlier, in a schedule, a budget or a handover. I want to be where those decisions are made. The Lunchbox, which I wish I had produced, and Guneet Monga, who did, have short answers of their own.
+At Whistling Woods International, where I trained as a cinematographer, my camera turned round. Student sets kept asking me to shoot their behind-the-scenes stills and video, more of them than I could cover, so I committed to shoots in advance, and on days with no set of my own I still wanted to be on one, for the beautiful sets, the people at work and the candid moments. I was photographing the people making films, not the films, and watching every department at work. That is what turned me towards producing. My CV lists the sets I have worked on, and as a camera assistant I keep seeing problems reach the camera that began earlier, in a schedule, a budget or a handover. I want to be where those decisions are made.
 The stories I want to produce are about work, money and family, often crossing between India and the United States. REGISTERED POST, the feature I pitch here, is one of them: a family register, an urn posted from Ohio and a young priest in Haridwar caught between the two. I want to tell stories like it with humour and without pity, for audiences in India and abroad.
 After AFI I plan to work in development and production for a few years, then build a studio in India of 8 to 30 people with its own slate, giving talented people from outside film families paid work and someone to show them how it is done. AFI teaches the way I learned, by doing, and I want to leave with a thesis film carried from pre-production through post and with Fellows I would want to keep working with. I began with frames built to stand out, then learned balance, then meaning. The frame I want to learn at AFI is the one decided before anyone rolls, so that in my studio, people who start as I did, with a camera and no contacts, can decide it too.
-*760 words*
+*741 words*
 ## **2. Project Pitch**
 *Limit: 2 pages*
 *Question: A project you would like to produce as a feature or TV series (original or adapted from a novel, play, news article, current or historical event): 1) concise plot overview with main character arcs; 2) central themes and visual tone; 3) why the story matters to you and why it will connect with an audience.*
@@ -1178,8 +1177,7 @@ It is a festival dramedy for families on both ends of these calls, in the United
 ## **3. Short answer 1**
 *Limit: all short answers share 3 pages*
 *Question: What is a film or TV series you wish you could have produced and why?*
-The Lunchbox. A quiet 2013 Mumbai story about a lunch delivered to the wrong office, it is a film I love for its restraint: the sounds of a kitchen, the train commute, a letter read in silence. It reached audiences around the world because of how it was set up, as a co-production across several countries, with a festival launch and distribution that took a very local film abroad. I wish I had produced it because it is the kind of film I want to make: a specific Indian story, made with care, with the financing and partners in place for it to be seen outside India.
-*107 words*
+*0 words*
 ## **4. Short answer 2**
 *Limit: *
 *Question: What is an area of producing you feel you need more support to learn and grow into the role?*
@@ -1189,8 +1187,7 @@ In development, I want to learn to work with a writer from the earliest treatmen
 ## **5. Short answer 3**
 *Limit: *
 *Question: Is there a producer whose career you admire or aspire to emulate?*
-Guneet Monga. She came into Indian cinema without a film family, co-founded Sikhya Entertainment, produced films such as The Lunchbox and Masaan, and later won an Academy Award as producer of The Elephant Whisperers. What I admire most is that she brings new filmmakers into the industry along with their stories. That is the kind of producer I want to become, and Sikhya is the closest model I have for the company I want to build in India.
-*78 words*
+*0 words*
 ## **6. Short answer 4**
 *Limit: *
 *Question: Aside from watching films, how do you spend your free time?*
@@ -1242,7 +1239,7 @@ After The Classroom, my stills began to move for someone else: a musician at my 
 
 It was not until a professional shoot for SHLAY, a senior's new clothing label, that I felt the urge for a third kind of picture: neither a contrast frame nor a balanced one, but an impact frame, one that meant something. At Whistling Woods International, where I trained as a cinematographer, student crews asked me to shoot their behind-the-scenes stills and video, more than I could cover, so I committed to shoots in advance, and on days without a set of my own I still wanted to be on one, for beautiful sets, people at work and candid moments. I was photographing the people making films, not the films, and those were the frames that meant something. Somebody had put each set together before I arrived, and I wanted to be that somebody.
 
-My CV lists the sets I have worked on, most recently as a camera assistant at Bayview Projects under producer Boney Kapoor. Each stage gave me a new frame, and the last takes in the whole set and everyone on it: the producer's frame. Heinz is where my commerce classroom and my camera finally meet, and where I would learn to compose it.
+My CV lists the sets I have worked on, most recently as a camera assistant on a project under producer Boney Kapoor. Each stage gave me a new frame, and the last takes in the whole set and everyone on it: the producer's frame. Heinz is where my commerce classroom and my camera finally meet, and where I would learn to compose it.
 *497 words*
 ## **3. Why Heinz College**
 *Limit: 150 to 300 words*
@@ -1383,7 +1380,7 @@ One episode of The Classroom, a five-part web series made with friends while at 
 *Limit: 500 words, double-spaced*
 *Question: What are your short-term career goals? Why is the Stern MBA the necessary next chapter in your professional story? Please be specific.*
 On family trips to Dehradun I shot on a Canon 600D with its kit lens, then traded it for a nifty fifty on a 7D Mark II. The pairing opened possibilities that a better camera could not have offered: I used manual focus creatively for the first time, played with bokeh and learned how stabilisers work, which led me to ask why the 7D had no in-body stabilisation when Sony offered it for less. I was asking about price, product and value before I had the words, and the company I want to build will depend on all three.
-My CV lists the sets I have worked on, most recently as a camera assistant at Bayview Projects under producer Boney Kapoor. My short-term goal is a development role at a company that makes films and shows for Indian and international audiences, where I would learn how projects are chosen, financed, packaged and sold before I build a company of my own.
+My CV lists the sets I have worked on, most recently as a camera assistant on a project under producer Boney Kapoor. My short-term goal is a development role at a company that makes films and shows for Indian and international audiences, where I would learn how projects are chosen, financed, packaged and sold before I build a company of my own.
 That company is why the Stern MBA is the necessary next chapter. I plan it as an Indian studio, 8 to 30 people strong, that develops its own slate and hires talented people without film-family connections, trains them, pays them fairly and trusts them early. Running it will mean structuring deals, managing cash across long projects, choosing projects and markets and building a team that stays. Film school taught me how a film is made, not how a project is valued and financed, or how to manage a team and a balance sheet at once, and I want a grounding in finance and leadership before other people's jobs and money depend on my decisions.
 The MBA/MFA is built for this: a first year mostly at Stern, then Tisch producing courses in packaging and in the structure and management of an independent film company, and a market course that ends at Cannes, where films are bought and sold. I would learn the business in the same years that Tisch trains the craft.
 My school subjects were economics, accountancy and business studies, so some of the groundwork is there. I started by asking why a cheaper camera had a feature mine lacked. At Stern I would learn to ask the same questions of a film: what it costs, who pays for it and whom it pays.
@@ -1418,7 +1415,7 @@ Some of that confidence went into approaching a musician at school whose music h
 The stills did not stop when I started shooting video. The day before I left for Europe, I did a professional shoot for SHLAY, a senior's new boutique clothing brand. By then I carried a Nikon Z6 with a heavy 24-70 and had been convinced the camera was doing the work, until I handed it to someone else and saw that knowledge made the difference. On that shoot I felt the urge for a meaningful frame: not the contrast frame of my editing days, not the balanced frame of my landscapes, but an impact frame.
 In France I hit a point where I could not stop using the camera, not because of the architecture and not because of the camera. I shot on autopilot: motion long exposures, frozen water, birds, strangers, and my own family as if on black-and-white film. I had built my colour profiles before travelling, and I never felt the need to edit a frame. That trip settled for me the difference between a career and the thing I would do anyway. My family never knew it would become a career; my parents did not talk to us about work until my senior years at school. Today their houses are full of my polished prints, and although I sometimes miss the amateur auto-exposure moments when everyone was made to smile, I prefer candids now, because now the images bring smiles.
 At Whistling Woods International in Mumbai, where I trained as a cinematographer, my camera turned round. Student sets kept asking me to be their behind-the-scenes photographer, for stills and video, more of them than I could cover, so I committed to shoots in advance, and even on days with no set of my own I wanted to be on one, for the beautiful sets, the people at work and the candid moments. I was photographing the people making films rather than the films, and from behind the scenes I could watch every department at work, not only the camera team. That was my bridge to producing.
-The sets on my CV, most recently as a camera assistant at Bayview Projects under producer Boney Kapoor, have shown me the other side of that view from inside one department: on set after set, problems reach the camera that started earlier, in decisions about the schedule, the budget, locations or cast, and my department can only work around them. I want to be where those decisions are made. Commerce at Suncity School had already taught me the questions asked there: what something costs, who pays for it and who it is for. The word none of us had for the organising side of The Classroom is producing: deciding which stories get made and setting them up to be made well. I have not yet worked in a production office, developed a script with a writer over many drafts, or handled the budgets, schedules, financing and distribution that decide whether a film gets made and seen. That is what I am applying to Creative Producing to learn.
+The sets on my CV, most recently as a camera assistant on a project under producer Boney Kapoor, have shown me the other side of that view from inside one department: on set after set, problems reach the camera that started earlier, in decisions about the schedule, the budget, locations or cast, and my department can only work around them. I want to be where those decisions are made. Commerce at Suncity School had already taught me the questions asked there: what something costs, who pays for it and who it is for. The word none of us had for the organising side of The Classroom is producing: deciding which stories get made and setting them up to be made well. I have not yet worked in a production office, developed a script with a writer over many drafts, or handled the budgets, schedules, financing and distribution that decide whether a film gets made and seen. That is what I am applying to Creative Producing to learn.
 My creative influences have been people at close range: a teacher who noticed what I loved though he was teaching something else, a musician whose requests set my pictures moving, a family who were my first audience, and the crews who let me photograph them at work.
 The three pieces in this application are the stories I want to produce. In ROLL CALL, my writing sample, a school drill master in 1951 Rajasthan must enrol twenty women under their own names on India's first electoral roll, though they will only speak from behind a purdah screen. In ONLY ONCE, my film prompt scene, a young wife stuck near the top of a ferris wheel at the Gangasagar Mela faces the mother-in-law she and her husband came to leave behind. In my feature treatment, a boy in Mizoram in 2007, as the bamboo flowers and the rats swarm, finds his grandfather hoarding rice. Each is about who a family or a country counts and who it leaves out of the frame, and I want to make them with humour and without pity.
 Columbia's first year would put me inside the process I used to photograph from behind the scenes: producers write and direct short films alongside the writers and directors, and produce a classmate's film, so I would learn how a script is built before I learn how it is paid for. Later come feature film development and financing, the business of film, and a thesis film I would produce. Columbia graduate Apoorva Charan, an Indian-born producer whose film Joyland won a prize at Cannes, has the kind of career I want.

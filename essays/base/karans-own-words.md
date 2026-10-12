@@ -160,6 +160,16 @@ send the stark and chapman links
 
 create a base document which has entirely everything. i need to see the source of your knowledge
 
+## 2026-10-12 10:06 UTC
+
+i mean your understanding of me
+
+## 2026-10-12 17:49 UTC
+
+yep true
+who even said that
+bayview just worked as our line production team
+
 ## Answers Karan gave through question prompts and plan reviews (verbatim)
 
 **8 October 2026, 23:19 UTC, role questions:**
