@@ -1,0 +1,6 @@
+# Notes
+**Deadline.** 15 November 2026 for all three programmes: the Peter Stark Producing Program, the MFA in Film and Television Production, and the MFA in Writing for Screen and Television.
+**Eligibility.** USC's condition is met. Karan's degree is awarded by the Tata Institute of Social Sciences (TISS), a UGC-recognised deemed university, confirmed by Karan on 9 October. USC evaluates international degrees itself and does not accept WES or ECE reports, so no separate credential evaluation is needed.
+**Before submitting.** The Stark prompts were taken from the official site and still need to be checked against SlideRoom once the application is open there.
+**Programme details** in the answers were checked against USC's official pages on 7 October 2026.
+**Still to come from Karan.** Stark question 9 asks for a favourite film, show, web series, book or play. It is left open for his own choice.
