@@ -1,0 +1,289 @@
+<title>Answer Rewrite Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: a two-pane desk — the writing surface on the left, the checker ledger on the right; one column on phones. */
+:root {
+  --bg: #F2F4F3; --surface: #FFFFFF; --sunk: #E8ECEA; --ink: #16201C; --muted: #59675F; --line: #D3DBD7;
+  --accent: #0E5D6B; --accent-ink: #FFFFFF; --accent-soft: #DCEBED;
+  --low: #22764A; --low-bg: #E1F1E7; --mid: #9A6408; --mid-bg: #FAEFD8; --high: #B0261E; --high-bg: #FAE3E0;
+  --mark-high: rgba(176, 38, 30, .15); --mark-mid: rgba(154, 100, 8, .16); --hint-line: #0E5D6B;
+  --shadow: 0 1px 2px rgba(22, 32, 28, .06), 0 8px 24px rgba(22, 32, 28, .06);
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-doc: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-num: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1513; --surface: #161E1B; --sunk: #1C2622; --ink: #E2EAE6; --muted: #97A69F; --line: #2B3833;
+    --accent: #62B9C6; --accent-ink: #062126; --accent-soft: #17343A;
+    --low: #63C48F; --low-bg: #142C1E; --mid: #E2AA42; --mid-bg: #33280F; --high: #F27D72; --high-bg: #3A1B18;
+    --mark-high: rgba(242, 125, 114, .22); --mark-mid: rgba(226, 170, 66, .2); --hint-line: #62B9C6;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1513; --surface: #161E1B; --sunk: #1C2622; --ink: #E2EAE6; --muted: #97A69F; --line: #2B3833;
+  --accent: #62B9C6; --accent-ink: #062126; --accent-soft: #17343A;
+  --low: #63C48F; --low-bg: #142C1E; --mid: #E2AA42; --mid-bg: #33280F; --high: #F27D72; --high-bg: #3A1B18;
+  --mark-high: rgba(242, 125, 114, .22); --mark-mid: rgba(226, 170, 66, .2); --hint-line: #62B9C6;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-ui); margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+.app { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 16px 40px; }
+.top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 4px 14px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.brand h1 { font: 600 19px/1.2 var(--font-ui); letter-spacing: -.01em; margin: 0; text-wrap: balance; }
+.brand .tag { color: var(--muted); font-size: 13px; }
+@media (max-width: 560px) { .brand .tag { display: none; } .toolbar .btn { padding: 6px 10px; font-size: 13.5px; } }
+.top .spacer { flex: 1; }
+.pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); white-space: nowrap; }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.pill[data-state="ready"] .dot { background: var(--low); }
+.pill[data-state="loading"] .dot { background: var(--mid); animation: pulse 1.2s infinite ease-in-out; }
+.pill[data-state="error"] .dot { background: var(--high); }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .pill[data-state="loading"] .dot { animation: none; } }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); padding: 7px 12px; border-radius: var(--r); cursor: pointer; font-size: 14px; line-height: 1.2; }
+.btn:hover { border-color: var(--muted); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.quiet { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.quiet:hover { color: var(--ink); border-color: var(--line); }
+.btn .kbd { font: 11px var(--font-num); opacity: .75; }
+
+.desk { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 920px) { .desk { grid-template-columns: minmax(0, 1fr); } }
+
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); min-width: 0; }
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); background: var(--surface); z-index: 3; border-radius: 8px 8px 0 0; }
+.toolbar .sep { width: 1px; align-self: stretch; background: var(--line); margin-inline: 2px; }
+.toolbar .grow { flex: 1; }
+
+.editor-wrap { position: relative; }
+.backdrop, #editor { font: 17px/1.7 var(--font-doc); padding: 22px 26px 26px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; letter-spacing: normal; tab-size: 4; }
+.backdrop { position: absolute; inset: 0; color: transparent; pointer-events: none; overflow: hidden; z-index: 0; }
+.backdrop mark { color: transparent; border-radius: 2px; padding: 0; }
+.backdrop mark.s-high { background: var(--mark-high); }
+.backdrop mark.s-mid { background: var(--mark-mid); }
+.backdrop mark.s-focus { box-shadow: 0 0 0 2px var(--accent); }
+.backdrop span.hint { text-decoration: underline wavy var(--hint-line); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+#editor { position: relative; z-index: 1; display: block; width: 100%; min-height: 52vh; resize: none; background: transparent; color: var(--ink); outline: none; overflow: hidden; caret-color: var(--accent); }
+#editor::placeholder { color: var(--muted); font-style: italic; }
+.editor-foot { display: flex; gap: 14px; flex-wrap: wrap; justify-content: space-between; padding: 8px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+.example-note { margin: 12px 14px 0; padding: 8px 12px; border: 1px dashed var(--line); border-radius: var(--r); color: var(--muted); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+.panel { display: grid; gap: 14px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.card h2 { font: 600 12px/1.3 var(--font-ui); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 10px; }
+.card p { margin: 0 0 8px; }
+.small { font-size: 13px; color: var(--muted); }
+
+.verdict-main { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.verdict-score { font: 500 44px/1 var(--font-num); letter-spacing: -.02em; }
+.band { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: 13px; }
+.band.low { color: var(--low); background: var(--low-bg); }
+.band.mid { color: var(--mid); background: var(--mid-bg); }
+.band.high { color: var(--high); background: var(--high-bg); }
+.band.none { color: var(--muted); background: var(--sunk); }
+.meter { position: relative; height: 32px; margin: 12px 0 6px; }
+.meter .track { position: absolute; left: 0; right: 0; top: 8px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--low-bg) 0 40%, var(--mid-bg) 40% 65%, var(--high-bg) 65% 100%); border: 1px solid var(--line); }
+.meter .needle { position: absolute; top: 2px; width: 3px; height: 20px; background: var(--ink); border-radius: 2px; transform: translateX(-1px); transition: left .4s ease; }
+@media (prefers-reduced-motion: reduce) { .meter .needle { transition: none; } }
+.meter .ticks { position: absolute; left: 0; right: 0; top: 18px; height: 12px; font: 10px var(--font-num); color: var(--muted); }
+.meter .ticks span { position: absolute; transform: translateX(-50%); }
+.meter .ticks span:first-child { transform: none; }
+.meter .ticks span:last-child { transform: translateX(-100%); }
+.verdict-sub { color: var(--muted); font-size: 13.5px; }
+.warn { margin-top: 10px; padding: 8px 10px; border-radius: var(--r); background: var(--mid-bg); color: var(--ink); font-size: 13px; }
+.delta { font: 500 13px var(--font-num); }
+.delta.down { color: var(--low); } .delta.up { color: var(--high); }
+
+.ledger { display: grid; gap: 0; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 11px 0; border-top: 1px solid var(--line); align-items: center; }
+.row:first-of-type { border-top: 0; padding-top: 2px; }
+.row .name { font-weight: 600; font-size: 14px; min-width: 0; }
+.row .src { color: var(--muted); font-size: 12.5px; }
+.row .val { text-align: right; font-size: 13px; white-space: nowrap; }
+.row .bar { grid-column: 1 / -1; position: relative; height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; }
+.row .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--muted); border-radius: 3px; transition: width .35s ease; }
+.row .bar i.low { background: var(--low); } .row .bar i.mid { background: var(--mid); } .row .bar i.high { background: var(--high); }
+.row .bar b { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); opacity: .55; }
+.row .prog { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
+.row details { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.row details summary { cursor: pointer; width: fit-content; }
+.row details p { margin: 6px 0 0; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.chip.low { color: var(--low); background: var(--low-bg); } .chip.mid { color: var(--mid); background: var(--mid-bg); } .chip.high { color: var(--high); background: var(--high-bg); } .chip.none { color: var(--muted); background: var(--sunk); }
+
+.sent-list { display: grid; gap: 8px; }
+.sent { border: 1px solid var(--line); border-radius: var(--r); padding: 9px 10px; display: grid; gap: 6px; }
+.sent.focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.sent q { font: 15px/1.5 var(--font-doc); quotes: none; }
+.sent .acts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.sugg { display: grid; gap: 6px; margin-top: 2px; }
+.sugg button.opt { text-align: left; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: var(--r); cursor: pointer; font: 15px/1.5 var(--font-doc); }
+.sugg button.opt:hover { border-color: var(--accent); }
+.sugg .why { font: 11.5px var(--font-ui); color: var(--muted); display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: .05em; }
+.hint-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.hint-list button { border: 1px dashed var(--hint-line); background: transparent; border-radius: 999px; padding: 2px 9px; font-size: 13px; cursor: pointer; color: var(--ink); }
+.empty { color: var(--muted); font-size: 13.5px; }
+
+.overlay { position: fixed; inset: 0; background: rgba(10, 16, 14, .45); z-index: 20; display: grid; place-items: center; padding: 16px; }
+.dialog { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); width: min(860px, 100%); max-height: calc(100% - 24px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; }
+.dialog header { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+.dialog header h3 { margin: 0; font: 600 16px var(--font-ui); flex: 1; }
+.dialog .body { padding: 14px 18px; overflow: auto; min-width: 0; }
+.dialog footer { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.diff { font: 16px/1.7 var(--font-doc); white-space: pre-wrap; overflow-wrap: break-word; }
+.diff del { color: var(--high); background: var(--high-bg); text-decoration: line-through; }
+.diff ins { color: var(--low); background: var(--low-bg); text-decoration: none; }
+.facts { margin: 12px 0 0; padding: 10px 12px; border-radius: var(--r); font-size: 13.5px; }
+.facts.ok { background: var(--low-bg); } .facts.bad { background: var(--high-bg); }
+.facts ul { margin: 6px 0 0; padding-left: 18px; }
+.stream { font: 15px/1.6 var(--font-doc); white-space: pre-wrap; color: var(--muted); min-height: 3em; }
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-weight: 600; font-size: 14px; }
+.field textarea { width: 100%; min-height: 90px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); resize: vertical; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.ver { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.ver:first-child { border-top: 0; }
+.ver .meta { font-size: 12.5px; color: var(--muted); }
+.ver .txt { grid-column: 1 / -1; font: 14px/1.5 var(--font-doc); color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 14px; border-radius: var(--r); font-size: 14px; z-index: 30; max-width: calc(100% - 32px); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><h1>Answer Rewrite Desk</h1><span class="tag">AI-writing check and safe rewrite</span></div>
+    <div class="spacer"></div>
+    <div class="pill-row" id="pills" aria-label="Checker status"></div>
+    <button class="btn quiet" id="settingsBtn" type="button">Settings</button>
+  </header>
+
+  <div class="desk">
+    <section class="sheet" aria-label="Your answer">
+      <div class="toolbar">
+        <button class="btn primary" id="checkBtn" type="button">Check <span class="kbd">Ctrl ↵</span></button>
+        <button class="btn" id="fixFlaggedBtn" type="button" title="Rewrite only the highlighted sentences">Rewrite flagged</button>
+        <button class="btn" id="rephraseBtn" type="button" title="Rephrase the whole answer">Rephrase all</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button class="btn quiet" id="undoBtn" type="button" disabled>Undo change</button>
+        <button class="btn quiet" id="versionsBtn" type="button">Versions</button>
+        <span class="grow"></span>
+        <button class="btn" id="copyBtn" type="button">Copy text</button>
+      </div>
+      <div id="exampleNote" class="example-note" hidden>
+        <span>This is an example answer so you can see the checks work. Paste your own answer to replace it.</span>
+        <button class="btn quiet" id="clearExampleBtn" type="button">Clear example</button>
+      </div>
+      <div class="editor-wrap">
+        <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+        <textarea id="editor" spellcheck="true" aria-label="Answer text" placeholder="Paste or type your answer here, then press Check."></textarea>
+      </div>
+      <div class="editor-foot">
+        <span><span class="num" id="wordCount">0</span> words · <span class="num" id="charCount">0</span> characters</span>
+        <span id="saveState">Saved on this device</span>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Results">
+      <section class="card" id="verdictCard" aria-live="polite">
+        <h2>AI-detection risk</h2>
+        <div class="verdict-main"><span class="verdict-score" id="riskScore">–</span><span class="band none" id="riskBand">Not checked yet</span><span class="delta" id="riskDelta"></span></div>
+        <div class="meter" aria-hidden="true"><div class="track"></div><div class="needle" id="needle" style="left:0%"></div><div class="ticks"><span style="left:0%">0</span><span style="left:40%">40</span><span style="left:65%">65</span><span style="left:100%">100</span></div></div>
+        <div class="verdict-sub" id="riskSub">Press Check to run the detectors on this answer.</div>
+        <div class="warn" id="shortWarn" hidden></div>
+      </section>
+
+      <section class="card">
+        <h2>Checkers</h2>
+        <div class="ledger" id="ledger"></div>
+      </section>
+
+      <section class="card">
+        <h2>Sentences to rewrite</h2>
+        <div class="sent-list" id="sentList"><p class="empty">Flagged sentences appear here after a check.</p></div>
+      </section>
+
+      <section class="card">
+        <h2>Style hints</h2>
+        <p class="small">Phrases that turn up often in AI-written text. They are hints for your rewrite, not a detector.</p>
+        <div class="hint-list" id="hintList"><span class="empty">None found.</span></div>
+      </section>
+
+      <section class="card small">
+        <h2>How this works</h2>
+        <p>The checkers run inside this browser. Your text is not sent anywhere when you press Check. Rewrites are written by Claude through your own Claude account.</p>
+        <p>Universities mostly use Turnitin, GPTZero and Copyleaks (DrillBit through ShodhShuddhi in India). None of them publish their models, so they cannot run here. These are the strongest open-source detectors on the RAID benchmark (University of Pennsylvania) that fit in a browser.</p>
+        <p>Scores are calibrated on 599 human-written samples (news, essays, Reddit posts, abstracts and more). "Flags AI" means the answer reads as more AI-like than 95% of those samples. To cross-check with a tool universities use, paste the final text into <a href="https://gptzero.me" target="_blank" rel="noopener">GPTZero</a>.</p>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<div class="overlay" id="reviewOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+    <header><h3 id="reviewTitle">Review the rewrite</h3><button class="btn quiet" type="button" data-close>Close</button></header>
+    <div class="body">
+      <p class="small" id="reviewIntro"></p>
+      <div class="stream" id="reviewStream" hidden></div>
+      <div class="diff" id="reviewDiff" hidden></div>
+      <div class="facts" id="reviewFacts" hidden></div>
+      <div id="manualBox" hidden>
+        <div class="field"><label for="promptOut">1. Copy this request into Claude</label><textarea id="promptOut" readonly></textarea></div>
+        <button class="btn" id="copyPromptBtn" type="button">Copy request</button>
+        <div class="field" style="margin-top:14px"><label for="pasteBack">2. Paste Claude's rewritten answer here</label><textarea id="pasteBack"></textarea></div>
+        <button class="btn" id="usePastedBtn" type="button">Review pasted text</button>
+      </div>
+    </div>
+    <footer>
+      <button class="btn quiet" id="stopBtn" type="button" hidden>Stop</button>
+      <button class="btn" id="keepMineBtn" type="button" data-close>Keep my version</button>
+      <button class="btn primary" id="acceptBtn" type="button" disabled>Use rewrite</button>
+    </footer>
+  </div>
+</div>
+
+<div class="overlay" id="versionsOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="versionsTitle">
+    <header><h3 id="versionsTitle">Versions</h3><button class="btn quiet" type="button" data-close>Close</button></header>
+    <div class="body"><p class="small">Every check and every accepted rewrite is saved here, on this device only.</p><div id="versionList"></div></div>
+    <footer><button class="btn" type="button" data-close>Done</button></footer>
+  </div>
+</div>
+
+<div class="overlay" id="settingsOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <header><h3 id="settingsTitle">Settings</h3><button class="btn quiet" type="button" data-close>Close</button></header>
+    <div class="body">
+      <div class="field">
+        <label for="voiceInput">Your voice (used for rewrites)</label>
+        <textarea id="voiceInput"></textarea>
+        <span class="small">Describe how you write. Claude follows this when it suggests rewrites.</span>
+      </div>
+      <label class="check"><input type="checkbox" id="heavyToggle"> <span>Use ModernBERT, the strongest checker (160 MB download the first time, then stored in this browser)</span></label>
+      <p class="small" style="margin-top:14px">Saved data on this device: your draft, up to 40 versions and these settings.</p>
+      <button class="btn" id="clearDataBtn" type="button">Clear saved data</button>
+      <p class="small" id="clearConfirm" hidden>Press again to confirm. This removes the draft and all versions.</p>
+    </div>
+    <footer><button class="btn primary" type="button" id="saveSettingsBtn">Save</button></footer>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="app.mjs"></script>
