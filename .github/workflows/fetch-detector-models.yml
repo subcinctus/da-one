@@ -1,0 +1,46 @@
+name: fetch detector models
+
+# One-off job: download the open-source AI-text detectors from Hugging Face, export them to
+# quantized ONNX for the browser, and publish the files to the `claude/ai-checker-models` branch.
+on:
+  push:
+    branches: [claude/ai-writing-checker]
+    paths:
+      - tools/export_detectors.py
+      - tools/sample_texts.json
+      - .github/workflows/fetch-detector-models.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: |
+          pip install --quiet torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet "transformers==4.57.1" "peft==0.17.1" "onnx==1.17.0" "onnxruntime==1.22.0" \
+            "huggingface_hub==0.35.3" safetensors sentencepiece protobuf numpy
+      - name: Export detectors
+        run: python tools/export_detectors.py out
+      - name: Publish to models branch
+        if: always()
+        run: |
+          set -e
+          [ -d out ] || exit 0
+          cd out
+          git init -q
+          git checkout -q -b claude/ai-checker-models
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Exported AI-text detector models from ${GITHUB_SHA}"
+          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" claude/ai-checker-models
+          du -ah . | sort -h | tail -25
