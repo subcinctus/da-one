@@ -71,9 +71,13 @@ GLTR's published GPT-2 outputs exactly, if a "classic detectors" page is wanted 
 python3 tools/build_artifact.py dist     # needs the models branch, onnxruntime-web 1.22.0 and @huggingface/tokenizers 0.1.3
 ```
 
-`dist/` holds 33 files (~217 MB, every file under the 15 MB artifact limit). Model weights are split
-into 14 MiB parts; the worker downloads them once, checks the SHA-256 and keeps them in the
-browser's Cache Storage.
+`dist/` holds 33 files (about 217 MB). Artifacts cap files at 15 MB, publishes at 64 MB and a version
+at 256 MB, so model weights are split into 14 MiB parts named `.wasm` (a served binary type; the
+worker only reads the bytes, then checks the SHA-256 of the whole model) and the folder goes up in
+four publishes. The worker keeps downloaded parts in the browser's Cache Storage, so later visits
+start in seconds.
+
+Published at https://claude.ai/artifact/3zpyz9du2icMWjGLF4wPQQ (private to its owner until shared).
 
 ## Limits
 

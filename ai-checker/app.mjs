@@ -199,8 +199,21 @@ function ensemble() {
   const pct = humanPct(combo.human_q, s / w);
   return { used, pct, risk: Math.round(riskFromPct(pct)), flagged: used.filter((k) => Math.round(pctOf(k)) >= 95) };
 }
+// A sentence is listed and highlighted from the 90th percentile of human 3-sentence windows (the same
+// point where the overall risk turns Medium); "Very AI-like" from the 95th.
+const SENT_FLAG = 90;
 // Sentence highlights only matter when the answer as a whole looks AI-written.
 const sentencesMatter = () => { const e = ensemble(); return !!e && e.risk >= 40; };
+// Sentences to work on: those past the line, topped up with the most AI-like of the rest
+// (at least two, or about 30% of the answer), so a high-risk answer always shows where to start.
+function flaggedSentences() {
+  if (!sentencesMatter()) return [];
+  const scored = state.sentences.map((s, i) => ({ s, i })).filter((x) => x.s.heat !== null).sort((a, b) => b.s.heat - a.s.heat);
+  const want = Math.min(scored.length, Math.max(2, Math.ceil(scored.length * 0.3)));
+  const out = scored.filter((x) => x.s.heat >= SENT_FLAG);
+  for (const x of scored) { if (out.length >= want) break; if (!out.includes(x)) out.push(x); }
+  return out.map((x) => ({ i: x.i, level: x.s.heat >= 95 ? 'high' : x.s.heat >= SENT_FLAG ? 'mid' : 'rel' }));
+}
 
 // ---------- text helpers ----------
 const words = (t) => (t.match(/[\p{L}\p{N}][\p{L}\p{N}'’.-]*/gu) || []).length;
@@ -309,10 +322,10 @@ function autosize() { editor.style.height = 'auto'; editor.style.height = editor
 function renderBackdrop() {
   const text = editor.value;
   const marks = [];
-  const show = sentencesMatter();
+  const level = new Map(flaggedSentences().map((f) => [f.i, f.level]));
   state.sentences.forEach((s, i) => {
-    const b = show ? band(s.heat === null ? null : riskFromPct(s.heat)) : 'none';
-    if (b === 'high' || b === 'mid' || i === state.focusSentence) marks.push({ start: s.start, end: s.end, cls: `s-${b === 'low' || b === 'none' ? 'plain' : b}${i === state.focusSentence ? ' s-focus' : ''}`, kind: 'mark' });
+    const lv = level.get(i);
+    if (lv || i === state.focusSentence) marks.push({ start: s.start, end: s.end, cls: `s-${lv === 'high' ? 'high' : lv ? 'mid' : 'plain'}${i === state.focusSentence ? ' s-focus' : ''}`, kind: 'mark' });
   });
   const hints = findHints(text).map((h) => ({ ...h, cls: 'hint', kind: 'span' }));
   // build segments: sentence marks may contain hint spans
@@ -490,7 +503,7 @@ function renderVerdict() {
 
 function renderSentences() {
   const el = $('sentList');
-  const flagged = state.sentences.map((s, i) => ({ ...s, i })).filter((s) => s.heat !== null && s.heat >= 85).sort((a, b) => b.heat - a.heat);
+  const flagged = flaggedSentences().map((f) => ({ ...state.sentences[f.i], i: f.i, level: f.level }));
   if (!state.lastCheck) { el.innerHTML = '<p class="empty">Flagged sentences appear here after a check.</p>'; return; }
   if (!flagged.length && state.sentPending) { el.innerHTML = '<p class="empty">Scoring each sentence…</p>'; return; }
   const e = ensemble();
@@ -501,10 +514,11 @@ function renderSentences() {
     return;
   }
   el.innerHTML = flagged.slice(0, 12).map((s) => {
-    const b = s.heat >= 95 ? 'high' : 'mid';
+    const b = s.level === 'high' ? 'high' : 'mid';
+    const label = s.level === 'high' ? 'Very AI-like' : s.level === 'mid' ? 'Somewhat AI-like' : 'More AI-like than the rest';
     return `<div class="sent${s.i === state.focusSentence ? ' focus' : ''}" data-i="${s.i}">
       <q>${esc(s.text)}</q>
-      <div class="acts"><span class="chip ${b}">${b === 'high' ? 'Very AI-like' : 'Somewhat AI-like'}</span>
+      <div class="acts"><span class="chip ${b}">${label}</span>
       <button class="btn quiet" type="button" data-act="select">Edit by hand</button>
       <button class="btn" type="button" data-act="suggest">Suggest rewrites</button></div>
       <div class="sugg" data-sugg></div>
@@ -650,7 +664,7 @@ function wholePrompt(mode) {
   const text = editor.value;
   let body = text;
   if (mode === 'flagged') {
-    const fl = state.sentences.filter((s) => s.heat !== null && s.heat >= 85).sort((a, b) => b.start - a.start);
+    const fl = flaggedSentences().map((f) => state.sentences[f.i]).sort((a, b) => b.start - a.start);
     for (const s of fl) body = body.slice(0, s.start) + '⟦' + body.slice(s.start, s.end) + '⟧' + body.slice(s.end);
   }
   const task = mode === 'flagged'
@@ -712,7 +726,7 @@ function closeOverlay(id) { $(id).hidden = true; }
 async function startRewrite(mode) {
   const text = editor.value;
   if (!text.trim()) { toast('Paste or type an answer first.'); return; }
-  if (mode === 'flagged' && (!sentencesMatter() || !state.sentences.some((s) => s.heat !== null && s.heat >= 85))) {
+  if (mode === 'flagged' && !flaggedSentences().length) {
     toast(state.lastCheck ? 'No sentences are flagged. Use Rephrase all instead.' : 'Press Check first so the flagged sentences are known.');
     return;
   }
@@ -852,7 +866,8 @@ function wire() {
   editor.addEventListener('input', onEdit);
   editor.addEventListener('click', () => {
     const pos = editor.selectionStart;
-    const i = state.sentences.findIndex((s) => pos >= s.start && pos <= s.end && s.heat !== null && s.heat >= 85);
+    const flagged = new Set(flaggedSentences().map((f) => f.i));
+    const i = state.sentences.findIndex((s, k) => flagged.has(k) && pos >= s.start && pos <= s.end);
     if (i !== state.focusSentence) { state.focusSentence = i; renderBackdrop(); renderSentences(); }
     if (i >= 0) document.querySelector(`.sent[data-i="${i}"]`)?.scrollIntoView({ block: 'nearest' });
   });
