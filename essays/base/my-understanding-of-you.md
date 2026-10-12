@@ -2132,8 +2132,18 @@ With my current and first postgraduate job as a production coordinator and produ
 
 ## Appendix D. Where everything lives
 
-- **USC Peter Stark Producing Program application:** [Stark Google Doc](https://docs.google.com/document/d/1ZCmRjUJnZvXeSFVnsFmMEoGRv_zh6TSXVRKGWqFT4WY/edit)
-- **Chapman University application:** [Chapman Google Doc](https://docs.google.com/document/d/1T6G8qoSzyBVG5ymeSLP33uXJquMDIC4Yfwocqaqm-io/edit)
+- **UCLA MFA Producers Program application:** [UCLA Google Doc](https://docs.google.com/document/d/12LAfspxV-3TBOEHLFPMYxHGjccQl--gLkrGdFdT1oUk/edit)
+- **UNCSA MFA Filmmaking, Creative Producing application:** [UNCSA Google Doc](https://docs.google.com/document/d/1m6S7xN3_rjcrnMaNa92YKQt4I4B--nTac_xOGvdOsT4/edit)
+- **USC Peter Stark Producing Program application:** [Stark Google Doc](https://docs.google.com/document/d/1cl5hht2w4xmn3MUG9PNSw2p4WuEPGz8aSrdSCZFkVeU/edit)
+- **USC, all three programmes application:** [USC Google Doc](https://docs.google.com/document/d/1plWcx0EbrHb-9mb7UZ7BfBMT_ziilseu9BJwUlXaUUo/edit)
+- **Chapman University application:** [Chapman Google Doc](https://docs.google.com/document/d/14F6Um0OAo6D_quer_UZyQgXEwAQDKoEEegFdtMoHMjY/edit)
+- **LMU application:** [LMU Google Doc](https://docs.google.com/document/d/1FrP4o2Cs2_dAKDPnj2aLSYqfSbwq9fkm7hQrQ57k1rs/edit)
+- **NYFA MFA in Producing application:** [NYFA Google Doc](https://docs.google.com/document/d/1b9dUVHDHWRZ7gF5sbbFbD07AeXscxpAgdPDvS_0wxRM/edit)
+- **AFI Conservatory MFA in Producing application:** [AFI Google Doc](https://docs.google.com/document/d/1aEacWNNK6KaxqbXZX-Cb-e5392KoC7vtqC09YDVnpG0/edit)
+- **CMU Heinz MEIM application:** [CMU Google Doc](https://docs.google.com/document/d/14jgwpvxOul7Q8n6Jy3Nv3JxZxQlVGZKNEEz3Qkh5ZlE/edit)
+- **NYU Tisch Graduate Film with Stern MBA application:** [NYU Google Doc](https://docs.google.com/document/d/1pcNJido6Az76nOhs31RrsUAskOoaiVnhrLYKn9erXOM/edit)
+- **Columbia MFA Film, Creative Producing application:** [Columbia Google Doc](https://docs.google.com/document/d/1f27ulwXkjto8NibYwHGsrhV4xPUkEzzCrz-BlKxbUEU/edit)
+- **BU MS Media Ventures application:** [BU Google Doc](https://docs.google.com/document/d/1zqVGbnEMh28141KdqUZAO9DZrwPC9VEUZyJDiJ2Napk/edit)
 - **All essay files and their history:** the GitHub repo subcinctus/da-one, branch claude/essays-doc-refinement-9l5rhg, folder essays/ ([open on GitHub](https://github.com/subcinctus/da-one/tree/claude/essays-doc-refinement-9l5rhg/essays))
 
-**Note:** the Google Docs for the other colleges are being rebuilt around your story. They will get new links, which will be added here.
+**Note:** links updated 12 October 2026, after the Bayview and Lunchbox corrections.
