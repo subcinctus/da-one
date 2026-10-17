@@ -38,7 +38,7 @@ MODELS = [
     dict(key='tabularis-modernbert', repo='tabularisai/ai-text-detection', variants=['q8']),
     # MiniLMv2 distilled from DeBERTa-v3-large, MIT, ships its own int8 ONNX on GitHub
     dict(key='sallulabs-minilm', kind='github-onnx', repo='https://github.com/salmannawaz786/sallulabs-ai-detector',
-         onnx='model/model_int8.onnx', variants=['q8']),
+         onnx='model/model_int8.onnx', variants=['q8'], max_len=256),
     # rewrite guards
     dict(key='nli-deberta-xsmall', kind='nli', repo='cross-encoder/nli-deberta-v3-xsmall', variants=['q8']),
     dict(key='minilm-l6', kind='embed', repo='sentence-transformers/all-MiniLM-L6-v2', variants=['q8']),
@@ -121,7 +121,8 @@ class EmbedWrap(torch.nn.Module):
         h = self.m(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
         mask = attention_mask.unsqueeze(-1).to(h.dtype)
         v = (h * mask).sum(1) / mask.sum(1).clamp(min=1e-9)
-        return torch.nn.functional.normalize(v, p=2, dim=1)
+        # written out (not F.normalize): ReduceL2 keeps an 'axes' attribute that opset 21 no longer accepts
+        return v / torch.sqrt((v * v).sum(1, keepdim=True)).clamp(min=1e-12)
 
 
 def ops_of(path):
@@ -498,6 +499,7 @@ def export_github_onnx(spec, out):
     margin = sc[:, -1] - sc[:, 0] if sc.shape[1] > 1 else sc[:, 0]
     log(f'  raw output dims {sc.shape} AUROC per raw output {au}; AUROC of last-first margin {auroc(margin, labels)}')
     report = dict(key=key, kind='detector', repo=repo, commit=head, inputs=[i[0] for i in ins], outputs=[o[0] for o in outs],
+                  max_len=spec.get('max_len', 512),
                   n_outputs=int(sc.shape[1]), auroc_raw=au, auroc_margin=auroc(margin, labels),
                   cls_id=tok.token_to_id('<s>') if tok.token_to_id('<s>') is not None else tok.token_to_id('[CLS]'),
                   sep_id=tok.token_to_id('</s>') if tok.token_to_id('</s>') is not None else tok.token_to_id('[SEP]'),

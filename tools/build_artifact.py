@@ -10,6 +10,9 @@ Model files are split into parts of at most 14 MiB because artifact files are ca
 """
 import hashlib, json, os, shutil, sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from model_specs import model_spec  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'ai-checker')
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
@@ -20,11 +23,10 @@ NPM_DIR = os.environ.get('NPM_DIR', '/home/user/work/npm')
 CALIB = os.environ.get('CALIB', os.path.join(SRC, 'calibration.json'))
 PART = 14 * 1024 * 1024
 
-MODELS = {
-    'bert-tiny-raid': dict(cls_id=101, sep_id=102, output='sigmoid_human'),
-    'e5-small-lora': dict(cls_id=101, sep_id=102, output='softmax'),
-    'modernbert-raid-mage': dict(cls_id=50281, sep_id=50282, output='softmax'),
-}
+DEFAULT_MODELS = ['bert-tiny-raid', 'e5-small-lora', 'modernbert-raid-mage', 'fakespot-roberta', 'tabularis-modernbert',
+                  'sallulabs-minilm', 'nli-deberta-xsmall', 'minilm-l6']
+INCLUDE = [k for k in os.environ.get('INCLUDE', ','.join(DEFAULT_MODELS)).split(',') if k]
+SITE_WARN_MB, SITE_MAX_MB = 700, 900  # GitHub Pages sites are capped at 1 GB
 
 
 def copy(src, rel):
@@ -76,8 +78,11 @@ def main():
         copy(os.path.join(ort, f), f'vendor/{f}')
     copy(os.path.join(NPM_DIR, 'hft/package/dist/tokenizers.min.mjs'), 'vendor/tokenizers.min.mjs')
     manifest = {'models': {}, 'calibration': json.load(open(CALIB)) if os.path.exists(CALIB) else None}
-    for key, extra in MODELS.items():
+    for key in INCLUDE:
         d = os.path.join(MODELS_DIR, key)
+        if not os.path.exists(os.path.join(d, 'reference.json')):
+            print(f'warning: {key} is not in {MODELS_DIR}; left out')
+            continue
         ref = json.load(open(os.path.join(d, 'reference.json')))
         meta = ref['files']['model_q8.onnx']
         src_parts = meta['parts'] or ['model_q8.onnx']
@@ -90,9 +95,14 @@ def main():
             with open(os.path.join(OUT, 'models', key, name), 'wb') as f:
                 f.write(data[i:i + PART])
             parts.append(name)
-        for f in ['tokenizer.json', 'tokenizer_config.json']:
-            copy(os.path.join(d, f), f'models/{key}/{f}')
-        manifest['models'][key] = dict(size=len(data), sha256=meta['sha256'], parts=parts, repo=ref['repo'], **extra)
+        copy(os.path.join(d, 'tokenizer.json'), f'models/{key}/tokenizer.json')
+        tc = os.path.join(d, 'tokenizer_config.json')
+        if os.path.exists(tc):
+            copy(tc, f'models/{key}/tokenizer_config.json')
+        else:
+            with open(os.path.join(OUT, 'models', key, 'tokenizer_config.json'), 'w') as f:
+                f.write('{}')
+        manifest['models'][key] = dict(size=len(data), sha256=meta['sha256'], parts=parts, **model_spec(key, ref))
     with open(os.path.join(OUT, 'models', 'manifest.json'), 'w') as f:
         json.dump(manifest, f, separators=(',', ':'))
     total, count = 0, 0
@@ -105,6 +115,10 @@ def main():
             if size > 15_000_000:
                 raise SystemExit(f'{p} is over the 15 MB per-file limit')
     print(f'{OUT}: {count} files, {total / 1e6:.1f} MB')
+    if SITE and total / 1e6 > SITE_MAX_MB:
+        raise SystemExit(f'site is {total / 1e6:.0f} MB, over the {SITE_MAX_MB} MB budget (GitHub Pages limit 1 GB)')
+    if SITE and total / 1e6 > SITE_WARN_MB:
+        print(f'warning: site is {total / 1e6:.0f} MB, over the {SITE_WARN_MB} MB target')
 
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 env:
-  DEFAULT_ONLY: fakespot-roberta,tabularis-modernbert,sallulabs-minilm,nli-deberta-xsmall,minilm-l6
+  DEFAULT_ONLY: tabularis-modernbert,minilm-l6
 
 jobs:
   export:
