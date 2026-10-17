@@ -7,7 +7,7 @@
 import { words, esc, splitSentences, diffWords } from './src/text.mjs';
 import { cleanText, auditText } from './src/normalize.mjs';
 import { compareFacts } from './src/facts.mjs';
-import { findTells, styleStats } from './src/tells.mjs';
+import { findTells, styleStats, tellScore } from './src/tells.mjs';
 import { humanPct, band, BAND_LABEL, combine, smoothHeat } from './src/calibration.mjs';
 import { gateCandidate } from './src/guards.mjs';
 import { rewriteFlagged } from './src/rewrite/loop.mjs';
@@ -63,12 +63,20 @@ const CHECKERS = [
     src: 'Thinkst Applied Research, MIT licence', raid: 'not on RAID; a weak signal on its own',
     about: 'Measures how well your text compresses together with a corpus of AI-written text. A faithful port of Thinkst’s own browser build.',
     links: [['GitHub', 'https://github.com/thinkst/zippy']] },
+  { key: 'tells', name: 'AI-tell rules', short: 'Tells', kind: 'tells', group: 'rules',
+    src: 'Rules from blader/humanizer, vale-ai-tells, stop-slop, berenslab and SlopTotal (MIT)',
+    raid: 'not a model: counts stock AI phrasing (each rule weighted) per 100 words, plus style flags such as even sentence lengths',
+    about: 'The same rules that list the AI tells under the answer, turned into one score and calibrated like the detectors. Strong on polished chat-model prose, weak on plainly written answers.',
+    links: [['blader/humanizer', 'https://github.com/blader/humanizer'], ['vale-ai-tells', 'https://github.com/tbhb/vale-ai-tells']] },
 ];
 const GUARD_MODELS = { nli: 'nli-deberta-xsmall', embed: 'minilm-l6' };
 const byKey = (k) => CHECKERS.find((c) => c.key === k);
-// checkers this build ships (models listed in the manifest), smallest first; ZipPy is always there
-const visible = () => CHECKERS.filter((c) => c.kind === 'zippy' || state.manifest?.models?.[c.key]);
-const modelKeys = () => visible().filter((c) => c.kind !== 'zippy').sort((a, b) => a.size - b.size).map((c) => c.key);
+// checkers this build ships (models listed in the manifest), smallest first; ZipPy and the tell rules
+// need no download and are always there
+const visible = () => CHECKERS.filter((c) => c.kind || state.manifest?.models?.[c.key]);
+const modelKeys = () => visible().filter((c) => !c.kind).sort((a, b) => a.size - b.size).map((c) => c.key);
+// raw tell score of a text, in the same shape as a detector result
+const tellResult = (text) => { const t0 = performance.now(); return { status: 'done', prob: null, raw: tellScore(text), ms: performance.now() - t0 }; };
 
 // ---------- state ----------
 const state = {
@@ -161,13 +169,14 @@ function friendlyLoadError(err) {
 
 async function warmUp() {
   state.ready.zippy = 'ready';
+  state.ready.tells = 'ready';
   try {
     const r = await modelWorker.call({ type: 'manifest' });
     state.manifest = r.manifest;
     state.mode = state.manifest.calibration?.default_mode || 'article';
     renderCalibText();
   } catch (err) {
-    for (const c of CHECKERS) if (c.kind !== 'zippy') { state.ready[c.key] = 'error'; state.loadError[c.key] = friendlyLoadError(err); }
+    for (const c of CHECKERS) if (!c.kind) { state.ready[c.key] = 'error'; state.loadError[c.key] = friendlyLoadError(err); }
     renderPills(); renderLedger();
     return;
   }
@@ -215,7 +224,7 @@ function flaggedSentences(all = false) {
 }
 // Checkers that score sentence windows: calibrated on human windows, loaded, and (for the rewrite
 // guide) not the held-out validator.
-const windowModels = () => modelKeys().filter((k) => windowCal()[k] && state.ready[k] === 'ready');
+const windowModels = () => modelKeys().filter((k) => windowCal()[k] && windowWeight(k) > 0 && state.ready[k] === 'ready');
 const validatorKey = () => {
   const v = state.manifest?.calibration?.validator || 'fakespot-roberta';
   return state.manifest?.models?.[v] && modeCal()?.checkers?.[v] ? v : null;
@@ -362,25 +371,29 @@ function ledgerRow(c) {
     else if (r.status === 'done' && pct !== null) {
       const pr = Math.round(pct);
       const b = pr >= 95 ? 'high' : pr >= 85 ? 'mid' : 'low';
-      val = `<span class="num">${fmtPct(pct)}</span> <span class="chip ${b}">${b === 'high' ? 'Flags AI' : b === 'mid' ? 'Borderline' : 'Reads human'}</span>`;
+      val = `<span class="num">${fmtPct(pct)}</span> <span class="chip ${b}">${b === 'high' ? 'Flags AI' : b === 'mid' ? 'Borderline' : 'Not flagged'}</span>`;
       bar = `<div class="bar" title="More AI-like than ${pr}% of the professional human writing it was compared with"><i class="${b}" style="width:${Math.max(2, pct)}%"></i><b style="left:95%"></b></div>`;
     } else if (r.status === 'done') {
-      const ai = c.kind === 'zippy' ? r.determination === 'AI' : r.prob >= 0.5;
+      const ai = c.kind === 'zippy' ? r.determination === 'AI' : c.kind === 'tells' ? r.raw >= 2 : r.prob >= 0.5;
       val = `<span class="chip none">${ai ? 'Leans AI' : 'Leans human'} (not calibrated yet)</span>`;
     }
   }
-  const raw = r && r.status === 'done' ? (c.kind === 'zippy' ? `ZipPy says ${esc(r.determination)} (confidence ${r.score.toFixed(4)})` : `Raw AI probability ${(r.prob * 100).toFixed(1)}%`) + ` · ${(r.ms / 1000).toFixed(1)} s` : '';
+  const raw = r && r.status === 'done' ? (c.kind === 'zippy' ? `ZipPy says ${esc(r.determination)} (confidence ${r.score.toFixed(4)})`
+    : c.kind === 'tells' ? `Tell score ${r.raw.toFixed(2)}` : `Raw AI probability ${(r.prob * 100).toFixed(1)}%`) + ` · ${(r.ms / 1000).toFixed(1)} s` : '';
+  const weight = modeCal()?.ensemble?.weights?.[c.key];
+  const unused = weight === 0 ? '<div class="src">Not counted in the overall score: it added nothing on 2024–26 AI text in the calibration tests.</div>' : '';
   const held = c.key === validatorKey() ? ' This checker is held back during rewrites and only used to confirm the result, so a rewrite cannot simply be tuned to it.' : '';
   return `<div class="row" data-key="${c.key}">
-      <div><div class="name">${esc(c.name)}</div><div class="src">${esc(c.src)}</div></div>
+      <div><div class="name">${esc(c.name)}</div><div class="src">${esc(c.src)}</div>${unused}</div>
       <div class="val">${val}</div>${bar}${prog}
       <details><summary>Details</summary><p>${esc(c.about)}${held}</p><p>${esc(c.raid)}.${raw ? ' ' + raw + '.' : ''}</p>${measuredLine(c.key)}<p>${c.links.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${esc(t)}</a>`).join(' · ')}</p></details>
     </div>`;
 }
 function renderLedger() {
-  const trained = visible().filter((c) => c.kind !== 'zippy');
-  const other = visible().filter((c) => c.kind === 'zippy');
-  $('ledger').innerHTML = `<div class="group-title">Trained detectors</div>${trained.map(ledgerRow).join('')}<div class="group-title">Compression test</div>${other.map(ledgerRow).join('')}`;
+  const group = (title, list) => (list.length ? `<div class="group-title">${title}</div>${list.map(ledgerRow).join('')}` : '');
+  $('ledger').innerHTML = group('Trained detectors', visible().filter((c) => !c.kind))
+    + group('Writing-style rules', visible().filter((c) => c.kind === 'tells'))
+    + group('Compression test', visible().filter((c) => c.kind === 'zippy'));
 }
 
 function measuredLine(key) {
@@ -431,7 +444,9 @@ function renderVerdict() {
   const pending = visible().filter((c) => state.results[c.key]?.status === 'running' || (state.ready[c.key] === 'loading' && state.results[c.key]?.status !== 'done')).length;
   const flaggedAll = visible().filter((c) => { const p = pctOf(c.key); return p !== null && Math.round(p) >= 95; }).length;
   $('riskSub').textContent = `${flaggedAll} of ${total} checkers flag this answer as AI-written, compared with professional human writing.${pending ? ' More results are coming.' : ''}`
-    + (state.lastCheck ? ` ${w.toLocaleString('en-IN')} words.` : '');
+    + (state.lastCheck ? ` ${w.toLocaleString('en-IN')} words.` : '')
+    // measured: these checkers miss most plainly written answers from the newest models (see How this works)
+    + (b === 'low' && !pending ? ' A Low score is not a pass: these open checkers miss many plainly written answers from the newest AI models. Cross-check with GPTZero or Pangram below.' : '');
 }
 
 const TELL_GROUP = { vocabulary: 'Words', phrase: 'Stock phrases', opener: 'Openers', closer: 'Closers', formula: 'Formulas', structure: 'Structure', punctuation: 'Punctuation' };
@@ -521,6 +536,7 @@ async function runCheckInner(run, text) {
   const live = () => run === state.runId && editor.value === text;
   const finish = (key, r) => { if (run !== state.runId) return; state.results[key] = r; renderLedger(); renderVerdict(); renderSentences(); renderBackdrop(); };
 
+  try { finish('tells', tellResult(text)); } catch (err) { finish('tells', { status: 'error', error: String(err?.message || err) }); }
   const zp = (async () => {
     finish('zippy', { status: 'running' });
     try {
@@ -849,6 +865,7 @@ async function showRewriteResult(res) {
       try { after[key] = { status: 'done', raw: (await modelWorker.call({ type: 'score', key, texts: [res.text] })).probs[0] }; } catch { /* skip */ }
     }
     try { const z = await zippyWorker.call({ type: 'score', text: res.text }); after.zippy = { status: 'done', raw: z.determination === 'AI' ? z.score : -z.score }; } catch { /* skip */ }
+    try { after.tells = tellResult(res.text); } catch { /* skip */ }
     const rows = visible().filter((c) => pctOf(c.key) !== null && after[c.key]).map((c) => {
       const a = pctOf(c.key), b = humanPct(modeCal().checkers[c.key].human_q, after[c.key].raw);
       return `<tr><td>${esc(c.name)}${c.key === validatorKey() ? ' <span class="small">(held back)</span>' : ''}</td><td class="num">${fmtPct(a)}</td><td class="num">${fmtPct(b)}</td></tr>`;
@@ -985,6 +1002,7 @@ async function checkSamples() {
         try { res[key] = { status: 'done', raw: (await modelWorker.call({ type: 'score', key, texts: [s.text] })).probs[0] }; } catch { /* skip */ }
       }
       try { const z = await zippyWorker.call({ type: 'score', text: s.text }); res.zippy = { status: 'done', raw: z.determination === 'AI' ? z.score : -z.score }; } catch { /* skip */ }
+      try { res.tells = tellResult(s.text); } catch { /* skip */ }
       const e = ensemble(res);
       if (e) await mine.updateSample(s.id, { risk: e.risk });
     }

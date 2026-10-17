@@ -8,7 +8,10 @@ import {
   windowHeat, windowPcts, smoothHeat, WINDOW_WEIGHTS,
 } from '../../ai-checker/src/calibration.mjs';
 
-const CAL = JSON.parse(readFileSync(new URL('../../ai-checker/calibration.json', import.meta.url), 'utf8'));
+// The first shipped calibration (linear ensemble, e5/BERT-tiny windows), frozen so the golden values below
+// stay valid after refits; CAL2 is the calibration the page ships now.
+const CAL = JSON.parse(readFileSync(new URL('./fixtures/calibration-v1.json', import.meta.url), 'utf8'));
+const CAL2 = JSON.parse(readFileSync(new URL('../../ai-checker/calibration.json', import.meta.url), 'utf8'));
 const MODE = CAL.modes.article;
 const CALIBRATE_PY = fileURLToPath(new URL('../../tools/calibrate.py', import.meta.url));
 const near = (a, b, eps = 1e-9, msg) => assert.ok(Math.abs(a - b) <= eps, msg || `${a} != ${b}`);
@@ -251,13 +254,13 @@ test('band: high ≥ 65, mid ≥ 40, else low; null → none', () => {
 });
 
 test('BAND_LABEL: one label per band, unchanged wording, frozen', () => {
-  assert.deepEqual({ ...BAND_LABEL }, { high: 'High: likely flagged', mid: 'Medium: could be flagged', low: 'Low: reads human', none: 'Not checked yet' });
+  assert.deepEqual({ ...BAND_LABEL }, { high: 'High: likely flagged', mid: 'Medium: could be flagged', low: 'Low: not flagged by these checkers', none: 'Not checked yet' });
   for (const r of [0, 50, 80, null]) assert.ok(BAND_LABEL[band(r)]);
   assert.ok(Object.isFrozen(BAND_LABEL));
 });
 
 // ---------- combine: the shipped (linear) calibration.json ----------
-const GOLDEN = [  // computed with the old page's ensemble() on ai-checker/calibration.json
+const GOLDEN = [  // computed with the old page's ensemble() on the first calibration.json (fixtures/calibration-v1.json)
   { raw: { 'modernbert-raid-mage': 0.42, 'e5-small-lora': 0.71, 'bert-tiny-raid': 0.2, zippy: 0.05 }, pct: 87.77132810159225, risk: 38, flagged: ['zippy'] },
   { raw: { 'modernbert-raid-mage': 0.995, 'e5-small-lora': 0.95, 'bert-tiny-raid': 0.9, zippy: 0.2 }, pct: 100, risk: 100, flagged: ['e5-small-lora', 'modernbert-raid-mage', 'zippy'] },
   { raw: { 'modernbert-raid-mage': 0.8, 'e5-small-lora': 0.7, 'bert-tiny-raid': 0.4, zippy: 0.02 }, pct: 91.27637844565633, risk: 46, flagged: [] },
@@ -269,7 +272,7 @@ const GOLDEN = [  // computed with the old page's ensemble() on ai-checker/calib
   { raw: { 'modernbert-raid-mage': 0.0001, 'e5-small-lora': 0.01, 'bert-tiny-raid': 0.01 }, pct: 0, risk: 0, flagged: [] },
 ];
 
-test('combine reproduces the old page on the real calibration.json', () => {
+test('combine reproduces the old page on the first calibration.json', () => {
   assert.equal(MODE.ensemble.feature, undefined);  // the shipped file is the old (linear) format
   for (const g of GOLDEN) {
     const e = combine(MODE, pctsOf(g.raw));
@@ -449,7 +452,7 @@ test('combine (logit): a calibrate.py-shaped mode built from the shipped tables 
 
 // ---------- windowHeat / smoothHeat ----------
 const PROBS = { 'e5-small-lora': [0.1, 0.5, 0.9, 0.3, 0.97], 'bert-tiny-raid': [0.05, 0.2, 0.95, 0.04, 0.5] };
-// computed with the old page's scoreSentencesInner() on ai-checker/calibration.json windows
+// computed with the old page's scoreSentencesInner() on the first calibration.json windows
 const OLD_OWN = [0.35646542925988495, 7.4586715315758605, 80.9095823579844, 2.123800338237453, 70.62788313258034];
 const OLD_HEAT = [3.1973478701862756, 36.83903586213928, 80.9095823579844, 33.638113146136234, 70.62788313258034];
 
@@ -577,4 +580,27 @@ test('smoothHeat: unscored sentences stay null and do not count as neighbours', 
   const own = [5, 60];
   smoothHeat(own);
   assert.deepEqual(own, [5, 60]);
+});
+
+// ---------- the calibration the page ships now (tools/calibrate.py output) ----------
+test('shipped calibration: logit ensemble, a combo for every subset of weighted checkers, window tables', () => {
+  const m = CAL2.modes[CAL2.default_mode];
+  assert.equal(m.ensemble.feature, 'logit');
+  const used = Object.keys(m.ensemble.weights).filter((k) => m.ensemble.weights[k] > 0).sort();
+  assert.ok(used.length >= 3, `only ${used.length} weighted checkers`);
+  for (const k of Object.keys(m.ensemble.weights)) assert.ok(m.ensemble.weights[k] >= 0, k);
+  for (const k of used) assert.equal(m.checkers[k].human_q.length, 101, k);
+  for (let mask = 1; mask < 1 << used.length; mask++) {
+    const combo = used.filter((_, i) => mask & (1 << i)).join('+');
+    assert.equal(m.ensemble.combos[combo]?.human_q?.length, 101, combo);
+  }
+  for (const [k, q] of Object.entries(CAL2.windows)) {
+    assert.equal(q.length, 101, k);
+    for (let i = 1; i < q.length; i++) assert.ok(q[i] >= q[i - 1], `${k} window quantiles not sorted`);
+  }
+  assert.ok(m.checkers[CAL2.validator], 'the validator has a calibration');
+  // human-like percentiles everywhere give a low risk; AI-like ones a high risk
+  const at = (p) => combine(m, Object.fromEntries(used.map((k) => [k, p])));
+  assert.ok(at(30).risk < 40, `risk ${at(30).risk} at the 30th percentile`);
+  assert.ok(at(99).risk >= 65, `risk ${at(99).risk} at the 99th percentile`);
 });

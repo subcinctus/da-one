@@ -388,3 +388,13 @@ export function tellsBySentence(text, sentences) {
     return { count: hit.length, weight: hit.reduce((a, f) => a + f.weight, 0), rules: [...new Set(hit.map((f) => f.rule))] };
   });
 }
+
+// One number for the AI-tell rules, used as a checker in the calibrated ensemble: rule weight per 100
+// words plus one point per style flag. tools/calib/tells_pool.mjs scores the calibration pool with
+// this same function, so the page and the fitted quantiles agree.
+export function tellScore(text) {
+  const t = str(text);
+  const { findings, nWords } = analyse(t);
+  const weight = findings.reduce((a, f) => a + f.weight, 0);
+  return (nWords ? (weight / nWords) * 100 : 0) + styleStats(t).flags.length;
+}

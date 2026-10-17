@@ -18,7 +18,7 @@ permissions:
   contents: write
 
 env:
-  SHIPPED: bert-tiny-raid,e5-small-lora,modernbert-raid-mage,fakespot-roberta,tabularis-modernbert,sallulabs-minilm,nli-deberta-xsmall,minilm-l6
+  SHIPPED: fakespot-roberta,modernbert-raid-mage,tabularis-modernbert,sallulabs-minilm,nli-deberta-xsmall,minilm-l6
 
 jobs:
   export:

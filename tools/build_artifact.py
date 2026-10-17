@@ -33,8 +33,10 @@ WEBLLM_PKG = pkg('@mlc-ai/web-llm', 'web-llm')
 CALIB = os.environ.get('CALIB', os.path.join(SRC, 'calibration.json'))
 PART = 14 * 1024 * 1024
 
-DEFAULT_MODELS = ['bert-tiny-raid', 'e5-small-lora', 'modernbert-raid-mage', 'fakespot-roberta', 'tabularis-modernbert',
-                  'sallulabs-minilm', 'nli-deberta-xsmall', 'minilm-l6']
+# Detectors the calibration gives weight, plus the two guard models. e5-small-lora and bert-tiny-raid still
+# export (INCLUDE=... adds them back), but the fit on 2024-26 text gave them no weight.
+DEFAULT_MODELS = ['fakespot-roberta', 'modernbert-raid-mage', 'tabularis-modernbert', 'sallulabs-minilm',
+                  'nli-deberta-xsmall', 'minilm-l6']
 INCLUDE = [k for k in os.environ.get('INCLUDE', ','.join(DEFAULT_MODELS)).split(',') if k]
 SITE_WARN_MB, SITE_MAX_MB = 700, 900  # GitHub Pages sites are capped at 1 GB
 

@@ -66,16 +66,18 @@ jobs:
         run: |
           set -e
           node tools/calib/zippy_pool.mjs --merge zippy.json art/zippy-*/zippy-*.json
+          node tools/calib/tells_pool.mjs art/pool/pool.jsonl tells.json
           git clone -q --depth 1 --branch claude/ai-checker-calib \
             "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" calib \
             || { mkdir calib && cd calib && git init -q -b claude/ai-checker-calib && \
                  git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" && cd ..; }
           cp art/pool/pool.jsonl calib/pool.jsonl
           cp zippy.json calib/zippy.json
+          cp tells.json calib/tells.json
           cd calib
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add pool.jsonl zippy.json
-          git commit -q -m "Calibration pool and ZipPy scores from ${GITHUB_SHA}" || { echo "unchanged"; exit 0; }
+          git add pool.jsonl zippy.json tells.json
+          git commit -q -m "Calibration pool, ZipPy and tell scores from ${GITHUB_SHA}" || { echo "unchanged"; exit 0; }
           git push -q origin claude/ai-checker-calib
           wc -l pool.jsonl

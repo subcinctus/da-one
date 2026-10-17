@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { findTells, styleStats, tellsBySentence, BAN_LIST } from '../../ai-checker/src/tells.mjs';
+import { findTells, styleStats, tellsBySentence, tellScore, BAN_LIST } from '../../ai-checker/src/tells.mjs';
 import * as data from '../../ai-checker/src/tells-data.mjs';
 import { splitSentences, words } from '../../ai-checker/src/text.mjs';
 
@@ -717,4 +717,15 @@ test('adversarial long inputs stay fast (no catastrophic backtracking)', () => {
     const ms = performance.now() - a;
     assert.ok(ms < 400, `${JSON.stringify(s.slice(0, 15))}… took ${ms.toFixed(0)} ms`);
   }
+});
+
+test('tellScore: weight per 100 words plus style flags; stock AI prose scores above plain writing', () => {
+  const ai = "In today's dynamic lending landscape, it is important to leverage data-driven underwriting. Moreover, fostering strong partnerships plays a pivotal role. Ultimately, sustainable growth is not just about volumes; it is about building a resilient franchise.";
+  const plain = 'We grew the home-loan book by about 18% last year, mostly in Nagpur and Indore. Our branch teams knew the builders, and that mattered more than any campaign we ran from Mumbai.';
+  assert.ok(tellScore(ai) > tellScore(plain) + 2, `${tellScore(ai)} vs ${tellScore(plain)}`);
+  assert.equal(tellScore(''), 0);
+  assert.equal(tellScore(null), 0);
+  const w = findTells(ai).reduce((a, f) => a + f.weight, 0);
+  const words = ai.split(/\s+/).length;
+  assert.ok(Math.abs(tellScore(ai) - (w / words) * 100 - styleStats(ai).flags.length) < 0.5 * 100 / words, 'score is weight per 100 words plus flags');
 });

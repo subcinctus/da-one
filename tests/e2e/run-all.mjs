@@ -47,7 +47,7 @@ If I did it again, I would set up that desk six months earlier and give the bran
 async function waitChecked(page, { all = false, timeout = 600000 } = {}) {
   await page.waitForFunction((all) => {
     const vals = [...document.querySelectorAll('#ledger .row .val')].map((v) => v.textContent);
-    const done = (v) => /(Flags AI|Borderline|Reads human|Failed|Retry|Turn on|not calibrated)/.test(v);
+    const done = (v) => /(Flags AI|Borderline|Not flagged|Failed|Retry|Turn on|not calibrated)/.test(v);
     const busy = document.getElementById('checkBtn').getAttribute('aria-busy') === 'true';
     return vals.length && !busy && (all ? vals.every(done) : vals.filter(done).length >= 2) && /\d/.test(document.getElementById('riskScore').textContent);
   }, all, { timeout, polling: 1000 });

@@ -32,7 +32,7 @@ export function riskFromPct(p) {
 }
 
 export const band = (r) => (typeof r !== 'number' || Number.isNaN(r) ? 'none' : r >= 65 ? 'high' : r >= 40 ? 'mid' : 'low');
-export const BAND_LABEL = Object.freeze({ high: 'High: likely flagged', mid: 'Medium: could be flagged', low: 'Low: reads human', none: 'Not checked yet' });
+export const BAND_LABEL = Object.freeze({ high: 'High: likely flagged', mid: 'Medium: could be flagged', low: 'Low: not flagged by these checkers', none: 'Not checked yet' });
 
 // logit of a percentile, clipped like logit_pct() in tools/calibrate.py
 export const logitPct = (pct) => { const p = Math.min(0.999, Math.max(0.001, pct / 100)); return Math.log(p / (1 - p)); };

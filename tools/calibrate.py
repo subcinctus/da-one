@@ -4,7 +4,7 @@
 
 POOL.jsonl comes from tools/calib/build_pool.py; SCORES_DIR holds scores-*.json from
 tools/calib/score_pool.py (doc and window probabilities per detector) and zippy.json from
-tools/calib/zippy_pool.mjs. Output (read by the page through models/manifest.json):
+tools/calib/zippy_pool.mjs, and tells.json from tools/calib/tells_pool.mjs. Output (read by the page through models/manifest.json):
 
   modes.article.checkers[k].human_q   101 quantiles of detector k's score on professional human texts
   modes.article.ensemble              {feature: 'logit', weights, combos: {"k1+k2": {human_q}}}
@@ -14,7 +14,8 @@ tools/calib/zippy_pool.mjs. Output (read by the page through models/manifest.jso
 Method: each score becomes a percentile among professional human texts (conformal p-value). The
 detectors are combined by a non-negative logistic regression on logit(percentile), fitted on the
 calibration half with non-native human texts weighted up, so the combination is not tuned to flag
-them; the combined score gets its own human quantiles. Rates are measured on the held-out half and on
+them, and AI answers in the owner's domain weighted up, since those are what the page is for; the
+combined score gets its own human quantiles. The AI-tell rules take part as one more checker. Rates are measured on the held-out half and on
 Human Detectors (never used for fitting), with Clopper-Pearson 95% intervals.
 """
 import itertools, json, os, sys
@@ -31,6 +32,8 @@ VALIDATOR = sys.argv[sys.argv.index('--validator') + 1] if '--validator' in sys.
 REF_GROUPS = {'prof', 'web', 'legacy'}       # the "professional human writing" reference
 AI_GROUPS = {'ai', 'indomain', 'legacy'}
 LEGACY_GEN = {'gpt-3.5/4'}
+NONNATIVE_WEIGHT = 2.0   # non-native human texts count double in the fit, so it does not learn to flag them
+INDOMAIN_WEIGHT = 5.0    # AI answers in the owner's own domain and register (tools/calib/ai_answers_claude.jsonl)
 
 
 def quantiles(a):
@@ -156,7 +159,7 @@ def main():
     fit_rows = cal & ((ref_h | ai | nonnat))
     X = np.stack([logit_pct(pct_cal[k]) for k in keys], 1)
     y = ai.astype(float)
-    w = np.where(nonnat, 2.0, 1.0)
+    w = np.where(nonnat, NONNATIVE_WEIGHT, np.where(grp == 'indomain', INDOMAIN_WEIGHT, 1.0))
     b, coef = nnlr(X[fit_rows], y[fit_rows], w[fit_rows])
     coef = np.where(coef < 0.02 * coef.max(), 0.0, coef)
     weights = {k: round(float(c), 4) for k, c in zip(keys, coef)}
@@ -175,6 +178,8 @@ def main():
                auroc_modern=auroc(s_cal[modern & te], s_cal[ref_h & te]),
                auroc_heldout=auroc(s_cal[held & (lab == 1)], s_cal[held & (lab == 0)]),
                tpr_modern=rate(flag[modern & te]), tpr_legacy=rate(flag[ai & ~modern & te]),
+               tpr_indomain=rate(flag[(grp == 'indomain') & te]), tpr_indomain_mid=rate((pe >= 90)[(grp == 'indomain') & te]),
+               tpr_modern_mid=rate((pe >= 90)[modern & te]),
                fpr_prof=rate(flag[ref_h & te]), fpr_prof_150=rate(flag[ref_h & te & (nw >= 150)]),
                fpr_nonnative=rate(flag[nonnat]), fpr_essay=rate(flag[essay]),
                medium_or_high_fpr_prof=rate((pe >= 90)[ref_h & te]),
@@ -274,6 +279,8 @@ def write_report(R, path):
           f"- Professional human flagged: {pc(e['fpr_prof'])}; at 150+ words {pc(e['fpr_prof_150'])}; Medium or High {pc(e['medium_or_high_fpr_prof'])}",
           f"- Non-native human flagged: {pc(e['fpr_nonnative'])}; student essays {pc(e['fpr_essay'])}",
           f"- Held-out articles (Human Detectors): AI {pc(e['heldout_tpr'])}, human {pc(e['heldout_fpr'])}",
+          f"- Modern AI rated Medium or High: {pc(e['tpr_modern_mid'])}",
+          f"- In-domain AI answers (lending, the owner's register): flagged {pc(e['tpr_indomain'])}; Medium or High {pc(e['tpr_indomain_mid'])}",
           '', '| Task | Modern AI flagged |', '|---|---|'] + [f'| {t} | {pc(r)} |' for t, r in e['tpr_by_task'].items()]
     L += ['', '| Generator | Flagged |', '|---|---|'] + [f'| {g} | {100 * r:.0f}% |' for g, r in e['tpr_by_gen'].items()]
     L += ['', '| Human source | Flagged |', '|---|---|'] + [f'| {s} | {pc(r)} |' for s, r in e['fpr_by_src'].items()]
