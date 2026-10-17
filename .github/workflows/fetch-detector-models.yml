@@ -1,23 +1,32 @@
 name: fetch detector models
 
-# One-off job: download the open-source AI-text detectors from Hugging Face, export them to
-# quantized ONNX for the browser, and publish the files to the `claude/ai-checker-models` branch.
+# Download open-source AI-text detectors (and the small models the rewrite guards use) from
+# Hugging Face or GitHub, export them to quantized ONNX for the browser, and add the files to the
+# `claude/ai-checker-models` branch. Only the models named in ONLY are exported; the others already
+# on the branch are kept.
 on:
   push:
     branches: [claude/ai-writing-checker]
     paths:
       - tools/export_detectors.py
-      - tools/sample_texts.json
       - .github/workflows/fetch-detector-models.yml
   workflow_dispatch:
+    inputs:
+      only:
+        description: Comma-separated model keys to export
+        required: false
+        default: ''
 
 permissions:
   contents: write
 
+env:
+  DEFAULT_ONLY: fakespot-roberta,tabularis-modernbert,sallulabs-minilm,nli-deberta-xsmall,minilm-l6
+
 jobs:
   export:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,20 +36,31 @@ jobs:
         run: |
           pip install --quiet torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           pip install --quiet "transformers==4.57.1" "peft==0.17.1" "onnx==1.17.0" "onnxruntime==1.22.0" \
-            "huggingface_hub==0.35.3" safetensors sentencepiece protobuf numpy
-      - name: Export detectors
+            "huggingface_hub==0.35.3" safetensors sentencepiece protobuf tiktoken numpy
+      - name: Export
+        env:
+          ONLY: ${{ github.event.inputs.only || env.DEFAULT_ONLY }}
         run: python tools/export_detectors.py out
-      - name: Publish to models branch
+      - name: Add to models branch
         if: always()
         run: |
           set -e
           [ -d out ] || exit 0
-          cd out
-          git init -q
-          git checkout -q -b claude/ai-checker-models
+          rm -rf out/_src_*
+          git clone -q --depth 1 --branch claude/ai-checker-models \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" models
+          for d in out/*/; do
+            k=$(basename "$d")
+            [ -f "$d/reference.json" ] || continue
+            rm -rf "models/$k"
+            cp -r "$d" "models/$k"
+          done
+          cd models
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add -A
-          git commit -q -m "Exported AI-text detector models from ${GITHUB_SHA}"
-          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" claude/ai-checker-models
-          du -ah . | sort -h | tail -25
+          git commit -q -m "Export models ${ONLY_LIST} from ${GITHUB_SHA}" || { echo "nothing new"; exit 0; }
+          git push -q origin claude/ai-checker-models
+          du -sh */ | sort -h
+        env:
+          ONLY_LIST: ${{ github.event.inputs.only || env.DEFAULT_ONLY }}
