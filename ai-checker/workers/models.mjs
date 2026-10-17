@@ -1,5 +1,7 @@
-// Runs the trained detectors (ONNX Runtime Web, WebAssembly, one thread) off the main thread.
-// Messages in : {id, type: 'load', key} | {id, type: 'score', key, texts: string[]}
+// Runs the ONNX models (ONNX Runtime Web, WebAssembly, one thread) off the main thread: the AI-text
+// detectors, and the small NLI and embedding models the rewrite guards use.
+// Messages in : {id, type: 'manifest'} | {id, type: 'load', key} | {id, type: 'score', key, texts, run}
+//               | {id, type: 'nli', key, pairs: [[premise, hypothesis]]} | {id, type: 'embed', key, texts}
 // Messages out: {type: 'progress', key, loaded, total, stage} | {id, ok: true, ...} | {id, error}
 import * as ort from '../vendor/ort.wasm.min.mjs';
 import { Tokenizer } from '../vendor/tokenizers.min.mjs';
@@ -8,6 +10,7 @@ const ROOT = new URL('../', import.meta.url);
 const CACHE = 'answer-desk-models-v1';
 const WINDOW = 510;  // content tokens per window ([CLS] and [SEP] make 512)
 const STRIDE = 384;
+const NLI_MAX = 510;   // both sentences together, plus [CLS] and two [SEP]
 
 ort.env.wasm.numThreads = 1;
 ort.env.wasm.wasmPaths = {
@@ -133,28 +136,39 @@ async function load(key) {
   try { return await p; } finally { loading.delete(key); }
 }
 
-function windows(ids) {
+function windows(ids, size = WINDOW, stride = STRIDE) {
   const out = [];
   if (ids.length === 0) return [[]];
-  for (let start = 0; ; start += STRIDE) {
-    out.push(ids.slice(start, start + WINDOW));
-    if (start + WINDOW >= ids.length) break;
+  for (let start = 0; ; start += stride) {
+    out.push(ids.slice(start, start + size));
+    if (start + size >= ids.length) break;
   }
   return out;
 }
 
-async function aiProb(entry, ids) {
-  const { session, spec } = entry;
-  const x = [spec.cls_id, ...ids, spec.sep_id];
+// Feeds for a single sequence; models differ in whether they take token_type_ids.
+function feedsFor(session, x) {
   const n = x.length;
   const feeds = {
     input_ids: new ort.Tensor('int64', BigInt64Array.from(x, BigInt), [1, n]),
     attention_mask: new ort.Tensor('int64', new BigInt64Array(n).fill(1n), [1, n]),
   };
-  const out = await session.run(feeds);
-  const lg = out.logits.data;
-  // BERT-tiny-RAID outputs one "human" logit; the others output [human, AI] logits.
-  return spec.output === 'sigmoid_human' ? 1 - 1 / (1 + Math.exp(-lg[0])) : 1 / (1 + Math.exp(lg[0] - lg[1]));
+  if (session.inputNames.includes('token_type_ids')) feeds.token_type_ids = new ort.Tensor('int64', new BigInt64Array(n), [1, n]);
+  for (const k of Object.keys(feeds)) if (!session.inputNames.includes(k)) delete feeds[k];
+  return feeds;
+}
+
+const softmaxAt = (lg, k) => { const m = Math.max(...lg); let z = 0; for (const v of lg) z += Math.exp(v - m); return Math.exp(lg[k] - m) / z; };
+
+async function aiProb(entry, ids) {
+  const { session, spec } = entry;
+  const out = await session.run(feedsFor(session, [spec.cls_id, ...ids, spec.sep_id]));
+  const lg = Array.from(out[session.outputNames[0]].data, Number);
+  // BERT-tiny-RAID outputs one "human" logit; single-logit AI models use 'sigmoid'; the others
+  // output class logits with the AI class at ai_index (default 1).
+  if (spec.output === 'sigmoid_human') return 1 - 1 / (1 + Math.exp(-lg[0]));
+  if (spec.output === 'sigmoid' || lg.length === 1) return 1 / (1 + Math.exp(-lg[0]));
+  return softmaxAt(lg, spec.ai_index ?? 1);
 }
 
 async function score(key, texts, run) {
@@ -167,7 +181,8 @@ async function scoreAll(entry, texts, run) {
   for (const t of texts) {
     if (run && run < latestRun) throw new Error('superseded');
     const ids = entry.tokenizer.encode(t, { add_special_tokens: false }).ids;
-    const ws = windows(ids);
+    const size = Math.min(WINDOW, (entry.spec.max_len || 512) - 2);
+    const ws = windows(ids, size, Math.round(size * STRIDE / WINDOW));
     let sum = 0, wsum = 0;
     for (const w of ws) {
       const p = await aiProb(entry, w);
@@ -177,6 +192,43 @@ async function scoreAll(entry, texts, run) {
     probs.push(sum / wsum);
   }
   return probs;
+}
+
+// NLI: [CLS] premise [SEP] hypothesis [SEP]; returns label probabilities by name.
+async function nli(key, pairs) {
+  const entry = await load(key);
+  const { session, tokenizer, spec } = entry;
+  const labels = spec.labels || { 0: 'contradiction', 1: 'entailment', 2: 'neutral' };
+  return serial(async () => {
+    const out = [];
+    for (const [a, b] of pairs) {
+      let A = tokenizer.encode(a, { add_special_tokens: false }).ids;
+      let B = tokenizer.encode(b, { add_special_tokens: false }).ids;
+      while (A.length + B.length > NLI_MAX - 1) { if (A.length >= B.length) A = A.slice(0, -1); else B = B.slice(0, -1); }
+      const r = await session.run(feedsFor(session, [spec.cls_id, ...A, spec.sep_id, ...B, spec.sep_id]));
+      const lg = Array.from(r[session.outputNames[0]].data, Number);
+      const p = {};
+      lg.forEach((_, k) => { p[labels[k] || String(k)] = softmaxAt(lg, k); });
+      out.push(p);
+    }
+    return out;
+  });
+}
+
+// Sentence embeddings, mean-pooled and L2-normalised inside the graph.
+async function embed(key, texts) {
+  const entry = await load(key);
+  const { session, tokenizer, spec } = entry;
+  const max = (spec.max_len || 256) - 2;
+  return serial(async () => {
+    const out = [];
+    for (const t of texts) {
+      const ids = tokenizer.encode(t, { add_special_tokens: false }).ids.slice(0, max);
+      const r = await session.run(feedsFor(session, [spec.cls_id, ...ids, spec.sep_id]));
+      out.push(Float32Array.from(r[session.outputNames[0]].data));
+    }
+    return out;
+  });
 }
 
 self.onmessage = async (e) => {
@@ -193,6 +245,10 @@ self.onmessage = async (e) => {
       const t0 = performance.now();
       const probs = await score(key, texts, run);
       post({ id, ok: true, probs, ms: performance.now() - t0 });
+    } else if (type === 'nli') {
+      post({ id, ok: true, probs: await nli(key, e.data.pairs) });
+    } else if (type === 'embed') {
+      post({ id, ok: true, vectors: await embed(key, texts) });
     } else {
       post({ id, error: `Unknown request: ${type}` });
     }

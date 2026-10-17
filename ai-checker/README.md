@@ -72,7 +72,7 @@ python3 tools/build_artifact.py dist          # claude.ai artifact
 python3 tools/build_artifact.py site --site   # standalone static site, e.g. GitHub Pages
 ```
 
-Both need the models branch, onnxruntime-web 1.22.0 and @huggingface/tokenizers 0.1.3.
+Both need the models branch, onnxruntime-web 1.30.0 and @huggingface/tokenizers 0.1.3.
 
 `dist/` holds 34 files (about 217 MB). Artifacts cap files at 15 MB, publishes at 64 MB and a version
 at 256 MB, so model weights are split into 14 MiB parts named `.wasm` (a served binary type; the
