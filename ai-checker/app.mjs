@@ -218,7 +218,8 @@ function flaggedSentences(all = false) {
   if (!sentencesMatter()) return [];
   const scored = state.sentences.map((s, i) => ({ s, i })).filter((x) => x.s.heat !== null).sort((a, b) => b.s.heat - a.s.heat);
   const out = scored.filter((x) => x.s.heat >= SENT_FLAG);
-  const want = all ? scored.filter((x) => x.s.heat >= 75).length : Math.min(scored.length, Math.max(2, Math.ceil(scored.length * 0.3)));
+  const usual = Math.min(scored.length, Math.max(2, Math.ceil(scored.length * 0.3)));
+  const want = all ? Math.max(usual, scored.filter((x) => x.s.heat >= 75).length) : usual;
   for (const x of scored) { if (out.length >= want) break; if (!out.includes(x)) out.push(x); }
   return out.map((x) => ({ i: x.i, level: x.s.heat >= 95 ? 'high' : x.s.heat >= SENT_FLAG ? 'mid' : 'rel' }));
 }
@@ -263,7 +264,7 @@ function relocateSentences() {
   const text = editor.value;
   let from = 0;
   state.sentences = state.sentences.map((s) => {
-    const at = text.indexOf(s.text, Math.max(0, from - 20));
+    const at = text.indexOf(s.text, from);
     if (at < 0) return null;
     from = at + s.text.length;
     return { ...s, start: at, end: at + s.text.length };
@@ -322,8 +323,7 @@ function setText(t, label) {
 }
 
 // ---------- versions ----------
-function snapshot(label, risk = null) {
-  const text = editor.value;
+function snapshot(label, risk = null, text = editor.value) {
   if (!text.trim()) return;
   const list = store.get(K.versions, []);
   if (list[0] && list[0].text === text) { if (risk !== null) { list[0].risk = risk; store.set(K.versions, list); } return; }
@@ -454,7 +454,17 @@ function tellsIn(s) { return state.tells.filter((t) => t.start >= s.start && t.e
 
 function renderSentences() {
   const el = $('sentList');
+  // an "Ask me" box in use (answers typed, a reply pasted, versions on the way) survives re-renders:
+  // its node moves into the new card, so code still writing into it stays connected
+  const live = new Map();
+  for (const card of el.querySelectorAll('.sent')) {
+    const box = card.querySelector('[data-sugg]');
+    if (box && box.childElementCount && card.dataset.t) live.set(card.dataset.t, box);
+  }
   const flagged = flaggedSentences().map((f) => ({ ...state.sentences[f.i], i: f.i, level: f.level }));
+  for (const [i, s] of state.sentences.entries()) {
+    if (live.has(s.text) && !flagged.some((f) => f.i === i)) flagged.push({ ...s, i, level: 'rel' });
+  }
   if (!state.lastCheck) { el.innerHTML = '<p class="empty">Flagged sentences appear here after a check.</p>'; return; }
   if (!flagged.length && state.sentPending) { el.innerHTML = '<p class="empty">Scoring each sentence…</p>'; return; }
   const e = ensemble();
@@ -469,7 +479,7 @@ function renderSentences() {
     const label = s.level === 'high' ? 'Very AI-like' : s.level === 'mid' ? 'Somewhat AI-like' : 'More AI-like than the rest';
     const reasons = tellsIn(s).slice(0, 4).map((t) => `<li>${esc(t.message)}</li>`).join('');
     const agree = s.of ? `<span class="agree">${s.agree} of ${s.of} checkers</span>` : '';
-    return `<div class="sent${s.i === state.focusSentence ? ' focus' : ''}" data-i="${s.i}">
+    return `<div class="sent${s.i === state.focusSentence ? ' focus' : ''}" data-i="${s.i}" data-t="${esc(s.text)}">
       <q>${esc(s.text)}</q>
       <div class="acts"><span class="chip ${b}">${label}</span>${agree}</div>
       ${reasons ? `<ul class="reasons">${reasons}</ul>` : ''}
@@ -480,6 +490,10 @@ function renderSentences() {
       <div class="sugg" data-sugg></div>
     </div>`;
   }).join('');
+  for (const card of el.querySelectorAll('.sent')) {
+    const old = live.get(card.dataset.t);
+    if (old) card.querySelector('[data-sugg]').replaceWith(old);
+  }
 }
 
 function renderTells() {
@@ -563,10 +577,10 @@ async function runCheckInner(run, text) {
       if (state.ready[key] !== 'ready') { later.push(key); continue; }
       if (run !== state.runId) return;
       // sentences first once the light window checkers are in, so highlights appear early
-      if (!sentencesDone && byKey(key).heavy) { await scoreSentences(run, text); sentencesDone = true; }
+      if (!sentencesDone && byKey(key).heavy) { if (live()) await scoreSentences(run, text); sentencesDone = true; }
       await scoreDoc(key);
     }
-    if (!sentencesDone) await scoreSentences(run, text);
+    if (!sentencesDone && live()) await scoreSentences(run, text);
   })();
 
   await Promise.all([zp, models]);
@@ -589,7 +603,7 @@ async function runCheckInner(run, text) {
 function settle(run) {
   if (run !== state.runId) return;
   const e = ensemble();
-  if (e) { state.lastCheck.risk = e.risk; snapshot('Checked', e.risk); }
+  if (e && state.lastCheck) { state.lastCheck.risk = e.risk; snapshot('Checked', e.risk, state.lastCheck.text); }
   renderVerdict(); renderLedger();
 }
 
@@ -675,12 +689,23 @@ function openRewrite(targets = null) {
   if (!state.lastCheck || state.lastCheck.text !== editor.value) { toast('Press Check first so the flagged sentences are known.'); return; }
   const all = targets || flaggedSentences($('optAll').checked).map((f) => f.i);
   if (!all.length) { toast('No sentences are flagged. The answer already reads as human-written to these checkers.'); return; }
-  rw.targets = all; rw.result = null; rw.original = editor.value;
-  $('rwIntro').textContent = `${all.length} sentence${all.length > 1 ? 's' : ''} will be rewritten. Everything else stays exactly as it is.`;
+  rw.targets = all; rw.result = null; rw.original = editor.value; rw.picked = !!targets;
+  rwIntro();
   showStage('setup');
   openOverlay('rewriteOverlay');
   renderEngines();
   probeEngines();
+}
+
+function rwIntro() {
+  const n = rw.targets.length;
+  $('rwIntro').textContent = `${n} sentence${n > 1 ? 's' : ''} will be rewritten. Everything else stays exactly as it is.`;
+}
+// the "only slightly AI-like" box changes the list unless the user picked one sentence
+function refreshTargets() {
+  if (rw.picked) return;
+  const all = flaggedSentences($('optAll').checked).map((f) => f.i);
+  if (all.length) { rw.targets = all; rwIntro(); }
 }
 
 function showStage(stage) {
@@ -720,6 +745,7 @@ async function guardCtx(allow = [], note = () => {}) {
 async function guideScores(texts) {
   const v = validatorKey();
   const keys = windowModels().filter((k) => k !== v);
+  if (!keys.length) throw new Error('no sentence checker is ready to compare the versions; wait for the checkers to load, then try again');
   const per = await windowPcts(texts, keys);
   const used = Object.keys(per);
   return texts.map((_, i) => {
@@ -739,6 +765,7 @@ async function validatorScore(text) {
 }
 
 async function startRewrite() {
+  refreshTargets();
   const engineId = $('engineList').querySelector('input:checked')?.value || 'manual';
   store.set(K.engine, engineId);
   rw.engineId = engineId;
@@ -762,7 +789,15 @@ async function startRewrite() {
     for (const it of its) for (let v = 0; v < n; v++) {
       reqs.push({ ...sentencePrompt({ before: it.before, sentence: it.sentence, after: it.after, voice: voice(), samples, variant: (v + round) % 4 }), n: 1, maxTokens: 220, text: it.sentence, id: it.index });
     }
-    const out = await eng.generate(reqs, { signal: rw.ctl.signal, onProgress: (p) => { if (p?.message) logLine(p.message); } });
+    let out;
+    try {
+      out = await eng.generate(reqs, { signal: rw.ctl.signal, onProgress: (p) => { if (p?.message) logLine(p.message); } });
+    } catch (err) {
+      // a rewriter that stops answering later on must not throw away what the earlier rounds found
+      if (err?.name === 'AbortError' || round === 0) throw err;
+      logLine(`The rewriter stopped answering in round ${round + 1} (${err?.message || err}). Keeping what the earlier rounds found.`);
+      return new Map();
+    }
     const map = new Map();
     reqs.forEach((r, k) => {
       const list = map.get(r.id) || [];
@@ -889,10 +924,11 @@ function acceptRewrite() {
 // ---------- interview ("Ask me") ----------
 function paragraphOf(i) {
   const text = editor.value, s = state.sentences[i];
-  const start = text.lastIndexOf('\n\n', s.start) + 1 || 0;
-  const endAt = text.indexOf('\n\n', s.end);
-  const end = endAt < 0 ? text.length : endAt;
-  return { start: start < 0 ? 0 : start, end, text: text.slice(start < 0 ? 0 : start, end).trim() };
+  const from = s.start > 0 ? text.lastIndexOf('\n', s.start - 1) + 1 : 0;
+  const endAt = text.indexOf('\n', s.end);
+  const raw = text.slice(from, endAt < 0 ? text.length : endAt);
+  const start = from + (raw.length - raw.trimStart().length);
+  return { start, end: start + raw.trim().length, text: raw.trim() };
 }
 
 function askFor(i, box) {
@@ -914,7 +950,9 @@ async function askGo(i, box) {
   // Interview needs a model that follows instructions: Humanizer 12B only restyles text as it stands
   const canFollow = (id) => engineStatus[id]?.ok && (id !== 'local' || !engineStatus.local.humanizer || engineStatus.local.chatModel);
   const saved = store.get(K.engine, null);
-  const engineId = [saved, 'local', 'webllm'].find((id) => id && id !== 'manual' && canFollow(id)) || 'manual';
+  const webllmOk = saved === 'webllm' || !!pickEngine(webllmMod, 'webllm')?.model;  // never start a 1-5 GB download unasked
+  const engineId = saved === 'manual' ? 'manual'
+    : [saved, 'local', 'webllm'].find((id) => id && id !== 'manual' && canFollow(id) && (id !== 'webllm' || webllmOk)) || 'manual';
   const req = { ...interviewPrompt({ paragraph: para.text, answers, voice: voice() }), n: 3, maxTokens: 600 };
   if (engineId === 'manual') {
     box.insertAdjacentHTML('beforeend', `<div class="field"><label>Copy this into a Claude chat, then paste the reply below</label><textarea readonly>${esc(`${req.system}\n\n${req.user}`)}</textarea><textarea data-paste placeholder="Paste Claude's reply here"></textarea><button class="btn" type="button" data-act="ask-paste">Check this version</button></div>`);
@@ -924,7 +962,8 @@ async function askGo(i, box) {
   box.insertAdjacentHTML('beforeend', '<p class="small" data-status>Writing versions with your answers…</p>');
   try {
     const eng = pickEngine(engineId === 'local' ? localMod : webllmMod, engineId);
-    const out = (await eng.generate([req], {}))[0] || [];
+    const status = (msg) => { const el = box.querySelector('[data-status]'); if (el && msg) el.textContent = msg; };
+    const out = (await eng.generate([req], { onProgress: (p) => status(p?.message) }))[0] || [];
     await showAskCandidates(i, box, para, out, answers);
   } catch (err) { box.querySelector('[data-status]').textContent = `Could not write versions: ${err?.message || err}`; }
 }
@@ -933,7 +972,9 @@ async function showAskCandidates(i, box, para, raw, answers) {
   const ctx = await guardCtx(answers);
   const cands = raw.map((t) => cleanText(cleanOutput(t)).text.trim()).filter(Boolean);
   const ok = [], bad = [];
+  const breaks = (s) => (s.match(/\n/g) || []).length;
   for (const c of cands) {
+    if (breaks(c) !== breaks(para.text)) { bad.push({ c, g: { ok: false, reasons: [{ code: 'layout', message: 'it changed the paragraph breaks' }] } }); continue; }
     const g = await gateCandidate(para.text, c, ctx);
     (g.ok ? ok : bad).push({ c, g });
   }
@@ -1038,7 +1079,10 @@ function wire() {
     const pos = editor.selectionStart;
     const flagged = new Set(flaggedSentences().map((f) => f.i));
     const i = state.sentences.findIndex((s, k) => flagged.has(k) && pos >= s.start && pos <= s.end);
-    if (i !== state.focusSentence) { state.focusSentence = i; renderBackdrop(); renderSentences(); }
+    if (i !== state.focusSentence) {
+      state.focusSentence = i; renderBackdrop();
+      for (const c of $('sentList').querySelectorAll('.sent')) c.classList.toggle('focus', Number(c.dataset.i) === i);
+    }
     if (i >= 0) document.querySelector(`.sent[data-i="${i}"]`)?.scrollIntoView({ block: 'nearest' });
   });
   window.addEventListener('resize', () => { autosize(); });
@@ -1062,7 +1106,7 @@ function wire() {
     catch { editor.focus(); editor.select(); toast('Press Ctrl+C (or ⌘C) to copy the selected text.'); }
   };
   $('cleanBtn').onclick = () => { const r = cleanText(editor.value); setText(r.text, 'Clean hidden characters'); toast('Cleaned. Undo brings the original back.'); };
-  $('clearExampleBtn').onclick = () => { $('exampleNote').hidden = true; store.set(K.seen, true); setText('', 'Clear example'); state.lastCheck = null; state.results = {}; state.sentences = []; renderAll(); editor.focus(); };
+  $('clearExampleBtn').onclick = () => { state.runId++; setChecking(false); $('exampleNote').hidden = true; store.set(K.seen, true); setText('', 'Clear example'); state.lastCheck = null; state.results = {}; state.sentences = []; renderAll(); editor.focus(); };
   editor.addEventListener('paste', () => { if (!$('exampleNote').hidden && editor.value === EXAMPLE) { $('exampleNote').hidden = true; store.set(K.seen, true); } });
 
   $('ledger').addEventListener('click', (e) => {
@@ -1092,7 +1136,8 @@ function wire() {
     else if (act === 'ask-go') askGo(i, box);
     else if (act === 'ask-paste') {
       const para = paragraphOf(i);
-      showAskCandidates(i, box, para, [box.querySelector('[data-paste]').value], JSON.parse(box.dataset.answers || '[]'));
+      showAskCandidates(i, box, para, [box.querySelector('[data-paste]').value], JSON.parse(box.dataset.answers || '[]'))
+        .catch((err) => toast(`Could not check this version: ${err?.message || err}`));
     } else if (popt) {
       const opts = JSON.parse(box.dataset.opts || '[]');
       const para = JSON.parse(box.dataset.para || 'null');
@@ -1116,6 +1161,7 @@ function wire() {
   });
   $('startBtn').onclick = () => startRewrite().catch((err) => { showStage('run'); logLine(`Could not start: ${err?.message || err}`); });
   $('usePastedBtn').onclick = () => usePasted();
+  $('optAll').addEventListener('change', refreshTargets);
   $('stopBtn').onclick = () => rw.ctl?.abort();
   $('acceptBtn').onclick = acceptRewrite;
   $('copyPromptBtn').onclick = async () => {

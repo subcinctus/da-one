@@ -1,100 +1,134 @@
-# Answer Rewrite Desk
+# Answer Desk
 
-A browser page for checking an answer against open-source AI-text detectors and rewriting the
-sentences they flag, without breaking the facts in it.
+Check an answer with open-source AI-text detectors, see which sentences read as AI-written, and
+rewrite them without losing a single fact. Everything runs in your browser; nothing is uploaded.
 
-- **Checks run in the browser.** Nothing is uploaded when you press Check. The detectors are
-  ONNX models executed with ONNX Runtime Web (WebAssembly) in a worker, plus ZipPy in plain JS.
-- **Rewrites go through Claude** (the artifact `sample` capability, on the viewer's own Claude
-  account). Outside Claude the page offers a copy-the-request / paste-the-answer fallback.
-- **Nothing is changed without review.** Every rewrite opens a word-level diff and a fact check
-  (numbers, amounts, dates, acronyms and names must survive). Every check and accepted rewrite is
-  saved as a version on the device; the draft autosaves.
+**Open it: https://subcinctus.github.io/answer-desk/** (after the first deploy, see below)
 
-## Checkers
+## What it does
 
-| Checker | Source | Method | RAID (UPenn) at 5% false positives | Size in browser |
+1. **Check.** Paste an answer and press Check. Six checkers score it, each shown separately;
+   five of them are combined into one risk score (Low / Medium / High). Sentences are highlighted by how
+   AI-like their surroundings read, and the AI tells in them (stock phrases, even sentence lengths
+   and so on) are listed with what to do instead.
+2. **Fix it yourself (Coach).** Edit in place; the tells update as you type, and Check rescores.
+3. **Ask me (Interview).** For a flagged paragraph the page asks one or two questions: the real
+   figure, an example from your own work, your view. A model rewrites the paragraph using only
+   your answers as new facts. This is the method that reads most human, because the content is yours.
+4. **Rewrite flagged.** For each flagged sentence the rewriter writes several versions. Every
+   version must pass the guards below; of the ones that do, the one the checkers rate least AI-like
+   is kept, for up to three rounds. You then see a word-by-word comparison, a fact report and a
+   before/after table for every checker, and nothing changes until you press Use rewrite.
+5. **My writing.** Paste 20 or more of your own pre-2022 texts. They stay in this browser. The
+   page scores them with every checker, so you can see how your genuine writing scores. It also uses
+   up to three of them as voice examples for the rewriter.
+6. **Versions.** Every check and accepted rewrite is saved on this device; undo works across
+   rewrites.
+
+### The guards (a version is thrown out if any fails)
+
+- **Facts.** Every number, amount (₹, lakh, crore, Indian digit grouping), percentage, bps, date,
+  FY/quarter, acronym (GNPA, RBI, DSA…) and name in the original must still be there, and nothing
+  new may be added.
+- **Negations and modal words.** "not", "may", "will", "must", "can" and similar must match, so
+  "can reduce" never becomes "cuts".
+- **Meaning.** A small NLI model (DeBERTa-v3-xsmall) checks both directions: the original implies
+  the version and the version implies the original.
+- **Similarity.** MiniLM sentence embeddings must stay close (cosine ≥ 0.85).
+- **Size of change.** An edit-ratio cap, a length window, and no new names.
+- **Grammar.** Harper (Indian English) must find no new grammar slips.
+- **Hidden characters.** No zero-width or look-alike characters (these are also cleaned from pasted
+  text, since they fool detectors and some institutions treat them as cheating).
+
+One checker (Fakespot) is held back from choosing versions and only confirms the result. If the
+other checkers improved and it did not, the page warns that the rewrite was over-fitted to them.
+
+### Rewriters (all free)
+
+| Engine | What it is | Set-up |
+|---|---|---|
+| **Local, Humanizer 12B** (recommended on a Mac with 32 GB) | Gemma-based model fine-tuned to rewrite AI text into human-sounding text ([sgaofen/humanizer-local-model](https://github.com/sgaofen/humanizer-local-model), Apache-2.0), run by llama.cpp on your computer | `brew install llama.cpp`, then `llama-server --hf-repo jialinyyzz/humanizer --hf-file humanizer-12b-Q8_0.gguf -c 8192 -np 1 -ngl 99 --port 8080`. The first start downloads about 13 GB. LM Studio or Ollama with any chat model also work. Interview mode needs a chat model (Humanizer only restyles). |
+| **In-browser Qwen3** | Qwen3 8B / 4B / 1.7B run by WebLLM on the graphics chip | Nothing to install; Chrome or Edge with WebGPU. First use downloads 1–5 GB and keeps it. |
+| **Claude chat (copy and paste)** | Your Claude plan | Copy the request into Claude, paste the reply back. The guards and the choice still run locally. Newer Claude models watermark their output (Anthropic, August 2026). |
+
+## How good is it? (measured, `docs/calibration-report.md`)
+
+Calibration pool: 4,091 texts. Human: professional writing (SEC filings, HC3 finance answers,
+Enron mail, news, Stack Exchange), non-native and student essays. AI: 2024–26 generators
+(MIRAGE's 17 LLMs, SlopBench's 2026 models, MAGA, LLMTrace, DACTYL, Beemo) in four styles
+(generate, polish, rewrite, humanized), plus 72 answers on Indian lending written for this test by
+a current Claude model. Rates are on a held-out half. Separately, the Human Detectors set (300
+articles carrying GPTZero and Pangram verdicts) was never used for fitting.
+
+| Checker | Source | AUROC, 2024–26 AI | AUROC, held-out articles | Weight |
 |---|---|---|---|---|
-| ModernBERT detector | Drayson, Yilmaz, Lampos (UCL), EMNLP 2025 — [GeorgeDrayson/model_collapse](https://github.com/GeorgeDrayson/model_collapse), model Apache-2.0 | fine-tuned ModernBERT-base on RAID + MAGE | 99.1% caught (94.1% under attacks) | 160 MB |
-| e5-small LoRA | [menglinzhou/microsoft-hackathon-24](https://github.com/menglinzhou/microsoft-hackathon-24), MIT | e5-small + LoRA on RAID | 93.9% (85.7%) | 36 MB |
-| BERT-tiny RAID | RAID leaderboard entry `ShantanuT01/BERT-tiny-RAID`, MIT | 4M-parameter BERT on RAID | 91.1% (84.2%) | 4.7 MB |
-| ZipPy | [thinkst/zippy](https://github.com/thinkst/zippy), MIT | LZMA compression against an AI-text corpus | not listed | none |
+| Fakespot RoBERTa | Mozilla Fakespot, Apache-2.0 | 0.90 | 0.99 | 0.52 |
+| ModernBERT (RAID + MAGE) | Drayson et al., UCL, EMNLP 2025, Apache-2.0 | 0.75 | 0.73 | 0.28 |
+| SalluLabs MiniLM | RAID leaderboard 2026, MIT | 0.85 | 0.61 | 0.17 |
+| Tabularis ModernBERT | tabularis.ai, MIT | 0.86 | 0.91 | 0.06 |
+| AI-tell rules | blader/humanizer, vale-ai-tells, stop-slop, berenslab, SlopTotal (MIT) | 0.74 | 0.76 | 0.03 |
+| ZipPy (compression) | Thinkst, MIT | 0.51 | 0.67 | 0 (shown, not counted) |
 
-Universities mostly use Turnitin, GPTZero and Copyleaks (DrillBit through ShodhShuddhi in
-India). None publish their models, so none can run here. The page links to GPTZero's free checker
-for a cross-check.
+ModernBERT is weak on general modern text but the best of the five at telling the in-domain Claude
+answers from human writing, which is why it keeps a large weight.
 
-Older university-lab detectors were considered and left out of this version. GLTR (Harvard/MIT-IBM)
-scores 59.7% on RAID, the GPTZero-style perplexity method is similar, and Fast-DetectGPT
-(Westlake) needs a 7B model to be strong. They all need GPT-2 in the browser (about 140 MB), which does
-not fit next to ModernBERT under the 256 MB artifact limit. The GPT-2 export in `tools/` reproduces
-GLTR's published GPT-2 outputs exactly, if a "classic detectors" page is wanted later.
+**Combined score** (High = above the 95th percentile of professional human writing; Medium = 90th):
 
-## How the numbers were checked
+| | Result |
+|---|---|
+| Professional human texts rated High | 4.7% (5.3% at 150+ words) |
+| Professional human texts rated Medium or High | 8.7% |
+| Non-native English human texts rated High | 3.9% |
+| 2024–26 AI texts rated High / Medium or High | 71% / 79% |
+| Held-out articles: AI rated High / human rated High | 84% / 1.3% |
+| Agreement with GPTZero / Pangram on those articles | 93% / 92% |
+| **In-domain Claude answers rated High / Medium or High** | **14% / 24%** (n = 29) |
 
-- **Model export** (`tools/export_detectors.py`, run by `.github/workflows/fetch-detector-models.yml`
-  because the build sandbox cannot reach Hugging Face): PyTorch → ONNX → int8 weights in 64-value
-  blocks (`DequantizeLinear`-21). On 480 human vs GPT-4/ChatGPT samples the int8 models agree with
-  PyTorch on 99.8% (ModernBERT), 100% (e5) and 99.2% (BERT-tiny) of decisions. 4-bit versions were
-  too lossy and are not used. Files are on the `claude/ai-checker-models` branch.
-- **Browser runtime**: tokenizers.js gives the same token IDs as Hugging Face `tokenizers` on 70
-  test strings per model (incl. ₹ amounts, Hindi, emoji); ONNX Runtime Web gives the same
-  probabilities as Python ONNX Runtime to within 1e-5.
-- **ZipPy**: `detectors/zippy.js` is a port of Thinkst's browser build (`nlzmadetect`). With the
-  same corpus it returns byte-identical scores to their compiled extension code on 64 test texts.
-- **Calibration** (`tools/calibrate.py`): raw detector probabilities are not comparable across
-  kinds of writing (RAID's own thresholds flagged 97% of human PubMed answers at ModernBERT's news
-  threshold), so each score is shown as a percentile against 299 pieces of professional human
-  writing: RAID's abstracts, news, Wikipedia, Reddit, reviews, books, poetry and recipes, plus BBC
-  news and WritingPrompts stories from Fast-DetectGPT's data. "Flags AI" means above the 95th
-  percentile. Measured on a held-out half (quantiles fitted on the other half):
+**The release target was not met.** The plan asked for 90% of modern AI caught at ≤5% false flags;
+these open models reach about 71–79%. The weakest point is the last row: answers written plainly
+by the newest models in your own field mostly pass these checkers. So a Low score means "these
+checkers did not flag it", not "Turnitin will pass it". Use the GPTZero and Pangram buttons for a
+second opinion on anything that matters.
 
-  | | AI texts caught | Human texts flagged |
-  |---|---|---|
-  | Combined score (weights 3 ModernBERT, 1 e5, ¼ BERT-tiny, ¼ ZipPy) | 99% | 7% |
-  | ModernBERT alone | 99% | 8% |
-  | e5-small LoRA alone | 91% | 7% |
-  | BERT-tiny alone | 69% | 3% |
-  | ZipPy alone | 15% | 8% |
+Other honest limits:
 
-  The 301 AI texts came from GPT-4, ChatGPT, GPT-3, GPT-2, Llama 2 chat, Mistral, MPT and Cohere.
+- No rewrite method guarantees a pass. Since August 2026 Turnitin counts text changed by
+  "bypasser" tools as AI. The safest changes are your own (Interview mode): a real example, the
+  actual figure, your view.
+- Under about 150 words every detector is unreliable; Turnitin itself calls scores under 300 words less reliable.
+- Turnitin and DrillBit cannot be called by individuals, so nothing here reproduces their verdict.
+- If a course or employer does not allow AI help, an AI rewriter may break that rule whatever the
+  scores say.
 
-- **Essays are the weak spot.** On 300 human school essays (Kaggle DAIGT, Persuade corpus) ModernBERT
-  scored 72% as AI, and e5 rated many of them highly too. Calibrated against those essays instead,
-  the checkers caught 88% of AI essays but rated a ChatGPT-style business answer as low risk (27
-  instead of 100). The page is meant for professional answers, so it compares with professional
-  writing and tells the user that high scores on school-style essays need care.
+## Privacy
 
-## Build and publish
+The checkers, guards and grammar check run in your browser (ONNX Runtime Web, WebAssembly). Your
+text is not sent anywhere when you check it. The local and in-browser rewriters keep it on your
+computer; the Claude engine sends only what you paste into Claude yourself. Writing samples and
+versions stay in this browser's storage. The page is marked `noindex`.
 
-```
-python3 tools/build_artifact.py dist          # claude.ai artifact
-python3 tools/build_artifact.py site --site   # standalone static site, e.g. GitHub Pages
-```
+## Repository layout
 
-Both need the models branch, onnxruntime-web 1.30.0 and @huggingface/tokenizers 0.1.3.
+| Path | What |
+|---|---|
+| `ai-checker/` | The page: `index.html`, `app.mjs`, modules in `src/` (contracts in `src/README.md`), workers, `calibration.json` |
+| `tools/export_detectors.py`, `tools/model_specs.py` | Export the detectors and guard models to int8 ONNX, with fp32 parity checks |
+| `tools/build_artifact.py` | Build the static site (`python3 tools/build_artifact.py site --site`) |
+| `tools/calib/`, `tools/calibrate.py` | Build and score the calibration pool, fit the ensemble, write the report |
+| `tests/unit/` | 560+ unit tests (`npm test`) |
+| `tests/e2e/` | Playwright tests on a gzip static server with a fake local rewriter (`npm run e2e`); `smoke.mjs` for the live site |
+| `.github/workflows/` | `models` (export to the `models` release), `deploy` (test, build, publish to Pages, check the live site), `weekly check` |
 
-`dist/` holds 34 files (about 217 MB). Artifacts cap files at 15 MB, publishes at 64 MB and a version
-at 256 MB, so model weights are split into 14 MiB parts named `.wasm` (a served binary type; the
-worker only reads the bytes, then checks the SHA-256 of the whole model) and the folder goes up in
-four publishes. The worker keeps downloaded parts in the browser's Cache Storage, so later visits
-start in seconds.
+## Deploying (once)
 
-Published at https://claude.ai/artifact/3zpyz9du2icMWjGLF4wPQQ (private to its owner until shared).
-Inside Claude, rewrites happen in one click.
+1. Create a public repository named `answer-desk` and give the Claude GitHub app access to it.
+2. Settings → Pages → Source: **GitHub Actions**.
+3. Push this repository's contents to `main`. Run the **models** workflow once (Actions tab).
+   When it finishes, **deploy** runs by itself: unit tests, site build, nine browser tests, publish,
+   then a smoke test against the live URL.
 
-The `--site` build is for a static host. It wraps the page in its own HTML document (the artifact
-host normally supplies one), adds `.nojekyll`, a README and the licence texts, and goes on the
-`gh-pages` branch of a public repository that holds only the built site. A static site has no
-Claude runtime, so rewrites there use the two-step copy-and-paste path. Static hosts such as
-GitHub Pages gzip `.wasm` and `.json`, so the worker checks download length only on uncompressed
-responses; the SHA-256 check still covers every model.
+The models are never committed. The models workflow exports them from pinned Hugging Face and
+GitHub sources into release assets, and the site serves them split into 14 MiB parts. The first
+visit downloads about 600 MB; the browser keeps it, so later visits start in seconds.
 
-## Limits
-
-- No open-source detector equals Turnitin. A low score here lowers the risk; it does not guarantee
-  a pass.
-- Under about 150 words every detector is unreliable. Turnitin does not score text under 300 words.
-- Text rewritten by AI can still read as AI. The best results come from editing the flagged
-  sentences in your own words; the suggestions are a starting point.
-- ModernBERT needs about 0.8 GB of memory, so it is off by default on phones and low-memory devices.
+Third-party components and licences: `ai-checker/vendor/NOTICE.md`.

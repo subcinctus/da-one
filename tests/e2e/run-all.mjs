@@ -152,6 +152,8 @@ async function main() {
   });
 
   await test('Ask me rewrites a paragraph with the owner\'s own answer', async () => {
+    // the previous test chose Claude, and Ask me keeps to the chosen engine; pick the local one again
+    await page.evaluate(() => localStorage.setItem('ard.engine', JSON.stringify('local')));
     await page.click('#checkBtn');
     await waitChecked(page, { all: true });
     const card = page.locator('#sentList .sent').first();
