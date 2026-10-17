@@ -66,9 +66,13 @@ def main():
     if os.path.exists(OUT):
         shutil.rmtree(OUT)
     os.makedirs(OUT)
-    for rel in ['app.mjs', 'workers/models.mjs', 'workers/zippy.js', 'detectors/zippy.js',
+    for rel in ['app.mjs', 'workers/models.mjs', 'workers/zippy.js', 'workers/grammar.mjs', 'detectors/zippy.js',
                 'vendor/lzma_worker-min.js', 'vendor/zippy-ai-generated.txt', 'vendor/NOTICE.md']:
         copy(os.path.join(SRC, rel), rel)
+    for dp, _, fs in os.walk(os.path.join(SRC, 'src')):  # page modules (plain ES modules)
+        for f in fs:
+            if f.endswith('.mjs'):
+                copy(os.path.join(dp, f), os.path.relpath(os.path.join(dp, f), SRC))
     if SITE:
         write_site_page()
     else:
@@ -77,6 +81,12 @@ def main():
     for f in ['ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']:
         copy(os.path.join(ort, f), f'vendor/{f}')
     copy(os.path.join(NPM_DIR, 'hft/package/dist/tokenizers.min.mjs'), 'vendor/tokenizers.min.mjs')
+    # Harper grammar checker (harper.js): the ES modules and the slim WASM binary
+    hdist = os.path.join(NPM_DIR, 'harper/package/dist')
+    for f in sorted(os.listdir(hdist)):
+        if f in ('index.js', 'slimBinary.js', 'harper_wasm_slim_bg.wasm') or f.startswith('BinaryModule-'):
+            copy(os.path.join(hdist, f), f'vendor/harper/{f}')
+    copy(os.path.join(NPM_DIR, 'harper/package/LICENSE'), 'vendor/harper/LICENSE')
     manifest = {'models': {}, 'calibration': json.load(open(CALIB)) if os.path.exists(CALIB) else None}
     for key in INCLUDE:
         d = os.path.join(MODELS_DIR, key)
@@ -112,8 +122,9 @@ def main():
             size = os.path.getsize(p)
             total += size
             count += 1
-            if size > 15_000_000:
-                raise SystemExit(f'{p} is over the 15 MB per-file limit')
+            limit = 50_000_000 if SITE else 15_000_000  # artifacts cap files at 15 MB; keep site files far below GitHub's 100 MB
+            if size > limit:
+                raise SystemExit(f'{p} is over the {limit // 1_000_000} MB per-file limit')
     print(f'{OUT}: {count} files, {total / 1e6:.1f} MB')
     if SITE and total / 1e6 > SITE_MAX_MB:
         raise SystemExit(f'site is {total / 1e6:.0f} MB, over the {SITE_MAX_MB} MB budget (GitHub Pages limit 1 GB)')

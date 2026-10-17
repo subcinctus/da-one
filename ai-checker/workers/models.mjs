@@ -5,6 +5,7 @@
 // Messages out: {type: 'progress', key, loaded, total, stage} | {id, ok: true, ...} | {id, error}
 import * as ort from '../vendor/ort.wasm.min.mjs';
 import { Tokenizer } from '../vendor/tokenizers.min.mjs';
+import { forDetector } from '../src/normalize.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const CACHE = 'answer-desk-models-v1';
@@ -180,7 +181,8 @@ async function scoreAll(entry, texts, run) {
   const probs = [];
   for (const t of texts) {
     if (run && run < latestRun) throw new Error('superseded');
-    const ids = entry.tokenizer.encode(t, { add_special_tokens: false }).ids;
+    // the same clean-up as the calibration scorer: no invisible characters or lookalike letters, then NFKC
+    const ids = entry.tokenizer.encode(forDetector(t), { add_special_tokens: false }).ids;
     const size = Math.min(WINDOW, (entry.spec.max_len || 512) - 2);
     const ws = windows(ids, size, Math.round(size * STRIDE / WINDOW));
     let sum = 0, wsum = 0;

@@ -1,0 +1,46 @@
+name: calibration pool
+
+# Build the calibration pool (human and AI texts from public datasets, plus the in-domain AI answers in
+# tools/calib) and store it on the `claude/ai-checker-calib` branch. Scoring and fitting run elsewhere.
+on:
+  push:
+    branches: [claude/ai-writing-checker]
+    paths:
+      - tools/calib/build_pool.py
+      - tools/calib/ai_answers_claude.jsonl
+      - .github/workflows/calibration-pool.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pool:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: pip install --quiet "datasets==4.1.1" "huggingface_hub==0.35.3" pandas pyarrow requests
+      - name: Build pool
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python tools/calib/build_pool.py pool.jsonl
+      - name: Store on the calibration branch
+        run: |
+          set -e
+          git clone -q --depth 1 --branch claude/ai-checker-calib \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" calib \
+            || { mkdir calib && cd calib && git init -q -b claude/ai-checker-calib && \
+                 git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" && cd ..; }
+          cp pool.jsonl calib/pool.jsonl
+          cd calib
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add pool.jsonl
+          git commit -q -m "Calibration pool from ${GITHUB_SHA}" || { echo "pool unchanged"; exit 0; }
+          git push -q origin claude/ai-checker-calib
+          wc -l pool.jsonl

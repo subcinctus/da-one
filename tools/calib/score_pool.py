@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from model_specs import model_spec  # noqa: E402
 
 WINDOW, STRIDE = 510, 384
-WINDOW_MODELS = {'e5-small-lora', 'bert-tiny-raid', 'fakespot-roberta', 'sallulabs-minilm'}
+WINDOW_MODELS = None  # every detector also scores the 3-sentence windows of rows marked 'win'
 INVISIBLE = re.compile('[­؜᠎​-‏‪-‮⁠-⁤⁦-⁯﻿]')
 SPACES = re.compile('[  -   　]')
 
@@ -110,13 +110,15 @@ def main():
         t0 = time.time()
         out['doc'][key] = [score_text(sess, tok, spec, p['text']) for p in pool]
         print(f'{key}: {len(pool)} texts in {time.time() - t0:.0f}s', flush=True)
-        if key in WINDOW_MODELS:
+        if WINDOW_MODELS is None or key in WINDOW_MODELS:
             t0 = time.time()
-            win = []
+            win = {}
             for p in pool:
+                if not p.get('win', True):
+                    continue
                 S = sentences(p['text'])
                 ws = [' '.join(S[max(0, i - 1):i + 2]) for i in range(len(S))]
-                win.append([score_text(sess, tok, spec, w) for w in ws])
+                win[p['id']] = [score_text(sess, tok, spec, w) for w in ws]
             out['win'][key] = win
             print(f'{key}: windows in {time.time() - t0:.0f}s', flush=True)
         json.dump(out, open(out_path, 'w'))
