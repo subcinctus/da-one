@@ -2,7 +2,7 @@
 //   node tests/e2e/run-all.mjs SITE_DIR
 // Starts the gzip static server (like GitHub Pages) and the fake local rewriter, then checks:
 // the example answer, a human answer, hidden-character clean-up, the rewrite loop through the local
-// engine with every guard, the Claude copy/paste path, undo and versions, My writing, the phone
+// engine with every guard, the Claude copy/paste path, Ask me (interview), undo and versions, My writing, the phone
 // layout, and that nothing logs an error or 404s.
 import { spawn } from 'child_process';
 import path from 'path';
@@ -56,7 +56,7 @@ const risk = (page) => page.evaluate(() => Number(document.getElementById('riskS
 
 async function main() {
   await start([path.join(here, 'server.mjs'), site, String(PORT), '/answer-desk/']);
-  await start([path.join(here, 'fake-llm.mjs'), String(LLM)]);
+  await start([path.join(here, 'fake-llm.mjs'), String(LLM), 'humanizer-12b-Q8_0.gguf', 'qwen3-8b-instruct']);
   const browser = await pw.chromium.launch(launchOpts);
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
   const page = await ctx.newPage();
@@ -149,6 +149,22 @@ async function main() {
     const summary = await page.textContent('#rwSummary');
     assert(/thrown out|No version passed|changed/.test(summary), `summary: ${summary}`);
     await page.click('#keepMineBtn');
+  });
+
+  await test('Ask me rewrites a paragraph with the owner\'s own answer', async () => {
+    await page.click('#checkBtn');
+    await waitChecked(page, { all: true });
+    const card = page.locator('#sentList .sent').first();
+    await card.locator('[data-act="ask"]').click();
+    const inputs = card.locator('[data-q]');
+    assert((await inputs.count()) >= 1, 'no interview questions');
+    await inputs.first().fill('we cut turnaround from 9 days to 4 days in FY24');
+    await card.locator('[data-act="ask-go"]').click();
+    await card.locator('[data-popt]').first().waitFor({ timeout: 300000 });
+    await card.locator('[data-popt]').first().click();
+    await page.waitForFunction(() => document.getElementById('editor').value.includes('9 days to 4 days'), null, { timeout: 10000 });
+    const text = await page.inputValue('#editor');
+    for (const fact of ['GNPA', '1.5%', 'Tier 2', 'Tier 3', 'DSAs']) assert(text.includes(fact), `lost ${fact}`);
   });
 
   await test('versions and My writing', async () => {

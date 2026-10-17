@@ -6,6 +6,7 @@ import http from 'http';
 
 const port = Number(process.argv[2] || 18080);
 const model = process.argv[3] || 'humanizer-12b-Q8_0.gguf';
+const chatModel = process.argv[4] || '';  // a second, instruction-following model (as LM Studio or Ollama can list)
 export const REWRITES = [
   [/^In today's dynamic lending landscape/, [
     'Growing a retail mortgage book is a balancing act: you push for growth, but you watch credit closely.',
@@ -54,6 +55,15 @@ function target(prompt) {
   return s.split('\n').map((x) => x.trim()).sort((a, b) => b.length - a.length)[0] || '';
 }
 
+// Interview mode: keep the paragraph exactly and add the author's answers, as a careful chat model would.
+function interview(msg) {
+  const para = (msg.match(/My paragraph:\n([\s\S]*?)\n\n/) || [])[1];
+  const answers = ((msg.match(/My answers[^\n]*\n([\s\S]*?)(?:\n\n|$)/) || [])[1] || '').split('\n')
+    .map((l) => l.replace(/^- /, '').trim()).filter((l) => l && l !== '(none)');
+  if (!para) return null;
+  return `${para.trim()} ${answers.map((a) => `In our case, ${a.replace(/[.\s]+$/, '')}.`).join(' ')}`.trim();
+}
+
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' };
 http.createServer((req, res) => {
   const send = (code, obj) => { res.writeHead(code, { 'Content-Type': 'application/json', ...cors }); res.end(JSON.stringify(obj)); };
@@ -64,15 +74,16 @@ http.createServer((req, res) => {
     const j = body ? JSON.parse(body) : {};
     const url = req.url.split('?')[0];
     if (url === '/health') return send(200, { status: 'ok' });
-    if (url === '/v1/models' || url === '/models') return send(200, { object: 'list', data: [{ id: model, object: 'model' }] });
+    if (url === '/v1/models' || url === '/models') return send(200, { object: 'list', data: [model, chatModel].filter(Boolean).map((id) => ({ id, object: 'model' })) });
     if (url === '/props') return send(200, { model_path: model, default_generation_settings: { n_ctx: 8192 } });
     if (url === '/completion') return send(200, { content: rewrite(target(j.prompt)), stop: true });
     if (url === '/v1/completions') return send(200, { choices: [{ text: rewrite(target(j.prompt)), index: 0, finish_reason: 'stop' }] });
     if (url === '/v1/chat/completions') {
       const msg = (j.messages || []).map((m) => (typeof m.content === 'string' ? m.content : '')).join('\n');
       const n = Math.max(1, j.n || 1);
-      return send(200, { choices: Array.from({ length: n }, (_, i) => ({ index: i, message: { role: 'assistant', content: rewrite(target(msg)) }, finish_reason: 'stop' })) });
+      const reply = () => interview(msg) ?? rewrite(target(msg));
+      return send(200, { choices: Array.from({ length: n }, (_, i) => ({ index: i, message: { role: 'assistant', content: reply() }, finish_reason: 'stop' })) });
     }
     send(404, { error: 'not found' });
   });
-}).listen(port, '127.0.0.1', () => console.log(`fake llm on http://127.0.0.1:${port} (${model})`));
+}).listen(port, '127.0.0.1', () => console.log(`fake llm on http://127.0.0.1:${port} (${[model, chatModel].filter(Boolean).join(', ')})`));
