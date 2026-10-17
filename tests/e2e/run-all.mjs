@@ -104,6 +104,7 @@ async function main() {
     await page.goto(BASE);
     await waitChecked(page, { all: true });
     const before = await risk(page);
+    const original = await page.inputValue('#editor');
     await page.click('#rewriteBtn');
     await page.waitForSelector('#engineList .engine .status.ok', { timeout: 20000 });
     await page.check('#engineList input[value="local"]');
@@ -114,12 +115,19 @@ async function main() {
     const summary = await page.textContent('#rwSummary');
     assert(/sentences changed/.test(summary), `summary: ${summary}`);
     await page.waitForFunction(() => /Overall risk/.test(document.getElementById('rwCompare').textContent), null, { timeout: 300000 });
+    // the loop only keeps a version that scores lower than the sentence it replaces, so the whole-answer
+    // checkers should move down; the overall risk can stay pinned at 100 when one sentence in six changes
+    const rows = await page.$$eval('#rwCompare tr', (trs) => trs.slice(1).map((tr) => [...tr.cells].map((c) => c.textContent)));
+    const pct = (s) => Number(String(s).replace(/\D+$/, '').replace(/[^\d.]/g, ''));
+    const moved = rows.filter((r) => r.length === 3 && !/Overall/.test(r[0])).map((r) => pct(r[2]) - pct(r[1]));
+    assert(moved.some((d) => d < 0), `no checker moved down: ${JSON.stringify(rows)}`);
     await page.click('#acceptBtn');
     await waitChecked(page, { all: true });
     const after = await risk(page);
     const text = await page.inputValue('#editor');
     for (const fact of ['GNPA', '1.5%', 'Tier 2', 'Tier 3', 'DSAs']) assert(text.includes(fact), `lost ${fact}`);
-    assert(after < before, `risk did not drop: ${before} → ${after}`);
+    assert(text !== original, 'the accepted rewrite did not change the text');
+    assert(after <= before, `risk went up: ${before} → ${after}`);
     await page.click('#undoBtn');
     assert((await page.inputValue('#editor')).startsWith("In today's dynamic lending landscape"), 'undo did not bring the original back');
   });

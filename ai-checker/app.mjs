@@ -798,6 +798,24 @@ async function usePasted() {
   await runLoop(async (its, round) => (round === 0 ? new Map(its.map((it) => [it.index, cleaned.get(it.index) || []])) : new Map()), 1);
 }
 
+// Why versions were thrown out, most common first: ": 3 changed the meaning, 2 changed a number".
+const REASON_LABEL = {
+  facts: 'changed a number, name or term', negation: 'changed a "not"', modal: 'changed a "may/will/must"',
+  entailment: 'changed the meaning', contradiction: 'contradicted the original', similarity: 'drifted too far from the original',
+  'edit-ratio': 'changed too much at once', length: 'was much shorter or longer', 'new-entity': 'added a new name',
+  grammar: 'added a grammar slip', meta: 'talked about itself', 'unsafe-chars': 'had hidden characters', empty: 'was empty',
+  layout: 'broke the sentence layout', error: 'could not be checked', gate: 'did not pass the guards',
+};
+function rejectionSummary(changes) {
+  const n = new Map();
+  for (const c of changes) for (const r of c.rejected || []) {
+    const code = r.reasons?.[0]?.code || 'error';  // count each version once, by its first reason
+    n.set(code, (n.get(code) || 0) + 1);
+  }
+  const parts = [...n.entries()].sort((a, b) => b[1] - a[1]).map(([code, k]) => `${k} ${REASON_LABEL[code] || code}`);
+  return parts.length ? `: ${parts.join(', ')}` : '';
+}
+
 async function showRewriteResult(res) {
   rw.result = res;
   showStage('result');
@@ -817,10 +835,11 @@ async function showRewriteResult(res) {
   facts.innerHTML = issues.length ? `<strong>Check these before you use it:</strong><ul>${issues.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`
     : `<strong>Fact check passed.</strong> Every number, date, name, acronym, negation and "may/will" word from your answer is still there. ${fc.wordsBefore} → ${fc.wordsAfter} words.`;
   const rejected = res.changes.reduce((a, c) => a + (c.rejected?.length || 0), 0);
+  const why = rejectionSummary(res.changes);
   const warn = res.warnings?.includes('goodhart') ? ' The held-back checker did not improve as much as the others: read the result critically, and consider editing by hand.' : '';
   $('rwSummary').textContent = changed.length
-    ? `${changed.length} of ${res.changes.length} sentences changed; ${rejected} version${rejected === 1 ? ' was' : 's were'} thrown out by the guards. Red is removed, green is added.${warn}`
-    : 'No version passed the guards and beat the original, so nothing changed. Try "Ask me" on a sentence, or edit it by hand.';
+    ? `${changed.length} of ${res.changes.length} sentences changed; ${rejected} version${rejected === 1 ? ' was' : 's were'} thrown out by the guards${why}. Red is removed, green is added.${warn}`
+    : `No version passed the guards and beat the original, so nothing changed${why ? ` (thrown out${why.slice(1)})` : ''}. Try "Ask me" on a sentence, or edit it by hand.`;
   $('acceptBtn').disabled = !changed.length;
   // before/after for every checker on the whole answer (the confirmation step)
   $('rwCompare').innerHTML = '<tr><th>Checker</th><th class="num">Before</th><th class="num">After</th></tr><tr><td colspan="3" class="small">Scoring the rewrite…</td></tr>';

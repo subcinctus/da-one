@@ -200,7 +200,10 @@ export function createLocalEngine(opts = {}) {
     if (perm === 'denied') return { ok: false, code: 'lna-denied', detail: explain('lna-denied') };
     // while Chrome shows its prompt the request waits for the answer, so give the user time
     const timeout = perm === 'prompt' ? timeouts.permission : timeouts.probe;
-    const found = await Promise.all(list.map((b) => probeOne(b, timeout, signal)));
+    // the address the owner set comes first; the usual ports are only tried when it does not answer
+    // (each refused port is a red line in the browser console, which nothing can suppress)
+    const first = st.base ? [await probeOne(st.base, timeout, signal)] : [];
+    const found = first[0]?.ok ? first : [...first, ...(await Promise.all(list.filter((b) => b !== st.base).map((b) => probeOne(b, timeout, signal))))];
     const hit = found.find((r) => r.ok);
     if (hit) {
       st.server = hit;
