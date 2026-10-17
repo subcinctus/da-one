@@ -19,7 +19,8 @@ export function humanPct(q, x) {
 }
 
 // Risk scale shown to the user: typical human writing sits low, the 5%-false-positive line sits at 65.
-export const RISK_KNOTS = Object.freeze([[0, 0], [50, 15], [80, 30], [90, 40], [95, 65], [99, 85], [100, 100]]);
+// Frozen down to each knot: a caller writing RISK_KNOTS[i][1] would otherwise shift every risk shown.
+export const RISK_KNOTS = Object.freeze([[0, 0], [50, 15], [80, 30], [90, 40], [95, 65], [99, 85], [100, 100]].map(Object.freeze));
 export function riskFromPct(p) {
   if (typeof p !== 'number' || Number.isNaN(p)) return null;
   p = Math.max(0, p);
@@ -60,7 +61,7 @@ export function combine(cal, pcts) {
 
 // Window weights when the calibration has none (the old page: e5-small counts double).
 export const WINDOW_WEIGHTS = Object.freeze({ 'e5-small-lora': 2, 'bert-tiny-raid': 1 });
-const windowWeight = (weights, k) => (finite(weights?.[k]) ? weights[k] : WINDOW_WEIGHTS[k] ?? 1);
+const windowWeight = (weights, k) => (own(weights, k) && finite(weights[k]) ? weights[k] : own(WINDOW_WEIGHTS, k) ? WINDOW_WEIGHTS[k] : 1);
 
 // Per-checker window percentiles {key: (pct|null)[]} for the checkers that have window quantiles.
 export function windowPcts(calWindows, probsByKey) {
@@ -74,11 +75,13 @@ export function windowPcts(calWindows, probsByKey) {
 
 // Per-window heat: each checker's window probabilities as human percentiles, averaged with
 // weightsByKey (calibration window_weights; missing keys fall back to WINDOW_WEIGHTS, else 1).
-// A window no checker scored is null.
+// One entry per window (the longest probability list given), null where no checker scored it, so
+// heat[i] is never undefined even when no checker is usable.
 export function windowHeat(calWindows, probsByKey, weightsByKey = null) {
   const per = windowPcts(calWindows, probsByKey);
   const keys = Object.keys(per).filter((k) => windowWeight(weightsByKey, k) > 0);
-  const len = Math.max(0, ...keys.map((k) => per[k].length));
+  const lens = Object.values(probsByKey || {}).map((v) => (v && typeof v === 'object' && Number.isInteger(v.length) ? v.length : 0));
+  const len = Math.max(0, ...lens);
   return Array.from({ length: len }, (_, i) => {
     let s = 0, w = 0;
     for (const k of keys) {

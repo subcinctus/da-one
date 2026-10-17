@@ -21,7 +21,7 @@ from model_specs import model_spec  # noqa: E402
 
 WINDOW, STRIDE = 510, 384
 WINDOW_MODELS = None  # every detector also scores the 3-sentence windows of rows marked 'win'
-INVISIBLE = re.compile('[­؜᠎​-‏‪-‮⁠-⁤⁦-⁯﻿]')
+INVISIBLE = re.compile('[\xad\u061c\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u206f\ufeff]')
 SPACES = re.compile('[  -   　]')
 
 

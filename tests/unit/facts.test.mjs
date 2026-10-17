@@ -34,7 +34,7 @@ test('empty, null and non-string input never throw', () => {
 
 // ---------- currencies and Indian units ----------
 test('₹1,00,000 = Rs 100000 = INR 1 lakh = Rs. 1,00,000 = Rs 1L = ₹ 1 lac', () => {
-  assert.deepEqual(keys('₹1,00,000 Rs 100000 INR 1 lakh Rs. 1,00,000 Rs 1L ₹ 1 lac rs 1 Lakh 1,00,000 rupees'), ['inr:100000']);
+  assert.deepEqual(nums('₹1,00,000 Rs 100000 INR 1 lakh Rs. 1,00,000 Rs 1L ₹ 1 lac rs 1 Lakh 1,00,000 rupees'), Array(8).fill('inr:100000'));
 });
 
 test('2.5 crore = 25,000,000 = 2,50,00,000; with a currency it becomes inr', () => {
@@ -46,7 +46,7 @@ test('2.5 crore = 25,000,000 = 2,50,00,000; with a currency it becomes inr', () 
 });
 
 test('Rs 2,000 cr in every spelling', () => {
-  assert.deepEqual(keys('Rs 2,000 cr, Rs 2,000 Cr., ₹2000 crores, INR 2,000 CR, Rs.2000cr'), ['inr:20000000000']);
+  assert.deepEqual(nums('Rs 2,000 cr, Rs 2,000 Cr., ₹2000 crores, INR 2,000 CR, Rs.2000cr'), Array(5).fill('inr:20000000000'));
 });
 
 test('Indian digit grouping and lakh/lac/crore forms', () => {
@@ -58,7 +58,7 @@ test('Indian digit grouping and lakh/lac/crore forms', () => {
 });
 
 test('million, billion, thousand and k', () => {
-  assert.deepEqual(keys('$4 mn, US$ 4 million, USD 4mn, $4M, $4m, 4 million dollars'), ['usd:4000000']);
+  assert.deepEqual(nums('$4 mn, US$ 4 million, USD 4mn, $4M, $4m, 4 million dollars'), Array(6).fill('usd:4000000'));
   same('₹1.2 bn', 'INR 1,200 million');
   same('10k', '10,000');
   same('10K', '10 thousand');
@@ -146,7 +146,7 @@ test('quarters, halves and nine months, also glued to the year', () => {
   assert.deepEqual(nums('Q1FY24, 1QFY24, Q1 FY24 and Q1-FY24'), ['fy:2024', 'fy:2024', 'fy:2024', 'fy:2024', 'q:1', 'q:1', 'q:1', 'q:1']);
   assert.deepEqual(nums('H1 and H2 FY25, 2H'), ['fy:2025', 'h:1', 'h:2', 'h:2']);
   assert.deepEqual(keys('9MFY24'), ['fy:2024', 'months:9']);
-  assert.deepEqual(keys('CY24 and CY2024'), ['cy:2024']);
+  assert.deepEqual(nums('CY24 and CY2024'), ['cy:2024', 'cy:2024']);
   assert.deepEqual(nums('H2O and H1B'), []);
 });
 
@@ -426,6 +426,152 @@ test('typical sentence rewrites keep their facts and pass', () => {
       'In Q4 FY24 collection efficiency rose to 99.5%, from 98.7% in Q3 FY24.'],
   ];
   for (const [a, b] of pairs) assert.equal(compareFacts(a, b).ok, true, `${a} → ${b}: ${JSON.stringify(compareFacts(a, b))}`);
+});
+
+// ---------- review fixes ----------
+test('"No. of branches" is "number of", not a negation', () => {
+  assert.deepEqual(negs('No. of branches rose to 150. The no.of loans grew. Sl. No. #4.'), {});
+  assert.equal(compareFacts('No. of branches rose to 150.', 'The number of branches rose to 150.').ok, true);
+  assert.deepEqual(negs('The answer is No. We will not lend.'), { no: 1, not: 1 });
+  assert.deepEqual(negs('We said no. Of the 50 branches, none closed.'), { no: 1, none: 1 });
+});
+
+test('"a lakh", "a crore", "a million" are numbers; "half a lakh" is 50,000', () => {
+  assert.deepEqual(keys('over a lakh borrowers'), ['n:100000']);
+  same('over a lakh borrowers', 'over 1 lakh borrowers');
+  same('A crore of loans', '1 crore of loans');
+  same('a thousand crore', '1,000 crore');
+  same('half a lakh', '50,000');
+  same('half a million users', '0.5 million users');
+  assert.equal(compareFacts('over a lakh borrowers', 'over a thousand borrowers').ok, false);
+  assert.equal(compareFacts('over half a lakh MSMEs', 'over a lakh MSMEs').ok, false);
+  assert.deepEqual(keys('on behalf a lakh'), ['n:100000']); // "behalf" is not "half"
+  assert.deepEqual(nums('a few lakhs, a lot, a 5% rise, a branch'), ['pct:5']);
+  assert.deepEqual(keys('Rs a lakh'), ['inr:100000']);
+});
+
+test('"lakh-crore" with a hyphen is a lakh crore, never just a lakh', () => {
+  same('₹1.5 lakh-crore', '₹1.5 lakh crore');
+  same('Rs 2 thousand-crore', 'Rs 2,000 crore');
+  assert.deepEqual(keys('₹1.5 lakh-crore'), ['inr:1500000000000']);
+  assert.equal(compareFacts('Our book is ₹1.2 lakh-crore.', 'Our book is ₹1.2 lakh.').ok, false);
+});
+
+test('with a currency, a spaced L/K/M/B is still the unit (₹25 L = ₹25 lakh)', () => {
+  same('loans of ₹25 L', 'loans of ₹25 lakh');
+  assert.deepEqual(nums('Rs 5 L, Rs 5 K, $5 M and $1 B.'), ['inr:5000', 'inr:500000', 'usd:1000000000', 'usd:5000000']);
+  assert.equal(compareFacts('loans of ₹25 L', 'loans of ₹25').ok, false);
+  assert.deepEqual(keys('We paid Rs 50 L&T.'), ['inr:50']); // L&T is a company
+  assert.deepEqual(keys('5 L of water'), ['n:5']); // no currency: litres
+  assert.deepEqual(keys('Rs 5 l'), ['inr:5']); // lower-case spaced letter stays out
+});
+
+test('"Rupees" as a prefix is INR (Rupees Five Lakh Only)', () => {
+  same('Rupees Five Lakh Only', 'Rs 5,00,000');
+  same('rupees 500', 'INR 500');
+  same('₨ 500', '₹500'); // the older rupee sign U+20A8
+  assert.deepEqual(keys('Rupee 1'), ['inr:1']);
+});
+
+test('a parenthesised number mid-sentence is a fact unless it is part of a (1) (2) list', () => {
+  assert.deepEqual(keys('We opened new branches (12) in Q1.'), ['n:12', 'q:1']);
+  assert.equal(compareFacts('We opened branches (12) in Q1.', 'We opened branches (15) in Q1.').ok, false);
+  assert.deepEqual(nums('We focus on (1) sourcing, (2) underwriting and (3) collections.'), []);
+  assert.deepEqual(nums('Our priorities are (2) quality and (3) speed.'), []);
+  assert.deepEqual(nums('Item (1) is done.'), ['n:1']); // no neighbour, so it is a number
+  assert.deepEqual(nums('Our strategy rests on 1) retail, 2) MSME and 3) collections.'), []);
+  assert.deepEqual(nums('GNPA (in %) rose; we grew 12) branches'), ['n:12']);
+});
+
+test('a bare "1999-00" wraps the century like FY1999-00', () => {
+  assert.deepEqual(keys('1999-00'), ['fy:2000']);
+  same('1999-00', 'FY1999-00');
+  same('2099-00', 'FY2100');
+});
+
+test('"FY24 - 25% growth" is FY24 and 25%, not FY2024-25', () => {
+  assert.deepEqual(keys('In FY24 - 25% growth came from MSME.'), ['fy:2024', 'pct:25']);
+  assert.deepEqual(keys('FY24-25 percent'), ['fy:2024', 'pct:25']);
+  assert.deepEqual(keys('FY2024-2025 per year'), ['fy:2025']);
+  assert.deepEqual(keys('2023-24 per cent'), ['pct:2023', 'pct:24']);
+  assert.deepEqual(keys('FY24-25 pcs'), ['fy:2025']);
+});
+
+test('spaced ranges: 5 - 6% and 5 – 6% equal 5-6%; a year before a spaced dash is not a range start', () => {
+  same('GNPA was 5 - 6%.', 'GNPA was 5-6%.');
+  assert.deepEqual(keys('Growth in 2024 – 12% higher'), ['n:2024', 'pct:12']);
+  assert.deepEqual(keys('-2024 – 12%'), ['n:-2024', 'pct:12']);
+  same('2000 – 3000 crore', '2000-3000 crore');
+  same('Rs 5 – 10 crore', 'Rs 5-10 crore');
+  assert.equal(compareFacts('GNPA was 5 – 6%.', 'GNPA was 5–7%.').ok, false);
+});
+
+test('"Tier 2 and 3 lakh customers" keeps the amount', () => {
+  assert.deepEqual(nums('We serve Tier 2 and 3 lakh customers.'), ['n:300000']);
+  assert.deepEqual(terms('We serve Tier 2 and 3 lakh customers.'), { 'Tier 2': 1 });
+  assert.deepEqual(nums('Tier 1 and 5% of Tier 2'), ['pct:5']);
+  assert.deepEqual(terms('Tier 2 and 3 cities, Tier 2 and 3 per state'), { 'Tier 2': 2, 'Tier 3': 2 });
+});
+
+test('"not just anyone" is a real negation', () => {
+  assert.deepEqual(negs('We do not lend to just anyone, but to salaried borrowers.'), { not: 1 });
+  assert.deepEqual(negs("We won't just lend to anybody, but we will grow."), { "n't": 1 });
+  assert.equal(compareFacts('We do not just lend to anyone, but we grow.', 'We lend to anyone, but we grow.').ok, false);
+});
+
+test("should've and could've keep their modal", () => {
+  assert.deepEqual(mods("We should've acted; we could’ve grown; I've seen it."), { should: 1, could: 1 });
+  assert.equal(compareFacts("We should've acted.", 'We should have acted.').ok, true);
+  assert.equal(compareFacts("We should've acted.", 'We could have acted.').ok, false);
+});
+
+test('honorifics are not names; the name after them is', () => {
+  assert.deepEqual(terms('Our CFO Mr. Sharma, Dr Rao and Smt. Iyer agreed.'), { CFO: 1, Sharma: 1, Rao: 1, Iyer: 1 });
+  assert.equal(compareFacts('Our CFO Mr. Sharma agreed.', 'Our CFO, Sharma, agreed.').ok, true);
+});
+
+test('names listed after a colon count; a short label before a sentence does not', () => {
+  assert.deepEqual(terms('We operate in three states: Maharashtra, Gujarat and Karnataka.'),
+    { Maharashtra: 1, Gujarat: 1, Karnataka: 1 });
+  assert.equal(compareFacts('We operate in three states: Maharashtra, Gujarat and Karnataka.',
+    'We operate in three states: Gujarat and Karnataka.').ok, false);
+  assert.deepEqual(terms('Markets: Pune and Nashik grew. City: Pune.'), { Pune: 2, Nashik: 1 });
+  assert.deepEqual(terms('Note: Growth was fine. Key risks for FY25: Asset quality may slip.'), {});
+  assert.equal(compareFacts('Collections: Pune, Nashik and Nagpur led.', 'Pune, Nashik and Nagpur led collections.').ok, true);
+});
+
+test('a decomposed accent (NFD) is the same name as the composed one', () => {
+  assert.equal(compareFacts('We met Société Générale.', 'We met Société Générale.').ok, true);
+  assert.deepEqual(terms('भारत में Pune'), { Pune: 1 });
+});
+
+test('long digit-comma runs stay fast (no quadratic scan)', () => {
+  for (const t of ['1' + ',23'.repeat(20000), '1,'.repeat(20000), '9'.repeat(100000), `${'Tier 1 and '.repeat(5000)}x`]) {
+    const t0 = performance.now();
+    extractFacts(t);
+    assert.ok(performance.now() - t0 < 1500, `${t.slice(0, 12)}… took too long`);
+  }
+});
+
+test('realistic rewrites: facts kept pass, facts changed fail', () => {
+  const pass = [
+    ['Our AUM stood at ₹65,000 crore as on March 31, 2024.', 'As of 31 March 2024, AUM was Rs 65,000 Cr.'],
+    ['We disbursed Rs. 5,000 Cr. in Q1 FY25, up 18% QoQ.', 'Q1FY25 disbursements were ₹5,000 crore, 18% higher QoQ.'],
+    ['We added 2 lakh new customers in FY 2023-24.', 'In FY24, we added 200,000 new customers.'],
+    ['Spreads widened by 25 bps to 3.1%.', 'Spreads rose 0.25 percentage points to 3.1%.'],
+    ['LTV is capped at 75-80%.', 'LTV is capped at 75 to 80 per cent.'],
+    ['We raised $250 million via ECB.', 'We raised US$ 250 mn through ECB.'],
+    ['No. of active loans rose to 3.2 lakh.', 'Active loans rose to 3.2 lakh.'],
+  ];
+  for (const [a, b] of pass) assert.equal(compareFacts(a, b).ok, true, `${a} → ${b}: ${JSON.stringify(compareFacts(a, b))}`);
+  const fail = [
+    ['Disbursals were Rs 5,000 crore.', 'Disbursals were Rs 5,000 lakh.'],
+    ['GNPA was 2.1% on 31/03/2024.', 'GNPA was 2.1% on 31/03/2023.'],
+    ['NNPA was 0.9%.', 'GNPA was 0.9%.'],
+    ['We serve 50,000 customers.', 'We serve 5,000 customers.'],
+    ['We do not lend to builders.', 'We lend to builders.'],
+  ];
+  for (const [a, b] of fail) assert.equal(compareFacts(a, b).ok, false, `${a} → ${b}`);
 });
 
 // ---------- portability ----------

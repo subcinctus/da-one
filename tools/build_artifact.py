@@ -29,6 +29,7 @@ def pkg(name, legacy):
 
 
 ORT_PKG, TOK_PKG, HARPER_PKG = pkg('onnxruntime-web', 'ort'), pkg('@huggingface/tokenizers', 'hft'), pkg('harper.js', 'harper')
+WEBLLM_PKG = pkg('@mlc-ai/web-llm', 'web-llm')
 CALIB = os.environ.get('CALIB', os.path.join(SRC, 'calibration.json'))
 PART = 14 * 1024 * 1024
 
@@ -96,7 +97,10 @@ def main():
         if f in ('index.js', 'slimBinary.js', 'harper_wasm_slim_bg.wasm') or f.startswith('BinaryModule-'):
             copy(os.path.join(hdist, f), f'vendor/harper/{f}')
     copy(os.path.join(HARPER_PKG, 'LICENSE'), 'vendor/harper/LICENSE')
-    manifest = {'models': {}, 'calibration': json.load(open(CALIB)) if os.path.exists(CALIB) else None}
+    # WebLLM (in-browser rewriter): one self-contained ES module, loaded by workers/llm.mjs
+    copy(os.path.join(WEBLLM_PKG, 'lib/index.js'), 'vendor/web-llm/index.js')
+    copy(os.path.join(WEBLLM_PKG, 'LICENSE'), 'vendor/web-llm/LICENSE')
+    manifest ={'models': {}, 'calibration': json.load(open(CALIB)) if os.path.exists(CALIB) else None}
     for key in INCLUDE:
         d = os.path.join(MODELS_DIR, key)
         if not os.path.exists(os.path.join(d, 'reference.json')):

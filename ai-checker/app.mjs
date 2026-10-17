@@ -246,7 +246,7 @@ function renderBackdrop() {
     if (mk) piece = `<mark class="${mk.cls}">${piece}</mark>`;
     html += piece;
   }
-  backdrop.innerHTML = html + (text.endsWith('\n') ? ' ' : '') + '​';
+  backdrop.innerHTML = html + (text.endsWith('\n') ? ' ' : '') + '\u200b';
 }
 
 // Keep highlights on sentences that the user has not edited.
@@ -682,16 +682,24 @@ function showStage(stage) {
 const logLine = (msg) => { const el = $('rwLog'); el.textContent += (el.textContent ? '\n' : '') + msg; el.scrollTop = el.scrollHeight; };
 const setBar = (f) => { $('rwBar').style.width = `${Math.round(Math.max(0, Math.min(1, f)) * 100)}%`; };
 
-// Guard models and grammar run on demand; a guard that cannot load is skipped (and said so).
-const guardCtx = (allow = []) => {
+// Guard models and grammar run on demand. Each is tried once on a short text first: a guard that
+// cannot load is left out and said so, instead of failing every version (the loop fails closed).
+const GUARD_NAMES = { nli: 'meaning check', embed: 'similarity check', grammar: 'grammar check' };
+async function guardCtx(allow = [], note = () => {}) {
   const has = (k) => !!state.manifest?.models?.[k];
-  return {
-    allow,
-    nli: has(GUARD_MODELS.nli) ? async (premise, hypothesis) => (await guardWorker.call({ type: 'nli', key: GUARD_MODELS.nli, pairs: [[premise, hypothesis]] })).probs[0] : undefined,
-    embed: has(GUARD_MODELS.embed) ? async (texts) => (await guardWorker.call({ type: 'embed', key: GUARD_MODELS.embed, texts })).vectors : undefined,
+  const all = {
+    nli: has(GUARD_MODELS.nli) ? async (premise, hypothesis) => (await guardWorker.call({ type: 'nli', key: GUARD_MODELS.nli, pairs: [[premise, hypothesis]] })).probs[0] : null,
+    embed: has(GUARD_MODELS.embed) ? async (texts) => (await guardWorker.call({ type: 'embed', key: GUARD_MODELS.embed, texts })).vectors : null,
     grammar: async (text) => (await grammarWorker.call({ type: 'lint', texts: [text] })).lints[0],
   };
-};
+  const probe = { nli: (f) => f('The loan was approved.', 'The loan was approved.'), embed: (f) => f(['The loan was approved.']), grammar: (f) => f('The loan was approved.') };
+  const ctx = { allow };
+  await Promise.all(Object.entries(all).map(async ([k, f]) => {
+    if (!f) { note(`The ${GUARD_NAMES[k]} is not in this build, so it is skipped.`); return; }
+    try { await probe[k](f); ctx[k] = f; } catch (err) { note(`The ${GUARD_NAMES[k]} could not load (${err?.message || err}), so it is skipped.`); }
+  }));
+  return ctx;
+}
 
 async function guideScores(texts) {
   const v = validatorKey();
@@ -756,12 +764,13 @@ async function runLoop(getCandidates, rounds) {
   showStage('run'); $('rwLog').textContent = ''; setBar(0);
   const text = rw.original;
   logLine('Loading the meaning and grammar checks…');
-  const ctx = guardCtx();
   try {
+    const ctx = await guardCtx([], logLine);
+    if (rw.ctl !== ctl) return;
     const res = await rewriteFlagged({
       text, sentences: state.sentences.map(({ start, end, text: t }) => ({ start, end, text: t })), targets: rw.targets,
       getCandidates, scoreGuide: guideScores, scoreValidator: validatorScore,
-      gate: (orig, cand) => gateCandidate(orig, cand, ctx),
+      gate: (orig, cand, extra) => gateCandidate(orig, cand, { ...ctx, ...extra }),
       rounds, targetPct: 85, signal: ctl.signal,
       onProgress: (p) => { if (p.message) logLine(p.message); if (p.total) setBar(p.done / p.total); },
     });
@@ -866,7 +875,10 @@ async function askGo(i, box) {
   box.insertAdjacentHTML('beforeend', '<p class="small" data-status>Looking for a rewriter…</p>');
   await probeEngines();
   box.querySelector('[data-status]')?.remove();
-  const engineId = chosenEngine();
+  // Interview needs a model that follows instructions: Humanizer 12B only restyles text as it stands
+  const canFollow = (id) => engineStatus[id]?.ok && (id !== 'local' || !engineStatus.local.humanizer || engineStatus.local.chatModel);
+  const saved = store.get(K.engine, null);
+  const engineId = [saved, 'local', 'webllm'].find((id) => id && id !== 'manual' && canFollow(id)) || 'manual';
   const req = { ...interviewPrompt({ paragraph: para.text, answers, voice: voice() }), n: 3, maxTokens: 600 };
   if (engineId === 'manual') {
     box.insertAdjacentHTML('beforeend', `<div class="field"><label>Copy this into a Claude chat, then paste the reply below</label><textarea readonly>${esc(`${req.system}\n\n${req.user}`)}</textarea><textarea data-paste placeholder="Paste Claude's reply here"></textarea><button class="btn" type="button" data-act="ask-paste">Check this version</button></div>`);
@@ -882,7 +894,7 @@ async function askGo(i, box) {
 }
 
 async function showAskCandidates(i, box, para, raw, answers) {
-  const ctx = guardCtx(answers);
+  const ctx = await guardCtx(answers);
   const cands = raw.map((t) => cleanText(cleanOutput(t)).text.trim()).filter(Boolean);
   const ok = [], bad = [];
   for (const c of cands) {

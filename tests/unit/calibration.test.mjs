@@ -12,6 +12,13 @@ const CAL = JSON.parse(readFileSync(new URL('../../ai-checker/calibration.json',
 const MODE = CAL.modes.article;
 const CALIBRATE_PY = fileURLToPath(new URL('../../tools/calibrate.py', import.meta.url));
 const near = (a, b, eps = 1e-9, msg) => assert.ok(Math.abs(a - b) <= eps, msg || `${a} != ${b}`);
+// the next float above x
+function nextUp(x) {
+  if (x === 0) return Number.MIN_VALUE;
+  const f = new Float64Array([x]), b = new BigInt64Array(f.buffer);
+  b[0] += x > 0 ? 1n : -1n;
+  return f[0];
+}
 
 // Seeded PRNG so failures are reproducible.
 function rng(seed) {
@@ -165,6 +172,11 @@ test('humanPct and the logit combine match tools/calibrate.py (python3 + numpy)'
   const pct = [];
   for (let t = 0; t < 120; t++) { const q = randomQ(r, t % 5 ? 101 : 2); pct.push({ q, x: randomXs(r, q, 30) }); }
   for (const c of [...Object.values(MODE.checkers), ...Object.values(MODE.ensemble.combos)]) pct.push({ q: c.human_q, x: randomXs(r, c.human_q, 50) });
+  // one ulp either side of every quantile, on tables with plateaus at the start and at the end
+  for (let t = 0; t < 12; t++) {
+    const q = randomQ(r, t % 3 ? 101 : 5).map((v, i, a) => (t % 2 ? Math.max(v, a[Math.floor(a.length * 0.7)]) : Math.min(v, a[Math.floor(a.length * 0.3)])));
+    pct.push({ q, x: q.flatMap((v) => [v, nextUp(v), -nextUp(-v)]) });
+  }
   // logit-format combos: random weights, percentiles (including the 0/100 clip edges) and quantiles
   const combine_ = [];
   for (let t = 0; t < 80; t++) {
@@ -194,6 +206,10 @@ test('riskFromPct: same knots as the old page, hit exactly', () => {
   assert.deepEqual(RISK_KNOTS.map((k) => [...k]), OLD_KNOTS);
   for (const [x, y] of OLD_KNOTS) assert.equal(riskFromPct(x), y);
   assert.throws(() => { RISK_KNOTS.push([1, 1]); });
+  // each knot is frozen too: writing into one must not shift every risk shown
+  assert.throws(() => { RISK_KNOTS[1][1] = 99; });
+  assert.ok(RISK_KNOTS.every(Object.isFrozen));
+  assert.equal(riskFromPct(50), 15);
 });
 
 test('riskFromPct: linear between knots, identical to the old page on [0, 100]', () => {
@@ -457,7 +473,7 @@ test('windowHeat: default weights, explicit weights and the calibration window_w
   windowHeat(CAL.windows, PROBS, { 'bert-tiny-raid': 1 }).forEach((v, i) => near(v, OLD_OWN[i]));
   windowHeat(CAL.windows, PROBS, {}).forEach((v, i) => near(v, OLD_OWN[i]));
   windowHeat(CAL.windows, PROBS, { 'bert-tiny-raid': 0 }).forEach((v, i) => near(v, e[i]));
-  assert.deepEqual(windowHeat(CAL.windows, PROBS, { 'bert-tiny-raid': 0, 'e5-small-lora': 0 }), []);
+  assert.deepEqual(windowHeat(CAL.windows, PROBS, { 'bert-tiny-raid': 0, 'e5-small-lora': 0 }), [null, null, null, null, null]);
   // an unknown checker with window quantiles counts once
   const cal = { ...CAL.windows, other: CAL.windows['e5-small-lora'] };
   windowHeat(cal, { ...PROBS, other: PROBS['e5-small-lora'] }).forEach((v, i) => near(v, (3 * e[i] + b[i]) / 4));
@@ -482,16 +498,46 @@ test('windowHeat: checkers without window calibration, missing or bad scores are
 });
 
 test('windowHeat: empty and bad input never throws', () => {
+  const none5 = [null, null, null, null, null];
   assert.deepEqual(windowHeat(CAL.windows, {}), []);
   assert.deepEqual(windowHeat(CAL.windows, null), []);
-  assert.deepEqual(windowHeat(null, PROBS), []);
-  assert.deepEqual(windowHeat({}, PROBS), []);
+  assert.deepEqual(windowHeat(CAL.windows, 'e5-small-lora'), []);
+  assert.deepEqual(windowHeat(null, PROBS), none5);
+  assert.deepEqual(windowHeat({}, PROBS), none5);
   assert.deepEqual(windowHeat(CAL.windows, { 'e5-small-lora': [] }), []);
   assert.deepEqual(windowHeat(CAL.windows, { 'e5-small-lora': null }), []);
+  assert.deepEqual(windowHeat(CAL.windows, { 'e5-small-lora': 'abc', 'bert-tiny-raid': 7 }), []);
   // a checker with empty window quantiles is skipped, the others still count
   const bt = { 'bert-tiny-raid': CAL.windows['bert-tiny-raid'] };
   assert.deepEqual(windowHeat({ ...bt, 'e5-small-lora': [] }, PROBS), windowHeat(bt, PROBS));
   assert.equal(windowHeat(bt, PROBS).length, 5);
+});
+
+test('windowHeat: one entry per window even when no checker is usable (heat[i] is never undefined)', () => {
+  // only checkers without window quantiles (ModernBERT) or with weight 0: every window is unscored
+  const h = windowHeat(CAL.windows, { 'modernbert-raid-mage': [0.9, 0.9, 0.9] });
+  assert.deepEqual(h, [null, null, null]);
+  assert.deepEqual(smoothHeat(h), [null, null, null]);
+  assert.deepEqual(windowHeat(CAL.windows, { 'e5-small-lora': [0.9, 0.1] }, { 'e5-small-lora': 0 }), [null, null]);
+  // a usable checker with a shorter list: the windows it did not score are null, not missing
+  const per = windowPcts(CAL.windows, { 'e5-small-lora': [0.5, 0.6] });
+  const u = windowHeat(CAL.windows, { 'e5-small-lora': [0.5, 0.6], 'modernbert-raid-mage': [1, 1, 1, 1] });
+  assert.equal(u.length, 4);
+  near(u[0], per['e5-small-lora'][0]);
+  near(u[1], per['e5-small-lora'][1]);
+  assert.deepEqual(u.slice(2), [null, null]);
+  for (const v of smoothHeat(u)) assert.ok(v === null || Number.isFinite(v));
+});
+
+test('windowHeat: checker names are own-property lookups (no prototype weights)', () => {
+  const q = CAL.windows['e5-small-lora'];
+  const p = humanPct(q, 0.9);
+  // a checker called "constructor" or "toString" counts with the default weight 1, not dropped
+  near(windowHeat({ constructor: q }, { constructor: [0.9] })[0], p);
+  near(windowHeat({ toString: q, 'bert-tiny-raid': CAL.windows['bert-tiny-raid'] }, { toString: [0.9], 'bert-tiny-raid': [0.9] }, {})[0],
+    (p + humanPct(CAL.windows['bert-tiny-raid'], 0.9)) / 2);
+  // inherited names in weightsByKey are not weights
+  near(windowHeat(CAL.windows, PROBS, Object.create({ 'e5-small-lora': 0 }))[2], OLD_OWN[2]);
 });
 
 test('windowHeat: values stay within 0..100 on random scores', () => {

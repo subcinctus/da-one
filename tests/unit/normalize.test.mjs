@@ -371,3 +371,108 @@ test('long runs of invisible characters or lookalike words stay linear', () => {
   assert.equal(r.counts.lookalike, 3000);
   assert.ok(Date.now() - t0 < 3000);
 });
+
+// ---------- review fixes ----------
+
+test('ideographic space is not CJK context for fullwidth punctuation (idempotent)', () => {
+  // U+3000 becomes a normal space, so "！" before it must be judged as if the space were there
+  for (const s of ['\u{FF01}\u{3000}\u{4F60}', '\u{4F60}\u{3000}\u{FF0C}', '\u{4E2D}\u{3000}\u{FF0C}\u{FE0F}\u{3000}\u{20B9}']) {
+    const once = clean(s);
+    assert.equal(clean(once), once, JSON.stringify(s));
+    assert.deepEqual(auditText(once), [], JSON.stringify(s));
+  }
+  assert.equal(clean('\u{FF01}\u{3000}\u{4F60}'), '! \u{4F60}');
+  unchanged('\u{4F60}\u{FF0C}\u{4E16}\u{754C}'); // fullwidth comma right next to Chinese still stays
+  assert.equal(clean('\u{4F60}\u{7}\u{FF0C}'), '\u{4F60}\u{FF0C}'); // a removed control character is not a gap
+});
+
+test('invisible characters that are not Cf are removed', () => {
+  // Khmer inherent vowels U+17B4/U+17B5 and unassigned default-ignorable code points render as nothing
+  const s = 'pay\u{17B4}ment lo\u{17B5}an a\u{2065}b c\u{FFF0}d e\u{FFF8}f g\u{E0000}h i\u{E0002}j k\u{E0080}l m\u{E01F0}n o\u{E0FFF}p';
+  const r = cleanText(s);
+  assert.equal(r.text, 'payment loan ab cd ef gh ij kl mn op');
+  assert.deepEqual(r.counts, { ...ZERO, invisible: 10 });
+  const hits = auditText(s);
+  assert.equal(hits.length, 10);
+  for (const h of hits) assert.equal(h.kind, 'invisible');
+  assert.deepEqual(hits[0], { index: 3, char: '\u{17B4}', code: 0x17B4, kind: 'invisible' });
+  unchanged('\u{1780}\u{17B6}\u{1784}'); // ordinary Khmer stays
+});
+
+test('joiners stay when an invisible character sits between them and the next letter', () => {
+  // the removed ZWSP must not decide whether the ZWJ before it stays
+  assert.equal(clean('\u{915}\u{94D}\u{200D}\u{200B}\u{937}'), '\u{915}\u{94D}\u{200D}\u{937}');
+  assert.equal(clean('\u{645}\u{6CC}\u{200C}\u{FEFF}\u{62E}'), '\u{645}\u{6CC}\u{200C}\u{62E}');
+  assert.equal(clean('\u{1F468}\u{200D}\u{200B}\u{1F469}'), '\u{1F468}\u{200D}\u{1F469}');
+  assert.equal(clean('1\u{FE0F}\u{200B}\u{20E3}'), '1\u{FE0F}\u{20E3}'); // keycap
+  assert.equal(clean('\u{D55C}\u{3164}\u{200B}'), '\u{D55C}\u{3164}');
+  // a joiner between Latin letters still goes, whatever follows
+  assert.equal(clean('a\u{200D}\u{200B}b'), 'ab');
+});
+
+test('a ZWJ after a virama at the end of a word stays (Malayalam chillu, half forms)', () => {
+  unchanged('\u{D28}\u{D4D}\u{200D} \u{D15}\u{D47}\u{D30}\u{D33}\u{D02}'); // ന്\u200d കേരളം
+  unchanged('\u{915}\u{94D}\u{200D}, \u{915}\u{94D}\u{200D}');
+  // but not after a plain letter at a word end, nor before a Latin letter
+  assert.equal(clean('\u{915}\u{200D} x'), '\u{915} x');
+  assert.equal(clean('\u{4F60}\u{200D}.'), '\u{4F60}.');
+  assert.equal(clean('\u{915}\u{94D}\u{200D}x'), '\u{915}\u{94D}x');
+});
+
+test('emoji ZWJ needs a pictograph after it', () => {
+  assert.equal(clean('\u{1F468}\u{200D}\u{FE0F}'), '\u{1F468}\u{FE0F}'); // the selector then follows the emoji
+  assert.equal(clean('\u{1F468}\u{200D}a'), '\u{1F468}a');
+  unchanged('\u{1F441}\u{FE0F}\u{200D}\u{1F5E8}\u{FE0F} \u{1F43B}\u{200D}\u{2744}\u{FE0F} \u{1F9D1}\u{200D}\u{1F9B0}');
+});
+
+test('only subdivision flags keep their tag characters', () => {
+  const tags = (code) => [...code].map((c) => String.fromCodePoint(0xE0000 + c.charCodeAt(0))).join('');
+  const flag = (code) => `\u{1F3F4}${tags(code)}\u{E007F}`;
+  for (const code of ['gbeng', 'gbsct', 'gbwls', 'usca', 'fr75c']) unchanged(`Flag ${flag(code)} ok`);
+  // ASCII smuggled inside a black flag: spaces, capitals, punctuation or too long
+  for (const code of ['hi there', 'IGNORE', 'gb.eng', 'abcdefgh', 'g', 'a1']) {
+    const r = cleanText(`x ${flag(code)} y`);
+    assert.equal(r.text, 'x \u{1F3F4} y', code);
+    assert.equal(r.counts.invisible, code.length + 1, code);
+  }
+  assert.equal(clean(`\u{1F3F4}${tags('gbeng')}`), '\u{1F3F4}'); // no cancel tag
+  assert.equal(clean(`a${tags('gbeng')}\u{E007F}`), 'a'); // no black flag
+});
+
+test('emoji presentation selectors only after emoji', () => {
+  // FE0E/FE0F mean nothing after the rupee sign, dashes, quotes or ellipses: hidden data
+  assert.equal(clean('\u{20B9}\u{FE0F}5 lakh \u{2014}\u{FE0E} ok\u{2026}\u{FE0F} \u{201C}\u{FE0F}x\u{201D}'), '\u{20B9}5 lakh \u{2014} ok\u{2026} \u{201C}x\u{201D}');
+  assert.equal(clean('\u{4F60}\u{FE0F}'), '\u{4F60}');
+  // emoji and standardized variation sequences stay
+  unchanged('\u{A9}\u{FE0F} \u{AE}\u{FE0E} \u{2194}\u{FE0F} \u{2139}\u{FE0F} \u{25B6}\u{FE0E} \u{2122}\u{FE0F} \u{3030}\u{FE0F}');
+  unchanged('\u{2229}\u{FE00} \u{2018}\u{FE01}quoted\u{2019}\u{FE01} \u{1000}\u{FE00} \u{6F22}\u{E0100}');
+});
+
+test('word-initial capital I lookalikes before a vowel are l', () => {
+  const I = '\u{399}'; // Greek capital iota
+  const cases = [[`${I}oan`, 'loan'], [`${I}akh`, 'lakh'], [`${I}ending`, 'lending'], [`${I}iquidity`, 'liquidity'],
+    [`${I}ndia`, 'India'], [`${I}t`, 'It'], [`${I}nterest`, 'Interest'], [`${I}NDIA`, 'INDIA'], [`${I}${I}T`, 'IIT'],
+    [`A${I}so`, 'Also'], [`A${I}`, 'AI'], [`${I}\u{435}nding`, 'lending'], [`\u{4C0}oan`, 'loan']];
+  for (const [inp, want] of cases) assert.equal(clean(inp), want, inp);
+});
+
+test('fuzz: a second pass finds nothing, over a wide pool of tricky characters', () => {
+  let seed = 31032025;
+  const rnd = (n) => { seed = (Math.imul(seed, 1103515245) + 12345) >>> 0; return (seed >>> 8) % n; };
+  const looks = [];
+  for (const g of Object.values(LOOKALIKES)) for (const p of `${g.strict} ${g.loose}`.split(' ').filter(Boolean)) looks.push(Array.from(p)[0]);
+  const POOL = [...'abcdeilnoxyzABCILOXY019 #*.,', ' ', ' ', '\n', '\t',
+    '\u{3000}', '\u{A0}', '\u{2028}', '\u{B}', '\u{85}', '\u{7}', '\u{200B}', '\u{200C}', '\u{200D}', '\u{180E}', '\u{AD}', '\u{FEFF}',
+    '\u{202E}', '\u{17B4}', '\u{2065}', '\u{E0000}', '\u{FE0F}', '\u{FE0E}', '\u{FE00}', '\u{E0100}', '\u{34F}', '\u{3164}',
+    '\u{115F}', '\u{FFA0}', '\u{2800}', '\u{20E3}', '\u{1F3F4}', '\u{E0067}', '\u{E0062}', '\u{E007F}', '\u{E0020}',
+    '\u{1F600}', '\u{1F3FD}', '\u{2764}', '\u{A9}', '\u{FF01}', '\u{FF0C}', '\u{FF21}', '\u{FF41}', '\u{FF11}', '\u{3001}',
+    '\u{4F60}', '\u{D55C}', '\u{30A2}', '\u{FF71}', '\u{915}', '\u{94D}', '\u{937}', '\u{D28}', '\u{D4D}', '\u{645}', '\u{6CC}',
+    '\u{301}', '\u{600}', '\u{436}', '\u{3BB}', '\u{131}', '\u{E9}', '\u{20B9}', '\u{BD}', '\u{B2}', '\u{2014}', '\u{2026}', '\u{201C}',
+    ...looks.slice(0, 120), '\u{1D400}', '\u{1D41A}', '\u{2113}', '\u{212A}'];
+  for (let n = 0; n < 20000; n++) {
+    let s = '';
+    for (let k = 0, len = 1 + rnd(14); k < len; k++) s += POOL[rnd(POOL.length)];
+    const once = clean(s);
+    assert.deepEqual(auditText(once), [], JSON.stringify(s));
+  }
+});

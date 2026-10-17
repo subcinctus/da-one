@@ -32,6 +32,14 @@ const HANGUL_FILLERS = new Set([0x115F, 0x1160, 0x3164, 0xFFA0]);
 const isVS = (cp) => (cp >= 0xFE00 && cp <= 0xFE0F) || (cp >= 0xE0100 && cp <= 0xE01EF)
   || (cp >= 0x180B && cp <= 0x180D) || cp === 0x180F;
 const isFwPunct = (cp) => cp >= 0xFF01 && cp <= 0xFF5E && !/[A-Za-z0-9]/.test(String.fromCharCode(cp - 0xFEE0));
+// Invisible but not Cf: unassigned default-ignorable code points and the Khmer inherent vowels
+// U+17B4/U+17B5 (discouraged, render as nothing), all used to hide data in text.
+const isHidden = (cp) => cp === 0x2065 || cp === 0x17B4 || cp === 0x17B5 || (cp >= 0xFFF0 && cp <= 0xFFF8)
+  || (cp >= 0xE0000 && cp <= 0xE0FFF && !(cp >= 0xE0100 && cp <= 0xE01EF));
+const KEEP_CC = new Set([0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x85]);
+// Characters removed whatever their neighbours are.
+const gone = ({ ch, cp }) => isHidden(cp) || (/\p{Cc}/u.test(ch) && !KEEP_CC.has(cp))
+  || (/\p{Cf}/u.test(ch) && !JOINERS.has(cp) && !PREPENDED.has(cp));
 
 // Scripts that never need joiners or variation selectors between letters.
 const SIMPLE = new RegExp(`[${['Latin', 'Greek', 'Cyrillic', 'Armenian', 'Cherokee', 'Coptic', 'Lisu', 'Common', 'Inherited']
@@ -39,10 +47,12 @@ const SIMPLE = new RegExp(`[${['Latin', 'Greek', 'Cyrillic', 'Armenian', 'Cherok
 // Letters and marks of scripts that use ZWJ/ZWNJ (Indic, Arabic ...). None of them is removed
 // later, so a decision based on them still holds on a second pass.
 const complexLetter = (c) => !!c && /[\p{L}\p{M}]/u.test(c.ch) && !SIMPLE.test(c.ch) && !LOOK.has(c.ch)
-  && !HANGUL_FILLERS.has(c.cp) && !isVS(c.cp);
+  && !HANGUL_FILLERS.has(c.cp) && !isVS(c.cp) && !isHidden(c.cp);
 const PICTO = /\p{Extended_Pictographic}/u;
+const EMOJI = /\p{Emoji}/u;
 const EMOJI_PART = /[\p{Extended_Pictographic}\p{Emoji_Modifier}\u{FE0F}\u{20E3}]/u;
-const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Bopomofo}\u{3000}-\u{303F}\u{30FC}\u{FF61}-\u{FF9F}]/u;
+// U+3000 is left out: it becomes a normal space, so it must not count as CJK context.
+const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Bopomofo}\u{3001}-\u{303F}\u{30FC}\u{FF61}-\u{FF9F}]/u;
 
 function codePoints(s) {
   const cs = [];
@@ -59,7 +69,7 @@ function nearCJK(cs, k) {
   for (const step of [-1, 1]) {
     for (let j = k + step, n = 0; j >= 0 && j < cs.length && n < 8; j += step, n++) {
       const { ch, cp } = cs[j];
-      if (isFwPunct(cp) || isVS(cp) || HANGUL_FILLERS.has(cp) || /\p{Cf}/u.test(ch)) continue;
+      if (isFwPunct(cp) || isVS(cp) || HANGUL_FILLERS.has(cp) || JOINERS.has(cp) || gone(cs[j])) continue;
       if (CJK.test(ch)) return true;
       break;
     }
@@ -67,49 +77,64 @@ function nearCJK(cs, k) {
   return false;
 }
 
+// The next character that survives clean-up, so that a second pass decides the same way.
+function nextKept(cs, k) {
+  let j = k + 1;
+  while (j < cs.length && gone(cs[j])) j++;
+  return cs[j];
+}
+
 // Variation selectors belong after emoji, symbols, CJK ideographs and keycap digits, never after
-// Latin-like letters, spaces or another selector (hidden-data tricks).
-function keepVS(cp, prev, next) {
+// Latin-like letters, spaces or another selector (hidden-data tricks). The emoji selectors
+// FE0E/FE0F only have a meaning after emoji (emoji-variation-sequences.txt).
+function keepVS(cs, k, prev) {
+  const { cp } = cs[k];
   if (!prev || /\s/.test(prev.ch) || isVS(prev.cp)) return false;
   if (cp >= 0xE0100) return /\p{Script=Han}/u.test(prev.ch);
-  if (/[0-9#*]/.test(prev.ch)) return next?.ch === '\u{20E3}';
+  if (/[0-9#*]/.test(prev.ch)) return nextKept(cs, k)?.ch === '\u{20E3}';
+  if (cp === 0xFE0E || cp === 0xFE0F) return EMOJI.test(prev.ch);
   if (PICTO.test(prev.ch)) return true;
   return prev.cp >= 0x80 && !LOOK.has(prev.ch) && !(LETTER.test(prev.ch) && SIMPLE.test(prev.ch));
 }
 
-// Returns [replacement, kind] or null to keep the character. `prev` is the last character kept
-// (so a second pass gives the same result), `next` the raw next one.
+// Returns [replacement, kind] or null to keep the character. `prev` is the last character kept and
+// `next` the next one kept, so a second pass gives the same result.
 function classify(cs, k, prev) {
   const { ch, cp } = cs[k];
   if (cp >= 0x20 && cp < 0x7F) return null;
-  const next = cs[k + 1];
   if (cp === 0x09 || cp === 0x0A || cp === 0x0D) return null;
   if (cp === 0x0B || cp === 0x0C || cp === 0x85 || cp === 0x2028 || cp === 0x2029) return ['\n', 'space'];
   if (/\p{Zs}/u.test(ch) || cp === 0x2800) return [' ', 'space'];
   if (cp >= 0xFF01 && cp <= 0xFF5E) return isFwPunct(cp) && nearCJK(cs, k) ? null : [String.fromCharCode(cp - 0xFEE0), 'fullwidth'];
-  if (/\p{Cc}/u.test(ch)) return ['', 'invisible'];
+  if (/\p{Cc}/u.test(ch) || isHidden(cp)) return ['', 'invisible'];
   if (/\p{Cf}/u.test(ch)) {
     if (PREPENDED.has(cp)) return null;
     if (JOINERS.has(cp)) {
-      if (complexLetter(prev) && complexLetter(next)) return null;
-      if (cp === 0x200D && prev && next && EMOJI_PART.test(prev.ch) && EMOJI_PART.test(next.ch)) return null;
+      const next = nextKept(cs, k);
+      // inside an Indic or Arabic-script word, or after a virama at its end (the Malayalam
+      // chillu "ന്\u200d" is na + virama + ZWJ)
+      const wordEnd = !next || !/[\p{L}\p{M}\p{N}]/u.test(next.ch);
+      if (complexLetter(prev) && (complexLetter(next) || (wordEnd && /\p{M}/u.test(prev.ch)))) return null;
+      // emoji ZWJ sequence: emoji (or its modifier / selector) + ZWJ + pictograph
+      if (cp === 0x200D && prev && next && EMOJI_PART.test(prev.ch) && PICTO.test(next.ch)) return null;
     }
     return ['', 'invisible'];
   }
-  if (isVS(cp)) return keepVS(cp, prev, next) ? null : ['', 'invisible'];
+  if (isVS(cp)) return keepVS(cs, k, prev) ? null : ['', 'invisible'];
   if (cp === 0x34F) return prev && /\p{M}/u.test(prev.ch) ? null : ['', 'invisible']; // grapheme joiner
   if (HANGUL_FILLERS.has(cp)) {
     const hangul = (c) => !!c && !HANGUL_FILLERS.has(c.cp) && /\p{Script=Hangul}/u.test(c.ch);
-    return hangul(prev) || hangul(next) ? null : ['', 'invisible'];
+    return hangul(prev) || hangul(nextKept(cs, k)) ? null : ['', 'invisible'];
   }
   return null;
 }
 
-// Emoji tag sequence (black flag, tags, cancel tag: the England flag): returns the last index kept.
+// Emoji subdivision flag (black flag, tag letters of a subdivision code such as "gbeng", cancel
+// tag): returns the last index kept. Any other tag text is hidden data and is removed.
 function flagTags(cs, k) {
-  let j = k + 1;
-  while (j < cs.length && cs[j].cp >= 0xE0020 && cs[j].cp <= 0xE007E) j++;
-  return j > k + 1 && cs[j]?.cp === 0xE007F ? j : k;
+  let j = k + 1, code = '';
+  while (j < cs.length && cs[j].cp >= 0xE0020 && cs[j].cp <= 0xE007E && code.length < 8) code += String.fromCharCode(cs[j++].cp - 0xE0000);
+  return cs[j]?.cp === 0xE007F && /^(?:[a-z]{2}|[0-9]{3})[0-9a-z]{1,4}$/.test(code) ? j : k;
 }
 
 function wordsOf(cs) {
@@ -134,11 +159,13 @@ function wordsOf(cs) {
   });
 }
 
-// I and l share one TR39 skeleton; pick the case from the neighbouring letters.
+// I and l share one TR39 skeleton; pick from the neighbouring letters: l next to lowercase letters
+// (heΙΙo) or before a lowercase vowel at the start of a word (Ιoan, Ιakh), otherwise I (Ιt, ΙNDIA).
 function caseIL(src, prev, next) {
-  const lower = (ch) => LOWER.test(ch) || (LOOK.has(ch) && /^[a-km-z]$/.test(LOOK.get(ch).to));
-  if (prev) return lower(prev) || (next && lower(next)) ? 'l' : 'I';
-  return next && lower(next) && LOWER.test(src) ? 'l' : 'I';
+  const skel = (ch) => LOOK.get(ch)?.to ?? ch;
+  const lower = (ch) => !!ch && (LOWER.test(ch) || (LOOK.has(ch) && /^[a-km-z]$/.test(skel(ch))));
+  if (prev) return lower(prev) || lower(next) ? 'l' : 'I';
+  return lower(next) && (LOWER.test(src) || /^[aeiou]$/.test(skel(next))) ? 'l' : 'I';
 }
 
 function mapWord(x, loose) {
