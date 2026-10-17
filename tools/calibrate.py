@@ -111,6 +111,8 @@ def main():
     idx = {i: k for k, i in enumerate(ids)}
     doc, win = {}, {}
     for f in sorted(os.listdir(SCORES)):
+        if not f.endswith('.json') or f.endswith('.cache.json'):  # score_pool.py keeps its cache alongside
+            continue
         d = json.load(open(os.path.join(SCORES, f)))
         assert d['ids'] == ids, f'{f} was scored on a different pool'
         if 'zippy' in d:

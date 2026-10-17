@@ -97,7 +97,9 @@ async function main() {
   });
 
   await test('rewrite loop through the local engine keeps every fact and lowers the score', async () => {
-    // reload with no draft so the example answer comes back and is checked straight away
+    // reload with no draft so the example answer comes back and is checked straight away (the page
+    // saves the editor on pagehide, so empty it first or the old draft is written back)
+    await page.fill('#editor', '');
     await page.evaluate(() => { localStorage.removeItem('ard.draft'); localStorage.removeItem('ard.seenExample'); localStorage.setItem('ard.engine', JSON.stringify('local')); });
     await page.goto(BASE);
     await waitChecked(page, { all: true });
