@@ -40,14 +40,14 @@ export const logitPct = (pct) => { const p = Math.min(0.999, Math.max(0.001, pct
 // Combined score from per-checker percentiles {key: pct}. `cal` is a calibration mode
 // ({ensemble: {weights, combos, feature?}}) or its ensemble object. Uses the combo fitted for the
 // sorted set of checkers that have a percentile and a positive weight; 'logit' averages
-// logit(percentile), the old format averages the percentiles. ZipPy alone is too weak to stand for
-// the overall risk, so at least one trained checker is required.
+// logit(percentile), the old format averages the percentiles. ZipPy and the tell rules are too weak to
+// stand for the overall risk on their own, so at least one trained detector is required.
 export function combine(cal, pcts) {
   const ens = cal?.ensemble ?? cal;
   const weights = ens?.weights, combos = ens?.combos;
   if (!weights || !combos || !pcts || typeof pcts !== 'object') return null;
   const used = Object.keys(pcts).filter((k) => finite(pcts[k]) && own(weights, k) && finite(weights[k]) && weights[k] > 0).sort();
-  if (!used.some((k) => k !== 'zippy')) return null;
+  if (!used.some((k) => k !== 'zippy' && k !== 'tells')) return null;
   const key = used.join('+');
   const q = own(combos, key) ? combos[key]?.human_q : null;
   if (!q?.length) return null;

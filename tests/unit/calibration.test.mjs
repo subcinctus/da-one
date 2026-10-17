@@ -604,3 +604,11 @@ test('shipped calibration: logit ensemble, a combo for every subset of weighted 
   assert.ok(at(30).risk < 40, `risk ${at(30).risk} at the 30th percentile`);
   assert.ok(at(99).risk >= 65, `risk ${at(99).risk} at the 99th percentile`);
 });
+
+test('combine: the tell rules alone (or with ZipPy) give no overall risk; a trained detector is required', () => {
+  const m = CAL2.modes[CAL2.default_mode];
+  assert.equal(combine(m, { tells: 99 }), null);
+  assert.equal(combine(m, { tells: 99, zippy: 99 }), null);
+  const k = Object.keys(m.ensemble.weights).find((x) => m.ensemble.weights[x] > 0 && x !== 'tells' && x !== 'zippy');
+  assert.ok(combine(m, { tells: 99, [k]: 99 }));
+});
