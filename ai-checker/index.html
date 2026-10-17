@@ -167,6 +167,53 @@ a.btn { color: var(--ink); text-decoration: none; }
 .ver .txt { grid-column: 1 / -1; font: 14px/1.5 var(--font-doc); color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 14px; border-radius: var(--r); font-size: 14px; z-index: 30; max-width: calc(100% - 32px); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* website version: rewrite workbench, tells, engines, my writing */
+.toolbar .btn.primary + .btn.accent { margin-left: 0; }
+.btn.accent { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.banner { margin: 12px 14px 0; padding: 9px 12px; border-radius: var(--r); background: var(--mid-bg); font-size: 13.5px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.banner.info { background: var(--accent-soft); }
+.backdrop span.tell { text-decoration: underline dotted var(--hint-line); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.group-title { font: 600 11.5px var(--font-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 12px 0 2px; }
+.group-title:first-child { margin-top: 0; }
+.agree { font: 500 12px var(--font-num); color: var(--muted); }
+.reasons { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.reasons li { margin: 2px 0; }
+.tell-list { display: grid; gap: 6px; }
+.tell-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; align-items: baseline; font-size: 13.5px; }
+.tell-item button { border: 1px dashed var(--hint-line); background: transparent; border-radius: 999px; padding: 1px 8px; font-size: 12.5px; cursor: pointer; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tell-item span { color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; margin-top: 10px; }
+.stat { border: 1px solid var(--line); border-radius: var(--r); padding: 6px 8px; font-size: 12px; color: var(--muted); }
+.stat b { display: block; font: 500 15px var(--font-num); color: var(--ink); }
+.stat.flag { border-color: var(--mid); background: var(--mid-bg); }
+.xcheck { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.engines { display: grid; gap: 8px; }
+.engine { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
+.engine:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.engine input { margin-top: 3px; }
+.engine .title { font-weight: 600; }
+.engine .status { grid-column: 2; font-size: 12.5px; color: var(--muted); }
+.engine .status.ok { color: var(--low); } .engine .status.bad { color: var(--high); }
+.opts { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13.5px; align-items: center; margin: 10px 0; }
+.opts select, .opts input[type=number] { font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: auto; }
+.progress { font: 13px/1.55 var(--font-num); white-space: pre-wrap; background: var(--sunk); border-radius: var(--r); padding: 10px 12px; max-height: 220px; overflow: auto; }
+.bar-prog { height: 6px; background: var(--sunk); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+.bar-prog i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
+.compare { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+.compare th, .compare td { text-align: left; padding: 5px 6px; border-top: 1px solid var(--line); }
+.compare td.num { text-align: right; }
+.note { font-size: 12.5px; color: var(--muted); border-left: 3px solid var(--line); padding: 4px 10px; margin: 10px 0; }
+.qa { display: grid; gap: 8px; margin-top: 4px; }
+.qa label { font-size: 13px; font-weight: 600; }
+.qa input { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: 100%; }
+.samples { display: grid; gap: 0; }
+.sample { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.sample:first-child { border-top: 0; }
+.sample .txt { color: var(--muted); font: 14px/1.5 var(--font-doc); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; grid-column: 1 / -1; }
+.guide ol { padding-left: 20px; } .guide li { margin: 6px 0; }
+.guide code, .guide pre { font: 12.5px var(--font-num); background: var(--sunk); border-radius: 4px; padding: 1px 5px; }
+.guide pre { padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
 
 <div class="app">
@@ -174,6 +221,7 @@ a.btn { color: var(--ink); text-decoration: none; }
     <div class="brand"><h1>Answer Rewrite Desk</h1><span class="tag">AI-writing check and safe rewrite</span></div>
     <div class="spacer"></div>
     <div class="pill-row" id="pills" aria-label="Checker status"></div>
+    <button class="btn quiet" id="myWritingBtn" type="button">My writing</button>
     <button class="btn quiet" id="settingsBtn" type="button">Settings</button>
   </header>
 
@@ -181,8 +229,7 @@ a.btn { color: var(--ink); text-decoration: none; }
     <section class="sheet" aria-label="Your answer">
       <div class="toolbar">
         <button class="btn primary" id="checkBtn" type="button">Check <span class="kbd">Ctrl ↵</span></button>
-        <button class="btn" id="fixFlaggedBtn" type="button" title="Rewrite only the highlighted sentences">Rewrite flagged</button>
-        <button class="btn" id="rephraseBtn" type="button" title="Rephrase the whole answer">Rephrase all</button>
+        <button class="btn accent" id="rewriteBtn" type="button" title="Rewrite the highlighted sentences, keep every fact, and pick the version the checkers rate most human">Rewrite flagged</button>
         <span class="sep" aria-hidden="true"></span>
         <button class="btn quiet" id="undoBtn" type="button" disabled>Undo change</button>
         <button class="btn quiet" id="versionsBtn" type="button">Versions</button>
@@ -192,6 +239,10 @@ a.btn { color: var(--ink); text-decoration: none; }
       <div id="exampleNote" class="example-note" hidden>
         <span>This is an example answer so you can see the checks work. Paste your own answer to replace it.</span>
         <button class="btn quiet" id="clearExampleBtn" type="button">Clear example</button>
+      </div>
+      <div id="cleanBanner" class="banner" hidden>
+        <span id="cleanText"></span>
+        <button class="btn" id="cleanBtn" type="button">Clean them</button>
       </div>
       <div class="editor-wrap">
         <div class="backdrop" id="backdrop" aria-hidden="true"></div>
@@ -210,11 +261,7 @@ a.btn { color: var(--ink); text-decoration: none; }
         <div class="meter" aria-hidden="true"><div class="track"></div><div class="needle" id="needle" style="left:0%"></div><div class="ticks"><span style="left:0%">0</span><span style="left:40%">40</span><span style="left:65%">65</span><span style="left:100%">100</span></div></div>
         <div class="verdict-sub" id="riskSub">Press Check to run the detectors on this answer.</div>
         <div class="warn" id="shortWarn" hidden></div>
-      </section>
-
-      <section class="card">
-        <h2>Checkers</h2>
-        <div class="ledger" id="ledger"></div>
+        <div class="note" id="personalNote" hidden></div>
       </section>
 
       <section class="card">
@@ -223,41 +270,72 @@ a.btn { color: var(--ink); text-decoration: none; }
       </section>
 
       <section class="card">
-        <h2>Style hints</h2>
-        <p class="small">Phrases that turn up often in AI-written text. They are hints for your rewrite, not a detector.</p>
-        <div class="hint-list" id="hintList"><span class="empty">None found.</span></div>
+        <h2>Checkers</h2>
+        <div class="ledger" id="ledger"></div>
+        <div class="group-title">Cross-check on free websites</div>
+        <p class="small">Copies your answer and opens the site. Your text goes to that company when you paste it there.</p>
+        <div class="xcheck" id="xcheck">
+          <button class="btn" type="button" data-x="https://gptzero.me/">GPTZero</button>
+          <button class="btn" type="button" data-x="https://www.pangram.com/">Pangram</button>
+          <button class="btn" type="button" data-x="https://quillbot.com/ai-content-detector">QuillBot</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Why it reads as AI</h2>
+        <p class="small">Patterns that turn up far more in AI-written text. Fix these by hand and the scores usually drop. Click one to find it.</p>
+        <div class="tell-list" id="tellList"><span class="empty">Nothing found yet.</span></div>
+        <div class="stats" id="styleStats"></div>
       </section>
 
       <section class="card small">
         <h2>How this works</h2>
-        <p>The checkers run inside this browser. Your text is not sent anywhere when you press Check. Rewrites are written by Claude through your own Claude account.</p>
-        <p>Universities mostly use Turnitin, GPTZero and Copyleaks (DrillBit through ShodhShuddhi in India). None of them publish their models, so they cannot run here. These are the strongest open-source detectors on the RAID benchmark (University of Pennsylvania) that fit in a browser.</p>
-        <p><span id="calibText">Scores are compared with professional human writing: news, academic abstracts, Wikipedia, posts and stories. "Flags AI" means more AI-like than 95% of that writing.</span></p>
-        <p>School-style essays are the weak spot: these detectors score most human student essays as AI, so treat a high score on that kind of writing with care. No single score here, or in Turnitin, is proof either way. To cross-check with a tool universities use, paste the final text into <a href="https://gptzero.me" target="_blank" rel="noopener">GPTZero</a>.</p>
+        <p>Every checker runs inside this browser. Your text is not uploaded when you press Check, and rewrites made with the local or in-browser engine stay on your computer.</p>
+        <p>Universities mostly use Turnitin, GPTZero and Copyleaks (DrillBit through ShodhShuddhi in India). Turnitin and DrillBit cannot be called by individuals, so nothing here can reproduce their verdict exactly. These are the strongest open-source detectors that fit in a browser, from different training sets, so an answer that passes all of them is in a much better position.</p>
+        <p><span id="calibText">Scores are compared with professional human writing. "Flags AI" means more AI-like than 95% of that writing.</span></p>
+        <p>No rewrite method guarantees a pass. Since August 2026 Turnitin counts text changed by "bypasser" tools as AI, so the safest changes are your own: a real example, the actual number, your own view. If your programme does not allow AI help, using an AI rewriter may break its rules whatever the scores say.</p>
       </section>
     </aside>
   </div>
 </div>
 
-<div class="overlay" id="reviewOverlay" hidden>
-  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
-    <header><h3 id="reviewTitle">Review the rewrite</h3><button class="btn quiet" type="button" data-close>Close</button></header>
+<div class="overlay" id="rewriteOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rewriteTitle">
+    <header><h3 id="rewriteTitle">Rewrite flagged sentences</h3><button class="btn quiet" type="button" data-close>Close</button></header>
     <div class="body">
-      <p class="small" id="reviewIntro"></p>
-      <div class="stream" id="reviewStream" hidden></div>
-      <div class="diff" id="reviewDiff" hidden></div>
-      <div class="facts" id="reviewFacts" hidden></div>
-      <div id="manualBox" hidden>
-        <div class="field"><label for="promptOut">1. Copy this request into Claude</label><textarea id="promptOut" readonly></textarea></div>
-        <div class="manual-btns"><button class="btn" id="copyPromptBtn" type="button">Copy request</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude in a new tab</a></div>
-        <div class="field" style="margin-top:14px"><label for="pasteBack">2. Paste Claude's rewritten answer here</label><textarea id="pasteBack"></textarea></div>
-        <button class="btn" id="usePastedBtn" type="button">Review pasted text</button>
+      <div id="rwSetup">
+        <p class="small" id="rwIntro"></p>
+        <div class="engines" id="engineList"></div>
+        <div class="opts">
+          <label>Versions per sentence <select id="optN"><option>3</option><option selected>4</option><option>6</option></select></label>
+          <label>Rounds <select id="optRounds"><option>1</option><option>2</option><option selected>3</option></select></label>
+          <label><input type="checkbox" id="optAll"> Include sentences that are only slightly AI-like</label>
+        </div>
+        <p class="note">Each sentence gets several versions. A version is thrown out if it drops or changes a number, name, negation or "may/will", says something different (checked by a small meaning model), or adds a grammar slip. Of the rest, the one the checkers rate most human is kept. One checker is held back and only used to confirm the result.</p>
+        <div id="manualBox" hidden>
+          <div class="field"><label for="promptOut">1. Copy this request into a Claude chat</label><textarea id="promptOut" readonly></textarea></div>
+          <div class="manual-btns"><button class="btn" id="copyPromptBtn" type="button">Copy request</button><a class="btn" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude in a new tab</a></div>
+          <div class="field" style="margin-top:14px"><label for="pasteBack">2. Paste Claude's whole reply here</label><textarea id="pasteBack"></textarea></div>
+          <p class="note">Newer Claude models add an invisible watermark to what they write (Anthropic, August 2026). Some institutions can check for it.</p>
+        </div>
+      </div>
+      <div id="rwRun" hidden>
+        <div class="bar-prog"><i id="rwBar"></i></div>
+        <div class="progress" id="rwLog" aria-live="polite"></div>
+      </div>
+      <div id="rwResult" hidden>
+        <p class="small" id="rwSummary"></p>
+        <div class="diff" id="reviewDiff"></div>
+        <div class="facts" id="reviewFacts" hidden></div>
+        <table class="compare" id="rwCompare"></table>
       </div>
     </div>
     <footer>
       <button class="btn quiet" id="stopBtn" type="button" hidden>Stop</button>
-      <button class="btn" id="keepMineBtn" type="button" data-close>Keep my version</button>
-      <button class="btn primary" id="acceptBtn" type="button" disabled>Use rewrite</button>
+      <button class="btn" id="usePastedBtn" type="button" hidden>Check pasted versions</button>
+      <button class="btn primary" id="startBtn" type="button">Start</button>
+      <button class="btn" id="keepMineBtn" type="button" data-close hidden>Keep my version</button>
+      <button class="btn primary" id="acceptBtn" type="button" hidden>Use rewrite</button>
     </footer>
   </div>
 </div>
@@ -270,6 +348,40 @@ a.btn { color: var(--ink); text-decoration: none; }
   </div>
 </div>
 
+<div class="overlay" id="writingOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="writingTitle">
+    <header><h3 id="writingTitle">My writing</h3><button class="btn quiet" type="button" data-close>Close</button></header>
+    <div class="body">
+      <p class="small">Add pieces you wrote yourself, ideally before late 2022 (answers, reports, emails). They stay in this browser only. They do two jobs: up to three of them show the rewriter how you write, and the rest show how the checkers score <em>your</em> genuine writing, so you know what a normal score looks like for you.</p>
+      <div class="field"><label for="sampleInput">Paste one or more pieces (put a line with only --- between pieces)</label><textarea id="sampleInput"></textarea></div>
+      <div class="manual-btns"><button class="btn" id="addSampleBtn" type="button">Add</button><button class="btn" id="checkSamplesBtn" type="button">Check my writing</button></div>
+      <div class="note" id="samplesSummary" hidden></div>
+      <div class="samples" id="sampleList"></div>
+    </div>
+    <footer><button class="btn" type="button" data-close>Done</button></footer>
+  </div>
+</div>
+
+<div class="overlay" id="guideOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <header><h3 id="guideTitle">Set up the local rewriter (Humanizer 12B)</h3><button class="btn quiet" type="button" data-close>Close</button></header>
+    <div class="body guide">
+      <p>The strongest free rewriter runs as a small app on your Mac. It needs about 14 GB of free memory and a 13 GB download once. Your text never leaves the computer.</p>
+      <ol>
+        <li>Open <b>Terminal</b> (press ⌘ Space, type Terminal, press Return).</li>
+        <li>Install llama.cpp with Homebrew (if you do not have Homebrew, the first line installs it):
+          <pre>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install llama.cpp</pre></li>
+        <li>Start the rewriter (the first start downloads the model; keep this window open while you use the site):
+          <pre id="serverCmd"></pre></li>
+        <li>Come back here and press <b>Check again</b>. Chrome may ask whether this site may talk to apps on your computer: choose Allow.</li>
+      </ol>
+      <p class="small">Model: <a href="https://github.com/sgaofen/humanizer-local-model" target="_blank" rel="noopener">sgaofen/humanizer-local-model</a> (Apache-2.0), a Gemma-4-12B fine-tune for rewriting drafts so they read naturally. Server: <a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a> (MIT).</p>
+    </div>
+    <footer><button class="btn" id="guideRecheckBtn" type="button">Check again</button><button class="btn" type="button" data-close>Done</button></footer>
+  </div>
+</div>
+
 <div class="overlay" id="settingsOverlay" hidden>
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <header><h3 id="settingsTitle">Settings</h3><button class="btn quiet" type="button" data-close>Close</button></header>
@@ -277,12 +389,16 @@ a.btn { color: var(--ink); text-decoration: none; }
       <div class="field">
         <label for="voiceInput">Your voice (used for rewrites)</label>
         <textarea id="voiceInput"></textarea>
-        <span class="small">Describe how you write. Claude follows this when it suggests rewrites.</span>
+        <span class="small">Describe how you write. Rewrites follow this, together with the samples in My writing.</span>
       </div>
-      <label class="check"><input type="checkbox" id="heavyToggle"> <span>Use ModernBERT, the strongest checker (160 MB download the first time, then stored in this browser)</span></label>
-      <p class="small" style="margin-top:14px">Saved data on this device: your draft, up to 40 versions and these settings.</p>
+      <label class="check"><input type="checkbox" id="heavyToggle"> <span>Use the large checkers (ModernBERT and Tabularis, 320 MB download the first time, then stored in this browser)</span></label>
+      <div class="field" style="margin-top:14px">
+        <label for="portInput">Local rewriter address</label>
+        <input id="portInput" class="num" style="font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg)" placeholder="http://127.0.0.1:8080">
+      </div>
+      <p class="small" style="margin-top:14px">Saved on this device: your draft, up to 40 versions, your writing samples and these settings. Downloaded checkers and rewriters are kept in the browser's storage.</p>
       <button class="btn" id="clearDataBtn" type="button">Clear saved data</button>
-      <p class="small" id="clearConfirm" hidden>Press again to confirm. This removes the draft and all versions.</p>
+      <p class="small" id="clearConfirm" hidden>Press again to confirm. This removes the draft, all versions and your writing samples.</p>
     </div>
     <footer><button class="btn primary" type="button" id="saveSettingsBtn">Save</button></footer>
   </div>

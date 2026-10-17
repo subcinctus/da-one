@@ -20,6 +20,15 @@ SITE = '--site' in sys.argv[1:]
 OUT = os.path.abspath(ARGS[0] if ARGS else os.path.join(ROOT, 'dist'))
 MODELS_DIR = os.environ.get('MODELS_DIR', '/home/user/work/models')
 NPM_DIR = os.environ.get('NPM_DIR', '/home/user/work/npm')
+
+
+def pkg(name, legacy):
+    """An npm package: node_modules/<name> (npm ci with package.json), else the older unpacked tarball layout."""
+    nm = os.path.join(ROOT, 'node_modules', name)
+    return nm if os.path.exists(nm) else os.path.join(NPM_DIR, legacy, 'package')
+
+
+ORT_PKG, TOK_PKG, HARPER_PKG = pkg('onnxruntime-web', 'ort'), pkg('@huggingface/tokenizers', 'hft'), pkg('harper.js', 'harper')
 CALIB = os.environ.get('CALIB', os.path.join(SRC, 'calibration.json'))
 PART = 14 * 1024 * 1024
 
@@ -59,7 +68,7 @@ def write_site_page():
     open(os.path.join(OUT, '.nojekyll'), 'w').close()  # serve files as they are, no Jekyll build
     copy(os.path.join(SRC, 'site', 'README.md'), 'README.md')
     copy(os.path.join(SRC, 'site', 'MIT.txt'), 'LICENSES/MIT.txt')
-    copy(os.path.join(NPM_DIR, 'hft/package/LICENSE'), 'LICENSES/Apache-2.0.txt')
+    copy(os.path.join(TOK_PKG, 'LICENSE'), 'LICENSES/Apache-2.0.txt')
 
 
 def main():
@@ -77,16 +86,16 @@ def main():
         write_site_page()
     else:
         copy(os.path.join(SRC, 'index.html'), 'index.html')
-    ort = os.path.join(NPM_DIR, 'ort/package/dist')
+    ort = os.path.join(ORT_PKG, 'dist')
     for f in ['ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']:
         copy(os.path.join(ort, f), f'vendor/{f}')
-    copy(os.path.join(NPM_DIR, 'hft/package/dist/tokenizers.min.mjs'), 'vendor/tokenizers.min.mjs')
+    copy(os.path.join(TOK_PKG, 'dist/tokenizers.min.mjs'), 'vendor/tokenizers.min.mjs')
     # Harper grammar checker (harper.js): the ES modules and the slim WASM binary
-    hdist = os.path.join(NPM_DIR, 'harper/package/dist')
+    hdist = os.path.join(HARPER_PKG, 'dist')
     for f in sorted(os.listdir(hdist)):
         if f in ('index.js', 'slimBinary.js', 'harper_wasm_slim_bg.wasm') or f.startswith('BinaryModule-'):
             copy(os.path.join(hdist, f), f'vendor/harper/{f}')
-    copy(os.path.join(NPM_DIR, 'harper/package/LICENSE'), 'vendor/harper/LICENSE')
+    copy(os.path.join(HARPER_PKG, 'LICENSE'), 'vendor/harper/LICENSE')
     manifest = {'models': {}, 'calibration': json.load(open(CALIB)) if os.path.exists(CALIB) else None}
     for key in INCLUDE:
         d = os.path.join(MODELS_DIR, key)

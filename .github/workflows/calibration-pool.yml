@@ -1,12 +1,14 @@
 name: calibration pool
 
 # Build the calibration pool (human and AI texts from public datasets, plus the in-domain AI answers in
-# tools/calib) and store it on the `claude/ai-checker-calib` branch. Scoring and fitting run elsewhere.
+# tools/calib), score it with ZipPy (slow, so in four parallel shards), and store pool.jsonl and
+# zippy.json on the `claude/ai-checker-calib` branch. The ONNX detectors are scored separately.
 on:
   push:
     branches: [claude/ai-writing-checker]
     paths:
       - tools/calib/build_pool.py
+      - tools/calib/zippy_pool.mjs
       - tools/calib/ai_answers_claude.jsonl
       - .github/workflows/calibration-pool.yml
   workflow_dispatch:
@@ -29,18 +31,51 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: python tools/calib/build_pool.py pool.jsonl
-      - name: Store on the calibration branch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pool
+          path: pool.jsonl
+
+  zippy:
+    needs: pool
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: pool
+      - run: node tools/calib/zippy_pool.mjs pool.jsonl zippy-${{ matrix.shard }}.json ${{ matrix.shard }} 4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zippy-${{ matrix.shard }}
+          path: zippy-${{ matrix.shard }}.json
+
+  store:
+    needs: zippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+      - name: Merge and store on the calibration branch
         run: |
           set -e
+          node tools/calib/zippy_pool.mjs --merge zippy.json art/zippy-*/zippy-*.json
           git clone -q --depth 1 --branch claude/ai-checker-calib \
             "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" calib \
             || { mkdir calib && cd calib && git init -q -b claude/ai-checker-calib && \
                  git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" && cd ..; }
-          cp pool.jsonl calib/pool.jsonl
+          cp art/pool/pool.jsonl calib/pool.jsonl
+          cp zippy.json calib/zippy.json
           cd calib
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add pool.jsonl
-          git commit -q -m "Calibration pool from ${GITHUB_SHA}" || { echo "pool unchanged"; exit 0; }
+          git add pool.jsonl zippy.json
+          git commit -q -m "Calibration pool and ZipPy scores from ${GITHUB_SHA}" || { echo "unchanged"; exit 0; }
           git push -q origin claude/ai-checker-calib
           wc -l pool.jsonl

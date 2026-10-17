@@ -1,0 +1,24 @@
+name: weekly check
+
+# Once a week, open the live site in Chromium and run the smoke test (models download and verify,
+# a check runs, the fact guard holds). GitHub stops scheduled runs after 60 days without repository
+# activity; re-enable this workflow on the Actions tab if that happens.
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  live-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Check the live site
+        run: node tests/e2e/smoke.mjs "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"

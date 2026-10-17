@@ -154,17 +154,20 @@ def beemo():
     import pandas as pd
     df = pd.read_parquet(io.BytesIO(fetch(f'{RAW}/Toloka/beemo/main/dataset.parquet')))
     df = df[df['category'].isin(['Generation', 'Rewrite', 'Open QA'])]
+    n = collections.Counter()  # its LLM outputs are 2023-24 models, so keep them few; the GPT-4o edits matter most
     for _, r in df.sample(frac=1, random_state=7).iterrows():
-        add(r['human_output'], 0, 'web', 'beemo', gkey=r['prompt_id'], min_words=120)
-        add(r['model_output'], 1, 'ai', 'beemo', gen=r['model'], task='generate', gkey=r['prompt_id'], min_words=120)
+        if n['human'] < 100 and add(r['human_output'], 0, 'web', 'beemo', gkey=r['prompt_id'], min_words=120):
+            n['human'] += 1
+        if n['model'] < 60 and add(r['model_output'], 1, 'ai', 'beemo', gen=r['model'], task='generate', gkey=r['prompt_id'], min_words=120):
+            n['model'] += 1
         try:
             edits = ast.literal_eval(r['gpt-4o_edits'])
-            for e in edits:
-                for k in ('P1', 'P3'):
-                    if k in e:
-                        add(e[k], 1, 'ai', 'beemo', gen='gpt-4o', task='humanized', gkey=r['prompt_id'], min_words=120)
         except Exception:  # noqa: BLE001
-            pass
+            continue
+        for e in edits:
+            for k in ('P1', 'P3'):
+                if k in e and n['edit'] < 120 and add(e[k], 1, 'ai', 'beemo', gen='gpt-4o', task='humanized', gkey=r['prompt_id'], min_words=120):
+                    n['edit'] += 1
 
 
 # ---------- Hugging Face sources (need the hub) ----------

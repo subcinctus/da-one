@@ -1,0 +1,95 @@
+name: deploy
+
+# Build the site (page + models from the "models" release), run the unit and end-to-end tests, publish
+# to GitHub Pages, then check the live site.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [models]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # after the models workflow, only when it succeeded
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      ready: ${{ steps.models.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Download models
+        id: models
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          if ! gh release view models >/dev/null 2>&1; then
+            echo "::notice::The models have not been exported yet. The site deploys automatically when the models workflow finishes."
+            echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          gh release download models --dir models-tar --pattern '*.tar'
+          mkdir -p models
+          for t in models-tar/*.tar; do tar -C models -xf "$t"; done
+          ls models
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+      - name: Build
+        if: steps.models.outputs.ready == 'true'
+        run: MODELS_DIR=models python3 tools/build_artifact.py site --site
+      - name: Install Chromium
+        if: steps.models.outputs.ready == 'true'
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end tests
+        if: steps.models.outputs.ready == 'true'
+        run: node tests/e2e/run-all.mjs site
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.models.outputs.ready == 'true'
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - id: pages
+        uses: actions/deploy-pages@v4
+
+  live-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Check the live site
+        run: node tests/e2e/smoke.mjs "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"

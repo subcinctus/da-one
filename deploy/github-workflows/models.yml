@@ -1,0 +1,56 @@
+name: models
+
+# Export the detectors and guard models from Hugging Face / GitHub to quantized ONNX and keep them as
+# assets of the "models" release (one .tar per model). The deploy workflow downloads them from there,
+# so the repository itself never holds model files.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: Comma-separated model keys (empty = every shipped model)
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths: [tools/export_detectors.py]
+
+permissions:
+  contents: write
+
+env:
+  SHIPPED: bert-tiny-raid,e5-small-lora,modernbert-raid-mage,fakespot-roberta,tabularis-modernbert,sallulabs-minilm,nli-deberta-xsmall,minilm-l6
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: |
+          pip install --quiet torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet "transformers==4.57.1" "peft==0.17.1" "onnx==1.17.0" "onnxruntime==1.22.0" \
+            "huggingface_hub==0.35.3" safetensors sentencepiece protobuf tiktoken numpy
+      - name: Export
+        env:
+          ONLY: ${{ github.event.inputs.only || env.SHIPPED }}
+        run: python tools/export_detectors.py out
+      - name: Upload to the models release
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          rm -rf out/_src_*
+          gh release view models >/dev/null 2>&1 || gh release create models --title "Detector models" \
+            --notes "ONNX models used by the site, written by the models workflow. The deploy workflow downloads them; do not delete."
+          for d in out/*/; do
+            k=$(basename "$d")
+            [ -f "$d/reference.json" ] || continue
+            tar -C out -cf "$k.tar" "$k"
+            gh release upload models "$k.tar" --clobber
+            echo "uploaded $k ($(du -h "$k.tar" | cut -f1))"
+          done

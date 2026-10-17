@@ -2,13 +2,15 @@
 
     python3 tools/calib/score_pool.py POOL.jsonl MODELS_DIR OUT.json [key1,key2,...]
 
+Scores are cached by text (OUT.cache.json next to OUT), so a rebuilt pool only scores new texts.
+
 Matches ai-checker/workers/models.mjs: detector input cleaned like normalize.mjs forDetector
 (invisible characters removed, unusual spaces normalised, then NFKC), tokens without special tokens,
 windows of min(510, max_len - 2) tokens with a stride of 384/510 of that, [CLS] w [SEP] per window,
 and the length-weighted mean of the window probabilities. Also scores 3-sentence windows of every
 text (for the sentence highlights) with the models in WINDOW_MODELS.
 """
-import json, os, re, sys, time, unicodedata
+import hashlib, json, os, re, sys, time, unicodedata
 
 import numpy as np
 import onnxruntime as ort
@@ -54,6 +56,7 @@ def load(models_dir, key):
                 f.write(open(os.path.join(d, p), 'rb').read())
     so = ort.SessionOptions()
     so.add_session_config_entry('session.disable_quant_qdq', '1')
+    so.intra_op_num_threads = int(os.environ.get('ORT_THREADS', '0'))  # 0 = ONNX Runtime's default
     sess = ort.InferenceSession(path, so, providers=['CPUExecutionProvider'])
     tok = Tokenizer.from_file(os.path.join(d, 'tokenizer.json'))
     tok.no_padding()
@@ -100,27 +103,45 @@ def main():
         k for k in os.listdir(models_dir) if os.path.exists(os.path.join(models_dir, k, 'reference.json'))
         and json.load(open(os.path.join(models_dir, k, 'reference.json'))).get('kind', 'detector') == 'detector'
         and json.load(open(os.path.join(models_dir, k, 'reference.json'))).get('published', True))
-    out = json.load(open(out_path)) if os.path.exists(out_path) else {'ids': [p['id'] for p in pool], 'doc': {}, 'win': {}}
-    assert out['ids'] == [p['id'] for p in pool], 'pool changed; delete the old scores file'
+    cache_path = out_path + '.cache.json'
+    cache = json.load(open(cache_path)) if os.path.exists(cache_path) else {}
+    h = lambda t: hashlib.sha1(t.encode('utf-8')).hexdigest()
+    out = {'ids': [p['id'] for p in pool], 'doc': {}, 'win': {}}
     for key in keys:
-        if key in out['doc']:
-            print(key, 'already scored', flush=True)
-            continue
+        c = cache.setdefault(key, {})
         sess, tok, spec = load(models_dir, key)
-        t0 = time.time()
-        out['doc'][key] = [score_text(sess, tok, spec, p['text']) for p in pool]
-        print(f'{key}: {len(pool)} texts in {time.time() - t0:.0f}s', flush=True)
+        t0, n = time.time(), 0
+        doc = []
+        for i, p in enumerate(pool):
+            k = h(p['text'])
+            if k not in c:
+                c[k] = score_text(sess, tok, spec, p['text'])
+                n += 1
+                if n % 200 == 0:
+                    print(f'{key}: {n} new texts ({i + 1}/{len(pool)}) {time.time() - t0:.0f}s', flush=True)
+                    json.dump(cache, open(cache_path, 'w'))
+            doc.append(c[k])
+        out['doc'][key] = doc
+        print(f'{key}: {len(pool)} texts ({n} new) in {time.time() - t0:.0f}s', flush=True)
         if WINDOW_MODELS is None or key in WINDOW_MODELS:
-            t0 = time.time()
+            t0, n = time.time(), 0
             win = {}
             for p in pool:
                 if not p.get('win', True):
                     continue
                 S = sentences(p['text'])
                 ws = [' '.join(S[max(0, i - 1):i + 2]) for i in range(len(S))]
-                win[p['id']] = [score_text(sess, tok, spec, w) for w in ws]
+                vals = []
+                for w in ws:
+                    k = 'w:' + h(w)
+                    if k not in c:
+                        c[k] = score_text(sess, tok, spec, w)
+                        n += 1
+                    vals.append(c[k])
+                win[p['id']] = vals
             out['win'][key] = win
-            print(f'{key}: windows in {time.time() - t0:.0f}s', flush=True)
+            print(f'{key}: windows ({n} new) in {time.time() - t0:.0f}s', flush=True)
+        json.dump(cache, open(cache_path, 'w'))
         json.dump(out, open(out_path, 'w'))
 
 
