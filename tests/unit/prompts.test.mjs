@@ -14,7 +14,7 @@ const FACTS = 'We may not lend more than ₹2,000 crore to DSAs in FY24, as RBI 
 const PARA2 = 'Furthermore, robust early-warning systems and proactive collection strategies are crucial to keeping GNPA below 1.5%. '
   + 'By seamlessly integrating technology across the loan lifecycle, from sourcing to disbursement and servicing, lenders can reduce turnaround time while enhancing the overall customer experience. '
   + 'Ultimately, sustainable growth is not just about volumes; it is about building a resilient franchise that delivers long-term value for all stakeholders.';
-const VOICE = 'Senior retail-lending executive in India with 30 years of experience. Writes plain, direct business English.';
+const VOICE = 'Product manager with ten years of experience. Writes plain, direct business English.';
 // Prompt framing must never talk about checkers or evasion (it draws refusals and stiffer writing).
 const BAD_FRAMING = /detect|undetect|evad|evasion|bypass|\bAI\b|language model|humani[sz]|plagiar|chatgpt|\bGPT\b|fool|trick/i;
 const withoutBanLine = (t) => t.split('\n').filter((l) => !/Avoid these words and phrases/.test(l)).join('\n');

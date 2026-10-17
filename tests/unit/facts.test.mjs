@@ -418,7 +418,7 @@ test('typical sentence rewrites keep their facts and pass', () => {
     ['Ultimately, sustainable growth is not just about volumes; it is about building a resilient franchise.',
       'Volumes matter, but lasting growth comes from building a franchise that holds up.'],
     ['Moreover, fostering strong partnerships with builders and DSAs plays a pivotal role.', 'Our builder and DSA partnerships matter.'],
-    ['Sammaan Capital has grown its book.', 'We at Sammaan Capital have grown the book.'],
+    ['Northwind Housing Finance has grown its book.', 'We at Northwind Housing Finance have grown the book.'],
     ['Our disbursements crossed ₹10,000 crore in FY24, up 25% YoY.',
       'In FY2023-24 we disbursed over Rs 10,000 Cr, 25% more than a year earlier (YoY).'],
     ['As of 31st March 2024, our GNPA stood at 1.2% and NNPA at 0.6%.', 'GNPA was 1.2% and NNPA 0.6% on 31 March 2024.'],

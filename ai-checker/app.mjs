@@ -25,8 +25,8 @@ const store = {
 };
 const K = { draft: 'ard.draft', versions: 'ard.versions', voice: 'ard.voice', heavy: 'ard.heavy', seen: 'ard.seenExample', engine: 'ard.engine', local: 'ard.localUrl' };
 
-const DEFAULT_VOICE = 'Senior retail-lending executive in India with 30 years of experience (mortgages, sales, credit, collections). '
-  + 'Writes plain, direct business English: short and medium sentences, concrete numbers and examples from practice, '
+// Used until the owner describes their own voice in Settings (kept in this browser only)
+const DEFAULT_VOICE = 'Writes plain, direct English: short and medium sentences, concrete numbers and examples from experience, '
   + 'first person where it fits, no buzzwords.';
 
 const EXAMPLE = `In today's dynamic lending landscape, growing a retail mortgage book requires a holistic approach that balances ambition with prudence. First and foremost, it is important to leverage data-driven underwriting to identify creditworthy segments, particularly in Tier 2 and Tier 3 cities where demand for affordable housing continues to rise. Moreover, fostering strong partnerships with builders and DSAs plays a pivotal role in sourcing quality customers at scale.
