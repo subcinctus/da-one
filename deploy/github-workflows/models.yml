@@ -1,45 +1,85 @@
 name: models
 
-# Export the detectors and guard models from Hugging Face / GitHub to quantized ONNX and keep them as
-# assets of the "models" release (one .tar per model). The deploy workflow downloads them from there,
-# so the repository itself never holds model files.
+# Put the detector and guard models into the "models" release (one .tar per model), where the deploy
+# workflow downloads them, so the repository itself never holds model files.
+#
+# Default source: the exact files the calibration and tests were run on, from the public models branch
+# of subcinctus/da-one at a pinned commit. "export" rebuilds them instead from Hugging Face and GitHub
+# with tools/export_detectors.py (same pinned tool versions).
 on:
   workflow_dispatch:
     inputs:
+      source:
+        description: 'tested (copy the calibrated files) or export (rebuild from the original models)'
+        required: false
+        default: tested
       only:
         description: Comma-separated model keys (empty = every shipped model)
         required: false
         default: ''
   push:
     branches: [main]
-    paths: [tools/export_detectors.py]
+    paths: [tools/export_detectors.py, .github/workflows/models.yml]
 
 permissions:
   contents: write
 
 env:
   SHIPPED: fakespot-roberta,modernbert-raid-mage,tabularis-modernbert,sallulabs-minilm,nli-deberta-xsmall,minilm-l6
+  TESTED_REPO: https://github.com/subcinctus/da-one
+  TESTED_BRANCH: claude/ai-checker-models
+  TESTED_COMMIT: 617da8f1fa82b2f39398308482d9413959af12ed
 
 jobs:
-  export:
+  models:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+      - name: Copy the tested models
+        if: (github.event.inputs.source || 'tested') == 'tested'
+        env:
+          ONLY: ${{ github.event.inputs.only || env.SHIPPED }}
+        run: |
+          set -e
+          git clone -q --filter=blob:none --no-checkout --branch "$TESTED_BRANCH" "$TESTED_REPO" src
+          cd src
+          git checkout -q "$TESTED_COMMIT"
+          cd ..
+          mkdir -p out
+          for k in ${ONLY//,/ }; do
+            [ -f "src/$k/reference.json" ] || { echo "::error::$k is not on $TESTED_BRANCH@$TESTED_COMMIT"; exit 1; }
+            cp -r "src/$k" "out/$k"
+          done
+          # every file the reference lists must be there and match its SHA-256
+          python3 - <<'PY'
+          import hashlib, json, os, sys
+          bad = 0
+          for k in sorted(os.listdir('out')):
+              ref = json.load(open(f'out/{k}/reference.json'))
+              for name, meta in ref.get('files', {}).items():
+                  h = hashlib.sha256()
+                  for p in meta.get('parts') or [name]:
+                      h.update(open(f'out/{k}/{p}', 'rb').read())
+                  ok = h.hexdigest() == meta.get('sha256')
+                  bad += not ok
+                  print(f"{k}/{name}: {'ok' if ok else 'SHA-256 MISMATCH'}")
+          sys.exit(1 if bad else 0)
+          PY
       - uses: actions/setup-python@v5
+        if: github.event.inputs.source == 'export'
         with:
           python-version: '3.11'
-      - name: Install
+      - name: Export from the original models
+        if: github.event.inputs.source == 'export'
+        env:
+          ONLY: ${{ github.event.inputs.only || env.SHIPPED }}
         run: |
           pip install --quiet torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
           pip install --quiet "transformers==4.57.1" "peft==0.17.1" "onnx==1.17.0" "onnxruntime==1.22.0" \
             "huggingface_hub==0.35.3" safetensors sentencepiece protobuf tiktoken numpy
-      - name: Export
-        env:
-          ONLY: ${{ github.event.inputs.only || env.SHIPPED }}
-        run: python tools/export_detectors.py out
+          python tools/export_detectors.py out
       - name: Upload to the models release
-        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

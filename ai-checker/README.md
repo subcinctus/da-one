@@ -123,12 +123,14 @@ versions stay in this browser's storage. The page is marked `noindex`.
 
 1. Create a public repository named `answer-desk` and give the Claude GitHub app access to it.
 2. Settings → Pages → Source: **GitHub Actions**.
-3. Push this repository's contents to `main`. Run the **models** workflow once (Actions tab).
-   When it finishes, **deploy** runs by itself: unit tests, site build, nine browser tests, publish,
-   then a smoke test against the live URL.
+3. Push this repository's contents to `main`. The **models** workflow runs on that first push and
+   puts the models into a release; when it finishes, **deploy** runs by itself: unit tests, site
+   build, nine browser tests, publish, then a smoke test against the live URL.
 
-The models are never committed. The models workflow exports them from pinned Hugging Face and
-GitHub sources into release assets, and the site serves them split into 14 MiB parts. The first
+The models are never committed. By default the models workflow copies the exact files the
+calibration was run on (a pinned commit of the da-one models branch, each checked against its
+SHA-256); run it with `source: export` to rebuild them from the original Hugging Face and GitHub
+models instead. The site serves them split into 14 MiB parts. The first
 visit downloads about 600 MB; the browser keeps it, so later visits start in seconds.
 
 Third-party components and licences: `ai-checker/vendor/NOTICE.md`.
