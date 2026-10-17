@@ -98,7 +98,15 @@ def load_model(spec, local):
         return model.eval(), tok, base
     model, info = AutoModelForSequenceClassification.from_pretrained(local, output_loading_info=True, **kw)
     log(f'  loading info: {info}')
-    tok = AutoTokenizer.from_pretrained(local)
+    try:
+        tok = AutoTokenizer.from_pretrained(local)
+    except ValueError as e:  # e.g. a tokenizer_config.json written by transformers 5 ("TokenizersBackend")
+        from transformers import PreTrainedTokenizerFast
+        cfg = json.load(open(os.path.join(local, 'tokenizer_config.json')))
+        special = {k: cfg[k] for k in ('cls_token', 'sep_token', 'pad_token', 'mask_token', 'unk_token', 'bos_token', 'eos_token')
+                   if isinstance(cfg.get(k), str)}
+        log(f'  AutoTokenizer failed ({e}); using tokenizer.json directly with {special}')
+        tok = PreTrainedTokenizerFast(tokenizer_file=os.path.join(local, 'tokenizer.json'), model_max_length=512, **special)
     return model.eval(), tok, None
 
 

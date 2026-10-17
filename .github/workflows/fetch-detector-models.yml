@@ -21,7 +21,7 @@ permissions:
   contents: write
 
 env:
-  DEFAULT_ONLY: tabularis-modernbert,minilm-l6
+  DEFAULT_ONLY: tabularis-modernbert
 
 jobs:
   export:
