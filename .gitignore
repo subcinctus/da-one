@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 node_modules/
 ai-checker/vendor/web-llm/
+# research notes and reports can mention private context; kept out of the public repository
+research_notes/
+reports/
